@@ -2,52 +2,39 @@
 #include <iostream>
 
 template <typename T, size_t N>
-TableBase<T, N>::TableBase(std::string Name, T (*f)(std::vector<double>)):
-_Name(Name), _dims(N), _approximating_function(f)
-{
-	std::cout<<_Name << " dim=" << _dims <<std::endl;
-    std::vector<double> x = {1,1};
-    std::cout<<"Test function f(1,1) = " << _approximating_function(x) << std::endl;   
+TableBase<T, N>::TableBase(std::string Name, T (*f)(std::vector<double>), std::vector<size_t> shape):
+_Name(Name), _rank(N), _power_rank(std::pow(2, _rank)), _shape(shape), 
+_table(_shape), _approximating_function(f) {
+	std::cout<<_Name << " dim=" << _rank <<std::endl;
 }
 
-VectorTable2D::VectorTable2D(std::string Name, VectorData (*f)(std::vector<double>)):
-TableBase<VectorData, 2>(Name, f)
-{
-}
-
-VectorData VectorTable2D::InterpolateTable(size_t n, ...){
-   va_list args;
-   va_start(args, n);
-   std::cout<<"interp ";
-   for (size_t i=0; i<n; ++i) {
-       auto value = va_arg(args, double);
-       std::cout << value << " ";
+template <typename T, size_t N>
+T TableBase<T, N>::InterpolateTable(std::vector<double> values){
+   std::vector<size_t> index(_rank);
+   std::vector<double> w = values;
+   T result{0};
+   for(auto i=0; i<_power_rank; ++i) {
+        auto W = 1.0;
+        for (auto j=0; j<_rank; ++j) {
+            index[j] = (i & ( 1 << j )) >> j;
+            W *= (index[j]==0)?(1-w[j]):w[j];
+        }
+        result = result + _table(index)*W;
+        std::cout << result << ' ';
    }
-   std::cout<<std::endl;
-   va_end(args); 
+   return result;
 }
 
-void VectorTable2D::SetTableAt(size_t n, ...){
-   va_list args;
-   va_start(args, n);
-   std::cout<<"set ";
-   for (size_t i=0; i<n; ++i) {
-       auto value = va_arg(args, size_t);
-       std::cout << value << " ";
-   }
-   std::cout<<std::endl;
-   va_end(args);
+template <typename T, size_t N>
+void TableBase<T, N>::SetTableValue(std::vector<size_t> index, T v){
+    _table(index) = v;
 }
 
-VectorData VectorTable2D::GetTableAt(size_t n, ...){
-   va_list args;
-   va_start(args, n);
-   std::cout<<"get ";
-   for (size_t i=0; i<n; ++i) {
-       auto value = va_arg(args, size_t);
-       std::cout << value << " ";
-   }
-   std::cout<<std::endl;
-   va_end(args);
-}
+
+template class TableBase<double, 2>;
+template class TableBase<double, 3>;
+template class TableBase<double, 4>;
+template class TableBase<VectorT, 2>;
+template class TableBase<TensorT, 2>;
+
 

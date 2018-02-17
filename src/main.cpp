@@ -2,18 +2,35 @@
 #include <string>
 #include <iostream>
 
-VectorData f(std::vector<double> X);
+
+double f(std::vector<double> X);
+VectorT f1(std::vector<double> X);
+
 
 int main(){
-    VectorTable2D T1(std::string("Table1"), &f);
-    T1.InterpolateTable(2, 0.3, 0.5);
-    T1.SetTableAt(2, 10, 11);
-    T1.GetTableAt(2, 3, 1);
+    TableBase<double,2> T1(std::string("Table1"), &f, {{2,2}});
+    T1.SetTableValue({0, 0}, 1.0);
+	T1.SetTableValue({0, 1}, 2.0);
+	T1.SetTableValue({1, 0}, 3.0);
+	T1.SetTableValue({1, 1}, 4.0);
+    std::cout << T1.InterpolateTable({.3,.3}) << std::endl;
+
+    TableBase<double,3> T2(std::string("Table2"), &f, {{2,2,2}});
+    T2.SetTableValue({0, 0, 0}, 1.0);
+	T2.SetTableValue({0, 1, 0}, 2.0);
+	T2.SetTableValue({1, 0, 0}, 3.0);
+	T2.SetTableValue({1, 1, 0}, 4.0);
+    T2.SetTableValue({0, 0, 1}, 5.0);
+	T2.SetTableValue({0, 1, 1}, 6.0);
+	T2.SetTableValue({1, 0,1}, 7.0);
+	T2.SetTableValue({1, 1, 1}, 8.0);
+    std::cout << T2.InterpolateTable({.3,.3,.5}) << std::endl;
 }
 
-VectorData f(std::vector<double> X){
-  double x = X[0];
-  double y = X[1];
-  VectorData A{x, x+1, y*3, y*3+1};
-  return A;
+double f(std::vector<double> X){
+  return 1.0;
+}
+
+VectorT f1(std::vector<double> X){
+	return VectorT{0,1,2,3.5};
 }
