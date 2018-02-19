@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 #include <random>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include "TableBase.h"
 //	double (*dXdPS)(double * PS, size_t n_dims, void * params);
 // this base defines how a stochasitc object
@@ -17,23 +19,26 @@
 template <size_t N>
 class StochasticBase{
 protected:
-	std::string _Name;
-    std::random_device rd;
-    std::mt19937 gen;
-    TableBase<double, N> ZeroMoment; // 0-th moments of the distribution function
-                                // i.e. the integrated distribution function
-    TableBase<fourvec, N> FirstMoments; // 1-st moments of the distribution: <p^mu>
-    TableBase<tensor, N> SecondMoments;// 2-nd moments of the distribution: <p^mu p^nu>
-                                       // i.e. the correlator
-	virtual void tabulate_prob() = 0;
-	virtual void save_to_file() = 0;
-	virtual void read_from_file() = 0;
+	const std::string _Name;
+	// 0-th moments of the distribution function
+	// i.e. the integrated distribution function
+    std::shared_ptr<TableBase<scalar, N>> _ZeroMoment;
+	// 1-st moments of the distribution: <p^mu>
+    std::shared_ptr<TableBase<fourvec, N>> _FirstMoment;
+	// 2-nd moments of the distribution: <p^mu p^nu>, i.e. the correlator
+    std::shared_ptr<TableBase<tensor, N>> _SecondMoment;
+	virtual void compute(void) = 0;
 public:
-	StochasticBase(std::string Name);
-	// arg = [s, T] fot X22, arg = [s, T, dt] for X23, arg = [s, T, s1k, s2k] for f32
-	virtual double interpolate_prob(double * arg) = 0; 
-	virtual double calculate_prob(double * arg) = 0;
-	virtual void sample_output(double * arg, std::vector< std::vector<double> > & FS) = 0;
+	StochasticBase(std::string Name, boost::property_tree::ptree config);
+	scalar GetZeroM(std::vector<double> arg) {
+			return _ZeroMoment->InterpolateTable(arg);}; 
+	fourvec GetFirstM(std::vector<double> arg) {
+			return _FirstMoment->InterpolateTable(arg);}; 
+	tensor GetSecondM(std::vector<double> arg) {
+			return _SecondMoment->InterpolateTable(arg);}; 
+	virtual void sample(std::vector<double> arg, 
+						std::vector< std::vector<double> > & FS) = 0;
+	virtual void init(void) = 0;
 };
 
 #endif

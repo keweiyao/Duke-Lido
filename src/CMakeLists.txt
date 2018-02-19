@@ -3,6 +3,7 @@
 add_library(${LIBRARY_NAME} STATIC
 TableBase.cpp
 StochasticBase.cpp
+Xsection.cpp
 	)
 
 set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "")

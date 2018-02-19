@@ -20,9 +20,8 @@ protected:
     Dvec _low, _high;
     Dvec _step;
     boost::multi_array<T, N> _table;
-    T (*_approximating_function)(Dvec);
 public:
-	TableBase(std::string, T (*f)(Dvec), Svec, Dvec, Dvec);
+	TableBase(std::string, Svec, Dvec, Dvec);
 	T InterpolateTable(Dvec values);
     void SetTableValue(Svec index, T v);
     bool Save(std::string);

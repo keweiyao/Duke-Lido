@@ -1,13 +1,15 @@
 #include "TableBase.h"
 #include "H5Cpp.h"
 #include "predefine.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 #include <iostream>
 
 template <typename T, size_t N>
-TableBase<T, N>::TableBase(std::string Name, T (*f)(Dvec), Svec shape, Dvec low, Dvec high):
+TableBase<T, N>::TableBase(std::string Name, Svec shape, Dvec low, Dvec high):
 _Name(Name), _rank(N), _power_rank(std::pow(2, _rank)), 
-_shape(shape), _low(low), _high(high),
-_table(_shape), _approximating_function(f) {
+_shape(shape), _low(low), _high(high),_table(_shape)
+{
 	std::cout<<_Name << " dim=" << _rank <<std::endl;
 	for(auto i=0; i<_rank; ++i){
 		_step.push_back((high[i]-low[i])/(shape[i]-1));
@@ -46,9 +48,36 @@ void TableBase<T, N>::SetTableValue(Svec index, T v){
 
 template <typename T, size_t N>
 bool TableBase<T, N>::Save(std::string fname){
+	H5::Exception::dontPrint(); // suppress error messages
 	// the is a dumb implementation
-	H5::H5File file(fname, H5F_ACC_TRUNC);
-	H5::Group group = H5::Group( file.createGroup( "/"+_Name ));
+	H5::H5File file;
+	if( boost::filesystem::exists(fname)) file = H5::H5File(fname, H5F_ACC_RDWR);
+	else file = H5::H5File(fname, H5F_ACC_TRUNC);
+	std::vector<std::string> levels;
+	boost::split(levels, _Name, boost::is_any_of("/"));
+	std::string prefix = "";
+	H5::Group group;
+	for (auto& v : levels) {
+		prefix += ("/"+v);
+  		try{
+    		group = file.openGroup(prefix.c_str());
+			if (prefix == "/"+_Name) {	// if the last group existed before
+				// It need to be deleted and rebuild
+				H5Ldelete(file.getId(), prefix.c_str(), H5P_DEFAULT);
+				std::cerr<<"old data deleted and will be overwirtten\n";
+				group = file.createGroup(prefix.c_str());
+			}
+  		}catch (...) {
+    		group = file.createGroup(prefix.c_str());
+ 		}
+	}
+
+	hdf5_add_scalar_attr(group, "rank", _rank);
+	for (auto i=0; i<_rank; ++i){
+		hdf5_add_scalar_attr(group, "shape-"+std::to_string(i), _shape[i]);
+		hdf5_add_scalar_attr(group, "low-"+std::to_string(i), _low[i]);
+		hdf5_add_scalar_attr(group, "high-"+std::to_string(i), _high[i]);
+	}
 	
 	boost::multi_array<double, N> buffer(_shape);
 	hsize_t dims[_rank];
@@ -64,15 +93,9 @@ bool TableBase<T, N>::Save(std::string fname){
 			T item = _table.data()[i];
 			buffer.data()[i] = item.get(comp);
 		}
-		H5::DataSet dataset = file.createDataSet("/"+_Name+"/"+std::to_string(comp), 
-													datatype, dataspace, proplist);
+		auto dsname = prefix+"/"+std::to_string(comp);
+		H5::DataSet dataset = file.createDataSet(dsname, datatype, dataspace, proplist);
 		dataset.write(buffer.data(), datatype);
-	}
-	hdf5_add_scalar_attr(group, "rank", _rank);
-	for (auto i=0; i<_rank; ++i){
-		hdf5_add_scalar_attr(group, "shape-"+std::to_string(i), _shape[i]);
-		hdf5_add_scalar_attr(group, "low-"+std::to_string(i), _low[i]);
-		hdf5_add_scalar_attr(group, "high-"+std::to_string(i), _high[i]);
 	}
 	file.close();
 	return true;
@@ -121,5 +144,8 @@ template class TableBase<scalar, 3>;
 template class TableBase<scalar, 4>;
 template class TableBase<fourvec, 2>;
 template class TableBase<fourvec, 3>;
+template class TableBase<tensor, 2>;
+template class TableBase<tensor, 3>;
+
 
 
