@@ -2,7 +2,31 @@
 #define LORENTZ_H
 #include <iostream>
 #include <cmath>
+#include "hdf5.h"
+#include "hdf5_hl.h"
+#include <cstdlib>
+
 const double tiny_v2 = 1e-15;
+struct scalar {
+	double s;
+	friend std::ostream& operator<<(std::ostream& os, const scalar& A){
+    	os << A.s;
+    	return os;
+	  }
+	  friend scalar operator+(const scalar& A, const scalar& B){
+		return scalar{A.s+B.s};
+	  }
+	  friend scalar operator-(const scalar& A, const scalar& B){
+		return scalar{A.s-B.s};
+	  }
+	  template<typename T>
+	  scalar operator*(T u){
+		return scalar{s*u};
+	  }
+	static size_t size(void){return 1;}
+	void set(int i, double value) {s = value;};
+	double get(int i) {return s;};
+};
 
 struct fourvec {
   double a[4];
@@ -42,6 +66,9 @@ struct fourvec {
   friend double dot(const fourvec& A, const fourvec& B) {
 	return A.t()*B.t() - A.x()*B.x() - A.y()*B.y() - A.z()*B.z();
   }
+  static size_t size(void){return 4;}
+  void set(int i, double value) {a[i] = value;};
+  double get(int i) {return a[i];};
 };
 
 struct tensor {
@@ -135,6 +162,11 @@ struct tensor {
   double trace(void){
     return T[0][0]-T[1][1]-T[2][2]-T[3][3];
   }
+  void set(int i, double value) {T[i/4][i%4] = value;};
+  double get(int i) {return T[i/4][i%4];};
+  static size_t size(void){return 16;}
 };
+
+
 
 #endif

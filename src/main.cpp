@@ -3,24 +3,24 @@
 #include <iostream>
 
 
-double f(std::vector<double> X);
+scalar f(std::vector<double> X);
 fourvec f1(std::vector<double> X);
 
 
 int main(){
-    TableBase<double,2> T1(std::string("Table1"), &f, {{5,5}}, {{0,0}}, {{1,1}});
+    TableBase<scalar,2> T1(std::string("Table1"), &f, {{5,5}}, {{0,0}}, {{1,1}});
     for (auto i=0; i<5; ++i) {
    		for (auto j=0; j<5; ++j) {
-   			T1.SetTableValue({i, j}, i*j);
+   			T1.SetTableValue({i, j}, {i*j});
     	}
     }
     std::cout << T1.InterpolateTable({.25,.35}) << std::endl;
 
-    TableBase<double,3> T2(std::string("Table2"), &f, {{5,5,10}}, {{0,0,0}}, {{1,1,3}});
+    TableBase<scalar,3> T2(std::string("Table2"), &f, {{5,5,10}}, {{0,0,0}}, {{1,1,3}});
     for (auto i=0; i<5; ++i) {
    		for (auto j=0; j<5; ++j) {
    		    for (auto k=0; k<10; ++k) {
-	   			T2.SetTableValue({i, j, k}, i*j/(k+1.));
+	   			T2.SetTableValue({i, j, k}, {i*j/(k+1.)});
 			}
     	}
     }
@@ -35,10 +35,17 @@ int main(){
     	}
     }
     std::cout << T3.InterpolateTable({.3,.3,.3}).boost_to(0.99, 0., 0.) << std::endl;
+    
+    
+    T3.Save("field.h5");
+    TableBase<fourvec,3> T4(std::string("Table3"), &f1, {{5,5,10}}, {{0,0,0}}, {{1,1,3}});    
+    T4.Load("field.h5");
+    T4.Save("field-2.h5");
+    
 }
 
-double f(std::vector<double> X){
-  return 1.0;
+scalar f(std::vector<double> X){
+  return {1.0};
 }
 
 fourvec f1(std::vector<double> X){

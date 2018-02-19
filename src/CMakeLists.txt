@@ -2,6 +2,7 @@
 # to the main executable
 add_library(${LIBRARY_NAME} STATIC
 TableBase.cpp
+StochasticBase.cpp
 	)
 
 set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "")
