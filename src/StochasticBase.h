@@ -29,6 +29,8 @@ protected:
     std::shared_ptr<TableBase<tensor, N>> _SecondMoment;
 	void compute(int start, int end);
     virtual scalar calculate_scalar(std::vector<double> parameters) = 0;
+    virtual fourvec calculate_fourvec(std::vector<double> parameters) = 0;
+    virtual tensor calculate_tensor(std::vector<double> parameters) = 0;
 public:
 	StochasticBase(std::string Name, boost::property_tree::ptree config);
 	scalar GetZeroM(std::vector<double> arg) {

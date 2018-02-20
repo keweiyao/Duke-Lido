@@ -7,12 +7,14 @@
 
 #include "TableBase.h"
 #include "Xsection.h"
+#include "matrix_elements.h"
 
 void test_x(void);
 void test_config(void);
 void test_table(void);
 
 int main(){
+    initialize_mD_and_scale(0, 2.0);
 	test_x();
 	//test_config();
 	//test_table();
@@ -24,17 +26,14 @@ void test_x(void){
     ptree config;
     std::ifstream input("settings.xml");
     read_xml(input, config);
-	auto xQq2Qq = std::make_shared<Xsection<2>>("Qq2Qq/xsection", 
-											config.get_child("Boltzmann"));
+	auto xQq2Qq = std::make_shared<Xsection<2, double(*)(double, void*)>>
+	("Qq2Qq/xsection", config.get_child("Boltzmann"), dX_Qq2Qq_dt);
+	auto xQg2Qg = std::make_shared<Xsection<2, double(*)(double, void*)>>
+	("Qg2Qg/xsection", config.get_child("Boltzmann"), dX_Qg2Qg_dt);
 	xQq2Qq->init();
 	xQq2Qq->save("table.h5");
-	/*auto xQg2Qg = std::make_shared<Xsection<2>>("Qg2Qg/xsection", 
-											config.get_child("Boltzmann"));
-	auto xQq2Qqg = std::make_shared<Xsection<3>>("Qq2Qqg/xsection", 
-											config.get_child("Boltzmann"));
-	auto xQg2Qgg = std::make_shared<Xsection<3>>("Qg2Qgg/xsection", 
-											config.get_child("Boltzmann"));
-	//x22->GetZeroM({1., 1.});*/
+	xQg2Qg->init();
+	xQg2Qg->save("table.h5");
 }
 
 void test_config(void){

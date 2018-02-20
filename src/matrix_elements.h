@@ -25,12 +25,12 @@ void initialize_mD_and_scale(const unsigned int type, double scale);
 //=============Baisc function for Q+q --> Q+q==================================
 double M2_Qq2Qq(double t, void * params);
 double M2_Qq2Qq_rad(double t, void * params);
-double dX_Qq2Qq_dPS(double * PS, size_t n_dims, void * params);
+double dX_Qq2Qq_dt(double t, void * params);
 
 //=============Baisc function for Q+g --> Q+g==================================
 double M2_Qg2Qg(double t, void * params);
 double M2_Qg2Qg_rad(double t, void * params);
-double dX_Qg2Qg_dPS(double * PS, size_t n_dims, void * params);
+double dX_Qg2Qg_dt(double t, void * params);
 
 //=============Baisc function for Q+q --> Q+q+g==================================
 double M2_Qq2Qqg(double * x_, size_t n_dims_, void * params_);

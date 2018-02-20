@@ -1,0 +1,27 @@
+<Boltzmann>
+
+	<Qq2Qq status="active">
+	<probe>"charm"</probe>
+	<xsection slots="sqrts,temp">
+	<Nsqrts>30</Nsqrts> <Lsqrts>1.5</Lsqrts> <Hsqrts>20.0</Hsqrts>
+	<Ntemp>10</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+	</xsection>
+	<rate slots="energy,temp">
+	<Nenergy>30</Nenergy> <Lenergy>0.1</Lenergy> <Henergy>20.0</energy>
+	<Ntemp>20</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+	</rate>
+	</Qq2Qq>
+	
+	<Qg2Qg status="active">
+	<probe>"charm"</probe>
+	<xsection slots="sqrts,temp">
+	<Nsqrts>30</Nsqrts> <Lsqrts>1.5</Lsqrts> <Hsqrts>20.0</Hsqrts>
+	<Ntemp>10</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+	</xsection>
+	<rate slots="energy,temp">
+	<Nenergy>30</Nenergy> <Lenergy>0.1</Lenergy> <Henergy>20.0</energy>
+	<Ntemp>20</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+	</rate>
+	</Qg2Qg>
+	
+</Boltzmann>

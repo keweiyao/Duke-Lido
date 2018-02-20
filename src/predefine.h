@@ -18,8 +18,8 @@ const double pf_q = M_PI/2.*(Nc*Nc - 1)/2./Nc; // prefractor for quark self ener
 const double alpha0 = 4.*M_PI/(11. - 2./3.*nf); // alpha_s(Q2 = e*Lambda2)
 const double Lambda = 0.2; // [GeV] Lambda QCD
 const double Lambda2 = Lambda*Lambda; // [GeV^2] Lambda QCD squared
-const double mu2_left = Lambda2*std::exp(1.0),
-			 mu2_right = Lambda2*1e-6;
+const double mu2_left = Lambda2*std::exp(1.1),
+			 mu2_right = Lambda2*1e-2;
 // [GeV^2] ranges within which alphas > 1 and will be cut
 
 template <typename T> inline const H5::PredType& type();

@@ -71,8 +71,12 @@ void StochasticBase<N>::compute(int start, int end){
 			q = q/dim;
 			index[d] = n;
 		}
-		scalar res = calculate_scalar(_ZeroMoment->parameters(index));
-		_ZeroMoment->SetTableValue(index, res);
+		_ZeroMoment->SetTableValue(index, 
+						calculate_scalar(_ZeroMoment->parameters(index))	);
+		_FirstMoment->SetTableValue(index, 
+						calculate_fourvec(_FirstMoment->parameters(index))	);
+		_SecondMoment->SetTableValue(index, 
+						calculate_tensor(_SecondMoment->parameters(index))	);
 	}
 }
 

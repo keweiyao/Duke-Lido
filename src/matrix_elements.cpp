@@ -1,7 +1,7 @@
 #include <cmath>
 #include <iostream>
 
-#include "utility.h"
+#include "predefine.h"
 #include "matrix_elements.h"
 
 #include <boost/math/tools/roots.hpp>
@@ -117,10 +117,7 @@ double M2_Qq2Qq_rad(double t, void * params){
 	else return result;
 }
 
-double dX_Qq2Qq_dPS(double * PS, size_t n_dims, void * params){
-	(void)n_dims;
-	// unpacking parameters
-	double t = PS[0];
+double dX_Qq2Qq_dt(double t, void * params){
 	double * p = static_cast<double*>(params);
 	double s = p[0], M2 = p[2]*p[2];
 	return M2_Qq2Qq(t, params)/c16pi/std::pow(s-M2, 2);
@@ -177,9 +174,7 @@ double M2_Qg2Qg_rad(double t, void * params) {
 	else return result;
 }
 
-double dX_Qg2Qg_dPS(double * PS, size_t n_dims, void * params){
-	(void)n_dims;
-	double t = PS[0];
+double dX_Qg2Qg_dt(double t, void * params){
 	double * p = static_cast<double *>(params);
 	double s = p[0], M2 = p[2]*p[2];
 	return M2_Qg2Qg(t, params)/c16pi/std::pow(s-M2, 2);
