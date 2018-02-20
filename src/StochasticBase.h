@@ -27,7 +27,8 @@ protected:
     std::shared_ptr<TableBase<fourvec, N>> _FirstMoment;
 	// 2-nd moments of the distribution: <p^mu p^nu>, i.e. the correlator
     std::shared_ptr<TableBase<tensor, N>> _SecondMoment;
-	virtual void compute(void) = 0;
+	void compute(int start, int end);
+    virtual scalar calculate_scalar(std::vector<double> parameters) = 0;
 public:
 	StochasticBase(std::string Name, boost::property_tree::ptree config);
 	scalar GetZeroM(std::vector<double> arg) {
@@ -38,7 +39,8 @@ public:
 			return _SecondMoment->InterpolateTable(arg);}; 
 	virtual void sample(std::vector<double> arg, 
 						std::vector< std::vector<double> > & FS) = 0;
-	virtual void init(void) = 0;
+	void init(void);
+	void save(std::string);
 };
 
 #endif

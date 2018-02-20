@@ -24,10 +24,17 @@ void test_x(void){
     ptree config;
     std::ifstream input("settings.xml");
     read_xml(input, config);
-	auto x22 = std::make_shared<Xsection<2>>("Qq2Qq/xsection", 
+	auto xQq2Qq = std::make_shared<Xsection<2>>("Qq2Qq/xsection", 
 											config.get_child("Boltzmann"));
-	x22->init();
-	x22->GetZeroM({1., 1.});
+	xQq2Qq->init();
+	xQq2Qq->save("table.h5");
+	/*auto xQg2Qg = std::make_shared<Xsection<2>>("Qg2Qg/xsection", 
+											config.get_child("Boltzmann"));
+	auto xQq2Qqg = std::make_shared<Xsection<3>>("Qq2Qqg/xsection", 
+											config.get_child("Boltzmann"));
+	auto xQg2Qgg = std::make_shared<Xsection<3>>("Qg2Qgg/xsection", 
+											config.get_child("Boltzmann"));
+	//x22->GetZeroM({1., 1.});*/
 }
 
 void test_config(void){

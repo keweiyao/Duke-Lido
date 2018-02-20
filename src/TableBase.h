@@ -26,6 +26,19 @@ public:
     void SetTableValue(Svec index, T v);
     bool Save(std::string);
     bool Load(std::string);
+	size_t shape(size_t i) {return _shape[i];}
+	size_t rank(void) {return _rank;}
+	size_t length(void) {
+		size_t result=1; 
+		for(auto& D : _shape) result *= D;
+		return result;
+	}
+	Dvec parameters(Svec index){
+		Dvec res;
+		for(size_t i=0; i<_rank; i++)
+			res.push_back(_low[i] + _step[i]*index[i]);
+		return res;
+	}
 };
 
 
