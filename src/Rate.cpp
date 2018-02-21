@@ -29,7 +29,7 @@ scalar Rate<N1, N2, F>::calculate_scalar(std::vector<double> parameters){
 		double s = 2.*E2*E*(1. - v1*costheta) + M*M;
 		double sqrts = std::sqrt(s);
 		double Xtot = this->X->GetZeroM({sqrts,T}).s;
-    	std::vector<double> res{1./(2.*E)*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI};
+    	std::vector<double> res{1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI};
 		return res;
 	};
 	double xmin[2] = {0., -1.};
@@ -58,7 +58,7 @@ fourvec Rate<N1, N2, F>::calculate_fourvec(std::vector<double> parameters){
 		auto fmu1 = fmu0.rotate_back(p1.boost_to(vcom[0], vcom[1], vcom[2]));
 		// boost back to the matter frame		
 		auto fmu2 = fmu1.boost_back(vcom[0], vcom[1], vcom[2]);
-		double common = 1./(2.*E)*E2*std::exp(-E2/T)*(s-M*M)*2./16./M_PI/M_PI;
+		double common = 1./E*E2*std::exp(-E2/T)*(s-M*M)*2./16./M_PI/M_PI;
 		fmu2 = fmu2 * common;
 		// Set tranverse to zero due to azimuthal symmetry;
 		std::vector<double> res{fmu2.t(), fmu2.z()};
@@ -91,7 +91,7 @@ tensor Rate<N1, N2, F>::calculate_tensor(std::vector<double> parameters){
 		auto fmunu1 = fmunu0.rotate_back(p1.boost_to(vcom[0], vcom[1], vcom[2]));
 		// boost back to the matter frame		
 		auto fmunu2 = fmunu1.boost_back(vcom[0], vcom[1], vcom[2]);
-		double common = 1./(2.*E)*E2*std::exp(-E2/T)*(s-M*M)*2./32./std::pow(M_PI, 3);
+		double common = 1./E*E2*std::exp(-E2/T)*(s-M*M)*2./32./std::pow(M_PI, 3);
 		fmunu2 = fmunu2 * common;
 		// Set tranverse to zero due to azimuthal symmetry;
 		std::vector<double> res{fmunu2.T[0][0], fmunu2.T[1][1],

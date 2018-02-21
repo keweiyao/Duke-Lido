@@ -60,7 +60,6 @@ void StochasticBase<N>::init(void){
 
 template<size_t N>
 void StochasticBase<N>::compute(int start, int end){
-	std::cout << "start= " << start << ", end = " << end << ", computing table" << std::endl;
 	std::vector<size_t> index;
 	index.resize(N);
 	for(auto i=start; i<end; ++i){

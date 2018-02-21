@@ -16,7 +16,6 @@ void test_config(void);
 void test_table(void);
 
 int main(){
-    initialize_mD_and_scale(0, 1.0);
 	test_r();
 	//test_x();
 	//test_config();
@@ -28,20 +27,24 @@ void test_r(void){
     ptree config;
     std::ifstream input("settings.xml");
     read_xml(input, config);
+	double mu = config.get_child("Boltzmann.QCD").get<double>("mu");
+	std:: cout <<  "mu = " << mu << std::endl;
+    initialize_mD_and_scale(0, mu);
+
 	auto rQq2Qq = std::make_shared<Rate<2, 2, double(*)(double, void*)>>
 	("Qq2Qq", config.get_child("Boltzmann"), dX_Qq2Qq_dt);
 	rQq2Qq->init();
-	rQq2Qq->save("table.h5");
+	rQq2Qq->save("qhat.h5");
 
 	auto rQg2Qg = std::make_shared<Rate<2, 2, double(*)(double, void*)>>
 	("Qg2Qg", config.get_child("Boltzmann"), dX_Qg2Qg_dt);
 	rQg2Qg->init();
-	rQg2Qg->save("table.h5");
+	rQg2Qg->save("qhat.h5");
 
-	auto r = std::make_shared<Rate<2, 2, double(*)(double, void*)>>
-	("resonance", config.get_child("Boltzmann"), dX_res_dt);
-	r->init();
-	r->save("table.h5");
+	//auto r = std::make_shared<Rate<2, 2, double(*)(double, void*)>>
+	//("resonance", config.get_child("Boltzmann"), dX_res_dt);
+	//r->init();
+	//r->save("table.h5");
 }
 /*
 void test_x(void){
