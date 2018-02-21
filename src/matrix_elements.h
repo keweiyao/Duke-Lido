@@ -2,6 +2,7 @@
 #define MATRIX_ELEMENTS_H
 #include <cstdlib>
 
+
 //======running coupling=======================================================
 double alpha_s(double Q2, double T);
 double f_LPM(double x);
@@ -21,6 +22,9 @@ public:
 
 //=====For external initialization of debye mass==============================
 void initialize_mD_and_scale(const unsigned int type, double scale);
+
+//========resonance?? Q+q-->D-->Q+q============
+double dX_res_dt(double t, void * params);
 
 //=============Baisc function for Q+q --> Q+q==================================
 double M2_Qq2Qq(double t, void * params);

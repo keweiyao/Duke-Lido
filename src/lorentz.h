@@ -63,6 +63,20 @@ struct fourvec {
   fourvec boost_back(double vx, double vy, double vz){
 	return boost_to(-vx, -vy, -vz);
   }
+  fourvec rotate_back(const fourvec p){
+	double Dx = p.x(), Dy = p.y(), Dz = p.z();
+	double Dperp = std::sqrt(Dx*Dx + Dy*Dy);
+	double D = std::sqrt(Dperp*Dperp + Dz*Dz);
+	if (Dperp/D < 1e-10){
+		return fourvec{a[0], a[1], a[2], a[3]};
+	}
+	double c2 = Dz/D, s2 = Dperp/D;
+	double c3 = Dx/Dperp, s3 = Dy/Dperp;
+	return fourvec{	a[0],
+					-s3*a[1] - c3*(c2*a[2] - s2*a[3]),
+					c3*a[1] - s3*(c2*a[2] - s2*a[3]),
+	             	s2*a[2] + c2*a[3] };
+	}
   friend double dot(const fourvec& A, const fourvec& B) {
 	return A.t()*B.t() - A.x()*B.x() - A.y()*B.y() - A.z()*B.z();
   }
@@ -158,6 +172,37 @@ struct tensor {
   }
   tensor boost_back(double vx, double vy, double vz){
   	return boost_to(-vx, -vy, -vz);
+  }
+  tensor rotate_back(const fourvec p){
+	double Dx = p.x(), Dy = p.y(), Dz = p.z();
+	double Dperp = std::sqrt(Dx*Dx + Dy*Dy);
+	double D = std::sqrt(Dperp*Dperp + Dz*Dz);
+	if (Dperp/D < 1e-10){
+		return tensor{T[0][0], T[0][1], T[0][2], T[0][3],
+					T[1][0], T[1][1], T[1][2], T[1][3],
+					T[2][0], T[2][1], T[2][2], T[2][3],
+					T[3][0], T[3][1], T[3][2], T[3][3]};
+	}
+	double c2 = Dz/D, s2 = Dperp/D;
+	double c3 = Dx/Dperp, s3 = Dy/Dperp;
+	double R[3][3];
+	R[0][0] = -s3; R[0][1] = -c3*c2; R[0][2] = c3*s2;
+	R[1][0] = c3;  R[1][1] = -s3*c2; R[1][2] = s3*s2;
+	R[2][0] = 0.;  R[2][1] = 	 s2; R[2][2] =    c2;
+    tensor res{0};
+	for(auto mu=0; mu<4; ++mu) res.T[0][mu] = T[0][mu];
+	for(auto mu=1; mu<4; ++mu) res.T[mu][0] = T[mu][0];
+
+  	for(auto mu=1; mu<4; ++mu){
+  		for(auto nu=1; nu<4; ++nu){
+  			for(auto i=1; i<4; ++i){
+  				for(auto j=1; j<4; ++j){
+  					res.T[mu][nu] += R[mu-1][i-1]*R[nu-1][j-1]*T[i][j];
+  				}
+  			}
+  		}
+  	}
+  	return res;
   }
   double trace(void){
     return T[0][0]-T[1][1]-T[2][2]-T[3][3];

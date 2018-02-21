@@ -1,6 +1,5 @@
 #include <cmath>
 #include <iostream>
-
 #include "predefine.h"
 #include "matrix_elements.h"
 
@@ -83,6 +82,15 @@ void initialize_mD_and_scale(const unsigned int type, const double scale){
 	std::cout << "Scale = " << renormalization_scale << std::endl;
 }
 
+
+double dX_res_dt(double t, void * params){
+	double * p = static_cast<double *>(params);
+	double s = p[0], M2 = p[2]*p[2];
+	double sqrts = std::sqrt(s);
+	double Gamma2 = Lambda2;
+	double formfactor = Lambda2/(t*t+Lambda2*Lambda2);
+	return formfactor/(std::pow(sqrts-2.0,2)+Gamma2);
+};
 
 /// Q+q --> Q+q
 double M2_Qq2Qq(double t, void * params){

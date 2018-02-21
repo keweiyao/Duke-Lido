@@ -8,6 +8,7 @@
 #include <utility>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
+#include "cubature.h"
 
 /* Modified from here 
 @MISC {27248,
@@ -78,6 +79,51 @@ double quad_1d(F func,
             double epsabs = 1.e-4, double epsrel = 1.e-4,
             int limit = 1000){
   return gsl_quad_1d<F>(func, limit).integrate(range.first, range.second, epsabs, epsrel, error);
+}
+
+//---------------wrap around https://github.com/stevengj/cubature----------
+// multidimensional (intermeidate dimension) deterministic integration.
+template < typename F >
+class cubeture_nd{
+  F f;
+  int limit;
+  static int cubeture_wrapper(unsigned ndimx, const double *x, void *fdata, unsigned fdim, double *fval)
+  {
+    cubeture_nd * t = reinterpret_cast<cubeture_nd*>(fdata);
+	std::vector<double> res = t->f(x);
+	for (int i=0; i<fdim; ++i) fval[i] = res[i]; 
+	return 0;
+  }
+
+public:
+  cubeture_nd(F f, int limit): 
+  f(f), limit(limit) {}
+
+  std::vector<double> integrate(unsigned ndimx, unsigned ndimf, const double * min, const double * max, double epsabs, double epsrel, double &error){
+	double * result = new double[ndimf];
+	hcubature(ndimf, // dim-f()
+			&cubeture_wrapper, // f()
+			this, // data pointer
+			ndimx, // dim-x
+			min, // xmin pointer
+			max, // xmax pointer
+			limit,	// max evl? 
+			epsabs, // AbsErr
+			epsrel, // relErr
+			ERROR_INDIVIDUAL, // Error norm
+			result, &error);
+	std::vector<double> y;
+	for (int i=0; i< ndimf; i++) {y.push_back(result[i]);}
+	delete[] result;
+    return y;
+  }
+};
+
+template < typename F >
+std::vector<double> quad_nd(F func,
+		unsigned ndim, unsigned ndimf, const double * min, const double * max, 
+		double&error, double epsabs=1e-5, double epsrel=1e-5, int limit=0){
+	return cubeture_nd<F>(func, limit).integrate(ndim, ndimf, min, max, epsabs, epsrel, error);
 }
 
 #endif

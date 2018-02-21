@@ -7,20 +7,43 @@
 
 #include "TableBase.h"
 #include "Xsection.h"
+#include "Rate.h"
 #include "matrix_elements.h"
 
+void test_r(void);
 void test_x(void);
 void test_config(void);
 void test_table(void);
 
 int main(){
     initialize_mD_and_scale(0, 2.0);
-	test_x();
+	test_r();
+	//test_x();
 	//test_config();
 	//test_table();
 	return 0;
 }
+void test_r(void){
+	using boost::property_tree::ptree;
+    ptree config;
+    std::ifstream input("settings.xml");
+    read_xml(input, config);
+	auto rQq2Qq = std::make_shared<Rate<2, 2, double(*)(double, void*)>>
+	("Qq2Qq", config.get_child("Boltzmann"), dX_Qq2Qq_dt);
+	rQq2Qq->init();
+	rQq2Qq->save("table.h5");
 
+	auto rQg2Qg = std::make_shared<Rate<2, 2, double(*)(double, void*)>>
+	("Qg2Qg", config.get_child("Boltzmann"), dX_Qg2Qg_dt);
+	rQg2Qg->init();
+	rQg2Qg->save("table.h5");
+
+	auto r = std::make_shared<Rate<2, 2, double(*)(double, void*)>>
+	("resonance", config.get_child("Boltzmann"), dX_res_dt);
+	r->init();
+	r->save("table.h5");
+}
+/*
 void test_x(void){
 	using boost::property_tree::ptree;
     ptree config;
@@ -35,7 +58,6 @@ void test_x(void){
 	xQg2Qg->init();
 	xQg2Qg->save("table.h5");
 }
-
 void test_config(void){
     using boost::property_tree::ptree;
     ptree pt;
@@ -101,5 +123,5 @@ void test_table(void){
     T4.Load("field.h5");
     T4.Save("field-2.h5");
 
-}
+}*/
 

@@ -1,12 +1,18 @@
 #include "Xsection.h"
 #include "matrix_elements.h"
 #include "integrator.h"
+#include <boost/algorithm/string.hpp>
 
 template<size_t N, typename F>
 Xsection<N, F>::Xsection(std::string Name, 
 					boost::property_tree::ptree config, F f):
-StochasticBase<N>(Name, config), _mass(1.3), _f(f)
+StochasticBase<N>(Name, config), _f(f)
 {
+	std::vector<std::string> strs;
+	boost::split(strs, Name, boost::is_any_of("/"));
+	std::string process_name = strs[0];
+	auto tree = config.get_child(process_name );
+	_mass = tree.get<double>("mass");
 }
 
 template<size_t N, typename F>

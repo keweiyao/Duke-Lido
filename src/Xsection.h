@@ -10,7 +10,7 @@
 #include "StochasticBase.h"
 
 template <size_t N, typename F>
-class Xsection: public StochasticBase<N> {
+class Xsection: public virtual StochasticBase<N> {
 private:
 	scalar calculate_scalar(std::vector<double> parameters);
 	fourvec calculate_fourvec(std::vector<double> parameters);
