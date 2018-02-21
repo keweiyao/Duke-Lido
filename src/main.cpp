@@ -16,7 +16,7 @@ void test_config(void);
 void test_table(void);
 
 int main(){
-    initialize_mD_and_scale(0, 2.0);
+    initialize_mD_and_scale(0, 1.0);
 	test_r();
 	//test_x();
 	//test_config();

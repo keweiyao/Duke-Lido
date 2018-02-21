@@ -5,11 +5,11 @@
 		<mass>1.3</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
-			<Nsqrts>50</Nsqrts> <Lsqrts>1.4</Lsqrts> <Hsqrts>20.0</Hsqrts>
-			<Ntemp>32</Ntemp> <Ltemp>0.1</Ltemp> <Htemp>1.2</Htemp>
+			<Nsqrts>100</Nsqrts> <Lsqrts>1.4</Lsqrts> <Hsqrts>20.0</Hsqrts>
+			<Ntemp>20</Ntemp> <Ltemp>0.1</Ltemp> <Htemp>1.1</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>30</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>100.0</energy>
+			<Nenergy>30</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>50.0</energy>
 			<Ntemp>20</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</Qq2Qq>
@@ -19,11 +19,11 @@
 		<mass>1.3</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
-			<Nsqrts>30</Nsqrts> <Lsqrts>1.4</Lsqrts> <Hsqrts>20.0</Hsqrts>
-			<Ntemp>10</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Nsqrts>100</Nsqrts> <Lsqrts>1.4</Lsqrts> <Hsqrts>20.0</Hsqrts>
+			<Ntemp>20</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.1</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>30</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>100.0</energy>
+			<Nenergy>30</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>50.0</energy>
 			<Ntemp>20</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</Qg2Qg>
@@ -34,7 +34,7 @@
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
 			<Nsqrts>50</Nsqrts> <Lsqrts>1.4</Lsqrts> <Hsqrts>5.0</Hsqrts>
-			<Ntemp>30</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Ntemp>30</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.1</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
 			<Nenergy>30</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>5.0</energy>
