@@ -19,6 +19,11 @@ void Rate<N1, N2, F>::sample(std::vector<double> arg,
 }
 
 template <size_t N1, size_t N2, typename F>
+scalar Rate<N1, N2, F>::find_max(std::vector<double> parameters){
+    return scalar{1.0};
+}
+
+template <size_t N1, size_t N2, typename F>
 scalar Rate<N1, N2, F>::calculate_scalar(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];

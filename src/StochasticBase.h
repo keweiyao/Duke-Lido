@@ -20,6 +20,9 @@ template <size_t N>
 class StochasticBase{
 protected:
 	const std::string _Name;
+    // the maximum of the distribution with given parameters, used in rejection
+    // sampling
+    std::shared_ptr<TableBase<scalar, N>> _FunctionMax;
 	// 0-th moments of the distribution function
 	// i.e. the integrated distribution function
     std::shared_ptr<TableBase<scalar, N>> _ZeroMoment;
@@ -28,6 +31,7 @@ protected:
 	// 2-nd moments of the distribution: <p^mu p^nu>, i.e. the correlator
     std::shared_ptr<TableBase<tensor, N>> _SecondMoment;
 	void compute(int start, int end);
+    virtual scalar find_max(std::vector<double> parameters) = 0;
     virtual scalar calculate_scalar(std::vector<double> parameters) = 0;
     virtual fourvec calculate_fourvec(std::vector<double> parameters) = 0;
     virtual tensor calculate_tensor(std::vector<double> parameters) = 0;

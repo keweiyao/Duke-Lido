@@ -25,18 +25,19 @@ _Name(Name)
 		low.push_back(tree.get<double>("L"+v));
 		high.push_back(tree.get<double>("H"+v));
 	}
-	
-	StochasticBase<N>::_ZeroMoment = 
+    _FunctionMax = 
+		std::make_shared<TableBase<scalar, N>>(Name+"/fmax", shape, low, high);
+	_ZeroMoment = 
 		std::make_shared<TableBase<scalar, N>>(Name+"/scalar", shape, low, high);
-	StochasticBase<N>::_FirstMoment = 
+	_FirstMoment = 
 		std::make_shared<TableBase<fourvec, N>>(Name+"/vector", shape, low, high);
-	StochasticBase<N>::_SecondMoment = 
+	_SecondMoment = 
 		std::make_shared<TableBase<tensor, N>>(Name+"/tensor", shape, low, high);
-_ZeroMoment->SetTableValue({0, 0}, {10});
 }
 
 template<size_t N>
 void StochasticBase<N>::save(std::string fname){
+    _FunctionMax->Save(fname);
 	_ZeroMoment->Save(fname);
 	_FirstMoment->Save(fname);
 	_SecondMoment->Save(fname);
@@ -70,6 +71,8 @@ void StochasticBase<N>::compute(int start, int end){
 			q = q/dim;
 			index[d] = n;
 		}
+		_FunctionMax->SetTableValue(index, 
+						find_max(_FunctionMax->parameters(index))	);
 		_ZeroMoment->SetTableValue(index, 
 						calculate_scalar(_ZeroMoment->parameters(index))	);
 		_FirstMoment->SetTableValue(index, 

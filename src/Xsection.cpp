@@ -22,14 +22,26 @@ void Xsection<N, F>::sample(std::vector<double> arg,
 }
 
 template<size_t N, typename F>
+scalar Xsection<N, F>::find_max(std::vector<double> parameters){
+    return scalar{1.0};
+}
+
+template<size_t N, typename F>
 scalar Xsection<N, F>::calculate_scalar(std::vector<double> parameters){
 	double s = std::pow(parameters[0],2), temp = parameters[1];
-	double * params = new double[3];
-	params[0] = s; params[1] = temp; params[2]=_mass;
-	auto dXdt = [params, this](double t) {return this->_f(t, params);};
-	double error, tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0.;
-	double res = quad_1d(dXdt, {tmin, tmax}, error);
-	delete[] params;
+    // transform w = -log(1-t/Temp^2) 
+    // since nearly everything happens when t ~ T^2
+	auto dXdw = [s, temp, this](double w) {
+        double T2 = temp*temp;
+		double params[3] = {s, temp, this->_mass};
+		double t = T2*(1.-std::exp(-w));
+		double Jacobian = T2 - t;
+		return this->_f(t, params)*Jacobian;
+	};
+	double error, tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0;
+    double wmin = -std::log(1.-tmin/temp/temp), 
+		   wmax = -std::log(1.-tmax/temp/temp+1e-9);
+	double res = quad_1d(dXdw, {wmin, wmax}, error);
 	return scalar{res};
 }
 
@@ -37,18 +49,21 @@ template<size_t N, typename F>
 fourvec Xsection<N, F>::calculate_fourvec(std::vector<double> parameters){
 	double sqrts = parameters[0], temp = parameters[1];
 	double s = std::pow(sqrts,2);
-	double * params = new double[3];
-	params[0] = s; params[1] = temp; params[2]=_mass;
-	double error, tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0.;
-	const double p0 = (s-_mass*_mass)/2./sqrts;
+	double p0 = (s-_mass*_mass)/2./sqrts;
 	// <dpz*X>
-	auto dpz_dXdt = [params, p0, this](double t) {
-		double cos_theta13 = 1. + t/(2*p0*p0);
-		double dpz = p0*(cos_theta13-1.);
-		return this->_f(t, params)*dpz;
+	auto dpz_dXdw = [s, temp, p0, this](double w) {
+        double T2 = temp*temp;
+		double params[3] = {s, temp, this->_mass};
+		double t = T2*(1.-std::exp(-w));
+		double Jacobian = T2 - t;
+        double cos_theta13 = 1. + t/(2*p0*p0);
+        double dpz = p0*(cos_theta13-1.);
+		return this->_f(t, params)*dpz*Jacobian;
 	};
-	double dpz = quad_1d(dpz_dXdt, {tmin, tmax}, error);
-	delete[] params;
+	double error, tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0;
+    double wmin = -std::log(1.-tmin/temp/temp),
+		   wmax = -std::log(1.-tmax/temp/temp+1e-9);
+	double dpz = quad_1d(dpz_dXdw, {wmin, wmax}, error);
 	return fourvec{0., 0., 0., dpz};
 }
 
@@ -56,25 +71,33 @@ template<size_t N, typename F>
 tensor Xsection<N, F>::calculate_tensor(std::vector<double> parameters){
 	double sqrts = parameters[0], temp = parameters[1];
 	double s = std::pow(sqrts,2);
-	double * params = new double[3];
-	params[0] = s; params[1] = temp; params[2]=_mass;
-	double error, tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0.;
 	const double p0 = (s-_mass*_mass)/2./sqrts;
 	// <dpz^2*X>
-	auto dpzdpz_dXdt = [params, p0, this](double t) {
-		double cos_theta13 = 1. + t/(2*p0*p0);
-		double dpz = p0*(cos_theta13-1.);
-		return this->_f(t, params)*dpz*dpz;
+	auto dpzdpz_dXdw = [s, temp, p0, this](double w) {
+        double T2 = temp*temp;
+		double params[3] = {s, temp, this->_mass};
+		double t = T2*(1.-std::exp(-w));
+		double Jacobian = T2 - t;
+        double cos_theta13 = 1. + t/(2*p0*p0);
+        double dpz = p0*(cos_theta13-1.);
+		return this->_f(t, params)*dpz*dpz*Jacobian;
 	};
-	double dpzdpz = quad_1d(dpzdpz_dXdt, {tmin, tmax}, error);
 	// <dpt^2*X>
-	auto dptdpt_dXdt = [params, p0, this](double t) {
-		double cos_theta13 = 1. + t/(2*p0*p0);
+	auto dptdpt_dXdw = [s, temp, p0, this](double w) {
+		double T2 = temp*temp;
+		double params[3] = {s, temp, this->_mass};
+		double t = T2*(1.-std::exp(-w));
+		double Jacobian = T2 - t;
+        double cos_theta13 = 1. + t/(2*p0*p0);
 		double dptdpt = p0*p0*(1.-cos_theta13*cos_theta13);
-		return this->_f(t, params)*dptdpt;
+		return this->_f(t, params)*dptdpt*Jacobian;
 	};
-	double dptdpt = quad_1d(dptdpt_dXdt, {tmin, tmax}, error);
-	delete[] params;
+
+	double error, tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0;
+    double wmin = -std::log(1.-tmin/temp/temp), 
+		   wmax = -std::log(1.-tmax/temp/temp+1e-9);
+    double dpzdpz = quad_1d(dpzdpz_dXdw, {wmin, wmax}, error);
+	double dptdpt = quad_1d(dptdpt_dXdw, {wmin, wmax}, error);
 	return tensor{0., 	0., 		0., 		0.,
 				  0., 	dptdpt/2., 	0., 		0.,
 				  0., 	0., 		dptdpt/2.,	0.,

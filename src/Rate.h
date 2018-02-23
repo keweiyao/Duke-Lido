@@ -16,6 +16,7 @@ template <size_t N1, size_t N2, typename F>
 class Rate: public virtual StochasticBase<N1>{
 private:
 	std::shared_ptr<Xsection<N2, F>> X;
+    scalar find_max(std::vector<double> parameters);
 	scalar calculate_scalar(std::vector<double> parameters);
 	fourvec calculate_fourvec(std::vector<double> parameters);
 	tensor calculate_tensor(std::vector<double> parameters);
