@@ -20,6 +20,13 @@ const double Lambda = 0.2; // [GeV] Lambda QCD
 const double Lambda2 = Lambda*Lambda; // [GeV^2] Lambda QCD squared
 const double mu2_left = Lambda2*std::exp(1.1),
 			 mu2_right = Lambda2*1e-2;
+// color factor 
+const double TF = 0.5;
+const double CF =  TF * (Nc*Nc-1.)/Nc, dF = Nc;
+const double CA = Nc, dA = Nc*Nc - 1.;
+
+
+df/dA = 3/8, CF/CA = 8/6/3
 // [GeV^2] ranges within which alphas > 1 and will be cut
 
 template <typename T> inline const H5::PredType& type();

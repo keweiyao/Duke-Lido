@@ -418,3 +418,34 @@ double Ker_Qgg2Qg(double * x_, size_t n_dims_, void * params_){
 		// 2->3 = 2->2 * 1->2
 		return M2_elastic*Pg/16.;
 }
+
+//-------------------Light parton sector----------------------------
+// quark of differnt flavor, cannot annilate via strong interaction
+// only t-channel
+double M2_qq2qq_diff(double t, void*params){
+	double * p = static_cast<double*>(params);
+	double s = p[0], Temp = p[1], M2 = p[2]*p[2];
+	double u = - s - t;
+	double At = alpha_s(t, Temp);
+	double mt2 = t_channel_mD2->get_mD2(Temp);
+	double result = 8.*std::pow(4.*M_PI*At*dF*CF, 2)/dA*
+					(s*s + u*u)/std::pow(std::min(t,-mt2), 2);
+	return result;
+}
+// quark of same flavor and (anti)particle, cannot annilate via strong interaction
+// |t-channel + u-channel|^2
+double M2_qq2qq_same(double t, void*params){
+	double * p = static_cast<double*>(params);
+	double s = p[0], Temp = p[1], M2 = p[2]*p[2];
+	double u = - s - t;
+	double At = alpha_s(t, Temp);
+	double Au = alpha_s(u, Temp);
+	double mt2 = t_channel_mD2->get_mD2(Temp);
+	double result = 8.*std::pow(4.*M_PI*dF*CF, 2)/dA*
+					(	At*At*(s*s + u*u)/std::pow(std::min(t,-mt2), 2)
+						+Au*Au*(s*s + t*t)/std::pow(std::min(u,-mt2), 2)
+					)
+				+	16.*dF*CF*(CF-CA/2.)*Au*At*std::pow(4.*M_PI, 2)*
+					s*s/std::min(t,-mt2)/std::min(u,-mt2);
+	return result;
+}
