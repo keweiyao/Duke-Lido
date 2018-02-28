@@ -1,12 +1,14 @@
 #include "Xsection.h"
 #include "matrix_elements.h"
 #include "integrator.h"
+#include "minimizer.h"
+#include "sampler.h"
 #include <boost/algorithm/string.hpp>
 
 template<size_t N, typename F>
 Xsection<N, F>::Xsection(std::string Name, 
 					boost::property_tree::ptree config, F f):
-StochasticBase<N>(Name, config), _f(f)
+StochasticBase<N>(Name, config), _f(f), fast_exp_(0., 15., 1000)
 {
 	std::vector<std::string> strs;
 	boost::split(strs, Name, boost::is_any_of("/"));
@@ -16,14 +18,45 @@ StochasticBase<N>(Name, config), _f(f)
 }
 
 template<size_t N, typename F>
-void Xsection<N, F>::sample(std::vector<double> arg, 
+void Xsection<N, F>::sample(std::vector<double> parameters, 
 						std::vector< std::vector<double> > & FS){
-	std::cout << "sampling table" << std::endl;	
+	double s = std::pow(parameters[0],2), temp = parameters[1];
+    // transform w = -log(1-t/Temp^2) 
+    // since nearly everything happens when t ~ T^2
+	auto dXdw = [s, temp, this](double w) {
+        double T2 = temp*temp;
+		double params[3] = {s, temp, this->_mass};
+		double t = T2*(1.-fast_exp_(-w));
+		double Jacobian = T2 - t;
+		return this->_f(t, params)*Jacobian;
+	};
+	double tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0;
+    double wmin = -std::log(1.-tmin/temp/temp), 
+		   wmax = -std::log(1.-tmax/temp/temp+1e-9);
+	double w = sample_1d(dXdw, {wmin, wmax}, 
+						StochasticBase<N>::GetFmax(parameters).s);
+	double t = temp*temp*(1.-fast_exp_(-w));
+	//std::cout << t << std::endl;
 }
 
 template<size_t N, typename F>
 scalar Xsection<N, F>::find_max(std::vector<double> parameters){
-    return scalar{1.0};
+    double s = std::pow(parameters[0],2), temp = parameters[1];
+    // transform w = -log(1-t/Temp^2) 
+    // since nearly everything happens when t ~ T^2
+	auto minus_dXdw = [s, temp, this](double w) {
+        double T2 = temp*temp;
+		double params[3] = {s, temp, this->_mass};
+		double t = T2*(1.-fast_exp_(-w));
+		double Jacobian = T2 - t;
+		return -(this->_f(t, params)*Jacobian);
+	};
+	double tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0;
+    double wmin = -std::log(1.-tmin/temp/temp), 
+		   wmax = -std::log(1.-tmax/temp/temp+1e-9);
+	double res = -minimize_1d(minus_dXdw, {wmin, wmax});
+ 
+	return scalar{res};
 }
 
 template<size_t N, typename F>
@@ -34,7 +67,7 @@ scalar Xsection<N, F>::calculate_scalar(std::vector<double> parameters){
 	auto dXdw = [s, temp, this](double w) {
         double T2 = temp*temp;
 		double params[3] = {s, temp, this->_mass};
-		double t = T2*(1.-std::exp(-w));
+		double t = T2*(1.-fast_exp_(-w));
 		double Jacobian = T2 - t;
 		return this->_f(t, params)*Jacobian;
 	};
@@ -54,7 +87,7 @@ fourvec Xsection<N, F>::calculate_fourvec(std::vector<double> parameters){
 	auto dpz_dXdw = [s, temp, p0, this](double w) {
         double T2 = temp*temp;
 		double params[3] = {s, temp, this->_mass};
-		double t = T2*(1.-std::exp(-w));
+		double t = T2*(1.-fast_exp_(-w));
 		double Jacobian = T2 - t;
         double cos_theta13 = 1. + t/(2*p0*p0);
         double dpz = p0*(cos_theta13-1.);
@@ -76,7 +109,7 @@ tensor Xsection<N, F>::calculate_tensor(std::vector<double> parameters){
 	auto dpzdpz_dXdw = [s, temp, p0, this](double w) {
         double T2 = temp*temp;
 		double params[3] = {s, temp, this->_mass};
-		double t = T2*(1.-std::exp(-w));
+		double t = T2*(1.-fast_exp_(-w));
 		double Jacobian = T2 - t;
         double cos_theta13 = 1. + t/(2*p0*p0);
         double dpz = p0*(cos_theta13-1.);

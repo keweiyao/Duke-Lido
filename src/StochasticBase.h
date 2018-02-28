@@ -37,6 +37,8 @@ protected:
     virtual tensor calculate_tensor(std::vector<double> parameters) = 0;
 public:
 	StochasticBase(std::string Name, boost::property_tree::ptree config);
+	scalar GetFmax(std::vector<double> arg) {
+			return _FunctionMax->InterpolateTable(arg);}; 
 	scalar GetZeroM(std::vector<double> arg) {
 			return _ZeroMoment->InterpolateTable(arg);}; 
 	fourvec GetFirstM(std::vector<double> arg) {

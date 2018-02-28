@@ -35,13 +35,19 @@ void test_r(void){
 	("Qq2Qq", config.get_child("Boltzmann"), dX_Qq2Qq_dt);
 
 	rQq2Qq->init();
-
 	rQq2Qq->save("table.h5");
+	std::vector<std::vector<double>> FS;
+	for (int i=0; i< 10000000; i++){
+		double E1 = 1.4+std::rand()*30./RAND_MAX;
+		double T = std::rand()*0.85/RAND_MAX+0.15;
+		rQq2Qq->sample({E1, T}, FS);
+	}
+ 
 
-	auto rQg2Qg = std::make_shared<Rate<2, 2, double(*)(double, void*)>>
-	("Qg2Qg", config.get_child("Boltzmann"), dX_Qg2Qg_dt);
-	rQg2Qg->init();
-	rQg2Qg->save("table.h5");
+	//auto rQg2Qg = std::make_shared<Rate<2, 2, double(*)(double, void*)>>
+	//("Qg2Qg", config.get_child("Boltzmann"), dX_Qg2Qg_dt);
+	//rQg2Qg->init();
+	//rQg2Qg->save("table.h5");
 
 	//auto r = std::make_shared<Rate<2, 2, double(*)(double, void*)>>
 	//("resonance", config.get_child("Boltzmann"), dX_res_dt);

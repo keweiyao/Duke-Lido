@@ -7,7 +7,9 @@
 #include <random>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include "fast_exp.h"
 #include "StochasticBase.h"
+
 
 template <size_t N, typename F>
 class Xsection: public virtual StochasticBase<N> {
@@ -18,6 +20,7 @@ private:
 	tensor calculate_tensor(std::vector<double> parameters);
 	double _mass;
 	F _f;// the matrix element
+	const FastExp<double> fast_exp_;
 public:
 	Xsection(std::string Name, boost::property_tree::ptree config, F f);
 	void sample(std::vector<double> arg, 

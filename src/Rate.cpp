@@ -1,5 +1,9 @@
 #include "Rate.h"
 #include "integrator.h"
+#include "sampler.h"
+#include "minimizer.h"
+
+#include <random>
 
 template <size_t N1, size_t N2, typename F>
 Rate<N1, N2, F>::Rate(std::string Name, boost::property_tree::ptree config, F f):
@@ -13,14 +17,56 @@ X(std::make_shared<Xsection<N2, F>>(Name+"/xsection", config, f) ){
 }
 
 template <size_t N1, size_t N2, typename F>
-void Rate<N1, N2, F>::sample(std::vector<double> arg, 
+void Rate<N1, N2, F>::sample(std::vector<double> parameters, 
 						std::vector< std::vector<double> > & FS){
-	std::cout << "sampling table" << std::endl;	
+	double E = parameters[0];
+	double T = parameters[1];
+	double v1 = std::sqrt(1. - std::pow(_mass/E,2));
+	auto dR_dxdy = [E, T, v1, this](const double * x){
+		double M = this->_mass;
+		double E2 = T*(std::exp(x[0])-1.), costheta = x[1];
+		if (costheta > 1. || costheta < -1.) return 0.;
+		double s = 2.*E2*E*(1. - v1*costheta) + M*M;
+		double sqrts = std::sqrt(s);
+		double Xtot = this->X->GetZeroM({sqrts,T}).s;
+		double Jacobian = E2 + T;
+    	return 1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
+	};
+	auto res = sample_nd(dR_dxdy, 2, {{0., 3.},{-1., 1.}}, 
+						StochasticBase<N1>::GetFmax(parameters).s);
+	double E2 = T*(std::exp(res[0])-1.), 
+		   costheta = res[1];
+	double s = 2.*E2*E*(1. - v1*costheta) + _mass*_mass;
+	X->sample({std::sqrt(s), T}, FS);
+
+	/*
+	FS now is in Z-oriented CoM frame
+	1) FS.rotate_back
+	2) FS.boost_back
+	*/
 }
 
 template <size_t N1, size_t N2, typename F>
 scalar Rate<N1, N2, F>::find_max(std::vector<double> parameters){
-    return scalar{1.0};
+	double E = parameters[0];
+	double T = parameters[1];
+	auto dR_dxdy = [E, T, this](const double * x){
+		double M = this->_mass;
+		double v1 = std::sqrt(1. - M*M/E/E);
+		double E2 = T*(std::exp(x[0])-1.), costheta = x[1];
+		if (E2 < 0. || costheta > 1. || costheta < -1.) return 0.;
+		double s = 2.*E2*E*(1. - v1*costheta) + M*M;
+		double sqrts = std::sqrt(s);
+		double Xtot = this->X->GetZeroM({sqrts,T}).s;
+		double Jacobian = E2 + T;
+    	return -1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
+	};
+	// use f(E(x), y)*dE/dx, x = log(1+E/T), y = costheta
+    // x start from 1, y start from 0
+    // x step 0.3, cosphi step 0.3
+    // save a slightly larger fmax
+	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.3, 0.3})*1.1;
+    return scalar{val};
 }
 
 template <size_t N1, size_t N2, typename F>
