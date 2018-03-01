@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <random>
+#include <map>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include "TableBase.h"
@@ -20,6 +21,9 @@ template <size_t N>
 class StochasticBase{
 protected:
 	const std::string _Name;
+    // the maximum of the distribution with given parameters, used in rejection
+    // sampling
+    std::shared_ptr<TableBase<scalar, N>> _FunctionMax;
 	// 0-th moments of the distribution function
 	// i.e. the integrated distribution function
     std::shared_ptr<TableBase<scalar, N>> _ZeroMoment;
@@ -28,11 +32,14 @@ protected:
 	// 2-nd moments of the distribution: <p^mu p^nu>, i.e. the correlator
     std::shared_ptr<TableBase<tensor, N>> _SecondMoment;
 	void compute(int start, int end);
+    virtual scalar find_max(std::vector<double> parameters) = 0;
     virtual scalar calculate_scalar(std::vector<double> parameters) = 0;
     virtual fourvec calculate_fourvec(std::vector<double> parameters) = 0;
     virtual tensor calculate_tensor(std::vector<double> parameters) = 0;
 public:
 	StochasticBase(std::string Name, boost::property_tree::ptree config);
+	scalar GetFmax(std::vector<double> arg) {
+			return _FunctionMax->InterpolateTable(arg);}; 
 	scalar GetZeroM(std::vector<double> arg) {
 			return _ZeroMoment->InterpolateTable(arg);}; 
 	fourvec GetFirstM(std::vector<double> arg) {
@@ -40,7 +47,7 @@ public:
 	tensor GetSecondM(std::vector<double> arg) {
 			return _SecondMoment->InterpolateTable(arg);}; 
 	virtual void sample(std::vector<double> arg, 
-						std::vector< std::vector<double> > & FS) = 0;
+						std::vector< fourvec > & FS) = 0;
 	void init(void);
 	void save(std::string);
 };

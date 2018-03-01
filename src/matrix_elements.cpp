@@ -83,7 +83,7 @@ void initialize_mD_and_scale(const unsigned int type, const double scale){
 }
 
 
-double dX_res_dt(double t, void * params){
+double dX_res_dt(const double t, void * params){
 	double * p = static_cast<double *>(params);
 	double s = p[0], M2 = p[2]*p[2];
 	double sqrts = std::sqrt(s);
@@ -93,7 +93,7 @@ double dX_res_dt(double t, void * params){
 };
 
 /// Q+q --> Q+q
-double M2_Qq2Qq(double t, void * params){
+double M2_Qq2Qq(const double t, void * params){
 	// unpacking parameters
 	double * p = static_cast<double*>(params);
 	double s = p[0], Temp = p[1], M2 = p[2]*p[2];
@@ -111,7 +111,7 @@ double M2_Qq2Qq(double t, void * params){
 /// Q+q --> Q+q for radiation process, rightnow, this is the same as Q+q-->Q+q,
 /// exept that we don't restrict (-t) > mD2 here, instead, we require later
 /// that the emitted gluon has an energy larger than mD, excludes (-t) < epsilon
-double M2_Qq2Qq_rad(double t, void * params){
+double M2_Qq2Qq_rad(const double t, void * params){
 	// unpacking parameters
 	double * p = static_cast<double*>(params);
 	double s = p[0], Temp = p[1], M2 = p[2]*p[2];
@@ -125,14 +125,14 @@ double M2_Qq2Qq_rad(double t, void * params){
 	else return result;
 }
 
-double dX_Qq2Qq_dt(double t, void * params){
+double dX_Qq2Qq_dt(const double t, void * params){
 	double * p = static_cast<double*>(params);
 	double s = p[0], M2 = p[2]*p[2];
 	return M2_Qq2Qq(t, params)/c16pi/std::pow(s-M2, 2);
 }
 
 ///	Q+g --> Q+g
-double M2_Qg2Qg(double t, void * params){
+double M2_Qg2Qg(const double t, void * params){
 	// unpacking parameters
 	double * p = static_cast<double *>(params);
 	double s = p[0], Temp = p[1], M2 = p[2]*p[2];
@@ -169,7 +169,7 @@ double M2_Qg2Qg(double t, void * params){
 /// Q+g --> Q+g for radiation process, rightnow, this only inclues t-channel
 /// We don't restrict (-t) > mD2 here, instead, we require later that the
 /// emitted gluon has an energy larger than mD, which exclude (-t) < epsilon
-double M2_Qg2Qg_rad(double t, void * params) {
+double M2_Qg2Qg_rad(const double t, void * params) {
 	// unpacking parameters
 	double * p = static_cast<double *>(params);
 	double s = p[0], Temp = p[1], M2 = p[2]*p[2];
@@ -189,8 +189,7 @@ double dX_Qg2Qg_dt(double t, void * params){
 }
 
 /// Q + q --> Q + q + g
-double M2_Qq2Qqg(double * x_, size_t n_dims_, void * params_){
-	(void) n_dims_;
+double M2_Qq2Qqg(const double * x_, void * params_){
 	// unpack variables, parameters and check integration range
 	double phi4k = x_[3];
 	if ( phi4k <= -M_PI || phi4k >= M_PI) return 0.0;
@@ -258,8 +257,7 @@ double M2_Qq2Qqg(double * x_, size_t n_dims_, void * params_){
 
 
 /// Q + g --> Q + g + g
-double M2_Qg2Qgg(double * x_, size_t n_dims_, void * params_){
-	(void) n_dims_;
+double M2_Qg2Qgg(const double * x_, void * params_){
 	// unpack variables, parameters and check integration range
 	double phi4k = x_[3];
 	if ( phi4k <= -M_PI || phi4k >= M_PI) return 0.0;
@@ -329,8 +327,7 @@ double M2_Qg2Qgg(double * x_, size_t n_dims_, void * params_){
 
 
 //=============Basic for 3->2===========================================
-double Ker_Qqg2Qq(double * x_, size_t n_dims_, void * params_){
-  	(void) n_dims_;
+double Ker_Qqg2Qq(double * x_, void * params_){
 	// unpack variables costheta42 = x_[0]
 	double costheta24 = x_[0], phi24 = x_[1];
 	if (costheta24<=-1. || costheta24>=1. || phi24 <=0. || phi24 >=2.*M_PI) return 0.;
@@ -374,8 +371,7 @@ double Ker_Qqg2Qq(double * x_, size_t n_dims_, void * params_){
 		return M2_elastic*Pg/16.;
 }
 
-double Ker_Qgg2Qg(double * x_, size_t n_dims_, void * params_){
-	(void) n_dims_;
+double Ker_Qgg2Qg(double * x_, void * params_){
 	// unpack variables costheta42 = x_[0]
 	double costheta24 = x_[0], phi24 = x_[1];
 	if (costheta24<=-1. || costheta24>=1. || phi24 <=0. || phi24 >=2.*M_PI) return 0.;

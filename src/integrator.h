@@ -8,6 +8,9 @@
 #include <utility>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_monte.h>
+#include <gsl/gsl_monte_vegas.h>
 #include "cubature.h"
 
 /* Modified from here 
@@ -80,6 +83,50 @@ double quad_1d(F func,
             int limit = 1000){
   return gsl_quad_1d<F>(func, limit).integrate(range.first, range.second, epsabs, epsrel, error);
 }
+
+// GSL vegas wrapper
+template < typename F >
+class gsl_vegas{
+  F f;
+  int limit;
+  static double gsl_wrapper(double * x, size_t n_dim, void * p)
+  {
+    gsl_vegas * t = reinterpret_cast<gsl_vegas*>(p);
+    return t->f(x);
+  }
+
+public:
+  gsl_vegas(F f, int limit): 
+  f(f), limit(limit)
+  {}
+
+  double integrate(int dim, double * xmin, double * xmax, double &error)
+  {
+	const gsl_rng_type * Tr = gsl_rng_default;
+	gsl_rng * r = gsl_rng_alloc(Tr);
+
+	gsl_monte_function G;
+	G.f = gsl_wrapper;
+	G.dim = dim;
+	G.params = this;
+    double result;
+	gsl_monte_vegas_state * sv = gsl_monte_vegas_alloc(dim);
+	do{
+		gsl_monte_vegas_integrate(&G, xmin, xmax, dim, limit, r, sv, &result, &error);
+	}while(std::abs(gsl_monte_vegas_chisq(sv)-1.0)>1.);
+	gsl_monte_vegas_free(sv);
+	gsl_rng_free(r);
+	return result;
+  }
+};
+
+template < typename F >
+double vegas(F func,
+             int dim, double * xmin, double * xmax, double &error,
+             int limit = 5000){
+  return gsl_vegas<F>(func, limit).integrate(dim, xmin, xmax, error);
+}
+
 
 //---------------wrap around https://github.com/stevengj/cubature----------
 // multidimensional (intermeidate dimension) deterministic integration.
