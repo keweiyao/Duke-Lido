@@ -2,8 +2,7 @@
 #include "integrator.h"
 #include "sampler.h"
 #include "minimizer.h"
-
-#include <random>
+#include "random.h"
 
 template <size_t N1, size_t N2, typename F>
 Rate<N1, N2, F>::Rate(std::string Name, boost::property_tree::ptree config, F f):
@@ -47,7 +46,7 @@ void Rate<2, 2, double(*)(const double, void *)>::
 	X->sample({sqrts, T}, final_states);
 
     // give incoming partilce a random phi angle
-	double phi = std::rand()*2.*M_PI/RAND_MAX;
+	double phi = Srandom::dist_phi(Srandom::gen);
     // com velocity
     double vcom[3] = { E2*sintheta/(E2+E)*cos(phi), 
 						E2*sintheta/(E2+E)*sin(phi),
@@ -74,17 +73,17 @@ void Rate<3, 3, double(*)(const double*, void *)>::
 	double v1 = std::sqrt(1. - std::pow(_mass/E,2));
 	double delta_t = parameters[2];
 	fourvec dxmu = {delta_t, 0., 0., delta_t*v1};
-	double E2 = std::rand()*5./RAND_MAX*T;
-	double costheta = std::rand()*2./RAND_MAX - 1.;
+	double E2 = 8*T*Srandom::init_dis(Srandom::gen);
+	double costheta = Srandom::dist_costheta(Srandom::gen);
     double sintheta = std::sqrt(1. - costheta*costheta);
-	double phi = std::rand()*2.*M_PI/RAND_MAX;
+	double phi = Srandom::dist_phi(Srandom::gen);
 	double s = 2.*E2*E*(1. - v1*costheta) + _mass*_mass;
 	double sqrts = std::sqrt(s);
     double vcom[3] = { E2*sintheta/(E2+E)*cos(phi), 
 						E2*sintheta/(E2+E)*sin(phi),
 						 (E2*costheta+v1*E)/(E2+E)	};
 	double dt_com = (dxmu.boost_to(vcom[0], vcom[1], vcom[2])).t();
-	X->sample({sqrts, T, dt_com}, final_states);
+	X->sample({std::max(sqrts, 1.4), T, dt_com}, final_states);
 }
 
 template <size_t N1, size_t N2, typename F>

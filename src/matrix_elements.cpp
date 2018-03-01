@@ -203,7 +203,7 @@ double M2_Qq2Qqg(const double * x_, void * params_){
 		   // (1) and (2) share the same z-direction, and are related by a boost
 	// check bounds
 	double kt = T*(std::exp(log_1_ktT)-1.);
-	if (std::abs(costheta34)>1.||phi34<0.||phi34>2.*M_PI||kt>Qmax||kt<0.)
+	if (std::abs(costheta34)>=1.||phi34<=0.||phi34>=2.*M_PI||kt>=Qmax||kt<=0.)
 		return 0.;
 	double y = y_norm*std::acosh(Qmax/kt);
 	// construct k^mu

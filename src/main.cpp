@@ -46,7 +46,7 @@ void test_r(void){
 		if (i%10000==0) std::cerr << i << "-------"<< std::endl;
 		double T = 0.15 + std::rand()*0.85/RAND_MAX;
 		double E = 5. + std::rand()*25./RAND_MAX;
-		double dt = 0.3 + std::rand()*5.0/RAND_MAX;
+		double dt = 1.0 + std::rand()*5.0/RAND_MAX;
 		rQq2Qqg->sample({E,T,dt},FS);
 	}
 

@@ -9,6 +9,7 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_multimin.h>
+#include "sampler.h"
 
 template < typename F >
 double minimize_1d(F f, std::pair<double,double> const& range,
@@ -104,6 +105,17 @@ double minimize_nd(F func, const size_t dim,
 					std::vector<double> start, std::vector<double> step,
                     int max_iter=100, double eps=0.01){
   return gsl_minimize_nd<F>(func, dim).minimize(start, step, max_iter, eps);
+}
+
+// Use MC random walk as a maximizer
+// ----------Affine-invariant metropolis sample-------------------
+
+template<typename F>
+std::vector<double> MC_maximize(F f_, int n_dims_,
+		std::vector<std::pair<double,double>> const& range, int steps=20){
+	auto a = AiMS<F>(f_, n_dims_);
+	a.sample(range, steps);
+	return a.getmaxloc();
 }
 
 #endif 

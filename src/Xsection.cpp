@@ -5,7 +5,7 @@
 #include "sampler.h"
 #include "predefine.h"
 #include <boost/algorithm/string.hpp>
-
+#include "random.h"
 
 template<size_t N, typename F>
 Xsection<N, F>::Xsection(std::string Name, 
@@ -47,7 +47,7 @@ void Xsection<2, double(*)(const double, void*)>::
 						StochasticBase<2>::GetFmax(parameters).s);
 	double t = temp*temp*(1.-fast_exp_(-w));
 	// sample phi
-	double phi = std::rand()*2.*M_PI/RAND_MAX;
+	double phi = Srandom::dist_phi(Srandom::gen);
 	double cosphi = std::cos(phi), sinphi = std::sin(phi);
 	double E = (s+_mass*_mass)/2./sqrts; // EQ = (s+M^2)/2sqrts
 	double p = (s-_mass*_mass)/2./sqrts; // pQ = (s-M^2)/2sqrts
@@ -57,6 +57,8 @@ void Xsection<2, double(*)(const double, void*)>::
 	FS[0] = {E, p*sintheta*cosphi, p*sintheta*sinphi, p*costheta};
 	FS[1] = {p, -p*sintheta*cosphi, -p*sintheta*sinphi, -p*costheta};
 }
+#include <fstream>
+std::ofstream ff("out.dat");
 /*------------------Implementation for 2 -> 3--------------------*/
 template<>
 void Xsection<3, double(*)(const double*, void*)>::
@@ -74,16 +76,17 @@ void Xsection<3, double(*)(const double*, void*)>::
 	double umax = std::log(1.+Qmax/temp);
 	double xmin[4] = {0., -1.,  -1., 0.};
 	double xmax[4] = {umax, 1., 1., 2.*M_PI};
-
+	double approx = 1./(1.+1./std::pow(delta_t*temp,2))
+					/std::pow(temp, 6)*std::pow(s-_mass*_mass,2);
+	double fmax = StochasticBase<3>::GetFmax(parameters).s*approx;
 	auto res = sample_nd(dXdPS, 4, {{xmin[0], xmax[0]}, {xmin[1], xmax[1]}, 
-									{xmin[2], xmax[2]}, {xmin[3], xmax[3]}}, 
-									StochasticBase<3>::GetFmax(parameters).s);
-	double x[4] = {res[0], res[1], res[2], res[3]};
-	auto val =  dXdPS(x)/StochasticBase<3>::GetFmax(parameters).s;
-	if (val > 1.0)
+									{xmin[2], xmax[2]}, {xmin[3], xmax[3]}},
+							fmax);
+	fourvec w{res[0], res[1], res[2], res[3]};
+	ff << "A " << w << std::endl;
+	auto val =  dXdPS(w.a)/fmax;
+	//if (val > 1.0)
 	std:: cout << "*" << val << " " << sqrts << " " << temp << " " << delta_t << std::endl;
-	else
-	std:: cout << val << " " << sqrts << " " << temp << " " << delta_t << std::endl;
 }
 
 /*****************************************************************/
@@ -119,15 +122,29 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 	auto dXdPS = [s, temp, delta_t, this](const double * PS){
 		double M = this->_mass;
 		double params[4] = {s, temp, M, delta_t};
+		return this->_f(PS, params)*2./c256pi4/(s-_mass*_mass);
+	};
+	auto nega_dXdPS = [s, temp, delta_t, this](const double * PS){
+		double M = this->_mass;
+		double params[4] = {s, temp, M, delta_t};
 		return -this->_f(PS, params)*2./c256pi4/(s-_mass*_mass);
 	};
 	double Qmax = (s-_mass*_mass)/2./sqrts;
 	double umax = std::log(1.+Qmax/temp);
-	double u_start = umax*0.5;
-	double u_step = umax*0.2; 
-	auto val = -minimize_nd(dXdPS, 4, {u_start, 0.0, 0.5, M_PI}, 
-									  {u_step, 0.2, 0.3, 1.}, 10000, 1e-14);
-	return scalar{val*2.};
+	auto startloc = MC_maximize(dXdPS, 4, {{umax*0.4,umax*0.6}, {-0.2, 0.2}, 
+									  {0.0, 0.8}, {-0.5, 0.5}}, 200);
+	std::vector<double> step = {umax/20., 0.1, 0.05, 0.1};
+	double L[4] = {0, -1, -1, 0};
+	double H[4] = {umax, 1, 1, 2*M_PI};
+	for(int i=0; i<4; i++){
+		double dx = std::min(H[i]-startloc[i], startloc[i]-L[i])/2.;
+		step[i] = std::min(dx, step[i]);
+	}
+    double val = -minimize_nd(nega_dXdPS, 4, startloc, step,
+										1000, 1e-8);
+	double approx = 1./(1.+1./std::pow(delta_t*temp,2))
+					/std::pow(temp, 6)*std::pow(s-_mass*_mass,2);
+	return scalar{val*1.1/approx};
 }
 
 /*****************************************************************/

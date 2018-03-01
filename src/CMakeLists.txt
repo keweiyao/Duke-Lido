@@ -7,6 +7,7 @@ Xsection.cpp
 Rate.cpp
 matrix_elements.cpp
 hcubature.cpp
+random.cpp
 	)
 
 set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "")
