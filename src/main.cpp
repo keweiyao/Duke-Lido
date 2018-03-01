@@ -32,21 +32,21 @@ void test_r(void){
 	std:: cout <<  "mu = " << mu << std::endl;
     initialize_mD_and_scale(0, mu);
 
-	auto rQq2Qq = std::make_shared<Rate<2, 2, double(*)(const double, void*)>>
+	/*auto rQq2Qq = std::make_shared<Rate<2, 2, double(*)(const double, void*)>>
 	("Qq2Qq", config.get_child("Boltzmann"), dX_Qq2Qq_dt);
 	rQq2Qq->init();
-	rQq2Qq->save("table.h5");
+	rQq2Qq->save("table.h5");*/
 
 	auto rQq2Qqg = std::make_shared<Rate<3, 3, double(*)(const double*, void*)>>
 	("Qq2Qqg", config.get_child("Boltzmann"), M2_Qq2Qqg);
 	rQq2Qqg->init();
 	rQq2Qqg->save("table.h5");
     
-	for(int i=0; i<1000000; i++){
-		if (i%10000==0) std::cout << i << "-------"<< std::endl;
+	for(int i=0; i<100000; i++){
+		if (i%10000==0) std::cerr << i << "-------"<< std::endl;
 		double T = 0.15 + std::rand()*0.85/RAND_MAX;
-		double E = 2. + std::rand()*30./RAND_MAX;
-		double dt = 0.1 + std::rand()*5.0/RAND_MAX;
+		double E = 5. + std::rand()*25./RAND_MAX;
+		double dt = 0.3 + std::rand()*5.0/RAND_MAX;
 		rQq2Qqg->sample({E,T,dt},FS);
 	}
 

@@ -70,14 +70,10 @@ void Xsection<3, double(*)(const double*, void*)>::
 		double params[4] = {s, temp, M, delta_t};
 		return this->_f(PS, params)*2./c256pi4/(s-_mass*_mass);
 	};
-	double xmin[4] = {-15., 
-					  -std::log(1.-std::pow(_mass/sqrts,2)),
-					  -10.0, 
-					  -M_PI};
-	double xmax[4] = {std::log((sqrts-_mass)/(sqrts+_mass)), 
-					  15.0, 
-					  0.0, 
-					  M_PI};
+	double Qmax = (s-_mass*_mass)/2./sqrts;
+	double umax = std::log(1.+Qmax/temp);
+	double xmin[4] = {0., -1.,  -1., 0.};
+	double xmax[4] = {umax, 1., 1., 2.*M_PI};
 
 	auto res = sample_nd(dXdPS, 4, {{xmin[0], xmax[0]}, {xmin[1], xmax[1]}, 
 									{xmin[2], xmax[2]}, {xmin[3], xmax[3]}}, 
@@ -85,6 +81,8 @@ void Xsection<3, double(*)(const double*, void*)>::
 	double x[4] = {res[0], res[1], res[2], res[3]};
 	auto val =  dXdPS(x)/StochasticBase<3>::GetFmax(parameters).s;
 	if (val > 1.0)
+	std:: cout << "*" << val << " " << sqrts << " " << temp << " " << delta_t << std::endl;
+	else
 	std:: cout << val << " " << sqrts << " " << temp << " " << delta_t << std::endl;
 }
 
@@ -118,30 +116,18 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 	double sqrts = parameters[0], temp = parameters[1], 
 		   delta_t = parameters[2];
 	double s = sqrts*sqrts;
-	double xmin[4] = {-15., 
-					  -std::log(1.-std::pow(_mass/sqrts,2)),
-					  -10.0, 
-					  -M_PI};
-	double xmax[4] = {std::log((sqrts-_mass)/(sqrts+_mass)), 
-					  15.0, 
-					  0.0, 
-					  M_PI};
-	double x0[4], dx[4];
-	for(int i=0; i<4; i++) {
-		x0[i] = (xmin[i]+xmax[i])/2.;
-		dx[i] = (-xmin[i]+xmax[i])/6.;
-	}
-	auto dXdPS = [s, temp, delta_t, xmin, xmax, this](const double * PS){
+	auto dXdPS = [s, temp, delta_t, this](const double * PS){
 		double M = this->_mass;
 		double params[4] = {s, temp, M, delta_t};
-		for(int i=0; i<4; i++){
-			if (xmin[i]>=PS[i] || PS[i] >xmax[i]) return 0.;
-		}
 		return -this->_f(PS, params)*2./c256pi4/(s-_mass*_mass);
 	};
-	auto val = -minimize_nd(dXdPS, 4, {x0[0], x0[1], x0[2], x0[3]}, 
-									  {dx[0], dx[1], dx[2], dx[3]});
-	return scalar{val};
+	double Qmax = (s-_mass*_mass)/2./sqrts;
+	double umax = std::log(1.+Qmax/temp);
+	double u_start = umax*0.5;
+	double u_step = umax*0.2; 
+	auto val = -minimize_nd(dXdPS, 4, {u_start, 0.0, 0.5, M_PI}, 
+									  {u_step, 0.2, 0.3, 1.}, 10000, 1e-14);
+	return scalar{val*2.};
 }
 
 /*****************************************************************/
@@ -179,10 +165,10 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 		double params[4] = {s, temp, M, delta_t};
 		return this->_f(PS, params)*2./c256pi4/(s-_mass*_mass);
 	};
-	double xmin[4] = {-15., -std::log(1.-std::pow(_mass/sqrts,2)),
-					  -10.0, -M_PI};
-	double xmax[4] = {std::log((sqrts-_mass)/(sqrts+_mass)), 
-					 15.0, 0.0, M_PI};
+	double Qmax = (s-_mass*_mass)/2./sqrts;
+	double umax = std::log(1.+Qmax/temp);
+	double xmin[4] = {0., -1., -1., 0.};
+	double xmax[4] = {umax, 1., 1., 2.*M_PI};
 	double error;
 	double res = vegas(dXdPS, 4, xmin, xmax, error);
 	return scalar{res};

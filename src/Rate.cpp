@@ -84,7 +84,7 @@ void Rate<3, 3, double(*)(const double*, void *)>::
 						E2*sintheta/(E2+E)*sin(phi),
 						 (E2*costheta+v1*E)/(E2+E)	};
 	double dt_com = (dxmu.boost_to(vcom[0], vcom[1], vcom[2])).t();
-	X->sample({sqrts, T, delta_t}, final_states);
+	X->sample({sqrts, T, dt_com}, final_states);
 }
 
 template <size_t N1, size_t N2, typename F>
