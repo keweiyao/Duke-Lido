@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <random>
+#include <map>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include "TableBase.h"
@@ -46,7 +47,7 @@ public:
 	tensor GetSecondM(std::vector<double> arg) {
 			return _SecondMoment->InterpolateTable(arg);}; 
 	virtual void sample(std::vector<double> arg, 
-						std::vector< std::vector<double> > & FS) = 0;
+						std::vector< fourvec > & FS) = 0;
 	void init(void);
 	void save(std::string);
 };

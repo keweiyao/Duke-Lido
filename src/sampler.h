@@ -25,15 +25,20 @@ std::vector<double> sample_nd(F f, int dim, std::vector<std::pair<double,double>
 	double * x = new double[dim];
   	double y;
   	double * interval = new double[dim];
+	int counter = 0;
 	for(int i=0; i<dim; i++) interval[i] = range[i].second - range[i].first;
 	do{
 		// random choice
 		for(int i=0; i<dim; i++) 
 			x[i] = range[i].first+std::rand()*interval[i]/RAND_MAX;
 		y = f(x)/fmax;
-	}while(std::rand()*1./RAND_MAX>y);
+		counter ++;
+	}while(std::rand()*1./RAND_MAX>y && counter < 10000);
 	std::vector<double> res(dim);
 	for(int i=0; i<dim; i++) res[i] = x[i];
+	delete[] x;
+	delete[] interval;
+	std::cout << "try = " << counter<< std::endl;
 	return res;
 }
 

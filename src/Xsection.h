@@ -24,7 +24,7 @@ private:
 public:
 	Xsection(std::string Name, boost::property_tree::ptree config, F f);
 	void sample(std::vector<double> arg, 
-						std::vector< std::vector<double> > & FS);
+						std::vector< fourvec > & FS);
 };
 
 #endif
