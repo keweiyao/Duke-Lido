@@ -22,7 +22,7 @@ private:
 	F _f;// the matrix element
 	const FastExp<double> fast_exp_;
 public:
-	Xsection(std::string Name, boost::property_tree::ptree config, F f);
+	Xsection(std::string Name, std::string configfile, F f);
 	void sample(std::vector<double> arg, 
 						std::vector< fourvec > & FS);
 };

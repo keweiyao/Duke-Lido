@@ -8,6 +8,7 @@
 #include <map>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/algorithm/string.hpp>
 #include "TableBase.h"
 //	double (*dXdPS)(double * PS, size_t n_dims, void * params);
 // this base defines how a stochasitc object
@@ -37,7 +38,7 @@ protected:
     virtual fourvec calculate_fourvec(std::vector<double> parameters) = 0;
     virtual tensor calculate_tensor(std::vector<double> parameters) = 0;
 public:
-	StochasticBase(std::string Name, boost::property_tree::ptree config);
+	StochasticBase(std::string Name, std::string configfile);
 	scalar GetFmax(std::vector<double> arg) {
 			return _FunctionMax->InterpolateTable(arg);}; 
 	scalar GetZeroM(std::vector<double> arg) {

@@ -15,6 +15,7 @@ double sample_1d(F f, std::pair<double,double> const& range, double fmax){
 	do{
 		x = xlow+Srandom::init_dis(Srandom::gen)*interval;
 		y = f(x)/fmax;
+		if (y > 1.0) std::cerr << "\033[1m\033[33m" << "1d rejection, f/fmax > 1\n" << "\033[0m";
 	}while(Srandom::rejection(Srandom::gen)>y);
 	return x;
 }
@@ -32,13 +33,14 @@ std::vector<double> sample_nd(F f, int dim, std::vector<std::pair<double,double>
 		for(int i=0; i<dim; i++) 
 			x[i] = range[i].first+Srandom::init_dis(Srandom::gen)*interval[i];
 		y = f(x)/fmax;
+		if (y > 1.0) std::cerr <<"\033[1m\033[33m"<< "nd rejection, f/fmax > 1\n" << "\033[0m";
 		counter ++;
 	}while(Srandom::rejection(Srandom::gen)>y && counter < limit);
 	std::vector<double> res(dim);
 	for(int i=0; i<dim; i++) res[i] = x[i];
 	delete[] x;
 	delete[] interval;
-	if(counter==limit) std::cerr << "too many tries: " << counter << std::endl;
+	if(counter==limit) std::cerr <<"\033[1m\033[33m"<< "nd rejection, too many tries = " << limit << "\n" << "\033[0m";
 	return res;
 }
 

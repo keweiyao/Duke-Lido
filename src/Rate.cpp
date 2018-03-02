@@ -5,10 +5,19 @@
 #include "random.h"
 
 template <size_t N1, size_t N2, typename F>
-Rate<N1, N2, F>::Rate(std::string Name, boost::property_tree::ptree config, F f):
-StochasticBase<N1>(Name+"/rate", config),
-X(std::make_shared<Xsection<N2, F>>(Name+"/xsection", config, f) ){
-	auto tree = config.get_child(Name);
+Rate<N1, N2, F>::Rate(std::string Name, std::string configfile, F f):
+StochasticBase<N1>(Name+"/rate", configfile),
+X(std::make_shared<Xsection<N2, F>>(Name, configfile, f) ){
+	// read configfile
+	boost::property_tree::ptree config;
+	std::ifstream input(configfile);
+	read_xml(input, config);
+	
+	std::vector<std::string> strs;
+	boost::split(strs, Name, boost::is_any_of("/"));
+	std::string model_name = strs[0];
+	std::string process_name = strs[1];
+	auto tree = config.get_child(model_name+"."+process_name);
 	_mass = tree.get<double>("mass");
 	_degen = tree.get<double>("degeneracy");
 	X->init();

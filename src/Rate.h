@@ -22,7 +22,7 @@ private:
 	tensor calculate_tensor(std::vector<double> parameters);
 	double _mass, _degen;
 public:
-	Rate(std::string Name, boost::property_tree::ptree config, F f);
+	Rate(std::string Name, std::string configfile, F f);
 	void sample(std::vector<double> arg, 
 				std::vector< fourvec > & IS);
 };

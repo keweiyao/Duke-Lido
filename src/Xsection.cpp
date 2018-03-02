@@ -4,20 +4,24 @@
 #include "minimizer.h"
 #include "sampler.h"
 #include "predefine.h"
-#include <boost/algorithm/string.hpp>
+#include <fstream>
 #include "random.h"
 
 template<size_t N, typename F>
-Xsection<N, F>::Xsection(std::string Name, 
-					boost::property_tree::ptree config, F f):
-StochasticBase<N>(Name, config), 
-_f(f),
-fast_exp_(0., 15., 1000)
+Xsection<N, F>::Xsection(std::string Name, std::string configfile, F f):
+StochasticBase<N>(Name+"/xsection", configfile), 
+_f(f), fast_exp_(0., 15., 1000)
 {
+	// read configfile
+	boost::property_tree::ptree config;
+	std::ifstream input(configfile);
+	read_xml(input, config);
+
 	std::vector<std::string> strs;
 	boost::split(strs, Name, boost::is_any_of("/"));
-	std::string process_name = strs[0];
-	auto tree = config.get_child(process_name );
+	std::string model_name = strs[0];
+	std::string process_name = strs[1];
+	auto tree = config.get_child(model_name+"."+process_name);
 	_mass = tree.get<double>("mass");
 }
 
@@ -81,12 +85,7 @@ void Xsection<3, double(*)(const double*, void*)>::
 	double fmax = StochasticBase<3>::GetFmax(parameters).s*approx;
 	auto res = sample_nd(dXdPS, 4, {{xmin[0], xmax[0]}, {xmin[1], xmax[1]}, 
 									{xmin[2], xmax[2]}, {xmin[3], xmax[3]}},
-							fmax);
-	fourvec w{res[0], res[1], res[2], res[3]};
-	ff << "A " << w << std::endl;
-	auto val =  dXdPS(w.a)/fmax;
-	//if (val > 1.0)
-	std:: cout << "*" << val << " " << sqrts << " " << temp << " " << delta_t << std::endl;
+						fmax);
 }
 
 /*****************************************************************/

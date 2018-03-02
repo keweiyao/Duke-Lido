@@ -1,20 +1,24 @@
 #include "StochasticBase.h"
-#include <boost/algorithm/string.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <thread>
 
 template<size_t N>
-StochasticBase<N>::StochasticBase(std::string Name, 
-								boost::property_tree::ptree config):
+StochasticBase<N>::StochasticBase(std::string Name, std::string configfile):
 _Name(Name)
 {
+	// read configfile
+	boost::property_tree::ptree config;
+	std::ifstream input(configfile);
+	read_xml(input, config);
+	
 	std::vector<std::string> strs, slots;
 	boost::split(strs, _Name, boost::is_any_of("/"));
-	std::string process_name = strs[0];
-	std::string quantity_name = strs[1];
-	std::cout << __func__ << " " << _Name << std::endl;
-	auto tree = config.get_child(process_name+"."+quantity_name);
+	auto model_name = strs[0];
+	auto process_name = strs[1];
+	auto quantity_name = strs[2];
+
+	auto tree = config.get_child(model_name+"."+process_name+"."+quantity_name);
 	std::string allslots = tree.get<std::string>("<xmlattr>.slots");
 	boost::split(slots, allslots, boost::is_any_of(",") );
 

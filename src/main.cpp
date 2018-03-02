@@ -32,13 +32,13 @@ void test_r(void){
 	std:: cout <<  "mu = " << mu << std::endl;
     initialize_mD_and_scale(0, mu);
 
-	/*auto rQq2Qq = std::make_shared<Rate<2, 2, double(*)(const double, void*)>>
-	("Qq2Qq", config.get_child("Boltzmann"), dX_Qq2Qq_dt);
+	auto rQq2Qq = std::make_shared<Rate<2, 2, double(*)(const double, void*)>>
+	("Boltzmann/Qq2Qq", "settings.xml", dX_Qq2Qq_dt);
 	rQq2Qq->init();
-	rQq2Qq->save("table.h5");*/
+	rQq2Qq->save("table.h5");
 
 	auto rQq2Qqg = std::make_shared<Rate<3, 3, double(*)(const double*, void*)>>
-	("Qq2Qqg", config.get_child("Boltzmann"), M2_Qq2Qqg);
+	("Boltzmann/Qq2Qqg", "settings.xml", M2_Qq2Qqg);
 	rQq2Qqg->init();
 	rQq2Qqg->save("table.h5");
     
