@@ -8,7 +8,9 @@ if(NOT CXX11)
 endif()
 
 # Find and use Boost.
-find_package(Boost 1.50 REQUIRED COMPONENTS filesystem program_options system)
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost 1.50 REQUIRED COMPONENTS filesystem program_options system log log_setup thread REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 # Search for the HDF5 C++ library.  The CMake FindHDF5 package does not work

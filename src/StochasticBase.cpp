@@ -2,7 +2,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <thread>
-
+#include "simpleLogger.h"
 template<size_t N>
 StochasticBase<N>::StochasticBase(std::string Name, std::string configfile):
 _Name(Name)
@@ -49,11 +49,11 @@ void StochasticBase<N>::save(std::string fname){
 
 template<size_t N>
 void StochasticBase<N>::init(void){
-	std::cout << "init table" << std::endl;
+	LOG_INFO << "init table";
 	auto code = [this](int start, int end) { this->compute(start, end); };
 	std::vector<std::thread> threads;
-	// ZeroMoment table
-	size_t nthreads = 9;
+	unsigned int ntheads_min = 1;
+	size_t nthreads = std::max(std::thread::hardware_concurrency()-1, ntheads_min);
 	size_t padding = size_t(std::ceil(_ZeroMoment->length()*1./nthreads));
 	for(auto i=0; i<nthreads; ++i) {
 		int start = i*padding;

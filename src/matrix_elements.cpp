@@ -4,6 +4,7 @@
 #include "matrix_elements.h"
 #include "lorentz.h"
 #include <boost/math/tools/roots.hpp>
+#include "simpleLogger.h"
 
 double renormalization_scale = 2.0; // default
 
@@ -38,7 +39,7 @@ TL(0.1), TH(1.0), NT(100), dT((TH-TL)/(NT-1.)),
 type(_type), mD2(new double[NT])
 {
 	if (type==0) {
-		std::cout << "# leading order Debye mass" << std::endl;
+		LOG_INFO << "# leading order Debye mass";
 		// type==0 use self-consistent Debye mass
 		for (size_t i=0; i<NT; i++){
 			double T = TL+dT*i;
@@ -46,7 +47,7 @@ type(_type), mD2(new double[NT])
 		}
 	}
 	if (type==1) {
-		std::cout << "# self-consistent Debye mass" << std::endl;
+		LOG_INFO << "# self-consistent Debye mass";
 		// type==1 use self-consistent Debye mass
 		for (size_t i=0; i<NT; i++){
 			double T = TL+dT*i;
@@ -79,7 +80,7 @@ double Debye_mass::get_mD2(double T){
 void initialize_mD_and_scale(const unsigned int type, const double scale){
 	t_channel_mD2 = new Debye_mass(type);
 	renormalization_scale = scale;
-	std::cout << "Scale = " << renormalization_scale << std::endl;
+	LOG_INFO << "Scale = " << renormalization_scale;
 }
 
 

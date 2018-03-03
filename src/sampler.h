@@ -1,12 +1,13 @@
 #ifndef SAMPLER_H
 #define SAMPLER_H
+
 #include <iostream>
 #include <cmath>
-
 #include <functional>
 #include <memory>
 #include <utility>
 #include "random.h"
+#include "simpleLogger.h"
 
 template < typename F >
 double sample_1d(F f, std::pair<double,double> const& range, double fmax){
@@ -15,7 +16,7 @@ double sample_1d(F f, std::pair<double,double> const& range, double fmax){
 	do{
 		x = xlow+Srandom::init_dis(Srandom::gen)*interval;
 		y = f(x)/fmax;
-		if (y > 1.0) std::cerr << "\033[1m\033[33m" << "1d rejection, f/fmax > 1\n" << "\033[0m";
+		if (y > 1.0) LOG_WARNING << "1d rejection, f/fmax = " << y << " > 1";
 	}while(Srandom::rejection(Srandom::gen)>y);
 	return x;
 }
@@ -33,14 +34,14 @@ std::vector<double> sample_nd(F f, int dim, std::vector<std::pair<double,double>
 		for(int i=0; i<dim; i++) 
 			x[i] = range[i].first+Srandom::init_dis(Srandom::gen)*interval[i];
 		y = f(x)/fmax;
-		if (y > 1.0) std::cerr <<"\033[1m\033[33m"<< "nd rejection, f/fmax > 1\n" << "\033[0m";
+		if (y > 1.0) LOG_WARNING << "nd rejection, f/fmax = " << y << " > 1";
 		counter ++;
 	}while(Srandom::rejection(Srandom::gen)>y && counter < limit);
 	std::vector<double> res(dim);
 	for(int i=0; i<dim; i++) res[i] = x[i];
 	delete[] x;
 	delete[] interval;
-	if(counter==limit) std::cerr <<"\033[1m\033[33m"<< "nd rejection, too many tries = " << limit << "\n" << "\033[0m";
+	if(counter==limit) LOG_WARNING <<  "nd rejection, too many tries = " << limit;
 	return res;
 }
 

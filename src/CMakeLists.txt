@@ -8,6 +8,7 @@ Rate.cpp
 matrix_elements.cpp
 hcubature.cpp
 random.cpp
+simpleLogger.cpp
 	)
 
 set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "")
@@ -15,7 +16,7 @@ set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "")
 
 # compile the actual executable
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} ${LIBRARY_NAME}  ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread)
+target_link_libraries(${PROJECT_NAME} ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread)
 
 # install executable
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

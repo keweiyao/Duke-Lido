@@ -9,6 +9,7 @@
 #include "Xsection.h"
 #include "Rate.h"
 #include "matrix_elements.h"
+#include "simpleLogger.h"
 
 void test_r(void);
 void test_x(void);
@@ -29,7 +30,6 @@ void test_r(void){
     std::ifstream input("settings.xml");
     read_xml(input, config);
 	double mu = config.get_child("Boltzmann.QCD").get<double>("mu");
-	std:: cout <<  "mu = " << mu << std::endl;
     initialize_mD_and_scale(0, mu);
 
 	auto rQq2Qq = std::make_shared<Rate<2, 2, double(*)(const double, void*)>>
@@ -43,7 +43,7 @@ void test_r(void){
 	rQq2Qqg->save("table.h5");
     
 	for(int i=0; i<100000; i++){
-		if (i%10000==0) std::cerr << i << "-------"<< std::endl;
+		if (i%10000==0) LOG_INFO << i << " scattering events sampled";
 		double T = 0.15 + std::rand()*0.85/RAND_MAX;
 		double E = 5. + std::rand()*25./RAND_MAX;
 		double dt = 1.0 + std::rand()*5.0/RAND_MAX;

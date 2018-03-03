@@ -4,13 +4,14 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <iostream>
+#include "simpleLogger.h"
 
 template <typename T, size_t N>
 TableBase<T, N>::TableBase(std::string Name, Svec shape, Dvec low, Dvec high):
 _Name(Name), _rank(N), _power_rank(std::pow(2, _rank)), 
 _shape(shape), _low(low), _high(high),_table(_shape)
 {
-	std::cout<<_Name << " dim=" << _rank <<std::endl;
+	LOG_INFO<<_Name << " dim=" << _rank;
 	for(auto i=0; i<_rank; ++i){
 		_step.push_back((high[i]-low[i])/(shape[i]-1));
 	}
@@ -64,7 +65,7 @@ bool TableBase<T, N>::Save(std::string fname){
 			if (prefix == "/"+_Name) {	// if the last group existed before
 				// It need to be deleted and rebuild
 				H5Ldelete(file.getId(), prefix.c_str(), H5P_DEFAULT);
-				std::cerr<<"old data deleted and will be overwirtten\n";
+				LOG_WARNING<<"old data deleted and will be overwirtten";
 				group = file.createGroup(prefix.c_str());
 			}
   		}catch (...) {
@@ -108,12 +109,12 @@ bool TableBase<T, N>::Load(std::string fname){
 	size_t temp_rank;
 	hdf5_read_scalar_attr(group, "rank", temp_rank);
 	if (temp_rank != _rank) {
-		std::cout << "Table rank does not match" << std::endl;
+		LOG_FATAL<< "Table rank does not match";
 		file.close();
 		return false;
 	}
 	else{
-		std::cout << "Rank compitable, loading table" << std::endl;
+		LOG_INFO<< "Rank compitable, loading table";
 		for (auto i=0; i<_rank; ++i){
 			hdf5_read_scalar_attr(group, "shape-"+std::to_string(i), _shape[i]);
 			hdf5_read_scalar_attr(group, "low-"+std::to_string(i), _low[i]);
