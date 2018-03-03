@@ -10,6 +10,7 @@
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_multimin.h>
 #include "sampler.h"
+#include "simpleLogger.h"
 
 template < typename F >
 double minimize_1d(F f, std::pair<double,double> const& range,
@@ -53,11 +54,13 @@ class gsl_minimize_nd{
  
   static double f_wrapper(const gsl_vector * v, void * p){
 	gsl_minimize_nd * t = reinterpret_cast<gsl_minimize_nd*>(p);
-	std::shared_ptr<double> var(new double[t->dim]);
+	double * x = new double[t->dim];
 	for (int i=0; i< t->dim; ++i){
-		var.get()[i] = gsl_vector_get(v, i);
+		x[i] = gsl_vector_get(v, i);
 	}
-	return t->f(var.get());
+	double val = t->f(x);
+	delete [] x;
+	return val;
   }
 
 public:

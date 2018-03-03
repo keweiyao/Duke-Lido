@@ -8,6 +8,9 @@
 
 const double tiny_v2 = 1e-15;
 struct scalar {
+	static scalar unity(void){
+		return scalar{1.0};
+	}
 	double s;
 	friend std::ostream& operator<<(std::ostream& os, const scalar& A){
     	os << A.s;
@@ -23,12 +26,21 @@ struct scalar {
 	  scalar operator*(T u){
 		return scalar{s*u};
 	  }
+	  scalar operator/(scalar B){
+		return scalar{s/B.s};
+	  }
+	  scalar operator*(scalar B){
+		return scalar{s*B.s};
+	  }
 	static size_t size(void){return 1;}
 	void set(int i, double value) {s = value;};
 	double get(int i) {return s;};
 };
 
 struct fourvec {
+	static fourvec unity(void){
+		return fourvec{1.0, 1.0, 1.0, 1.0};
+	}
   double a[4];
   double t(void) const {return a[0];};
   double x(void) const {return a[1];};
@@ -47,6 +59,12 @@ struct fourvec {
   template<typename T>
   fourvec operator*(T s){
     return fourvec{a[0]*s,a[1]*s,a[2]*s,a[3]*s};
+  }
+  fourvec operator/(fourvec B){
+    return fourvec{a[0]/B.t(),a[1]/B.x(),a[2]/B.y(),a[3]/B.z()};
+  }
+  fourvec operator*(fourvec B){
+    return fourvec{a[0]*B.t(),a[1]*B.x(),a[2]*B.y(),a[3]*B.z()};
   }
   fourvec boost_to(double vx, double vy, double vz){
   	double v2 = std::max(vx*vx + vy*vy + vz*vz, tiny_v2);
@@ -86,6 +104,12 @@ struct fourvec {
 };
 
 struct tensor {
+  static tensor unity(void){
+  	return tensor{1.0,1.0,1.0,1.0,
+  				  1.0,1.0,1.0,1.0,
+  				  1.0,1.0,1.0,1.0,
+  				  1.0,1.0,1.0,1.0};
+  }
   double T[4][4];
   double tt(void) const {return T[0][0];};
   double tx(void) const {return T[0][1];};
@@ -140,6 +164,24 @@ struct tensor {
     for(auto i=0; i<4; ++i){
         for(auto j=0; j<4; ++j){
         	res.T[i][j] = T[i][j]*s;
+        }
+    }
+    return res;
+  }
+  tensor operator/(tensor B){
+    tensor res{0};
+    for(auto i=0; i<4; ++i){
+        for(auto j=0; j<4; ++j){
+        	res.T[i][j] = T[i][j]/B.T[i][j];
+        }
+    }
+    return res;
+  }
+  tensor operator*(tensor B){
+    tensor res{0};
+    for(auto i=0; i<4; ++i){
+        for(auto j=0; j<4; ++j){
+        	res.T[i][j] = T[i][j]*B.T[i][j];
         }
     }
     return res;

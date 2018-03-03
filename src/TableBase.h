@@ -20,10 +20,14 @@ protected:
     Dvec _low, _high;
     Dvec _step;
     boost::multi_array<T, N> _table;
+    T(*ApproximateFunction)(Dvec values);
 public:
 	TableBase(std::string, Svec, Dvec, Dvec);
 	T InterpolateTable(Dvec values);
     void SetTableValue(Svec index, T v);
+    void SetApproximateFunction(T(*f)(Dvec values)){
+    	ApproximateFunction = f;
+    	};
     bool Save(std::string);
     bool Load(std::string);
 	size_t shape(size_t i) {return _shape[i];}

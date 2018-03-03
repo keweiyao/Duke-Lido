@@ -103,7 +103,7 @@ scalar Rate<N1, N2, F>::find_max(std::vector<double> parameters){
 		double M = this->_mass;
 		double v1 = std::sqrt(1. - M*M/E/E);
 		double E2 = T*(std::exp(x[0])-1.), costheta = x[1];
-		if (E2 < 0. || costheta > 1. || costheta < -1.) return 0.;
+		if (E2 <= 0. || costheta >= 1. || costheta <= -1.) return 0.;
 		double s = 2.*E2*E*(1. - v1*costheta) + M*M;
 		double sqrts = std::sqrt(s);
 		double Xtot = this->X->GetZeroM({sqrts,T}).s;
@@ -114,7 +114,7 @@ scalar Rate<N1, N2, F>::find_max(std::vector<double> parameters){
     // x start from 1, y start from 0
     // x step 0.3, cosphi step 0.3
     // save a slightly larger fmax
-	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.3, 0.3})*1.1;
+	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2})*1.1;
     return scalar{val};
 }
 

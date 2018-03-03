@@ -53,7 +53,7 @@ void StochasticBase<N>::init(void){
 	auto code = [this](int start, int end) { this->compute(start, end); };
 	std::vector<std::thread> threads;
 	unsigned int ntheads_min = 1;
-	size_t nthreads = std::max(std::thread::hardware_concurrency()-1, ntheads_min);
+	size_t nthreads = std::max(std::thread::hardware_concurrency(), ntheads_min);
 	size_t padding = size_t(std::ceil(_ZeroMoment->length()*1./nthreads));
 	for(auto i=0; i<nthreads; ++i) {
 		int start = i*padding;

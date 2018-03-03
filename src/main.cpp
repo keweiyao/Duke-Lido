@@ -40,6 +40,7 @@ void test_r(void){
 	auto rQq2Qqg = std::make_shared<Rate<3, 3, double(*)(const double*, void*)>>
 	("Boltzmann/Qq2Qqg", "settings.xml", M2_Qq2Qqg);
 	rQq2Qqg->init();
+	LOG_INFO << "-----Done-----";
 	rQq2Qqg->save("table.h5");
     
 	for(int i=0; i<100000; i++){
@@ -48,6 +49,7 @@ void test_r(void){
 		double E = 5. + std::rand()*25./RAND_MAX;
 		double dt = 1.0 + std::rand()*5.0/RAND_MAX;
 		rQq2Qqg->sample({E,T,dt},FS);
+		rQq2Qq->sample({E,T},FS);
 	}
 
 	/*
@@ -122,16 +124,22 @@ void test_config(void){
 			}
 		}
     }
-}
+}*/
 
+scalar approx(std::vector<double> x){
+	return scalar{x[0]*x[1]*x[1]};
+}
 void test_table(void){
-	TableBase<scalar,2> T1(std::string("Table1"), {{5,5}}, {{0,0}}, {{1,1}});
-    for (auto i=0; i<5; ++i) {
-   		for (auto j=0; j<5; ++j) {
-   			T1.SetTableValue({i, j}, {i*j});
+	TableBase<scalar,2> T1(std::string("Table1"), {{4,4}}, {{0,0}}, {{1,1}});
+    for (auto i=0; i<4; ++i) {
+   		for (auto j=0; j<4; ++j) {
+   			T1.SetTableValue({i, j}, {i*j*j});
+   			std::cout << i*j*j << " ";
     	}
+    	std::cout << std::endl;
     }
-    std::cout << T1.InterpolateTable({.25,.35}) << std::endl;
+    T1.SetApproximateFunction(approx);
+    std::cout << T1.InterpolateTable({.5,.5}) << std::endl;
 
     TableBase<scalar,3> T2(std::string("Table2"), {{5,5,10}}, {{0,0,0}}, {{1,1,3}});
     for (auto i=0; i<5; ++i) {
@@ -159,5 +167,5 @@ void test_table(void){
     T4.Load("field.h5");
     T4.Save("field-2.h5");
 
-}*/
+}
 

@@ -253,80 +253,79 @@ double M2_Qq2Qqg(const double * x_, void * params_){
 				*f_LPM(u)
 				*(kt2*std::pow(iD1-iD2, 2.) + qt2*std::pow(iD2,2) + 2.*kmu.x()*qx*iD2*(iD1-iD2));
 	// Jacobian
-	double J = (1.0 - M2/s34) * M_PI/8. * kt * (kt + T);
+	double J = (1.0 - M2/s34) * M_PI/8./std::pow(2*M_PI,5) * kt * (kt + T);
 	// 2->3 = 2->2 * 1->2
 	return c48pi*M2_elastic*Pg*J;
 }
 
-
 /// Q + g --> Q + g + g
 double M2_Qg2Qgg(const double * x_, void * params_){
 	// unpack variables, parameters and check integration range
-	double phi4k = x_[3];
-	if ( phi4k <= -M_PI || phi4k >= M_PI) return 0.0;
 	double * params = static_cast<double*>(params_);
 	double s = params[0];
 	double sqrts = std::sqrt(s);
 	double T = params[1];
 	double M2 = params[2]*params[2];
-	double M2s = M2/s;
-	double sfactor = 1. - M2s;
+	double Qmax = (s-M2)/2./sqrts;
 	double dt = params[3];
-	double pmax =  0.5*sqrts*sfactor;
-	double expx1 = std::exp(x_[0]);
-	double expmx2 = std::exp(-x_[1]);
-	double k = pmax*(expx1+expmx2)/sfactor;
+	double log_1_ktT = x_[0], y_norm = x_[1], // in 3-body com frame---(1)
+		   costheta34 = x_[2], phi34 =x_[3]; // in p3-p4 com frame---(2)
+		   // (1) and (2) share the same z-direction, and are related by a boost
+	// check bounds
+	double kt = T*(std::exp(log_1_ktT)-1.);
+	if (std::abs(costheta34)>=1.||phi34<=0.||phi34>=2.*M_PI||kt>=Qmax||kt<=0.)
+		return 0.;
+	double y = y_norm*std::acosh(Qmax/kt);
+	// construct k^mu
+	fourvec kmu{kt*std::cosh(y), kt, 0, kt*std::sinh(y)};
+	double s34 = s - 2.*sqrts*kmu.t();
+	double sqrts34 = std::sqrt(s34);
+	double Q34 = (s34-M2)/2./sqrts34, E34 = (s34+M2)/2./sqrts34;
+	// construct p3, p4 in (2) frame
+	double cosphi34 = std::cos(phi34), sinphi34 = std::sin(phi34),
+		   sintheta34 = std::sqrt(1.-std::pow(costheta34,2));
+	fourvec p3mu{E34, Q34*sintheta34*cosphi34, 
+				Q34*sintheta34*cosphi34, Q34*costheta34};
+	fourvec p4mu{Q34, -Q34*sintheta34*cosphi34, 
+				-Q34*sintheta34*cosphi34, -Q34*costheta34};
+	// boost p3, p4 back to 3-body CoM Frame
+	double V0 = sqrts - kmu.t();
+	double v34[3] = {-kmu.x()/V0, -kmu.y()/V0, -kmu.z()/V0};
+	p3mu = p3mu.boost_back(v34[0], v34[1], v34[2]);
+	p4mu = p4mu.boost_back(v34[0], v34[1], v34[2]);
+	
+	// q-perp-vec, q = p2-p4, qperp = -p4perp
+	double qx = -p4mu.x(), qy = -p4mu.y();
+	double qt2 = qx*qx + qy*qy;
+	
+	double mD2 = t_channel_mD2->get_mD2(T);
+	double kt2 = kt*kt;
+	double x = (kmu.t()+kmu.z())/sqrts, xbar = (kmu.t()+std::abs(kmu.z()))/sqrts;
+	double one_minus_xbar = 1.-xbar;
+	double basic_denominator = kt2 + x*x*M2 + one_minus_xbar*mD2/2.;
+	double tauk = 2.*kmu.t()*one_minus_xbar/basic_denominator;
+	// here u is the ratio of the mean-free-path over the formation length
+	// mean-free-path \sim mean-free-time*v_HQ,
+	// v_HQ = p/E = (s - M^2)/(s + M^2)
+	// formation length = tau_k*v_k = tau_k
+	double u = dt/tauk*(s-M2)/(s+M2);
 
-	/// prevent a soft emission less than mD in the CoM frame
-	/// If the emission is collinear, than it actually prevents an emission
-	/// in the local restframe with energy gamma*mD = E/M*mD
+	// 2->2
+	double t = -2.*Qmax*(p4mu.t()+p4mu.z());
+	double M2_elastic = M2_Qg2Qg_rad(t, params);
 
-
-		double p4 = pmax - pmax*(expx1*M2s+expmx2)/sfactor;
-		if ( p4 <= 0. || k <= 0. ||p4 >= pmax || k >= pmax ) return 0.0;
-		double cos4 = std::tanh(x_[2]);
-		double cos_star = ((s-M2)-2.*sqrts*(p4+k))/(2.*p4*k) +1.;
-		if ( cos_star <= -1. || 1. <= cos_star) return 0.0;
-		// more useful variables
-		double sin_star = std::sqrt(1. - cos_star*cos_star), sin4 = std::sqrt(1. - cos4*cos4);
-		double cos_4k = std::cos(phi4k), sin_4k = std::sin(phi4k);
-		// k-vec
-		double kx = k*(sin_star*cos_4k*cos4 + sin4*cos_star),
-			   ky = k*sin_star*sin_4k,
-			   kz = k*(-sin_star*cos_4k*sin4 + cos4*cos_star);
-		double kt2 = kx*kx + ky*ky;
-		double mD2 = t_channel_mD2->get_mD2(T);
-		double x = (k+kz)/sqrts, xbar = (k+std::abs(kz))/sqrts;
-		double one_minus_xbar = 1.-xbar;
-		double basic_denominator = kt2 + x*x*M2 + one_minus_xbar*mD2/2.;
-		double tauk = 2.*k*one_minus_xbar/basic_denominator;
-
-		// q-perp-vec
-		double qx = -p4*sin4;
-		double alpha_rad = alpha_s(kt2, T);
-
-		// here u is the ratio of the mean-free-path over the formation length
-		// mean-free-path \sim mean-free-time*v_HQ,
-		// v_HQ = p/E = (s - M^2)/(s + M^2)
-		// formation length = tau_k*v_k = tau_k
-		double u = dt/tauk*(s-M2)/(s+M2);
-
-		// 2->2
-		double t = -2.*pmax*p4*(1.+cos4);
-		double M2_elastic = M2_Qg2Qg_rad(t, params);
-
-		// 1->2
-		double iD1 = 1./basic_denominator,
-			   iD2 = 1./(basic_denominator - 2.*qx*kx  + qx*qx);
-		double Pg = alpha_rad*std::pow(one_minus_xbar, 2)
-					*f_LPM(u)
-					*(kt2*std::pow(iD1-iD2, 2.) + std::pow(qx*iD2,2) + 2.*kx*qx*iD2*(iD1-iD2));
-		// Jacobian
-		double J = (k+p4-pmax)*(pmax-p4-M2s*k)/sfactor*sin4*sin4;
-		// 2->3 = 2->2 * 1->2
-		return c48pi*M2_elastic*Pg*J;
+	// 1->2
+	double alpha_rad = alpha_s(kt2, T);
+	double iD1 = 1./basic_denominator,
+	       iD2 = 1./(basic_denominator - 2.*qx*kmu.x()  + qt2);
+	double Pg = alpha_rad*std::pow(one_minus_xbar, 2)
+				*f_LPM(u)
+				*(kt2*std::pow(iD1-iD2, 2.) + qt2*std::pow(iD2,2) + 2.*kmu.x()*qx*iD2*(iD1-iD2));
+	// Jacobian
+	double J = (1.0 - M2/s34) * M_PI/8./std::pow(2*M_PI,5) * kt * (kt + T);
+	// 2->3 = 2->2 * 1->2
+	return c48pi*M2_elastic*Pg*J;
 }
-
 
 
 //=============Basic for 3->2===========================================

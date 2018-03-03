@@ -6,10 +6,13 @@
 #include "predefine.h"
 #include <fstream>
 #include "random.h"
+#include "approx_functions.h"
 
-template<size_t N, typename F>
-Xsection<N, F>::Xsection(std::string Name, std::string configfile, F f):
-StochasticBase<N>(Name+"/xsection", configfile), 
+template<>
+Xsection<2, double(*)(const double, void*)>::
+	Xsection(std::string Name, std::string configfile, 
+			double(*f)(const double, void*)):
+StochasticBase<2>(Name+"/xsection", configfile), 
 _f(f), fast_exp_(0., 15., 1000)
 {
 	// read configfile
@@ -23,6 +26,34 @@ _f(f), fast_exp_(0., 15., 1000)
 	std::string process_name = strs[1];
 	auto tree = config.get_child(model_name+"."+process_name);
 	_mass = tree.get<double>("mass");
+	
+	// Set Approximate function for X and dX_max
+	StochasticBase<2>::_ZeroMoment->SetApproximateFunction(approx_X22);
+	StochasticBase<2>::_FunctionMax->SetApproximateFunction(approx_dX22_max);
+}
+
+template<>
+Xsection<3, double(*)(const double *, void*)>::
+	Xsection(std::string Name, std::string configfile, 
+			double(*f)(const double*, void*)):
+StochasticBase<3>(Name+"/xsection", configfile), 
+_f(f), fast_exp_(0., 15., 1000)
+{
+	// read configfile
+	boost::property_tree::ptree config;
+	std::ifstream input(configfile);
+	read_xml(input, config);
+
+	std::vector<std::string> strs;
+	boost::split(strs, Name, boost::is_any_of("/"));
+	std::string model_name = strs[0];
+	std::string process_name = strs[1];
+	auto tree = config.get_child(model_name+"."+process_name);
+	_mass = tree.get<double>("mass");
+	
+	// Set Approximate function for X and dX_max
+	StochasticBase<3>::_ZeroMoment->SetApproximateFunction(approx_X23);
+	StochasticBase<3>::_FunctionMax->SetApproximateFunction(approx_dX23_max);
 }
 
 /*****************************************************************/
@@ -61,8 +92,7 @@ void Xsection<2, double(*)(const double, void*)>::
 	FS[0] = {E, p*sintheta*cosphi, p*sintheta*sinphi, p*costheta};
 	FS[1] = {p, -p*sintheta*cosphi, -p*sintheta*sinphi, -p*costheta};
 }
-#include <fstream>
-std::ofstream ff("out.dat");
+
 /*------------------Implementation for 2 -> 3--------------------*/
 template<>
 void Xsection<3, double(*)(const double*, void*)>::
@@ -74,18 +104,16 @@ void Xsection<3, double(*)(const double*, void*)>::
 	auto dXdPS = [s, temp, delta_t, this](const double * PS){
 		double M = this->_mass;
 		double params[4] = {s, temp, M, delta_t};
-		return this->_f(PS, params)*2./c256pi4/(s-_mass*_mass);
+		return this->_f(PS, params)/2./(s-_mass*_mass);
 	};
 	double Qmax = (s-_mass*_mass)/2./sqrts;
 	double umax = std::log(1.+Qmax/temp);
 	double xmin[4] = {0., -1.,  -1., 0.};
 	double xmax[4] = {umax, 1., 1., 2.*M_PI};
-	double approx = 1./(1.+1./std::pow(delta_t*temp,2))
-					/std::pow(temp, 6)*std::pow(s-_mass*_mass,2);
-	double fmax = StochasticBase<3>::GetFmax(parameters).s*approx;
+	double fmax = StochasticBase<3>::GetFmax(parameters).s;
 	auto res = sample_nd(dXdPS, 4, {{xmin[0], xmax[0]}, {xmin[1], xmax[1]}, 
 									{xmin[2], xmax[2]}, {xmin[3], xmax[3]}},
-						fmax);
+									fmax);
 }
 
 /*****************************************************************/
@@ -108,8 +136,8 @@ scalar Xsection<2, double(*)(const double, void*)>::
 	double tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0;
     double wmin = -std::log(1.-tmin/temp/temp), 
 		   wmax = -std::log(1.-tmax/temp/temp+1e-9);
-	double res = -minimize_1d(minus_dXdw, {wmin, wmax})*1.1;
-	return scalar{res};
+	double res = -minimize_1d(minus_dXdw, {wmin, wmax}, 0.0001, 100, 20);
+	return scalar{res*1.5};
 }
 /*------------------Implementation for 2 -> 3--------------------*/
 template<>
@@ -117,21 +145,22 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 	find_max(std::vector<double> parameters){
 	double sqrts = parameters[0], temp = parameters[1], 
 		   delta_t = parameters[2];
+	
 	double s = sqrts*sqrts;
 	auto dXdPS = [s, temp, delta_t, this](const double * PS){
 		double M = this->_mass;
 		double params[4] = {s, temp, M, delta_t};
-		return this->_f(PS, params)*2./c256pi4/(s-_mass*_mass);
+		return this->_f(PS, params)/2./(s-_mass*_mass);
 	};
 	auto nega_dXdPS = [s, temp, delta_t, this](const double * PS){
 		double M = this->_mass;
 		double params[4] = {s, temp, M, delta_t};
-		return -this->_f(PS, params)*2./c256pi4/(s-_mass*_mass);
+		return -this->_f(PS, params)/2./(s-_mass*_mass);
 	};
 	double Qmax = (s-_mass*_mass)/2./sqrts;
 	double umax = std::log(1.+Qmax/temp);
 	auto startloc = MC_maximize(dXdPS, 4, {{umax*0.4,umax*0.6}, {-0.2, 0.2}, 
-									  {0.0, 0.8}, {-0.5, 0.5}}, 200);
+									  {0.0, 0.8}, {-0.5, 0.5}}, 400);
 	std::vector<double> step = {umax/20., 0.1, 0.05, 0.1};
 	double L[4] = {0, -1, -1, 0};
 	double H[4] = {umax, 1, 1, 2*M_PI};
@@ -140,10 +169,8 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 		step[i] = std::min(dx, step[i]);
 	}
     double val = -minimize_nd(nega_dXdPS, 4, startloc, step,
-										1000, 1e-8);
-	double approx = 1./(1.+1./std::pow(delta_t*temp,2))
-					/std::pow(temp, 6)*std::pow(s-_mass*_mass,2);
-	return scalar{val*1.1/approx};
+										2000, 1e-12);
+	return scalar{val*1.1};
 }
 
 /*****************************************************************/
@@ -179,7 +206,7 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 	auto dXdPS = [s, temp, delta_t, this](const double * PS){
 		double M = this->_mass;
 		double params[4] = {s, temp, M, delta_t};
-		return this->_f(PS, params)*2./c256pi4/(s-_mass*_mass);
+		return this->_f(PS, params)/2./(s-_mass*_mass);
 	};
 	double Qmax = (s-_mass*_mass)/2./sqrts;
 	double umax = std::log(1.+Qmax/temp);

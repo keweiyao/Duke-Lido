@@ -6,6 +6,13 @@
 #include <iostream>
 #include "simpleLogger.h"
 
+// Default approximation function
+
+template <typename T>
+T default_approximate_function(Dvec values){
+	return T::unity();
+}
+
 template <typename T, size_t N>
 TableBase<T, N>::TableBase(std::string Name, Svec shape, Dvec low, Dvec high):
 _Name(Name), _rank(N), _power_rank(std::pow(2, _rank)), 
@@ -15,6 +22,8 @@ _shape(shape), _low(low), _high(high),_table(_shape)
 	for(auto i=0; i<_rank; ++i){
 		_step.push_back((high[i]-low[i])/(shape[i]-1));
 	}
+	// Set default approximation function to return 1
+	ApproximateFunction = default_approximate_function<T>;
 }
 
 template <typename T, size_t N>
@@ -31,15 +40,19 @@ T TableBase<T, N>::InterpolateTable(Dvec values){
    }
    Svec index(_rank);
    T result{0.};
+   Dvec corner_values(_rank); // hold x values at the corner of the hyper cube
    for(auto i=0; i<_power_rank; ++i) {
         auto W = 1.0;
         for (auto j=0; j<_rank; ++j) {
             index[j] = start_index[j] + ((i & ( 1 << j )) >> j);
             W *= (index[j]==start_index[j])?(1.-w[j]):w[j];
+            corner_values[j] = _low[j] + _step[j]*index[j];
         }
-        result = result + _table(index)*W;
+        // We interp f/f_approx
+        result = result + _table(index)/ApproximateFunction(corner_values)*W;
    }
-   return result;
+   // multiply the interp function back with f_approx
+   return result*ApproximateFunction(values);
 }
 
 template <typename T, size_t N>
