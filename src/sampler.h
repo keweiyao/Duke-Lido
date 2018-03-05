@@ -8,16 +8,22 @@
 #include <utility>
 #include "random.h"
 #include "simpleLogger.h"
+#include "stat.h"
 
 template < typename F >
 double sample_1d(F f, std::pair<double,double> const& range, double fmax){
+	int limit = 10000;
   	double y, x, xlow=range.first, xhigh=range.second;
   	double interval = xhigh-xlow;
+  	int counter = 0;
 	do{
 		x = xlow+Srandom::init_dis(Srandom::gen)*interval;
 		y = f(x)/fmax;
 		if (y > 1.0) LOG_WARNING << "1d rejection, f/fmax = " << y << " > 1";
-	}while(Srandom::rejection(Srandom::gen)>y);
+		counter ++;
+	}while(Srandom::rejection(Srandom::gen)>y && counter < limit);
+	if(counter==limit) LOG_WARNING <<  "1d rejection, too many tries = " << limit;
+	SamplerStat::count_1d ++; SamplerStat::total_1d += counter;
 	return x;
 }
 
@@ -42,6 +48,7 @@ std::vector<double> sample_nd(F f, int dim, std::vector<std::pair<double,double>
 	delete[] x;
 	delete[] interval;
 	if(counter==limit) LOG_WARNING <<  "nd rejection, too many tries = " << limit;
+	SamplerStat::count_nd ++; SamplerStat::total_nd += counter;
 	return res;
 }
 

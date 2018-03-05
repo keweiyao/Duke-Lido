@@ -40,20 +40,20 @@ _Name(Name)
 }
 
 template<size_t N>
-void StochasticBase<N>::save(std::string fname){
-    _FunctionMax->Save(fname);
-	_ZeroMoment->Save(fname);
-	_FirstMoment->Save(fname);
-	_SecondMoment->Save(fname);
+void StochasticBase<N>::load(std::string fname){
+    _FunctionMax->Load(fname);
+	_ZeroMoment->Load(fname);
+	_FirstMoment->Load(fname);
+	_SecondMoment->Load(fname);
 }
 
+
 template<size_t N>
-void StochasticBase<N>::init(void){
-	LOG_INFO << "init table";
+void StochasticBase<N>::init(std::string fname){
+	LOG_INFO << __func__ << "init table";
 	auto code = [this](int start, int end) { this->compute(start, end); };
 	std::vector<std::thread> threads;
-	unsigned int ntheads_min = 1;
-	size_t nthreads = std::max(std::thread::hardware_concurrency(), ntheads_min);
+	size_t nthreads = std::thread::hardware_concurrency();
 	size_t padding = size_t(std::ceil(_ZeroMoment->length()*1./nthreads));
 	for(auto i=0; i<nthreads; ++i) {
 		int start = i*padding;
@@ -61,6 +61,11 @@ void StochasticBase<N>::init(void){
 		threads.push_back( std::thread(code, start, end) );
 	}
 	for(auto& t : threads) t.join();
+	
+	_FunctionMax->Save(fname);
+	_ZeroMoment->Save(fname);
+	_FirstMoment->Save(fname);
+	_SecondMoment->Save(fname);
 }
 
 template<size_t N>

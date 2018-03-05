@@ -16,7 +16,7 @@ template < typename F >
 double minimize_1d(F f, std::pair<double,double> const& range,
 					double eps=0.01, int max_iter = 10, int N=5){
 	double xlow = range.first, xhigh = range.second;
-  	int loc, iter=0;
+  	int loc=0, iter=0;
 	double interval = xhigh-xlow;
 	double value = 0.;
 	double x, y, dx;

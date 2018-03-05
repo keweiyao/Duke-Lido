@@ -1,6 +1,7 @@
 from setuptools import setup, Extension
 from Cython.Build import cythonize
 from glob import glob
+import numpy as np
 import os
 
 # Remove the "-Wstrict-prototypes" compiler option, which isn't valid for C++.
@@ -10,15 +11,16 @@ for key, value in cfg_vars.items():
     if type(value) == str:
         cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
 
+src = glob("./src/*.cpp")
 #-------------HqEvo Module------------------
-fileLBT = [	'cython/pyScattering.pyx', 
-			'src/matrix_elements.cpp']
+fileLBT = [	'cython/pyScattering.pyx'] + src
 modules = [
         Extension('pyScattering', 
         		 sources=fileLBT, 
+        		 include_dirs=[np.get_include()],
         		 language="c++", 
         		 extra_compile_args=["-std=c++11", '-march=native', '-fPIC'],
-        		 libraries=["m", "gsl", "gslcblas", "boost_filesystem", "hdf5", "hdf5_cpp"])
+        		 libraries=["m", "gsl", "gslcblas", "boost_log", "boost_filesystem", "hdf5", "hdf5_cpp"])
 ]
 
 

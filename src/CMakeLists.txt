@@ -9,6 +9,9 @@ matrix_elements.cpp
 hcubature.cpp
 random.cpp
 simpleLogger.cpp
+stat.cpp
+approx_functions.cpp
+workflow.cpp
 	)
 
 set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "")

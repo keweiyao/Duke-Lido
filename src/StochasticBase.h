@@ -49,8 +49,8 @@ public:
 			return _SecondMoment->InterpolateTable(arg);}; 
 	virtual void sample(std::vector<double> arg, 
 						std::vector< fourvec > & FS) = 0;
-	void init(void);
-	void save(std::string);
+	void init(std::string);
+	void load(std::string);
 };
 
 #endif

@@ -21,10 +21,14 @@ private:
 	fourvec calculate_fourvec(std::vector<double> parameters);
 	tensor calculate_tensor(std::vector<double> parameters);
 	double _mass, _degen;
+	bool _active;
 public:
 	Rate(std::string Name, std::string configfile, F f);
 	void sample(std::vector<double> arg, 
 				std::vector< fourvec > & IS);
+	void initX(std::string fname){X->init(fname);}
+	void loadX(std::string fname){X->load(fname);}
+	bool IsActive(void) {return _active;}
 };
 
 #endif

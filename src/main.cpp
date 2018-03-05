@@ -1,86 +1,27 @@
 #include <string>
 #include <iostream>
 #include <exception>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <fstream>
 
-#include "TableBase.h"
-#include "Xsection.h"
-#include "Rate.h"
-#include "matrix_elements.h"
+//#include "TableBase.h"
+//#include "Xsection.h"
+
 #include "simpleLogger.h"
+#include "workflow.h"
 
-void test_r(void);
-void test_x(void);
+
 void test_config(void);
 void test_table(void);
 
-int main(){
-	test_r();
-	//test_x();
-	//test_config();
-	//test_table();
+
+int main(int argc, char* argv[]){
+	probe_test(10.0, 0.4, 0.05, 100, 10000, "old");
 	return 0;
 }
-void test_r(void){
-	std::vector<fourvec> FS;
-	using boost::property_tree::ptree;
-    ptree config;
-    std::ifstream input("settings.xml");
-    read_xml(input, config);
-	double mu = config.get_child("Boltzmann.QCD").get<double>("mu");
-    initialize_mD_and_scale(0, mu);
 
-	auto rQq2Qq = std::make_shared<Rate<2, 2, double(*)(const double, void*)>>
-	("Boltzmann/Qq2Qq", "settings.xml", dX_Qq2Qq_dt);
-	rQq2Qq->init();
-	rQq2Qq->save("table.h5");
 
-	auto rQq2Qqg = std::make_shared<Rate<3, 3, double(*)(const double*, void*)>>
-	("Boltzmann/Qq2Qqg", "settings.xml", M2_Qq2Qqg);
-	rQq2Qqg->init();
-	LOG_INFO << "-----Done-----";
-	rQq2Qqg->save("table.h5");
-    
-	for(int i=0; i<100000; i++){
-		if (i%10000==0) LOG_INFO << i << " scattering events sampled";
-		double T = 0.15 + std::rand()*0.85/RAND_MAX;
-		double E = 5. + std::rand()*25./RAND_MAX;
-		double dt = 1.0 + std::rand()*5.0/RAND_MAX;
-		rQq2Qqg->sample({E,T,dt},FS);
-		rQq2Qq->sample({E,T},FS);
-	}
+		
 
-	/*
-	std::vector<fourvec> plist(10000);
-	double T = 0.6;
-	double dt = 0.2;
-	for (auto &p : plist) p = fourvec{3, 0., 0., std::sqrt(3*3-1.3*1.3)};
-	for (int i=0; i<400; i++){
-		for (auto &p : plist){
-			double E = p.t();
-			double prob = dt*rQq2Qq->GetZeroM({E, T}).s;
-			if (std::rand()*1./RAND_MAX < prob){
-				rQq2Qq->sample({E, T}, FS);
-				p = FS[0].rotate_back(p);
-			}
-		}
-		if(i%20 ==0)
-			for (auto &p : plist) std::cout << p << std::endl;
-	}*/
  
-
-	//auto rQg2Qg = std::make_shared<Rate<2, 2, double(*)(double, void*)>>
-	//("Qg2Qg", config.get_child("Boltzmann"), dX_Qg2Qg_dt);
-	//rQg2Qg->init();
-	//rQg2Qg->save("table.h5");
-
-	//auto r = std::make_shared<Rate<2, 2, double(*)(double, void*)>>
-	//("resonance", config.get_child("Boltzmann"), dX_res_dt);
-	//r->init();
-	//r->save("table.h5");
-}
 /*
 void test_x(void){
 	using boost::property_tree::ptree;
@@ -124,7 +65,7 @@ void test_config(void){
 			}
 		}
     }
-}*/
+}
 
 scalar approx(std::vector<double> x){
 	return scalar{x[0]*x[1]*x[1]};
@@ -167,5 +108,5 @@ void test_table(void){
     T4.Load("field.h5");
     T4.Save("field-2.h5");
 
-}
+}*/
 
