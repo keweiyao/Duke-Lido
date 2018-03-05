@@ -11,12 +11,14 @@
 std::vector<Process> MyProcesses;
 
 void initialize(std::string mode){
+	
 	boost::property_tree::ptree config;
     std::ifstream input("settings.xml");
     read_xml(input, config);
 	double mu = config.get_child("Boltzmann.QCD").get<double>("mu");
     initialize_mD_and_scale(0, mu);
 
+	MyProcesses.clear();
 	MyProcesses.push_back( Rate22("Boltzmann/Qq2Qq", "settings.xml", dX_Qq2Qq_dt) );
 	MyProcesses.push_back( Rate22("Boltzmann/Qg2Qg", "settings.xml", dX_Qg2Qg_dt) );
 	
@@ -139,7 +141,7 @@ void probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Npartic
 	for (int it=0; it<Nsteps; ++it){
 		time += dt;
 		if (it%10 ==0) {
-			LOG_INFO << it << " steps";
+			LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
 			history << "#" << time << std::endl;
 			for (auto & p : plist) history << p.x << " " << p.p << std::endl;
 		}

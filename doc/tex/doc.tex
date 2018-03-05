@@ -1,0 +1,48 @@
+\documentclass[11pt]{beamer}
+\usetheme{Boadilla}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+%\author{}
+\title{A short update on the program}
+%\setbeamercovered{transparent} 
+%\setbeamertemplate{navigation symbols}{} 
+%\logo{} 
+%\institute{} 
+%\date{} 
+%\subject{} 
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+%\begin{frame}
+%\tableofcontents
+%\end{frame}
+
+\begin{frame}{New design}
+\begin{itemize}
+\item Easier to add/remove or implement new processes
+\item A new parametrization of three-body phase space,
+\item Replace MCMC sampling by high-dimensional rejection sampling.
+	\begin{itemize}
+	\item More controllable, no need to worry about ``thermalizaion".
+	\item Order of magnitude increase in sampling speed.
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Collision in the ``free streaming" stage}
+\begin{itemize}
+\item Writing out freestreaming energy density ($e$) and flow velocity ($\vec{v}$).
+\item Define a temperature with ideal equation of state $T = T_{\textrm{ideal}}(e)$.
+\item Allow heavy quark to start energy loss anywhere between $0^+$ and $t_{\textrm{hydro}}$ with an additional parameter $\xi$, 
+\begin{eqnarray}
+0^+< t_{\textrm{start}} = \xi t_{\textrm{hydro}} < t_{\textrm{hydro}}
+\end{eqnarray}
+\end{itemize}
+\end{frame}
+
+\end{document}

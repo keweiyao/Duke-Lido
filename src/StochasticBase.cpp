@@ -41,16 +41,20 @@ _Name(Name)
 
 template<size_t N>
 void StochasticBase<N>::load(std::string fname){
+	LOG_INFO << "Loading " << _Name+"/fmax";
     _FunctionMax->Load(fname);
+	LOG_INFO << "Loading " << _Name+"/scalar";
 	_ZeroMoment->Load(fname);
+	LOG_INFO << "Loading " << _Name+"/vector";
 	_FirstMoment->Load(fname);
+	LOG_INFO << "Loading " << _Name+"/tensor";
 	_SecondMoment->Load(fname);
 }
 
 
 template<size_t N>
 void StochasticBase<N>::init(std::string fname){
-	LOG_INFO << __func__ << "init table";
+	LOG_INFO << _Name << " Generating tables";
 	auto code = [this](int start, int end) { this->compute(start, end); };
 	std::vector<std::thread> threads;
 	size_t nthreads = std::thread::hardware_concurrency();

@@ -274,7 +274,7 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 /*------------------Default Implementation-----------------------*/
 template<size_t N, typename F>
 fourvec Xsection<N, F>::calculate_fourvec(std::vector<double> parameters){
-	return fourvec{0., 0., 0., 0.};
+	return fourvec::unity();
 }
 /*------------------Implementation for 2 -> 2--------------------*/
 template<>
@@ -306,7 +306,7 @@ fourvec Xsection<2, double(*)(const double, void*)>::
 /*------------------Default Implementation-----------------------*/
 template<size_t N, typename F>
 tensor Xsection<N, F>::calculate_tensor(std::vector<double> parameters){
-	return tensor{0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,};
+	return tensor::unity();
 }
 /*------------------Implementation for 2 -> 2--------------------*/
 template<>

@@ -177,7 +177,7 @@ scalar Rate<2, 2, double(*)(const double, void*)>::
     // x start from 1, y start from 0
     // x step 0.3, cosphi step 0.3
     // save a slightly larger fmax
-	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*2.0;
+	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*1.5;
     return scalar{val};
 }
 /*------------------Implementation for 2 -> 3--------------------*/
@@ -208,7 +208,7 @@ scalar Rate<3, 3, double(*)(const double*, void*)>::
     // x start from 1, y start from 0
     // x step 0.3, cosphi step 0.3
     // save a slightly larger fmax
-	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*2.0;
+	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*1.5;
     return scalar{val};
 }
 
@@ -267,8 +267,19 @@ scalar Rate<3, 3, double(*)(const double*, void*)>::
 	return scalar{_degen*val[0]};
 }
 
+
+/*****************************************************************/
+/*******************Integrate Delta_p^mu*dR **********************/
+/*****************************************************************/
+/*------------------No need to do this generally-----------------*/
 template <size_t N1, size_t N2, typename F>
 fourvec Rate<N1, N2, F>::calculate_fourvec(std::vector<double> parameters){
+	return fourvec::unity();
+}
+/*------------------Implementation for 2 -> 2--------------------*/
+template <>
+fourvec Rate<2, 2, double(*)(const double, void*)>::
+		calculate_fourvec(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];
 	auto code = [E, T, this](const double * x){
@@ -299,8 +310,18 @@ fourvec Rate<N1, N2, F>::calculate_fourvec(std::vector<double> parameters){
 	return fourvec{_degen*val[0], 0.0, 0.0, _degen*val[1]};
 }
 
+/*****************************************************************/
+/***********Integrate Delta_p^mu*Delta_p^mu*dR *******************/
+/*****************************************************************/
+/*------------------No need to do this generally-----------------*/
 template <size_t N1, size_t N2, typename F>
 tensor Rate<N1, N2, F>::calculate_tensor(std::vector<double> parameters){
+	return tensor::unity();
+}
+/*------------------Implementation for 2 -> 2--------------------*/
+template <>
+tensor Rate<2, 2, double(*)(const double, void*)>::
+		calculate_tensor(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];
 	auto code = [E, T, this](const double * x){
