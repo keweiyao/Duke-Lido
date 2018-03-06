@@ -33,7 +33,7 @@ cdef extern from "../src/workflow.h":
 		int pid
 		fourvec x, p
 		double trad
-		void freestream(double dt)
+		void freestream(double dt
 	cdef void initialize(string s)
 	cdef int update_particle_momentum(double dt, double temp, 
 				vector[double] v3cell, 
@@ -54,7 +54,9 @@ def py_dX_Qg2Qg_dt(double t, np.ndarray[np.double_t, ndim=1] X):
 	return dX_Qg2Qg_dt(t, &X[0])
 	
 def probe_run(E0, T, dt=0.05, Nsteps=100, Nparticles=10000, mode="old"):
-	probe_test(E0, T, dt, Nsteps, Nparticles, mode)	
+	probe_test(E0, T, dt, Nsteps, Nparticles, mode)
+
+
 	
 
 		

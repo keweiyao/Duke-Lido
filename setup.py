@@ -13,9 +13,9 @@ for key, value in cfg_vars.items():
 
 src = glob("./src/*.cpp")
 #-------------HqEvo Module------------------
-fileLBT = [	'cython/pyScattering.pyx'] + src
+fileLBT = [	'cython/event.pyx'] + src
 modules = [
-        Extension('pyScattering', 
+        Extension('event', 
         		 sources=fileLBT, 
         		 include_dirs=[np.get_include()],
         		 language="c++", 

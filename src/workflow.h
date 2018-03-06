@@ -3,15 +3,21 @@
 
 #include <boost/variant/variant.hpp>
 #include "Rate.h"
-
+#include <vector>
 
 struct particle{
 	int pid;
-	fourvec x, p;
-	double trad;
+	bool freezeout;
+	double mass;
+	fourvec x;
+	fourvec p;
+	double t_rad, t_absorb;
+	fourvec p0;
+	std::vector<double> vcell;
+	double Tf;
 	void freestream(double dt){
 		double a = dt/p.t();
-		x.a[0] = x.t() + p.t()*a;
+		x.a[0] = x.t() + dt;
 		x.a[1] = x.x() + p.x()*a;
 		x.a[2] = x.y() + p.y()*a;
 		x.a[3] = x.z() + p.z()*a;

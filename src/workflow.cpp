@@ -58,12 +58,10 @@ void initialize(std::string mode){
 
 int update_particle_momentum(double dt, double temp, std::vector<double> v3cell, 
 				double D_formation_t, fourvec incoming_p, std::vector<fourvec> & FS){
-				
 	auto p_cell = incoming_p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
 	double D_formation_t_cell = D_formation_t / incoming_p.t() * p_cell.t();
 	double dt_cell = dt / incoming_p.t() * p_cell.t();
 	double E_cell = p_cell.t();
-
     std::vector<double> P_channels(MyProcesses.size());
 	double P_total = 0.;
 	int channel = 0;
@@ -113,6 +111,7 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 											{E_cell, temp, D_formation_t_cell}, FS);
 			break;
 		default:
+			LOG_FATAL << "Channel = " << channel << " not exists";
 			exit(-1);
 			break;
 	}
@@ -134,7 +133,7 @@ void probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Npartic
 		p.pid = 4;
 		p.x = fourvec{0,0,0,0};
 		p.p = fourvec{E0, 0, 0, std::sqrt(E0*E0-M*M)};
-		p.trad = 0.;
+		p.t_rad = 0.;
 	}
 	std::ofstream history("history.dat");
 	double time = 0.;
@@ -148,12 +147,12 @@ void probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Npartic
 		for (auto & p : plist){
 			std::vector<fourvec> FS;
 			int channel = update_particle_momentum(dt*fmc_to_GeV_m1, T, 
-				{0.0, 0.0, 0.0}, (p.x.t()-p.trad)*fmc_to_GeV_m1, p.p, FS);
+				{0.0, 0.0, 0.0}, (p.x.t()-p.t_rad)*fmc_to_GeV_m1, p.p, FS);
 			
 			p.freestream(dt);
 			if (channel>=0) { 
 				p.p = FS[0];
-				if (channel == 2 || channel ==3) p.trad = time;
+				if (channel == 2 || channel ==3) p.t_rad = time;
 			}
 		}
 	}
