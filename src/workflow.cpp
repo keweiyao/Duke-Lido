@@ -90,7 +90,7 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 		channel ++;
 	}
 	for(auto& item : P_channels) {item /= P_total;}
-	if (P_total > 0.1) LOG_WARNING << "P_total = " << P_total << " may be too large";
+	if (P_total > 0.15) LOG_WARNING << "P_total = " << P_total << " may be too large";
 	if ( Srandom::init_dis(Srandom::gen) > P_total) return -1;
 	else{
 		double p = Srandom::init_dis(Srandom::gen);

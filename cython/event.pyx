@@ -363,10 +363,7 @@ cdef class event:
 		if self.mode == 'dynamic':
 			self.hydro_reader.load_next()
 		elif self.mode == 'static':
-			if StaticProperty==None:
-				raise ValueError("static meidum property not defined")
-			else:
-				self.hydro_reader.load_next(StaticProperty=StaticProperty)
+			self.hydro_reader.load_next(StaticProperty=StaticProperty)
 		else:
 			raise ValueError("medium mode not defined")
 		status = self.hydro_reader.hydro_status()
@@ -377,13 +374,14 @@ cdef class event:
 		it = self.HQ_list.begin()
 		while it != self.HQ_list.end():
 			if not deref(it).freezeout:
-				self.perform_HQ_step(it, self.dtau)
+				for substeps in range(2):
+					self.perform_HQ_step(it, self.dtau/2.)
 			inc(it)
 		return status
 
 	cdef perform_HQ_step(self, vector[particle].iterator it, double dtau):
 		PyErr_CheckSignals()
-		cdef double t, tau, T, vabs2, scale
+		cdef double t, tau_now, T, vabs2, scale
 		cdef vector[double] vcell
 		cdef vector[fourvec] final_state
 		cdef int channel
@@ -394,12 +392,12 @@ cdef class event:
 		# ensure |v| < 1. if T<Tc, label it as "freezout=True"        #
 		###############################################################
 		if self.mode == "dynamic":
-			tau = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)
+			tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)
 		else:
-			tau = deref(it).x.t()
+			tau_now = deref(it).x.t()
 		vcell.resize(3)
 		T, vcell[0], vcell[1], vcell[2] = \
-			self.hydro_reader.interpF(tau, 
+			self.hydro_reader.interpF(tau_now, 
 				[deref(it).x.t(),deref(it).x.x(),deref(it).x.y(),deref(it).x.z()],
 				['Temp', 'Vx', 'Vy', 'Vz'])
 		vabs2 = vcell[0]**2 + vcell[1]**2 + vcell[2]**2
@@ -424,11 +422,10 @@ cdef class event:
 			vz = deref(it).p.z()/deref(it).p.t()
 			t_m_zvz = deref(it).x.t() - deref(it).x.z()*vz
 			one_m_vz2 = 1. - vz*vz
-			dtau2 = dtau*(dtau+2*tau)
+			dtau2 = dtau*(dtau+2*tau_now)
 		 
 			dt_lab = \
 				(sqrt(t_m_zvz**2+one_m_vz2*dtau2) - t_m_zvz)/one_m_vz2
-			print("##", dt_lab, vz, tau, dtau)
 		else:
 			dt_lab = dtau
 		###############################################################
@@ -479,7 +476,18 @@ cdef class event:
 		cdef vector[particle].iterator it = self.HQ_list.begin()
 		cdef size_t i=0
 		with open(filename, 'w') as f:
+			head3 = ff.FortranRecordWriter(
+                 '2(a8,2x),1x,i3,1x,i6,3x,i3,1x,i6,3x,a4,2x,e10.4,2x,i8')
+			f.write('OSC1997A\n')
+			f.write('final_id_p_x\n')
+			f.write(head3.write(['lbt', '1.0alpha', 208, 82, \
+								 208, 82, 'aacm', 1380, 1])+'\n')
 			line = ff.FortranRecordWriter('i10, 2x, i10,19(2x,d12.6)')
+			eventhead =ff.FortranRecordWriter(
+					'i10,2x,i10,2x,f8.3,2x,f8.3,2x,i4,2x,i4,2X,i7')
+			f.write(
+				eventhead.write([1, self.HQ_list.size(), 0.001, 0.001, 1, 1, 1])\
+				+'\n')
 			while it != self.HQ_list.end():
 				f.write(line.write([i, deref(it).pid,
 					deref(it).p.x(),deref(it).p.y(),
@@ -494,4 +502,4 @@ cdef class event:
 					0., 0.])+'\n')
 				i += 1
 				inc(it)
-		return
+

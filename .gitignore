@@ -2,3 +2,4 @@
 test/
 *demo/
 cython/*.cpp
+*info/

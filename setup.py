@@ -11,6 +11,7 @@ for key, value in cfg_vars.items():
     if type(value) == str:
         cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
 
+libs=[path for path in os.environ['LD_LIBRARY_PATH'].split(':') if path]
 src = glob("./src/*.cpp")
 #-------------HqEvo Module------------------
 fileLBT = [	'cython/event.pyx'] + src
@@ -18,8 +19,9 @@ modules = [
         Extension('event', 
         		 sources=fileLBT, 
         		 include_dirs=[np.get_include()],
-        		 language="c++", 
-        		 extra_compile_args=["-std=c++11", '-march=native', '-fPIC'],
+        		 language="c++",
+				 library_dirs=libs,
+        		 extra_compile_args=["-std=c++11", '-fPIC'],
         		 libraries=["m", "gsl", "gslcblas", "boost_log", "boost_filesystem", "hdf5", "hdf5_cpp"])
 ]
 
