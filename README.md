@@ -1,4 +1,3 @@
-==========
 Scattering 
 ==========
 -------------------------------------------------
@@ -9,8 +8,9 @@ Requirements: c++11, libraries: gsl, hdf5, and boost
 
 To compile and install:
 
-.. code:: bash
+```bash
    mkdir build && cd build
    cmake ..
    make
    make install
+```
