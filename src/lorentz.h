@@ -66,7 +66,7 @@ struct fourvec {
   fourvec operator*(fourvec B){
     return fourvec{a[0]*B.t(),a[1]*B.x(),a[2]*B.y(),a[3]*B.z()};
   }
-  fourvec boost_to(double vx, double vy, double vz){
+  fourvec boost_to(double vx, double vy, double vz) const{
   	double v2 = std::max(vx*vx + vy*vy + vz*vz, tiny_v2);
   	double gamma = 1./std::sqrt(1. - v2);
   	double gamma_minus_one = gamma - 1.;
@@ -78,10 +78,10 @@ struct fourvec {
   		-gamma*vz*a[0] + a[3] + gamma_minus_one*vz*a_dot_v/v2
   	};
   }
-  fourvec boost_back(double vx, double vy, double vz){
+  fourvec boost_back(double vx, double vy, double vz) const{
 	return boost_to(-vx, -vy, -vz);
   }
-  fourvec rotate_back(const fourvec p){
+  fourvec rotate_back(const fourvec p) const{
 	double Dx = p.x(), Dy = p.y(), Dz = p.z();
 	double Dperp = std::sqrt(Dx*Dx + Dy*Dy);
 	double D = std::sqrt(Dperp*Dperp + Dz*Dz);
@@ -186,7 +186,7 @@ struct tensor {
     }
     return res;
   }
-  tensor boost_to(double vx, double vy, double vz){
+  tensor boost_to(double vx, double vy, double vz) const{
   	double v2 = std::max(vx*vx + vy*vy + vz*vz, tiny_v2);
   	double gamma = 1./std::sqrt(1. - v2);
   	double gm1 = gamma - 1.;
@@ -212,10 +212,10 @@ struct tensor {
   	}
   	return res;
   }
-  tensor boost_back(double vx, double vy, double vz){
+  tensor boost_back(double vx, double vy, double vz) const{
   	return boost_to(-vx, -vy, -vz);
   }
-  tensor rotate_back(const fourvec p){
+  tensor rotate_back(const fourvec p) const{
 	double Dx = p.x(), Dy = p.y(), Dz = p.z();
 	double Dperp = std::sqrt(Dx*Dx + Dy*Dy);
 	double D = std::sqrt(Dperp*Dperp + Dz*Dz);

@@ -57,7 +57,7 @@ void initialize(std::string mode){
 }
 
 int update_particle_momentum(double dt, double temp, std::vector<double> v3cell, 
-				double D_formation_t, fourvec incoming_p, std::vector<fourvec> & FS){
+			double D_formation_t, fourvec incoming_p, std::vector<fourvec> & FS){
 	auto p_cell = incoming_p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
 	double D_formation_t_cell = D_formation_t / incoming_p.t() * p_cell.t();
 	double dt_cell = dt / incoming_p.t() * p_cell.t();
@@ -157,3 +157,4 @@ void probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Npartic
 		}
 	}
 }
+

@@ -226,27 +226,42 @@ cdef extern from "../src/workflow.h":
 	cdef int update_particle_momentum(double dt, double temp, 
 				vector[double] v3cell, 
 				double D_formation_t, fourvec incoming_p, 
-				vector[fourvec] & FS);
+				vector[fourvec] & FS)
 
-cdef double proper_time(vector[double] x):
-	return sqrt(x[0]**2 - x[3]**2)
+cdef extern from "../src/Langevin.h":
+	cdef void initialize_transport_coeff(double A, double B)
+	cdef void Ito_update(double dt, double M, double temp, vector[double] v3cell,
+						const fourvec & pIn, fourvec & pOut)
+
+cdef vector[double] regulate_v(vector[double] v):
+	vabs2 = v[0]**2 + v[1]**2 + v[2]**2
+	if vabs2 >= little_below_one**2:
+		scale = 1.0/sqrt(vabs2)/little_above_one
+		v[0] *= scale
+		v[1] *= scale
+		v[2] *= scale
+	return v
 
 cdef class event:
-	cdef object hydro_reader, lbt, lgv
+	cdef object hydro_reader, fs_reader
 	cdef str mode, transport
 	cdef double M, Tc
 	cdef vector[particle] HQ_list
-	cdef double tau0, dtau, tau
+	cdef double tau0, tau
+	cdef bool lgv
 
-	def __cinit__(self, medium={"type":"static", "static_dt":0.05}, 
+	def __cinit__(self, preeq=None,
+					medium={"type":"static", "static_dt":0.05}, 
 					LBT=None, LGV=None, Tc=0.154, M=1.3):
-		# read medium config
 		self.mode = medium['type']
 		self.hydro_reader = Medium(medium_flags=medium)
 		self.tau0 = self.hydro_reader.init_tau()
-		self.dtau = self.hydro_reader.dtau()
+		if preeq is not None:
+			self.fs_reader = Medium(medium_flags=preeq)
+			self.tau0 = self.fs_reader.init_tau()
 		self.tau = self.tau0
-
+		self.lgv = False
+		
 		# load transport
 		self.Tc = Tc
 		self.M = M
@@ -255,7 +270,15 @@ cdef class event:
 		if not os.path.exists("table.h5"):
 			initialize("new")
 		else:
-			initialize("old")	
+			initialize("old")
+	
+		# initialize LGV
+		if LGV is not None:
+			if LGV['A']>1e-9 and LGV['B'] > 1e-9:
+				initialize_transport_coeff(LGV['A'], LGV['B'])
+				self.lgv = True
+			
+			
 	# The current time of the evolution.
 	def sys_time(self) :
 		return self.tau
@@ -357,6 +380,41 @@ cdef class event:
 			raise ValueError("Initilaiztion mode not defined")
 			exit()
 
+	cpdef bool perform_fs_step(self):
+		PyErr_CheckSignals()
+		if self.mode != 'dynamic':
+			raise Warning("Only dyanmic mode has a freestream step")
+			return False
+		self.fs_reader.load_next()
+		status = self.fs_reader.hydro_status()
+
+		self.tau += self.fs_reader.dtau()
+		cdef double T, tau_now, smaller_dtau
+		cdef vector[double] vcell
+		vcell.resize(3)
+		cdef vector[particle].iterator it = self.HQ_list.begin()
+		while it != self.HQ_list.end():
+			# use smaller time step than hydro 
+			for substeps in range(2):
+				smaller_dtau = self.fs_reader.dtau()/2.
+				# only update HQ that are not freezeout yet
+				if not deref(it).freezeout:
+					###############################################################
+					###############################################################
+					# Get the cell temperature and velocity for this heavy quark, #
+					###############################################################
+					tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)
+					T, vcell[0], vcell[1], vcell[2] = \
+							self.fs_reader.interpF(tau_now, 
+							[deref(it).x.t(),deref(it).x.x(),
+							deref(it).x.y(),deref(it).x.z()],
+							['Temp', 'Vx', 'Vy', 'Vz'])
+					#	ensure |v| < 1.	
+					vcell = regulate_v(vcell)
+					self.perform_HQ_step(it, tau_now, smaller_dtau, T, vcell)
+			inc(it)
+		return status
+
 	cpdef bool perform_hydro_step(self, 
 			StaticProperty={"Temp": 0.4, "Vx":0.0, "Vy":0.0, "Vz":0.0}	):
 		PyErr_CheckSignals()
@@ -367,45 +425,49 @@ cdef class event:
 		else:
 			raise ValueError("medium mode not defined")
 		status = self.hydro_reader.hydro_status()
+		#update system clock
+		self.tau += self.hydro_reader.dtau()
 
-		self.tau += self.dtau
-		cdef double t, x, y, z, tauQ
-		cdef vector[particle].iterator it
-		it = self.HQ_list.begin()
+		cdef double T, tau_now, smaller_dtau
+		cdef vector[double] vcell
+		vcell.resize(3)
+		cdef vector[particle].iterator it = self.HQ_list.begin()
 		while it != self.HQ_list.end():
-			if not deref(it).freezeout:
-				for substeps in range(2):
-					self.perform_HQ_step(it, self.dtau/2.)
+			# use smaller time step than hydro 
+			for substeps in range(2):
+				smaller_dtau = self.hydro_reader.dtau()/2.
+				# only update HQ that are not freezeout yet
+				if not deref(it).freezeout:
+					###############################################################
+					###############################################################
+					# Get the cell temperature and velocity for this heavy quark, #
+					###############################################################
+					if self.mode == "dynamic":
+						tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)
+					else:
+						tau_now = deref(it).x.t()
+					T, vcell[0], vcell[1], vcell[2] = \
+							self.hydro_reader.interpF(tau_now, 
+							[deref(it).x.t(),deref(it).x.x(),
+							deref(it).x.y(),deref(it).x.z()],
+							['Temp', 'Vx', 'Vy', 'Vz'])
+					#	ensure |v| < 1.	
+					vcell = regulate_v(vcell)
+					self.perform_HQ_step(it, tau_now, smaller_dtau, T, vcell)
 			inc(it)
 		return status
 
-	cdef perform_HQ_step(self, vector[particle].iterator it, double dtau):
+	cdef perform_HQ_step(self, vector[particle].iterator it, 
+						double tau_now, double dtau, 
+						double T, vector[double] vcell):
 		PyErr_CheckSignals()
-		cdef double t, tau_now, T, vabs2, scale
-		cdef vector[double] vcell
 		cdef vector[fourvec] final_state
 		cdef int channel
 
 		###############################################################
 		###############################################################
-		# Get the cell temperature and velocity for this heavy quark, #
-		# ensure |v| < 1. if T<Tc, label it as "freezout=True"        #
+		# 	if T<Tc, label it as "freezout=True"			          #
 		###############################################################
-		if self.mode == "dynamic":
-			tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)
-		else:
-			tau_now = deref(it).x.t()
-		vcell.resize(3)
-		T, vcell[0], vcell[1], vcell[2] = \
-			self.hydro_reader.interpF(tau_now, 
-				[deref(it).x.t(),deref(it).x.x(),deref(it).x.y(),deref(it).x.z()],
-				['Temp', 'Vx', 'Vy', 'Vz'])
-		vabs2 = vcell[0]**2 + vcell[1]**2 + vcell[2]**2
-		if vabs2 >= little_below_one**2:
-			scale = 1.0/sqrt(vabs2)/little_above_one
-			vcell[0] *= scale
-			vcell[1] *= scale
-			vcell[2] *= scale
 		if T <= self.Tc:
 			deref(it).freezeout = True
 			deref(it).Tf = T
@@ -428,12 +490,14 @@ cdef class event:
 				(sqrt(t_m_zvz**2+one_m_vz2*dtau2) - t_m_zvz)/one_m_vz2
 		else:
 			dt_lab = dtau
+
 		###############################################################
 		###############################################################
 		# update heavy quark status, returns which scatterig channel, #
 		# and return the full final states                            #
 		###############################################################
 		# time should be in GeV^-1 in the update function !!!
+		
 		channel = update_particle_momentum(
 				dt_lab*fmc_to_GeV_m1, # evolve for this time 
 				T, vcell, 	# fluid info
@@ -457,6 +521,13 @@ cdef class event:
 			deref(it).t_absorb = deref(it).x.t()
 		else:
 			raise ValueError("Unknown channel")
+
+		## if langevin is on, additional modification to momentum after LBT
+		cdef fourvec pOut
+		if self.lgv:
+			Ito_update(dt_lab*fmc_to_GeV_m1, deref(it).mass, T, vcell, 
+						deref(it).p, pOut)
+			deref(it).p = pOut
 
 	cpdef HQ_hist(self):
 		cdef vector[particle].iterator it = self.HQ_list.begin()

@@ -12,6 +12,7 @@ simpleLogger.cpp
 stat.cpp
 approx_functions.cpp
 workflow.cpp
+Langevin.cpp
 	)
 
 set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "")
