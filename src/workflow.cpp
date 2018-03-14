@@ -10,20 +10,20 @@
 #include <boost/foreach.hpp>
 std::vector<Process> MyProcesses;
 
-void initialize(std::string mode){
+void initialize(std::string mode, std::string path, double mu){
 	
 	boost::property_tree::ptree config;
-    std::ifstream input("settings.xml");
-    read_xml(input, config);
-	double mu = config.get_child("Boltzmann.QCD").get<double>("mu");
+//    std::ifstream input(path);
+//    read_xml(input, config);
+//	double mu = config.get_child("Boltzmann.QCD").get<double>("mu");
     initialize_mD_and_scale(0, mu);
 
 	MyProcesses.clear();
-	MyProcesses.push_back( Rate22("Boltzmann/Qq2Qq", "settings.xml", dX_Qq2Qq_dt) );
-	MyProcesses.push_back( Rate22("Boltzmann/Qg2Qg", "settings.xml", dX_Qg2Qg_dt) );
+	MyProcesses.push_back( Rate22("Boltzmann/Qq2Qq", path, dX_Qq2Qq_dt) );
+	MyProcesses.push_back( Rate22("Boltzmann/Qg2Qg", path, dX_Qg2Qg_dt) );
 	
-	MyProcesses.push_back( Rate23("Boltzmann/Qq2Qqg", "settings.xml", M2_Qq2Qqg) );
-	MyProcesses.push_back( Rate23("Boltzmann/Qg2Qgg", "settings.xml", M2_Qg2Qgg) );
+	MyProcesses.push_back( Rate23("Boltzmann/Qq2Qqg", path, M2_Qq2Qqg) );
+	MyProcesses.push_back( Rate23("Boltzmann/Qg2Qgg", path, M2_Qg2Qgg) );
 
 	BOOST_FOREACH(Process& r, MyProcesses){
 		switch(r.which()){
@@ -125,7 +125,7 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 
 void probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Nparticles=10000, std::string mode="old"){
 	double fmc_to_GeV_m1 = 5.026;
-	initialize(mode);
+	initialize(mode,"settings.xml", 2.0);
 	double M = 1.3;
 	
 	std::vector<particle> plist(Nparticles);

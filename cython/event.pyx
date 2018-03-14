@@ -222,7 +222,7 @@ cdef extern from "../src/workflow.h":
 		vector[double] vcell
 		double Tf
 		void freestream(double dt)
-	cdef void initialize(string s)
+	cdef void initialize(string mode, string path, double mu)
 	cdef int update_particle_momentum(double dt, double temp, 
 				vector[double] v3cell, 
 				double D_formation_t, fourvec incoming_p, 
@@ -252,7 +252,7 @@ cdef class event:
 
 	def __cinit__(self, preeq=None,
 					medium={"type":"static", "static_dt":0.05}, 
-					LBT=None, LGV=None, Tc=0.154, M=1.3):
+					LBT={"mu":2.0}, LGV=None, Tc=0.154, M=1.3):
 		self.mode = medium['type']
 		self.hydro_reader = Medium(medium_flags=medium)
 		self.tau0 = self.hydro_reader.init_tau()
@@ -267,10 +267,13 @@ cdef class event:
 		self.M = M
 
 		# initialize LBT
+		setting_path = os.environ['XDG_DATA_HOME']+\
+                                        "/event/settings.xml"
+		print(setting_path)
 		if not os.path.exists("table.h5"):
-			initialize("new")
+			initialize("new", setting_path, LBT['mu'])
 		else:
-			initialize("old")
+			initialize("old", setting_path, LBT['mu'])
 	
 		# initialize LGV
 		if LGV is not None:

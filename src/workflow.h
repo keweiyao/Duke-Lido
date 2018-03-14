@@ -29,7 +29,7 @@ typedef Rate<3, 3, double(*)(const double*, void*)> Rate23;
 typedef boost::variant<Rate22, Rate23> Process;
 extern std::vector<Process> MyProcesses;
 
-void initialize(std::string);
+void initialize(std::string, std::string path, double mu);
 int update_particle_momentum(double dt, double temp, std::vector<double> v3cell, 
 				double D_formation_t, fourvec incoming_p, std::vector<fourvec> & FS);
 
