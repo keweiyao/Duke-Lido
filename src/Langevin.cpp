@@ -28,7 +28,7 @@ void postpoint_update(	double dt, double M, double T, std::vector<double> v,
 	auto pIn_cell = pIn.boost_to(v[0], v[1], v[2]);
 	// imaging rotating to a frame where pIn lies on z-axis
 	double E0 = pIn_cell.t();
-	double p0 = std::sqrt(E0*E0 - M*M);
+	double p0 = std::sqrt(E0*E0 - M*M + 1e-9);
 
 	// step-1
 	double kt = kperp(E0, M, T),
@@ -73,7 +73,7 @@ void Ito_update(	double dt, double M, double T, std::vector<double> v,
 	auto pIn_cell = pIn.boost_to(v[0], v[1], v[2]);
 	// imaging rotating to a frame where pIn lies on z-axis
 	double E0 = pIn_cell.t();
-	double p0 = std::sqrt(E0*E0 - M*M);
+	double p0 = std::sqrt(E0*E0 - M*M+1e-9);
 
 	double kt = kperp(E0, M, T),
 		   kl = kpara(E0, M, T),

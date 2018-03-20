@@ -8,65 +8,71 @@
 #include <boost/variant/get.hpp>
 #include <boost/any.hpp>
 #include <boost/foreach.hpp>
-std::vector<Process> MyProcesses;
+std::map<int, std::vector<Process> > AllProcesses;
+
+void init_process(Process& r, std::string mode){
+     switch(r.which()){
+                        case 0:
+                                if (boost::get<Rate22>(r).IsActive())
+                                        if(mode == "new"){
+                                                boost::get<Rate22>(r).initX("table.h5");
+                                                boost::get<Rate22>(r).init("table.h5");
+                                        } else{
+                                                boost::get<Rate22>(r).loadX("table.h5");
+                                                boost::get<Rate22>(r).load("table.h5");
+                                        }
+                                else return;
+                                break;
+                        case 1:
+                                if (boost::get<Rate23>(r).IsActive())
+                                        if(mode == "new"){
+                                                boost::get<Rate23>(r).initX("table.h5");
+                                                boost::get<Rate23>(r).init("table.h5");
+                                        } else{
+                                                boost::get<Rate23>(r).loadX("table.h5");
+                                                boost::get<Rate23>(r).load("table.h5");
+                                        }
+                                else return;
+                                break;
+                        default:
+                                exit(-1);
+                                break;
+                }
+}
+
 
 void initialize(std::string mode, std::string path, double mu){
 	
 	boost::property_tree::ptree config;
-//    std::ifstream input(path);
-//    read_xml(input, config);
-//	double mu = config.get_child("Boltzmann.QCD").get<double>("mu");
-    initialize_mD_and_scale(0, mu);
+    	initialize_mD_and_scale(0, mu);
 
-	MyProcesses.clear();
-	MyProcesses.push_back( Rate22("Boltzmann/Qq2Qq", path, dX_Qq2Qq_dt) );
-	MyProcesses.push_back( Rate22("Boltzmann/Qg2Qg", path, dX_Qg2Qg_dt) );
-	
-	MyProcesses.push_back( Rate23("Boltzmann/Qq2Qqg", path, M2_Qq2Qqg) );
-	MyProcesses.push_back( Rate23("Boltzmann/Qg2Qgg", path, M2_Qg2Qgg) );
+	AllProcesses[4] = std::vector<Process>();
+	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", path, dX_Qq2Qq_dt) );
+	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", path, dX_Qg2Qg_dt) );
+	AllProcesses[4].push_back( Rate23("Boltzmann/cq2cqg", path, M2_Qq2Qqg) );
+	AllProcesses[4].push_back( Rate23("Boltzmann/cg2cgg", path, M2_Qg2Qgg) );
+        AllProcesses[5] = std::vector<Process>();
+        AllProcesses[5].push_back( Rate22("Boltzmann/bq2bq", path, dX_Qq2Qq_dt) );
+        AllProcesses[5].push_back( Rate22("Boltzmann/bg2bg", path, dX_Qg2Qg_dt) );
+        AllProcesses[5].push_back( Rate23("Boltzmann/bq2bqg", path, M2_Qq2Qqg) );
+        AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", path, M2_Qg2Qgg) );
 
-	BOOST_FOREACH(Process& r, MyProcesses){
-		switch(r.which()){
-			case 0:
-				if (boost::get<Rate22>(r).IsActive())
-					if(mode == "new"){
-						boost::get<Rate22>(r).initX("table.h5");
-						boost::get<Rate22>(r).init("table.h5");
-					} else{
-						boost::get<Rate22>(r).loadX("table.h5");
-						boost::get<Rate22>(r).load("table.h5");
-					}
-				else continue;
-				break;
-			case 1:
-				if (boost::get<Rate23>(r).IsActive())
-					if(mode == "new"){
-						boost::get<Rate23>(r).initX("table.h5");
-						boost::get<Rate23>(r).init("table.h5");
-					} else{
-						boost::get<Rate23>(r).loadX("table.h5");
-						boost::get<Rate23>(r).load("table.h5");
-					}
-				else continue;
-				break;
-			default:
-				exit(-1);
-				break;
-		}
-	}
+	BOOST_FOREACH(Process& r, AllProcesses[4]) init_process(r, mode);
+	BOOST_FOREACH(Process& r, AllProcesses[5]) init_process(r, mode);
 }
 
 int update_particle_momentum(double dt, double temp, std::vector<double> v3cell, 
-			double D_formation_t, fourvec incoming_p, std::vector<fourvec> & FS){
+			int pid, double D_formation_t, fourvec incoming_p, std::vector<fourvec> & FS){
+	int absid = std::abs(pid);
 	auto p_cell = incoming_p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
 	double D_formation_t_cell = D_formation_t / incoming_p.t() * p_cell.t();
 	double dt_cell = dt / incoming_p.t() * p_cell.t();
 	double E_cell = p_cell.t();
-    std::vector<double> P_channels(MyProcesses.size());
+        std::vector<double> P_channels(AllProcesses[absid].size());
 	double P_total = 0.;
 	int channel = 0;
 	double dR;
-	BOOST_FOREACH(Process& r, MyProcesses){
+	BOOST_FOREACH(Process& r, AllProcesses[absid]){
 		switch(r.which()){
 			case 0:
 				if (boost::get<Rate22>(r).IsActive())
@@ -102,12 +108,12 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 		}
 	}
 	// Do scattering
-	switch(MyProcesses[channel].which()){
+	switch(AllProcesses[absid][channel].which()){
 		case 0:
-			boost::get<Rate22>(MyProcesses[channel]).sample({E_cell, temp}, FS);
+			boost::get<Rate22>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
 			break;
 		case 1:
-			boost::get<Rate23>(MyProcesses[channel]).sample(
+			boost::get<Rate23>(AllProcesses[absid][channel]).sample(
 											{E_cell, temp, D_formation_t_cell}, FS);
 			break;
 		default:
@@ -124,7 +130,7 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 }
 
 void probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Nparticles=10000, std::string mode="old"){
-	double fmc_to_GeV_m1 = 5.026;
+/*	double fmc_to_GeV_m1 = 5.026;
 	initialize(mode,"settings.xml", 2.0);
 	double M = 1.3;
 	
@@ -155,6 +161,6 @@ void probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Npartic
 				if (channel == 2 || channel ==3) p.t_rad = time;
 			}
 		}
-	}
+	}*/
 }
 

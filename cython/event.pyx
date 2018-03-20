@@ -1,5 +1,6 @@
 # cython: c_string_type=str, c_string_encoding=ascii
 from libcpp cimport bool
+from libcpp.map cimport map
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libc.stdlib cimport rand, RAND_MAX
@@ -224,7 +225,7 @@ cdef extern from "../src/workflow.h":
 		void freestream(double dt)
 	cdef void initialize(string mode, string path, double mu)
 	cdef int update_particle_momentum(double dt, double temp, 
-				vector[double] v3cell, 
+				vector[double] v3cell, int pid, 
 				double D_formation_t, fourvec incoming_p, 
 				vector[fourvec] & FS)
 
@@ -244,31 +245,29 @@ cdef vector[double] regulate_v(vector[double] v):
 
 cdef class event:
 	cdef object hydro_reader, fs_reader
+	cdef map[int, vector[particle]] HQ_list
 	cdef str mode, transport
-	cdef double M, Tc
-	cdef vector[particle] HQ_list
+	cdef double Tc
 	cdef double tau0, tau
 	cdef bool lgv
 
 	def __cinit__(self, preeq=None,
-					medium={"type":"static", "static_dt":0.05}, 
-					LBT={"mu":2.0}, LGV=None, Tc=0.154, M=1.3):
+			medium={"type":"static", "static_dt":0.05}, 
+			LBT={"mu":2.0}, LGV={"A":1e-9, "B":1e-9}, Tc=0.154):
 		self.mode = medium['type']
 		self.hydro_reader = Medium(medium_flags=medium)
 		self.tau0 = self.hydro_reader.init_tau()
+		self.HQ_list[4] = vector[particle]()
+		self.HQ_list[5] = vector[particle]()
 		if preeq is not None:
 			self.fs_reader = Medium(medium_flags=preeq)
 			self.tau0 = self.fs_reader.init_tau()
 		self.tau = self.tau0
-		self.lgv = False
-		
-		# load transport
+		self.lgv = False	
 		self.Tc = Tc
-		self.M = M
 
 		# initialize LBT
-		setting_path = os.environ['XDG_DATA_HOME']+\
-                                        "/event/settings.xml"
+		setting_path = os.environ['XDG_DATA_HOME']+"/event/settings.xml"
 		print(setting_path)
 		if not os.path.exists("table.h5"):
 			initialize("new", setting_path, LBT['mu'])
@@ -287,101 +286,72 @@ cdef class event:
 		return self.tau
 
 	# Initilization
-	cpdef initialize_HQ(self, NQ, 
-			init_flags={"type":'box', "pmax":10., "L":10.}):
-		cdef double x, y, z, s1, s2
+	cpdef initialize_HQ(self, NQ, init_flags):
+		cdef double x, y, z, s1, s2, mass
+		cdef int pid
 		# for A+B:
 		#cdef double pT, phipt, rapidity, mT, t0
-		cdef double ymax, pTmax, pTmin
+		cdef double Emax, ymax, pTmax, pTmin
 		# for box:
 		cdef double p, cospz, sinpz
 		cdef double pmax, L
 		cdef vector[particle].iterator it
+		for pid, mass in zip([4,5],[1.3, 4.2]):
+			self.HQ_list[pid].clear()
+			self.HQ_list[pid].resize(NQ) # NQ charm quark and NQ bottom quark
+			if init_flags['type'] == 'A+B':
+				print("Initialize for dynamic medium")
+				HQ_xy_sampler = XY_sampler(init_flags['TAB'],
+							   init_flags['dxy'],
+							   init_flags['b'])
+				pTmax = init_flags['pTmax']
+				pTmin = init_flags['pTmin']
+				Emax = init_flags['Emax']
 
-		if init_flags['type'] == 'A+B':
-			self.HQ_list.clear()
-			self.HQ_list.resize(NQ)
-			print("Initialize for dynamic medium")
-			HQ_xy_sampler = XY_sampler(init_flags['TAB'],
-									   init_flags['dxy'],
-									   init_flags['b'])
-			pTmax = init_flags['pTmax']
-			pTmin = init_flags['pTmin']
-			ymax = init_flags['ymax']
-
-			print("Heavy quarks are freestreamed to {} fm/c".format(self.tau0))
-			it = self.HQ_list.begin()
-			X = []
-			Y = []
-			while it != self.HQ_list.end():
-				# Uniformly sample pT, phi, and y
-				pT = np.random.uniform(pTmin, pTmax)
-				mT = sqrt(pT**2 + self.M**2)
-				phipt = np.random.uniform(0, 2.*np.pi)
-				rapidity = np.random.uniform(-ymax, ymax)
-				pcharm = [mT*cosh(rapidity), pT*cos(phipt), \
+				print("Heavy quarks are freestreamed to {} fm/c".format(self.tau0))
+				it = self.HQ_list[pid].begin()
+				X = []
+				Y = []
+				while it != self.HQ_list[pid].end():
+					# Uniformly sample pT, phi, and ymin<y<ymax
+					# ymin, ymax are determined by the max-mT 
+					pT = np.random.uniform(pTmin, pTmax)
+					mT = sqrt(pT**2 + mass**2)
+					phipt = np.random.uniform(0, 2.*np.pi)
+					ymax = np.arccosh(Emax/mT)
+					rapidity = np.random.uniform(-ymax, ymax)
+					pcharm = [mT*cosh(rapidity), pT*cos(phipt), \
 							   pT*sin(phipt), mT*sinh(rapidity)]
-				# sample initial x-y from TRENTo at time = 0+
-				x, y, s1, s2 = HQ_xy_sampler.sample_xy()
-				r0 = [0.0, x, y, 0.0]
-				t0 = self.tau0/sqrt(1. - (pcharm[3]/pcharm[0])**2)
-				X.append(x)
-				Y.append(y)
-				# charm:
-				# Initialize positional space at tau = 0+
-				for i in range(4):
-					deref(it).p.a[i] = pcharm[i]
-					deref(it).x.a[i] = r0[i]
-				deref(it).mass = self.M
-				# free streaming to hydro starting time tau = tau0
-				deref(it).freestream(t0)
-				# set last interaction vertex (assumed to be hydro start time)
-				deref(it).t_rad = t0
-				deref(it).t_absorb = t0
-				# initialize others
-				deref(it).freezeout = False
-				deref(it).p0 = deref(it).p
-				deref(it).vcell = [0., 0., 0.]
-				deref(it).Tf = 0.
-				deref(it).pid = 4
-				inc(it)
-			# check the variance of the sampling
-			stdx, stdy = np.std(X), np.std(Y)
-			print("std(x,y) = {:1.3f}, {:1.3f} [fm]".format(stdx, stdy) )
-
-		elif init_flags['type'] == 'box':
-			self.HQ_list.clear()
-			self.HQ_list.resize(NQ)
-			print "Initialize for box simulation"
-			pmax = init_flags['pmax']
-			L = init_flags['L']
-			it = self.HQ_list.begin()
-
-			while it != self.HQ_list.end():
-				p = np.random.uniform(0, pmax)
-				phipt = np.random.uniform(0, 2.*np.pi)
-				cospz = little_below_one*np.random.uniform(-1., 1.)
-				sinpz = sqrt(1.-cospz**2)
-				p0 = [sqrt(p**2+self.M**2), p*sinpz*cos(phipt), \
-								p*sinpz*sin(phipt), p*cospz]
-				r0 = [0.0, x, y, z]
-				for i in range(4):
-					deref(it).p.a[i] = p0[i]
-					deref(it).x.a[i] = r0[i]
-				deref(it).t_rad = 0.0
-				deref(it).t_absorb = 0.0
-				deref(it).freezeout = False
-				deref(it).p0 = deref(it).p
-				deref(it).vcell = [0., 0., 0.]
-				deref(it).Tf = 0.
-				deref(it).pid = 4
-				deref(it).mass = self.M
-				x,y,z = np.random.uniform(-L,L,3)
-				
-				inc(it)
-		else:
-			raise ValueError("Initilaiztion mode not defined")
-			exit()
+					# sample initial x-y from TRENTo at time = 0+
+					x, y, s1, s2 = HQ_xy_sampler.sample_xy()
+					r0 = [0.0, x, y, 0.0]
+					t0 = self.tau0/sqrt(1. - (pcharm[3]/pcharm[0])**2)
+					X.append(x)
+					Y.append(y)
+					# Initialize positional space at tau = 0+
+					for i in range(4):
+						deref(it).p.a[i] = pcharm[i]
+						deref(it).p0.a[i] = pcharm[i]
+						deref(it).x.a[i] = r0[i]
+					deref(it).mass = mass
+					print(deref(it).mass, deref(it).p.t()**2 - deref(it).p.x()**2-deref(it).p.y()**2-deref(it).p.z()**2)
+					# free streaming to hydro starting time tau = tau0
+					deref(it).freestream(t0)
+					# set last interaction vertex (assumed to be hydro start time)
+					deref(it).t_rad = t0
+					deref(it).t_absorb = t0
+					# initialize others
+					deref(it).freezeout = False
+					deref(it).vcell = [0., 0., 0.]
+					deref(it).Tf = 0.
+					deref(it).pid = pid
+					inc(it)
+				# check the variance of the sampling
+				stdx, stdy = np.std(X), np.std(Y)
+				print("std(x,y) = {:1.3f}, {:1.3f} [fm]".format(stdx, stdy) )
+			else:
+				raise ValueError("Initilaiztion mode not defined")
+				exit()
 
 	cpdef bool perform_fs_step(self):
 		PyErr_CheckSignals()
@@ -395,27 +365,29 @@ cdef class event:
 		cdef double T, tau_now, smaller_dtau
 		cdef vector[double] vcell
 		vcell.resize(3)
-		cdef vector[particle].iterator it = self.HQ_list.begin()
-		while it != self.HQ_list.end():
-			# use smaller time step than hydro 
-			for substeps in range(2):
-				smaller_dtau = self.fs_reader.dtau()/2.
-				# only update HQ that are not freezeout yet
-				if not deref(it).freezeout:
-					###############################################################
-					###############################################################
-					# Get the cell temperature and velocity for this heavy quark, #
-					###############################################################
-					tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)
-					T, vcell[0], vcell[1], vcell[2] = \
-							self.fs_reader.interpF(tau_now, 
-							[deref(it).x.t(),deref(it).x.x(),
-							deref(it).x.y(),deref(it).x.z()],
-							['Temp', 'Vx', 'Vy', 'Vz'])
-					#	ensure |v| < 1.	
-					vcell = regulate_v(vcell)
-					self.perform_HQ_step(it, tau_now, smaller_dtau, T, vcell)
-			inc(it)
+		cdef vector[particle].iterator it 
+		for pid in [4,5]:
+			it = self.HQ_list[pid].begin()
+			while it != self.HQ_list[pid].end():
+				# use smaller time step than hydro 
+				for substeps in range(2):
+					smaller_dtau = self.fs_reader.dtau()/2.
+					# only update HQ that are not freezeout yet
+					if not deref(it).freezeout:
+						###############################################################
+						###############################################################
+						# Get the cell temperature and velocity for this heavy quark, #
+						###############################################################
+						tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)
+						T, vcell[0], vcell[1], vcell[2] = \
+								self.fs_reader.interpF(tau_now, 
+								[deref(it).x.t(),deref(it).x.x(),
+								deref(it).x.y(),deref(it).x.z()],
+								['Temp', 'Vx', 'Vy', 'Vz'])
+						#	ensure |v| < 1.	
+						vcell = regulate_v(vcell)
+						self.perform_HQ_step(it, tau_now, smaller_dtau, T, vcell)
+				inc(it)
 		return status
 
 	cpdef bool perform_hydro_step(self, 
@@ -434,30 +406,32 @@ cdef class event:
 		cdef double T, tau_now, smaller_dtau
 		cdef vector[double] vcell
 		vcell.resize(3)
-		cdef vector[particle].iterator it = self.HQ_list.begin()
-		while it != self.HQ_list.end():
-			# use smaller time step than hydro 
-			for substeps in range(2):
-				smaller_dtau = self.hydro_reader.dtau()/2.
-				# only update HQ that are not freezeout yet
-				if not deref(it).freezeout:
-					###############################################################
-					###############################################################
-					# Get the cell temperature and velocity for this heavy quark, #
-					###############################################################
-					if self.mode == "dynamic":
-						tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)
-					else:
-						tau_now = deref(it).x.t()
-					T, vcell[0], vcell[1], vcell[2] = \
-							self.hydro_reader.interpF(tau_now, 
-							[deref(it).x.t(),deref(it).x.x(),
-							deref(it).x.y(),deref(it).x.z()],
-							['Temp', 'Vx', 'Vy', 'Vz'])
-					#	ensure |v| < 1.	
-					vcell = regulate_v(vcell)
-					self.perform_HQ_step(it, tau_now, smaller_dtau, T, vcell)
-			inc(it)
+		cdef vector[particle].iterator it 
+		for pid in [4,5]:
+			it = self.HQ_list[pid].begin()
+			while it != self.HQ_list[pid].end():
+				# use smaller time step than hydro 
+				for substeps in range(2):
+					smaller_dtau = self.hydro_reader.dtau()/2.
+					# only update HQ that are not freezeout yet
+					if not deref(it).freezeout:
+						###############################################################
+						###############################################################
+						# Get the cell temperature and velocity for this heavy quark, #
+						###############################################################
+						if self.mode == "dynamic":
+							tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)
+						else:
+							tau_now = deref(it).x.t()
+						T, vcell[0], vcell[1], vcell[2] = \
+								self.hydro_reader.interpF(tau_now, 
+								[deref(it).x.t(),deref(it).x.x(),
+								deref(it).x.y(),deref(it).x.z()],
+								['Temp', 'Vx', 'Vy', 'Vz'])
+						#	ensure |v| < 1.	
+						vcell = regulate_v(vcell)
+						self.perform_HQ_step(it, tau_now, smaller_dtau, T, vcell)
+				inc(it)	
 		return status
 
 	cdef perform_HQ_step(self, vector[particle].iterator it, 
@@ -504,6 +478,7 @@ cdef class event:
 		channel = update_particle_momentum(
 				dt_lab*fmc_to_GeV_m1, # evolve for this time 
 				T, vcell, 	# fluid info
+				deref(it).pid, # particle pid
 				(deref(it).x.t() - deref(it).t_rad)*fmc_to_GeV_m1, # LPM effect
 				deref(it).p, # Initial probe momentum
 				final_state # Final states
@@ -532,13 +507,13 @@ cdef class event:
 						deref(it).p, pOut)
 			deref(it).p = pOut
 
-	cpdef HQ_hist(self):
-		cdef vector[particle].iterator it = self.HQ_list.begin()
+	cpdef HQ_hist(self, pid):
+		cdef vector[particle].iterator it = self.HQ_list[pid].begin()
 		cdef vector[ vector[double] ] p, x
 		p.clear()
 		x.clear()
 		cdef fourvec ix, ip
-		while it != self.HQ_list.end():
+		while it != self.HQ_list[pid].end():
 			ip = deref(it).p
 			ix = deref(it).x
 			p.push_back([ip.t(),ip.x(),ip.y(),ip.z()])
@@ -546,8 +521,8 @@ cdef class event:
 			inc(it)
 		return np.array(p), np.array(x)
 
-	cpdef output_oscar(self, filename):
-		cdef vector[particle].iterator it = self.HQ_list.begin()
+	cpdef output_oscar(self, pid, filename):
+		cdef vector[particle].iterator it = self.HQ_list[pid].begin()
 		cdef size_t i=0
 		with open(filename, 'w') as f:
 			head3 = ff.FortranRecordWriter(
@@ -560,9 +535,9 @@ cdef class event:
 			eventhead =ff.FortranRecordWriter(
 					'i10,2x,i10,2x,f8.3,2x,f8.3,2x,i4,2x,i4,2X,i7')
 			f.write(
-				eventhead.write([1, self.HQ_list.size(), 0.001, 0.001, 1, 1, 1])\
+				eventhead.write([1, self.HQ_list[pid].size(), 0.001, 0.001, 1, 1, 1])\
 				+'\n')
-			while it != self.HQ_list.end():
+			while it != self.HQ_list[pid].end():
 				f.write(line.write([i, deref(it).pid,
 					deref(it).p.x(),deref(it).p.y(),
 					deref(it).p.z(),deref(it).p.t(),
