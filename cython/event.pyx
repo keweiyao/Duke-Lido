@@ -251,9 +251,8 @@ cdef class event:
 	cdef double tau0, tau
 	cdef bool lgv
 
-	def __cinit__(self, preeq=None,
-			medium={"type":"static", "static_dt":0.05}, 
-			LBT={"mu":2.0}, LGV={"A":1e-9, "B":1e-9}, Tc=0.154):
+	def __cinit__(self, preeq=None, medium=None, 
+			LBT=None, LGV=None, Tc=0.154):
 		self.mode = medium['type']
 		self.hydro_reader = Medium(medium_flags=medium)
 		self.tau0 = self.hydro_reader.init_tau()
@@ -318,7 +317,7 @@ cdef class event:
 					pT = np.random.uniform(pTmin, pTmax)
 					mT = sqrt(pT**2 + mass**2)
 					phipt = np.random.uniform(0, 2.*np.pi)
-					ymax = np.arccosh(Emax/mT)
+					ymax = np.min([np.arccosh(Emax/mT), 3.0])
 					rapidity = np.random.uniform(-ymax, ymax)
 					pcharm = [mT*cosh(rapidity), pT*cos(phipt), \
 							   pT*sin(phipt), mT*sinh(rapidity)]
@@ -334,7 +333,6 @@ cdef class event:
 						deref(it).p0.a[i] = pcharm[i]
 						deref(it).x.a[i] = r0[i]
 					deref(it).mass = mass
-					print(deref(it).mass, deref(it).p.t()**2 - deref(it).p.x()**2-deref(it).p.y()**2-deref(it).p.z()**2)
 					# free streaming to hydro starting time tau = tau0
 					deref(it).freestream(t0)
 					# set last interaction vertex (assumed to be hydro start time)
@@ -492,11 +490,11 @@ cdef class event:
 		elif channel == 2 or channel == 3:
 			deref(it).freestream(dt_lab)
 			deref(it).p = final_state[0]
-			deref(it).t_rad = deref(it).x.t()
+			#deref(it).t_rad = deref(it).x.t()
 		elif channel == 4 or channel == 5:
 			deref(it).freestream(dt_lab)
 			deref(it).p = final_state[0]
-			deref(it).t_absorb = deref(it).x.t()
+			#deref(it).t_absorb = deref(it).x.t()
 		else:
 			raise ValueError("Unknown channel")
 

@@ -6,7 +6,7 @@
 #include <boost/math/tools/roots.hpp>
 #include "simpleLogger.h"
 
-double renormalization_scale = 2.0; // default
+double renormalization_scale; // default
 
 //=============running coupling=================================================
 double alpha_s(double Q2, double T){
@@ -43,7 +43,7 @@ type(_type), mD2(new double[NT])
 		// type==0 use self-consistent Debye mass
 		for (size_t i=0; i<NT; i++){
 			double T = TL+dT*i;
-			mD2[i] = pf_g*alpha_s(0., T)*T*T;
+			mD2[i] = pf_g*alpha_s(T, T)*T*T;
 		}
 	}
 	if (type==1) {
@@ -94,7 +94,7 @@ double M2_Qq2Qq(const double t, void * params){
 	double mt2 = t_channel_mD2->get_mD2(Temp);
 	double At = alpha_s(Q2t, Temp);
 	double Q2t_reg = Q2t - mt2;
-	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/std::pow(Q2t_reg, 2);
+	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/(Q2t-Lambda2);
 	if (result < 0.) return 0.;
 	else return result;
 }
@@ -111,7 +111,7 @@ double M2_Qq2Qq_rad(const double t, void * params){
 	double At = alpha_s(Q2t, Temp);
 	double mt2 = t_channel_mD2->get_mD2(Temp);
 	double Q2t_reg = Q2t - mt2;
-	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/std::pow(Q2t_reg, 2);
+	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/(Q2t-Lambda2);
 	if (result < 0.) return 0.;
 	else return result;
 }
@@ -141,7 +141,7 @@ double M2_Qg2Qg(const double t, void * params){
 	double Q2u_reg = Q2u>0?(Q2u + mt2):(Q2u-mt2);
 	double result = 0.0;
 	// t*t
-	result += 2.*At*At * Q2s*(-Q2u)/std::pow(Q2t_reg, 2);
+	result += 2.*At*At * Q2s*(-Q2u)/Q2t_reg/(Q2t-Lambda2);
 	// s*s
 	result += c4d9*As*As *
 			( Q2s*(-Q2u) + 2.*M2*(Q2s + 2.*M2) ) / std::pow(Q2s_reg, 2);
@@ -169,7 +169,7 @@ double M2_Qg2Qg_rad(const double t, void * params) {
 	double At = alpha_s(Q2t, Temp);
 	double mt2 = t_channel_mD2->get_mD2(Temp);
 	double Q2t_reg = Q2t - mt2;
-	double result = c16pi2*2.*At*At * Q2s*(-Q2u)/std::pow(Q2t_reg, 2);
+	double result = c16pi2*2.*At*At * Q2s*(-Q2u)/Q2t_reg/(Q2t - Lambda2);
 	if (result < 0.) return 0.;
 	else return result;
 }
@@ -224,27 +224,28 @@ double M2_Qq2Qqg(const double * x_, void * params_){
 	
 	double mD2 = t_channel_mD2->get_mD2(T);
 	double kt2 = kt*kt;
-	double x = (kmu.t()+kmu.z())/sqrts, xbar = (kmu.t()+std::abs(kmu.z()))/sqrts;
+	double kt_qt2 = kt2 - 2.*qx*kmu.x() + qt2;
+	double x = (kmu.t()+kmu.z())/sqrts, 
+	       xbar = (kmu.t()+std::abs(kmu.z()))/sqrts;
 	double one_minus_xbar = 1.-xbar;
-	double basic_denominator = kt2 + x*x*M2 + one_minus_xbar*mD2/2.;
-	double tauk = 2.*kmu.t()*one_minus_xbar/basic_denominator;
+	double iD1 = 1./(kt2 + x*x*M2),
+	       iD2 = 1./(kt_qt2 + x*x*M2 + mD2);
+	double tauk = 2.*one_minus_xbar*kmu.t()*iD1;
+	//double tauk2 = 2.*one_minus_xbar*kmu.t()*iD2;
+	//double tauk = kt2*iD1*iD1 > kt_qt2*iD2*iD2 ? tauk1 : tauk2;
 	// here u is the ratio of the mean-free-path over the formation length
 	// mean-free-path \sim mean-free-time*v_HQ,
 	// v_HQ = p/E = (s - M^2)/(s + M^2)
 	// formation length = tau_k*v_k = tau_k
 	double u = dt/tauk*(s-M2)/(s+M2);
 
-	// 2->2
 	double t = -2.*Qmax*(p4mu.t()+p4mu.z());
 	double M2_elastic = M2_Qq2Qq_rad(t, params);
 
-	// 1->2
 	double alpha_rad = alpha_s(kt2, T);
-	double iD1 = 1./basic_denominator,
-	       iD2 = 1./(basic_denominator - 2.*qx*kmu.x()  + qt2);
 	double Pg = alpha_rad*std::pow(one_minus_xbar, 2)
-				*f_LPM(u)
-				*(kt2*std::pow(iD1-iD2, 2.) + qt2*std::pow(iD2,2) + 2.*kmu.x()*qx*iD2*(iD1-iD2));
+      *f_LPM(u)
+      *(kt2*std::pow(iD1-iD2, 2.) + qt2*std::pow(iD2,2) + 2.*kmu.x()*qx*iD2*(iD1-iD2));
 	// Jacobian
 	double J = (1.0 - M2/s34) * M_PI/8./std::pow(2*M_PI,5) * kt * (kt + T) * ymax;
 	// 2->3 = 2->2 * 1->2
@@ -291,30 +292,31 @@ double M2_Qg2Qgg(const double * x_, void * params_){
 	// q-perp-vec, q = p2-p4, qperp = -p4perp
 	double qx = -p4mu.x(), qy = -p4mu.y();
 	double qt2 = qx*qx + qy*qy;
-	
+
 	double mD2 = t_channel_mD2->get_mD2(T);
-	double kt2 = kt*kt;
-	double x = (kmu.t()+kmu.z())/sqrts, xbar = (kmu.t()+std::abs(kmu.z()))/sqrts;
-	double one_minus_xbar = 1.-xbar;
-	double basic_denominator = kt2 + x*x*M2 + one_minus_xbar*mD2/2.;
-	double tauk = 2.*kmu.t()*one_minus_xbar/basic_denominator;
-	// here u is the ratio of the mean-free-path over the formation length
-	// mean-free-path \sim mean-free-time*v_HQ,
-	// v_HQ = p/E = (s - M^2)/(s + M^2)
-	// formation length = tau_k*v_k = tau_k
+        double kt2 = kt*kt;
+        double kt_qt2 = kt2 - 2.*qx*kmu.x() + qt2;
+        double x = (kmu.t()+kmu.z())/sqrts,
+               xbar = (kmu.t()+std::abs(kmu.z()))/sqrts;
+        double one_minus_xbar = 1.-xbar;
+        double iD1 = 1./(kt2 + x*x*M2),
+               iD2 = 1./(kt_qt2 + x*x*M2 + mD2);
+        double tauk = 2.*one_minus_xbar*kmu.t()*iD1;
+        //double tauk2 = 2.*one_minus_xbar*kmu.t()*iD2;
+        //double tauk = kt2*iD1*iD1 > kt_qt2*iD2*iD2 ? tauk1 : tauk2;
+
+
 	double u = dt/tauk*(s-M2)/(s+M2);
 
-	// 2->2
-	double t = -2.*Qmax*(p4mu.t()+p4mu.z());
-	double M2_elastic = M2_Qg2Qg_rad(t, params);
+        double t = -2.*Qmax*(p4mu.t()+p4mu.z());
+        double M2_elastic = M2_Qg2Qg_rad(t, params);
 
-	// 1->2
-	double alpha_rad = alpha_s(kt2, T);
-	double iD1 = 1./basic_denominator,
-	       iD2 = 1./(basic_denominator - 2.*qx*kmu.x()  + qt2);
-	double Pg = alpha_rad*std::pow(one_minus_xbar, 2)
-				*f_LPM(u)
-				*(kt2*std::pow(iD1-iD2, 2.) + qt2*std::pow(iD2,2) + 2.*kmu.x()*qx*iD2*(iD1-iD2));
+        double alpha_rad = alpha_s(kt2, T);
+        double Pg = alpha_rad*std::pow(one_minus_xbar, 2)
+      *f_LPM(u)
+      *(kt2*std::pow(iD1-iD2, 2.) + qt2*std::pow(iD2,2) + 2.*kmu.x()*qx*iD2*(iD1-iD2));
+
+
 	// Jacobian
 	double J = (1.0 - M2/s34) * M_PI/8./std::pow(2*M_PI,5) * kt * (kt + T) * ymax;
 	// 2->3 = 2->2 * 1->2

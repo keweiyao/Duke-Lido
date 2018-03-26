@@ -44,7 +44,7 @@ void init_process(Process& r, std::string mode){
 void initialize(std::string mode, std::string path, double mu){
 	
 	boost::property_tree::ptree config;
-    	initialize_mD_and_scale(0, mu);
+    	initialize_mD_and_scale(1, mu);
 
 	AllProcesses[4] = std::vector<Process>();
 	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", path, dX_Qq2Qq_dt) );
