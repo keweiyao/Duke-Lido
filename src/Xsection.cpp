@@ -10,9 +10,9 @@
 
 template<>
 Xsection<2, double(*)(const double, void*)>::
-	Xsection(std::string Name, std::string configfile, 
+	Xsection(std::string Name, std::string configfile,
 			double(*f)(const double, void*)):
-StochasticBase<2>(Name+"/xsection", configfile), 
+StochasticBase<2>(Name+"/xsection", configfile),
 _f(f), fast_exp_(0., 15., 1000)
 {
 	// read configfile
@@ -26,7 +26,7 @@ _f(f), fast_exp_(0., 15., 1000)
 	std::string process_name = strs[1];
 	auto tree = config.get_child(model_name+"."+process_name);
 	_mass = tree.get<double>("mass");
-	
+
 	// Set Approximate function for X and dX_max
 	StochasticBase<2>::_ZeroMoment->SetApproximateFunction(approx_X22);
 	StochasticBase<2>::_FunctionMax->SetApproximateFunction(approx_dX22_max);
@@ -34,9 +34,9 @@ _f(f), fast_exp_(0., 15., 1000)
 
 template<>
 Xsection<3, double(*)(const double *, void*)>::
-	Xsection(std::string Name, std::string configfile, 
+	Xsection(std::string Name, std::string configfile,
 			double(*f)(const double*, void*)):
-StochasticBase<3>(Name+"/xsection", configfile), 
+StochasticBase<3>(Name+"/xsection", configfile),
 _f(f), fast_exp_(0., 15., 1000)
 {
 	// read configfile
@@ -50,10 +50,34 @@ _f(f), fast_exp_(0., 15., 1000)
 	std::string process_name = strs[1];
 	auto tree = config.get_child(model_name+"."+process_name);
 	_mass = tree.get<double>("mass");
-	
+
 	// Set Approximate function for X and dX_max
 	StochasticBase<3>::_ZeroMoment->SetApproximateFunction(approx_X23);
 	StochasticBase<3>::_FunctionMax->SetApproximateFunction(approx_dX23_max);
+}
+
+template<>
+Xsection<5, double(*)(const double *, void*)>::
+	Xsection(std::string Name, std::string configfile,
+			double(*f)(const double*, void*)):
+StochasticBase<5>(Name+"/xsection", configfile),
+_f(f), fast_exp_(0., 15., 1000)
+{
+	// read configfile
+	boost::property_tree::ptree config;
+	std::ifstream input(configfile);
+	read_xml(input, config);
+
+	std::vector<std::string> strs;
+	boost::split(strs, Name, boost::is_any_of("/"));
+	std::string model_name = strs[0];
+	std::string process_name = strs[1];
+	auto tree = config.get_child(model_name+"."+process_name);
+	_mass = tree.get<double>("mass");
+
+	// Set Approximate function for X and dX_max
+	//StochasticBase<3>::_ZeroMoment->SetApproximateFunction(approx_X23);
+	//StochasticBase<3>::_FunctionMax->SetApproximateFunction(approx_dX23_max);
 }
 
 /*****************************************************************/
@@ -62,11 +86,11 @@ _f(f), fast_exp_(0., 15., 1000)
 /*------------------Implementation for 2 -> 2--------------------*/
 template<>
 void Xsection<2, double(*)(const double, void*)>::
-		sample(std::vector<double> parameters, 
+		sample(std::vector<double> parameters,
 				std::vector< fourvec > & FS){
 	double sqrts = std::max(parameters[0], 1.4), temp = parameters[1];
 	double s = std::pow(sqrts,2);
-    // transform w = -log(1-t/Temp^2) 
+    // transform w = -log(1-t/Temp^2)
     // since nearly everything happens when t ~ T^2
 	auto dXdw = [s, temp, this](double w) {
         double T2 = temp*temp;
@@ -76,7 +100,7 @@ void Xsection<2, double(*)(const double, void*)>::
 		return this->_f(t, params)*Jacobian;
 	};
 	double tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0.;
-    double wmin = -std::log(1.-tmin/temp/temp), 
+    double wmin = -std::log(1.-tmin/temp/temp),
 		   wmax = -std::log(1.-tmax/temp/temp);
 	double w = sample_1d(dXdw, {wmin, wmax}, StochasticBase<2>::GetFmax(parameters).s);
 	double t = temp*temp*(1.-fast_exp_(-w));
@@ -98,7 +122,7 @@ template<>
 void Xsection<3, double(*)(const double*, void*)>::
 	sample(std::vector<double> parameters,
 			std::vector< fourvec > & FS){
-	double sqrts = std::max(parameters[0], 1.4), temp = parameters[1], 
+	double sqrts = std::max(parameters[0], 1.4), temp = parameters[1],
 		   delta_t = parameters[2];
 	double s = sqrts*sqrts;
 	double Qmax = (s-_mass*_mass)/2./sqrts;
@@ -115,11 +139,11 @@ void Xsection<3, double(*)(const double*, void*)>::
 		double params[4] = {s, temp, M, delta_t};
 		return this->_f(x, params)/2./(s-_mass*_mass)*Jacobian;
 	};
-	
+
 	double xmin[4] = {0., -1.,  x2min, 0.};
 	double xmax[4] = {umax, 1., x2max, 2.*M_PI};
 	double fmax = StochasticBase<3>::GetFmax(parameters).s;
-	auto res = sample_nd(dXdPS, 4, {{xmin[0], xmax[0]}, {xmin[1], xmax[1]}, 
+	auto res = sample_nd(dXdPS, 4, {{xmin[0], xmax[0]}, {xmin[1], xmax[1]},
 									{xmin[2], xmax[2]}, {xmin[3], xmax[3]}},
 									fmax);
 	// deconvolve parameter
@@ -131,7 +155,7 @@ void Xsection<3, double(*)(const double*, void*)>::
 	double phi = Srandom::dist_phi(Srandom::gen);
 	// reconstruct momentums
 	double M2 = _mass*_mass;
-	fourvec kmu{kt*std::cosh(yk), kt*std::cos(phi), 
+	fourvec kmu{kt*std::cosh(yk), kt*std::cos(phi),
 			    kt*std::sin(phi), kt*std::sinh(yk)}; // k
 	double s34 = s - 2.*sqrts*kmu.t();
 	double sqrts34 = std::sqrt(s34);
@@ -141,20 +165,25 @@ void Xsection<3, double(*)(const double*, void*)>::
 		   sintheta34 = std::sqrt(1.-std::pow(costheta34,2));
 	fourvec p3mu{E34, Q34*sintheta34*cosphi34, Q34*sintheta34*sinphi34, Q34*costheta34},
 		p4mu{Q34, -Q34*sintheta34*cosphi34, -Q34*sintheta34*sinphi34, -Q34*costheta34};
-				
+
 	// boost p3, p4 back to 3-body CoM Frame
 	double V0 = sqrts - kmu.t();
 	double v34[3] = {-kmu.x()/V0, -kmu.y()/V0, -kmu.z()/V0};
 	p3mu = p3mu.boost_back(v34[0], v34[1], v34[2]); // p3
 	p4mu = p4mu.boost_back(v34[0], v34[1], v34[2]); // p4
-	
+
 	//FS.resize(3); // HQ + light parton
 	FS.clear();
 	FS.push_back(p3mu);
 	FS.push_back(p4mu);
 	FS.push_back(kmu);
 }
-
+/*------------------Implementation for 3 -> 2--------------------*/
+template<>
+void Xsection<5, double(*)(const double*, void*)>::
+	sample(std::vector<double> parameters,
+			std::vector< fourvec > & FS){
+}
 /*****************************************************************/
 /*******************find max of dX/dPS ***************************/
 /*****************************************************************/
@@ -163,7 +192,7 @@ template<>
 scalar Xsection<2, double(*)(const double, void*)>::
 	find_max(std::vector<double> parameters){
     double s = std::pow(parameters[0],2), temp = parameters[1];
-    // transform w = -log(1-t/Temp^2) 
+    // transform w = -log(1-t/Temp^2)
     // since nearly everything happens when t ~ T^2
 	auto minus_dXdw = [s, temp, this](const double w) {
         double T2 = temp*temp;
@@ -173,7 +202,7 @@ scalar Xsection<2, double(*)(const double, void*)>::
 		return -(this->_f(t, params)*Jacobian);
 	};
 	double tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0;
-    double wmin = -std::log(1.-tmin/temp/temp), 
+    double wmin = -std::log(1.-tmin/temp/temp),
 		   wmax = -std::log(1.-tmax/temp/temp);
 	double res = -minimize_1d(minus_dXdw, {wmin, wmax}, 1e-8, 100, 1000);
 	return scalar{res*1.5};
@@ -182,9 +211,9 @@ scalar Xsection<2, double(*)(const double, void*)>::
 template<>
 scalar Xsection<3, double(*)(const double*, void*)>::
 	find_max(std::vector<double> parameters){
-	double sqrts = parameters[0], temp = parameters[1], 
+	double sqrts = parameters[0], temp = parameters[1],
 		   delta_t = parameters[2];
-	
+
 	double s = sqrts*sqrts;
 	double Qmax = (s-_mass*_mass)/2./sqrts;
 	double umax = std::log(1.+Qmax/temp);
@@ -210,8 +239,8 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 		double params[4] = {s, temp, M, delta_t};
 		return -this->_f(x, params)/2./(s-_mass*_mass)*Jacobian;
 	};
-	auto startloc = MC_maximize(dXdPS, 4, 
-			{{umax*0.4,umax*0.6}, {-0.2, 0.2}, 
+	auto startloc = MC_maximize(dXdPS, 4,
+			{{umax*0.4,umax*0.6}, {-0.2, 0.2},
 			 {x2min+Lx2/3., x2max-Lx2/3.}, {-0.5, 0.5}}, 400);
 	std::vector<double> step = {umax/20., 0.1, (x2max-x2min)/20., 0.1};
 	double L[4] = {0, -1, x2min, 0};
@@ -224,7 +253,11 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 										4000, Lx2*umax*4*M_PI/1e12);
 	return scalar{val*1.5};
 }
-
+template<>
+scalar Xsection<5, double(*)(const double*, void*)>::
+	find_max(std::vector<double> parameters){
+	return scalar{1.0};
+}
 /*****************************************************************/
 /*************************Integrate dX ***************************/
 /*****************************************************************/
@@ -233,7 +266,7 @@ template<>
 scalar Xsection<2, double(*)(const double, void*)>::
 		calculate_scalar(std::vector<double> parameters){
 	double s = std::pow(parameters[0],2), temp = parameters[1];
-    // transform w = -log(1-t/Temp^2) 
+    // transform w = -log(1-t/Temp^2)
     // since nearly everything happens when t ~ T^2
 	auto dXdw = [s, temp, this](double w) {
         double T2 = temp*temp;
@@ -243,7 +276,7 @@ scalar Xsection<2, double(*)(const double, void*)>::
 		return this->_f(t, params)*Jacobian;
 	};
 	double error, tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0.;
-    double wmin = -std::log(1.-tmin/temp/temp), 
+    double wmin = -std::log(1.-tmin/temp/temp),
 		   wmax = -std::log(1.-tmax/temp/temp+1e-9);
 	double res = quad_1d(dXdw, {wmin, wmax}, error);
 	return scalar{res};
@@ -252,7 +285,7 @@ scalar Xsection<2, double(*)(const double, void*)>::
 template<>
 scalar Xsection<3, double(*)(const double*, void*)>::
 				calculate_scalar(std::vector<double> parameters){
-	double sqrts = parameters[0], temp = parameters[1], 
+	double sqrts = parameters[0], temp = parameters[1],
 		   delta_t = parameters[2];
 	double s = sqrts*sqrts;
 	auto dXdPS = [s, temp, delta_t, this](const double * PS){
@@ -267,6 +300,28 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 	double error;
 	double res = vegas(dXdPS, 4, xmin, xmax, error);
 	return scalar{res};
+}
+/*------------------Implementation for 3 -> 2--------------------*/
+template<>
+scalar Xsection<5, double(*)(const double*, void*)>::
+				calculate_scalar(std::vector<double> parameters){
+	// xiel = s12/s
+	double sqrts = parameters[0], temp = parameters[1],
+		   xinel = parameters[2], yinel = parameters[3], dt = parameters[4];
+	double s = sqrts*sqrts;
+	auto dXdPS = [s, temp, xinel, yinel, dt, this](const double * PS){
+		double M = this->_mass;
+		double params[6] = {s, temp, M, xinel, yinel, dt};
+		std::vector<double> res{this->_f(PS, params)};
+		return res;
+	};
+	double xmin[2] = {-1., 0.};
+	double xmax[2] = {1., 2.*M_PI};
+	double error;
+	auto res = quad_nd(dXdPS, 2, 1, xmin, xmax, error);
+	if (error/res[0] > 0.01)
+	LOG_INFO << sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt << " " << res[0] << "+/-" << error/res[0];
+	return scalar{res[0]};
 }
 /*****************************************************************/
 /**************Integrate dX \Delta p^mu***************************/
@@ -337,7 +392,7 @@ tensor Xsection<2, double(*)(const double, void*)>::
 	};
 
 	double error, tmin = -std::pow(s-_mass*_mass, 2)/s, tmax=0;
-    double wmin = -std::log(1.-tmin/temp/temp), 
+    double wmin = -std::log(1.-tmin/temp/temp),
 		   wmax = -std::log(1.-tmax/temp/temp+1e-9);
     double dpzdpz = quad_1d(dpzdpz_dXdw, {wmin, wmax}, error);
 	double dptdpt = quad_1d(dptdpt_dXdw, {wmin, wmax}, error);
@@ -349,3 +404,4 @@ tensor Xsection<2, double(*)(const double, void*)>::
 // instance:
 template class Xsection<2, double(*)(const double, void*)>;
 template class Xsection<3, double(*)(const double*, void*)>;
+template class Xsection<5, double(*)(const double*, void*)>;

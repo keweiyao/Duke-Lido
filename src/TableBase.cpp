@@ -15,7 +15,7 @@ T default_approximate_function(Dvec values){
 
 template <typename T, size_t N>
 TableBase<T, N>::TableBase(std::string Name, Svec shape, Dvec low, Dvec high):
-_Name(Name), _rank(N), _power_rank(std::pow(2, _rank)), 
+_Name(Name), _rank(N), _power_rank(std::pow(2, _rank)),
 _shape(shape), _low(low), _high(high),_table(_shape)
 {
 	LOG_INFO<<_Name << " dim=" << _rank;
@@ -92,7 +92,7 @@ bool TableBase<T, N>::Save(std::string fname){
 		hdf5_add_scalar_attr(group, "low-"+std::to_string(i), _low[i]);
 		hdf5_add_scalar_attr(group, "high-"+std::to_string(i), _high[i]);
 	}
-	
+
 	boost::multi_array<double, N> buffer(_shape);
 	hsize_t dims[_rank];
 	for (auto i=0; i<_rank; ++i) dims[i]=_shape[i];
@@ -101,7 +101,7 @@ bool TableBase<T, N>::Save(std::string fname){
 
 	H5::DataSpace dataspace(_rank, dims);
 	auto datatype(H5::PredType::NATIVE_DOUBLE);
-	
+
 	for(auto comp=0; comp<T::size(); ++comp) {
 		for(auto i=0; i<_table.num_elements(); ++i) {
 			T item = _table.data()[i];
@@ -155,13 +155,10 @@ bool TableBase<T, N>::Load(std::string fname){
 
 template class TableBase<scalar, 2>;
 template class TableBase<scalar, 3>;
-template class TableBase<scalar, 4>;
+template class TableBase<scalar, 5>;
 template class TableBase<fourvec, 2>;
 template class TableBase<fourvec, 3>;
-template class TableBase<fourvec, 4>;
+template class TableBase<fourvec, 5>;
 template class TableBase<tensor, 2>;
 template class TableBase<tensor, 3>;
-template class TableBase<tensor, 4>;
-
-
-
+template class TableBase<tensor, 5>;

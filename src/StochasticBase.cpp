@@ -11,7 +11,7 @@ _Name(Name)
 	boost::property_tree::ptree config;
 	std::ifstream input(configfile);
 	read_xml(input, config);
-	
+
 	std::vector<std::string> strs, slots;
 	boost::split(strs, _Name, boost::is_any_of("/"));
 	auto model_name = strs[0];
@@ -29,13 +29,13 @@ _Name(Name)
 		low.push_back(tree.get<double>("L"+v));
 		high.push_back(tree.get<double>("H"+v));
 	}
-    _FunctionMax = 
+    _FunctionMax =
 		std::make_shared<TableBase<scalar, N>>(Name+"/fmax", shape, low, high);
-	_ZeroMoment = 
+	_ZeroMoment =
 		std::make_shared<TableBase<scalar, N>>(Name+"/scalar", shape, low, high);
-	_FirstMoment = 
+	_FirstMoment =
 		std::make_shared<TableBase<fourvec, N>>(Name+"/vector", shape, low, high);
-	_SecondMoment = 
+	_SecondMoment =
 		std::make_shared<TableBase<tensor, N>>(Name+"/tensor", shape, low, high);
 }
 
@@ -45,10 +45,10 @@ void StochasticBase<N>::load(std::string fname){
     _FunctionMax->Load(fname);
 	LOG_INFO << "Loading " << _Name+"/scalar";
 	_ZeroMoment->Load(fname);
-	LOG_INFO << "Loading " << _Name+"/vector";
+	/*LOG_INFO << "Loading " << _Name+"/vector";
 	_FirstMoment->Load(fname);
 	LOG_INFO << "Loading " << _Name+"/tensor";
-	_SecondMoment->Load(fname);
+	_SecondMoment->Load(fname);*/
 }
 
 
@@ -65,11 +65,11 @@ void StochasticBase<N>::init(std::string fname){
 		threads.push_back( std::thread(code, start, end) );
 	}
 	for(auto& t : threads) t.join();
-	
+
 	_FunctionMax->Save(fname);
 	_ZeroMoment->Save(fname);
-	_FirstMoment->Save(fname);
-	_SecondMoment->Save(fname);
+	/*_FirstMoment->Save(fname);
+	_SecondMoment->Save(fname);*/
 }
 
 template<size_t N>
@@ -79,22 +79,22 @@ void StochasticBase<N>::compute(int start, int end){
 	for(auto i=start; i<end; ++i){
 		size_t q = i;
 		for(int d=N-1; d>=0; d--){
-			size_t dim = _ZeroMoment->shape(d);	
+			size_t dim = _ZeroMoment->shape(d);
 			size_t n = q%dim;
 			q = q/dim;
 			index[d] = n;
 		}
-		_FunctionMax->SetTableValue(index, 
+		_FunctionMax->SetTableValue(index,
 						find_max(_FunctionMax->parameters(index))	);
-		_ZeroMoment->SetTableValue(index, 
+		_ZeroMoment->SetTableValue(index,
 						calculate_scalar(_ZeroMoment->parameters(index))	);
-		_FirstMoment->SetTableValue(index, 
+		/*_FirstMoment->SetTableValue(index,
 						calculate_fourvec(_FirstMoment->parameters(index))	);
-		_SecondMoment->SetTableValue(index, 
-						calculate_tensor(_SecondMoment->parameters(index))	);
+		_SecondMoment->SetTableValue(index,
+						calculate_tensor(_SecondMoment->parameters(index))	);*/
 	}
 }
 
 template class StochasticBase<2>;
 template class StochasticBase<3>;
-template class StochasticBase<4>;
+template class StochasticBase<5>;

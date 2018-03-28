@@ -7,6 +7,7 @@
 
 #include "simpleLogger.h"
 #include "workflow.h"
+#include "matrix_elements.h"
 
 
 void test_config(void);
@@ -14,14 +15,17 @@ void test_table(void);
 
 
 int main(int argc, char* argv[]){
-	probe_test(10.0, 0.4, 0.05, 100, 10000, "old");
+	initialize_mD_and_scale(1, 2.0);
+	auto rQqg2Qq = Rate<3, 5, double(*)(const double*, void*)> ("Boltzmann/cqg2cq", "settings.xml", Ker_Qqg2Qq);
+	rQqg2Qq.initX("table.h5");
+	rQqg2Qq.init("table.h5");
 	return 0;
 }
 
 
-		
 
- 
+
+
 /*
 void test_x(void){
 	using boost::property_tree::ptree;
@@ -46,19 +50,19 @@ void test_config(void){
 		std::cout << std::endl << v.first << std::endl;
         if( v.first > "process" ) {
            std::cout << v.second.get<std::string>("name") << " "
-					<< v.second.get("<xmlattr>.status", "-") 
+					<< v.second.get("<xmlattr>.status", "-")
 					<< std::endl
          			<< v.second.get<std::string>("probe") << std::endl;
 			std::cout << "x-table info:" << std::endl;
 			for(auto & vv: pt.get_child("Boltzmann."+v.first+".xsection") ){
-				std::cout << "\t" << vv.first << " " 
+				std::cout << "\t" << vv.first << " "
 						   << vv.second.get("<xmlattr>.name", "none") << " "
 							<< vv.second.data() << " "
 							<< std::endl;
 			}
 			std::cout << "r-table info:" << std::endl;;
 			for(auto & vv: pt.get_child("Boltzmann."+v.first+".rate")){
-				std::cout << "\t" << vv.first << " " 
+				std::cout << "\t" << vv.first << " "
 						   << vv.second.get("<xmlattr>.name", "none") << " "
 							<< vv.second.data() << " "
 							<< std::endl;
@@ -91,7 +95,7 @@ void test_table(void){
     	}
     }
     std::cout << T2.InterpolateTable({.3,.3,.0}) << std::endl;
-    
+
     TableBase<fourvec,3> T3(std::string("Table3"), {{5,5,10}}, {{0,0,0}}, {{1,1,3}});
     for (auto i=0; i<5; ++i) {
    		for (auto j=0; j<5; ++j) {
@@ -101,12 +105,11 @@ void test_table(void){
     	}
     }
     std::cout << T3.InterpolateTable({.3,.3,.3}).boost_to(0.99, 0., 0.) << std::endl;
-    
-    
+
+
     T3.Save("field.h5");
-    TableBase<fourvec,3> T4(std::string("Table3"), {{5,5,10}}, {{0,0,0}}, {{1,1,3}});    
+    TableBase<fourvec,3> T4(std::string("Table3"), {{5,5,10}}, {{0,0,0}}, {{1,1,3}});
     T4.Load("field.h5");
     T4.Save("field-2.h5");
 
 }*/
-

@@ -42,7 +42,7 @@ void init_process(Process& r, std::string mode){
 
 
 void initialize(std::string mode, std::string path, double mu){
-	
+
 	boost::property_tree::ptree config;
     	initialize_mD_and_scale(1, mu);
 
@@ -61,7 +61,7 @@ void initialize(std::string mode, std::string path, double mu){
 	BOOST_FOREACH(Process& r, AllProcesses[5]) init_process(r, mode);
 }
 
-int update_particle_momentum(double dt, double temp, std::vector<double> v3cell, 
+int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 			int pid, double D_formation_t, fourvec incoming_p, std::vector<fourvec> & FS){
 	int absid = std::abs(pid);
 	auto p_cell = incoming_p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
@@ -79,7 +79,7 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 					dR = boost::get<Rate22>(r).GetZeroM(
 												{E_cell, temp}).s * dt_cell;
 				else dR = 0.0;
-				P_channels[channel] = P_total + dR;	
+				P_channels[channel] = P_total + dR;
 				break;
 			case 1:
 				if (boost::get<Rate23>(r).IsActive())
@@ -102,7 +102,7 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 		double p = Srandom::init_dis(Srandom::gen);
 		for(int i=0; i<P_channels.size(); ++i){
 			if (P_channels[i] > p) {
-				channel = i; 
+				channel = i;
 				break;
 			}
 		}
@@ -133,9 +133,9 @@ void probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Npartic
 /*	double fmc_to_GeV_m1 = 5.026;
 	initialize(mode,"settings.xml", 2.0);
 	double M = 1.3;
-	
+
 	std::vector<particle> plist(Nparticles);
-	for (auto & p : plist) { 
+	for (auto & p : plist) {
 		p.pid = 4;
 		p.x = fourvec{0,0,0,0};
 		p.p = fourvec{E0, 0, 0, std::sqrt(E0*E0-M*M)};
@@ -152,15 +152,14 @@ void probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Npartic
 		}
 		for (auto & p : plist){
 			std::vector<fourvec> FS;
-			int channel = update_particle_momentum(dt*fmc_to_GeV_m1, T, 
+			int channel = update_particle_momentum(dt*fmc_to_GeV_m1, T,
 				{0.0, 0.0, 0.0}, (p.x.t()-p.t_rad)*fmc_to_GeV_m1, p.p, FS);
-			
+
 			p.freestream(dt);
-			if (channel>=0) { 
+			if (channel>=0) {
 				p.p = FS[0];
 				if (channel == 2 || channel ==3) p.t_rad = time;
 			}
 		}
 	}*/
 }
-
