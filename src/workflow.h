@@ -27,7 +27,7 @@ struct particle{
 
 typedef Rate<2, 2, double(*)(const double, void*)> Rate22;
 typedef Rate<3, 3, double(*)(const double*, void*)> Rate23;
-typedef Rate<3, 5, double(*)(const double*, void*)> Rate32;
+typedef Rate<3, 4, double(*)(const double*, void*)> Rate32;
 typedef boost::variant<Rate22, Rate23, Rate32> Process;
 extern std::map<int, std::vector<Process>> AllProcesses;
 void initialize(std::string, std::string path, double mu);

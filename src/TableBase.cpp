@@ -155,10 +155,10 @@ bool TableBase<T, N>::Load(std::string fname){
 
 template class TableBase<scalar, 2>;
 template class TableBase<scalar, 3>;
-template class TableBase<scalar, 5>;
+template class TableBase<scalar, 4>;
 template class TableBase<fourvec, 2>;
 template class TableBase<fourvec, 3>;
-template class TableBase<fourvec, 5>;
+template class TableBase<fourvec, 4>;
 template class TableBase<tensor, 2>;
 template class TableBase<tensor, 3>;
-template class TableBase<tensor, 5>;
+template class TableBase<tensor, 4>;

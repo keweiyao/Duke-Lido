@@ -57,10 +57,10 @@ _f(f), fast_exp_(0., 15., 1000)
 }
 
 template<>
-Xsection<5, double(*)(const double *, void*)>::
+Xsection<4, double(*)(const double *, void*)>::
 	Xsection(std::string Name, std::string configfile,
 			double(*f)(const double*, void*)):
-StochasticBase<5>(Name+"/xsection", configfile),
+StochasticBase<4>(Name+"/xsection", configfile),
 _f(f), fast_exp_(0., 15., 1000)
 {
 	// read configfile
@@ -76,8 +76,8 @@ _f(f), fast_exp_(0., 15., 1000)
 	_mass = tree.get<double>("mass");
 
 	// Set Approximate function for X and dX_max
-	StochasticBase<5>::_ZeroMoment->SetApproximateFunction(approx_X32);
-	StochasticBase<5>::_FunctionMax->SetApproximateFunction(approx_dX32_max);
+	//StochasticBase<4>::_ZeroMoment->SetApproximateFunction(approx_X32);
+	//StochasticBase<4>::_FunctionMax->SetApproximateFunction(approx_dX32_max);
 }
 
 /*****************************************************************/
@@ -180,18 +180,18 @@ void Xsection<3, double(*)(const double*, void*)>::
 }
 /*------------------Implementation for 3 -> 2--------------------*/
 template<>
-void Xsection<5, double(*)(const double*, void*)>::
+void Xsection<4, double(*)(const double*, void*)>::
 	sample(std::vector<double> parameters,
 			std::vector< fourvec > & FS){
 	double sqrts = parameters[0], temp = parameters[1],
-		   xinel = parameters[2], yinel = parameters[3], dt = parameters[4];
+		   xinel = parameters[2], yinel = parameters[3];
 	double s = sqrts*sqrts;
-	auto dXdPS = [s, temp, xinel, yinel, dt, this](const double * PS){
+	auto dXdPS = [s, temp, xinel, yinel, this](const double * PS){
 		double M = this->_mass;
-		double params[6] = {s, temp, M, xinel, yinel, dt};
+		double params[5] = {s, temp, M, xinel, yinel};
 		return this->_f(PS, params);
 	};
-	double fmax = StochasticBase<5>::GetFmax(parameters).s;
+	double fmax = std::exp(StochasticBase<4>::GetFmax(parameters).s);
 	//LOG_INFO << "dX(sqrts, T, x, y, dt) " << sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt;
 	auto res = sample_nd(dXdPS, 2, {{-1., 1.}, {0., 2.*M_PI}}, fmax);
 
@@ -296,24 +296,23 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 }
 /*------------------Implementation for 3 -> 2--------------------*/
 template<>
-scalar Xsection<5, double(*)(const double*, void*)>::
+scalar Xsection<4, double(*)(const double*, void*)>::
 	find_max(std::vector<double> parameters){
 		double sqrts = parameters[0], temp = parameters[1],
-			   xinel = parameters[2], yinel = parameters[3], dt = parameters[4];
+			   xinel = parameters[2], yinel = parameters[3];
 		double s = sqrts*sqrts;
-		LOG_INFO << "dXM "<< sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt;
-		auto dXdPS = [s, temp, xinel, yinel, dt, this](const double * PS){
+		auto dXdPS = [s, temp, xinel, yinel, this](const double * PS){
 			double M = this->_mass;
-			double params[6] = {s, temp, M, xinel, yinel, dt};
+			double params[5] = {s, temp, M, xinel, yinel};
 			return this->_f(PS, params);
 		};
-		auto nega_dXdPS = [s, temp, xinel, yinel, dt, this](const double * PS){
+		auto nega_dXdPS = [s, temp, xinel, yinel, this](const double * PS){
 			double M = this->_mass;
-			double params[6] = {s, temp, M, xinel, yinel, dt};
+			double params[5] = {s, temp, M, xinel, yinel};
 			return -this->_f(PS, params);
 		};
 		// use MC_maximize to get into the vincinity ot the extrma
-		auto startloc = MC_maximize(dXdPS, 2, {{-.5, .5}, {M_PI/2.,1.5*M_PI}}, 20);
+		auto startloc = MC_maximize(dXdPS, 2, {{-1., 1.}, {0.,2.*M_PI}}, 100);
 		// use the best result of MC_maximize and determine the step of the simplex minimization method
 		std::vector<double> step = {0.1, 0.1};
 		double L[2] = {-1., 0.};
@@ -323,10 +322,10 @@ scalar Xsection<5, double(*)(const double*, void*)>::
 			step[i] = std::min(dx, step[i]);
 		}
 		// find the more precise maximum by the simplex method
-		double val = -minimize_nd(nega_dXdPS, 2, startloc, step, 1000, 2*2*M_PI/1e8);
+		double val = std::log(-minimize_nd(nega_dXdPS, 2, startloc, step, 10000, 2*2*M_PI/1e8)*2.);
 		// save max*1.5 just to be safe
-		LOG_INFO << "done "<< sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt;
-		return scalar{val*2.};
+
+		return scalar{val};
 }
 /*****************************************************************/
 /*************************Integrate dX ***************************/
@@ -373,17 +372,16 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 }
 /*------------------Implementation for 3 -> 2--------------------*/
 template<>
-scalar Xsection<5, double(*)(const double*, void*)>::
+scalar Xsection<4, double(*)(const double*, void*)>::
 				calculate_scalar(std::vector<double> parameters){
 
 	// xiel = s12/s
 	double sqrts = parameters[0], temp = parameters[1],
-		   xinel = parameters[2], yinel = parameters[3], dt = parameters[4];
-    LOG_INFO << "Xtot "<< sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt;
+		   xinel = parameters[2], yinel = parameters[3];
 	double s = sqrts*sqrts;
-	auto dXdPS = [s, temp, xinel, yinel, dt, this](const double * PS){
+	auto dXdPS = [s, temp, xinel, yinel, this](const double * PS){
 		double M = this->_mass;
-		double params[6] = {s, temp, M, xinel, yinel, dt};
+		double params[5] = {s, temp, M, xinel, yinel};
 		std::vector<double> res{this->_f(PS, params)};
 		return res;
 	};
@@ -391,10 +389,9 @@ scalar Xsection<5, double(*)(const double*, void*)>::
 	double xmax[2] = {1., 2.*M_PI};
 	double error;
 	auto res = quad_nd(dXdPS, 2, 1, xmin, xmax, error);
-	//LOG_INFO << "done "<< sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt;
-	//if (error/res[0] > 0.01)
-	//LOG_INFO << sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt << " " << res[0] << "+/-" << error/res[0];
-	return scalar{res[0]};
+	double result = std::log(res[0]);
+
+	return scalar{result};
 }
 /*****************************************************************/
 /**************Integrate dX \Delta p^mu***************************/
@@ -477,4 +474,4 @@ tensor Xsection<2, double(*)(const double, void*)>::
 // instance:
 template class Xsection<2, double(*)(const double, void*)>;
 template class Xsection<3, double(*)(const double*, void*)>;
-template class Xsection<5, double(*)(const double*, void*)>;
+template class Xsection<4, double(*)(const double*, void*)>;

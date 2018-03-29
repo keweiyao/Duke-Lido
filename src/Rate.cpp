@@ -4,6 +4,7 @@
 #include "minimizer.h"
 #include "random.h"
 #include "approx_functions.h"
+#include "matrix_elements.h"
 
 template <>
 Rate<2, 2, double(*)(const double, void *)>::
@@ -56,10 +57,10 @@ X(std::make_shared<Xsection<3, double(*)(const double*, void *)>>(Name, configfi
 }
 
 template <>
-Rate<3, 5, double(*)(const double*, void *)>::
+Rate<3, 4, double(*)(const double*, void *)>::
 	Rate(std::string Name, std::string configfile, double(*f)(const double*, void *)):
 StochasticBase<3>(Name+"/rate", configfile),
-X(std::make_shared<Xsection<5, double(*)(const double*, void *)>>(Name, configfile, f) )
+X(std::make_shared<Xsection<4, double(*)(const double*, void *)>>(Name, configfile, f) )
 {
 	// read configfile
 	boost::property_tree::ptree config;
@@ -76,8 +77,8 @@ X(std::make_shared<Xsection<5, double(*)(const double*, void *)>>(Name, configfi
 	_active = (tree.get<std::string>("<xmlattr>.status")=="active")?true:false;
 
 	// Set Approximate function for X and dX_max
-	StochasticBase<3>::_ZeroMoment->SetApproximateFunction(approx_R32);
-	StochasticBase<3>::_FunctionMax->SetApproximateFunction(approx_dR32_max);
+	//StochasticBase<3>::_ZeroMoment->SetApproximateFunction(approx_R32);
+	//StochasticBase<3>::_FunctionMax->SetApproximateFunction(approx_dR32_max);
 }
 
 /*****************************************************************/
@@ -176,7 +177,7 @@ void Rate<3, 3, double(*)(const double*, void *)>::
 }
 /*------------------Implementation for 3 -> 2--------------------*/
 template <>
-void Rate<3, 5, double(*)(const double*, void *)>::
+void Rate<3, 4, double(*)(const double*, void *)>::
 		sample(std::vector<double> parameters,
 			std::vector< fourvec > & final_states){
 	double E = parameters[0];
@@ -204,10 +205,10 @@ void Rate<3, 5, double(*)(const double*, void *)>::
 		double dt12 = (dxmu.boost_to(v12[0], v12[1], v12[2])).t();
 		double xinel = (s12-M2)/(s-M2), yinel = (s1k/s-M2/s12)/(1.-s12/s)/(1.-M2/s12);
 		// interp Xsection
-		double Xtot = this->X->GetZeroM({sqrts, T, xinel, yinel, dt12}).s;
+		double Xtot = prefix_3to2(s, s12, s1k, dt12, M)*std::exp(this->X->GetZeroM({sqrts, T, xinel, yinel}).s);
 		return std::exp(-(k+E2)/T)*k*E2*Xtot/E/8./std::pow(2.*M_PI, 5);
 	};
-	auto res = sample_nd(code, 5, {{0., 10.*T}, {0., 10.*T}, {-1., 1.}, {-1., 1.}, {0., 2.*M_PI}}, StochasticBase<3>::GetFmax(parameters).s );
+	auto res = sample_nd(code, 5, {{0., 10.*T}, {0., 10.*T}, {-1., 1.}, {-1., 1.}, {0., 2.*M_PI}}, std::exp(StochasticBase<3>::GetFmax(parameters).s) );
 	// sample Xsection
 	double k = res[0];
 	double E2 = res[1];
@@ -298,7 +299,7 @@ scalar Rate<3, 3, double(*)(const double*, void*)>::
 }
 /*------------------Implementation for 3 -> 2--------------------*/
 template <>
-scalar Rate<3, 5, double(*)(const double*, void*)>::
+scalar Rate<3, 4, double(*)(const double*, void*)>::
 		find_max(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];
@@ -308,7 +309,7 @@ scalar Rate<3, 5, double(*)(const double*, void*)>::
 		double M = this->_mass;
 		double M2 = M*M;
 		double k = x[0], E2 = x[1], cosk = x[2], cos2 = x[3], phi2 = x[4];
-		if (k<0. || E2<0. || k>10*T || E2>10*T || std::abs(cosk)>1.|| std::abs(cos2)>1.|| phi2<0. || phi2 > 2.*M_PI) return 0.;
+		if (k<0.01*T || E2<0.01*T || k>8*T || E2>8*T || std::abs(cosk)>.999|| std::abs(cos2)>.999|| phi2<0. || phi2 > 2.*M_PI) return 0.;
 		double sink = std::sqrt(1.-cosk*cosk), sin2 = std::sqrt(1.-cos2*cos2);
 		double cosphi2 = std::cos(phi2), sinphi2 = std::sin(phi2);
 		double v1 = std::sqrt(1. - M*M/E/E);
@@ -323,11 +324,15 @@ scalar Rate<3, 5, double(*)(const double*, void*)>::
     	double dt12 = (dxmu.boost_to(v12[0], v12[1], v12[2])).t();
 		double xinel = (s12-M2)/(s-M2), yinel = (s1k/s-M2/s12)/(1.-s12/s)/(1.-M2/s12);
     	// interp Xsection
-		double Xtot = this->X->GetZeroM({sqrts, T, xinel, yinel, dt12}).s;
-		return -std::exp(-(k+E2)/T)*k*E2*Xtot/E/8./std::pow(2.*M_PI, 5);
+		double Xtot = prefix_3to2(s, s12, s1k, dt12, M)*std::exp(this->X->GetZeroM({sqrts, T, xinel, yinel}).s);
+		return std::exp(-(k+E2)/T)*k*E2*Xtot/E/8./std::pow(2.*M_PI, 5);
 	};
-	auto val = -minimize_nd(code, 5, {2*T,2*T,0,0,M_PI}, {T/2., T/2., 0.2, 0.2, 0.5}, 1000, 1e-12);
-	return scalar{val*2.};
+	auto loc = MC_maximize(code, 5,
+				{{T, T*2}, {T, T*2},{-.5, .5}, {-0.5, 0.5}, {1.5,2.}}, 500);
+	double xloc[5] = {loc[0],loc[1],loc[2],loc[3],loc[4]};
+	auto val = std::log(code(xloc)*2.);
+	//auto val = -minimize_nd(code, 5, {2*T,2*T,0,0,M_PI}, {T/2., T/2., 0.2, 0.2, 0.5}, 1000, 1e-12);
+	return scalar{val};
 }
 
 /*****************************************************************/
@@ -386,7 +391,7 @@ scalar Rate<3, 3, double(*)(const double*, void*)>::
 }
 /*------------------Implementation for 3 -> 2--------------------*/
 template <>
-scalar Rate<3, 5, double(*)(const double*, void*)>::
+scalar Rate<3, 4, double(*)(const double*, void*)>::
 		calculate_scalar(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];
@@ -410,7 +415,7 @@ scalar Rate<3, 5, double(*)(const double*, void*)>::
     	double dt12 = (dxmu.boost_to(v12[0], v12[1], v12[2])).t();
 		double xinel = (s12-M2)/(s-M2), yinel = (s1k/s-M2/s12)/(1.-s12/s)/(1.-M2/s12);
     	// interp Xsection
-		double Xtot = this->X->GetZeroM({sqrts, T, xinel, yinel, dt12}).s;
+		double Xtot = prefix_3to2(s, s12, s1k, dt12, M)*std::exp(this->X->GetZeroM({sqrts, T, xinel, yinel}).s);
 		return std::exp(-(k+E2)/T)*k*E2*Xtot/E/8./std::pow(2.*M_PI, 5);
 	};
 	double xmin[5] = {0.,   0.,  -1., -1, 0.};
@@ -513,4 +518,4 @@ tensor Rate<2, 2, double(*)(const double, void*)>::
 
 template class Rate<2,2,double(*)(const double, void*)>; // For 2->2
 template class Rate<3,3,double(*)(const double*, void*)>; // For 2->3
-template class Rate<3,5,double(*)(const double*, void*)>; // For 3->2
+template class Rate<3,4,double(*)(const double*, void*)>; // For 3->2

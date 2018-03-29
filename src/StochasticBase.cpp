@@ -111,4 +111,4 @@ void StochasticBase<N>::compute(int start, int end){
 
 template class StochasticBase<2>;
 template class StochasticBase<3>;
-template class StochasticBase<5>;
+template class StochasticBase<4>;

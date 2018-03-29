@@ -41,6 +41,8 @@ double M2_Qq2Qqg(const double * x_, void * params_);
 //=============Baisc function for Q+g --> Q+g+g==================================
 double M2_Qg2Qgg(const double * x_, void * params_);
 
+// 3->2 prefix
+double prefix_3to2(double s, double s12, double s1k, double dt, double M);
 //=============Baisc function for Q+q+g --> Q+q==================================
 double Ker_Qqg2Qq(const double * x_,  void * params_);
 //=============Baisc function for Q+g+g --> Q+g==================================
