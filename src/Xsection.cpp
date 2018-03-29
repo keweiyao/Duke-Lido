@@ -76,8 +76,8 @@ _f(f), fast_exp_(0., 15., 1000)
 	_mass = tree.get<double>("mass");
 
 	// Set Approximate function for X and dX_max
-	//StochasticBase<3>::_ZeroMoment->SetApproximateFunction(approx_X23);
-	//StochasticBase<3>::_FunctionMax->SetApproximateFunction(approx_dX23_max);
+	StochasticBase<5>::_ZeroMoment->SetApproximateFunction(approx_X32);
+	StochasticBase<5>::_FunctionMax->SetApproximateFunction(approx_dX32_max);
 }
 
 /*****************************************************************/
@@ -183,6 +183,43 @@ template<>
 void Xsection<5, double(*)(const double*, void*)>::
 	sample(std::vector<double> parameters,
 			std::vector< fourvec > & FS){
+	double sqrts = parameters[0], temp = parameters[1],
+		   xinel = parameters[2], yinel = parameters[3], dt = parameters[4];
+	double s = sqrts*sqrts;
+	auto dXdPS = [s, temp, xinel, yinel, dt, this](const double * PS){
+		double M = this->_mass;
+		double params[6] = {s, temp, M, xinel, yinel, dt};
+		return this->_f(PS, params);
+	};
+	double fmax = StochasticBase<5>::GetFmax(parameters).s;
+	//LOG_INFO << "dX(sqrts, T, x, y, dt) " << sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt;
+	auto res = sample_nd(dXdPS, 2, {{-1., 1.}, {0., 2.*M_PI}}, fmax);
+
+	double costheta34 = res[0], phi34 = res[1];
+	double sintheta34 = std::sqrt(1. - costheta34*costheta34),
+			sinphi34 = std::sin(phi34), cosphi34 = std::cos(phi34);
+	double M2 = _mass*_mass;
+	double s12 = xinel*(s-M2) + M2; // 0 < params[3] = xinel = (s12-M2)/(s-M2) < 1
+	double s1k = (yinel*(1-s12/s)*(1-M2/s12)+M2/s12)*s; // 0 < params[4] = yinel = (s1k/s-M2/s12)/(1-s12/s)/(1-M2/s12) < 1
+	double sqrts12 = std::sqrt(s12);
+	double E1 = (s12+M2)/2./sqrts12,  p1 = (s12-M2)/2./sqrts12;
+	double E3 = (s+M2)/2./sqrts, p3 = (s-M2)/2./sqrts;
+	double k = (s-s12)/2./sqrts12;
+	double costhetak = (M2 + 2.*E1*k - s1k)/2./p1/k;
+	double sinthetak = std::sqrt(1. - costhetak*costhetak);
+	double kt = k*sinthetak, kz = k*costhetak;
+	// get final state
+	fourvec Ptot{sqrts12+k, kt, 0., kz};
+	double vcom[3] = {Ptot.x()/Ptot.t(), Ptot.y()/Ptot.t(),Ptot.z()/Ptot.t()};
+	// final state in 34-com frame
+	fourvec p3mu{E3, p3*sintheta34*cosphi34, p3*sintheta34*sinphi34, p3*costheta34};
+	fourvec p4mu{p3, -p3mu.x(), -p3mu.y(), -p3mu.z()};
+	// boost final state back to 12-com frame
+	p3mu = p3mu.boost_back(vcom[0], vcom[1], vcom[2]);
+	p4mu = p4mu.boost_back(vcom[0], vcom[1], vcom[2]);
+	FS.clear();
+	FS.push_back(p3mu);
+	FS.push_back(p4mu);
 }
 /*****************************************************************/
 /*******************find max of dX/dPS ***************************/
@@ -239,9 +276,11 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 		double params[4] = {s, temp, M, delta_t};
 		return -this->_f(x, params)/2./(s-_mass*_mass)*Jacobian;
 	};
+	// use MC_maximize to get into the vincinity ot the extrma
 	auto startloc = MC_maximize(dXdPS, 4,
 			{{umax*0.4,umax*0.6}, {-0.2, 0.2},
 			 {x2min+Lx2/3., x2max-Lx2/3.}, {-0.5, 0.5}}, 400);
+	// use the best result of MC_maximize and determine the step of the simplex minimization method
 	std::vector<double> step = {umax/20., 0.1, (x2max-x2min)/20., 0.1};
 	double L[4] = {0, -1, x2min, 0};
 	double H[4] = {umax, 1, x2max, 2*M_PI};
@@ -249,14 +288,45 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 		double dx = std::min(H[i]-startloc[i], startloc[i]-L[i])/2.;
 		step[i] = std::min(dx, step[i]);
 	}
+	// find the more precise maximum by the simplex method
     double val = -minimize_nd(nega_dXdPS, 4, startloc, step,
 										4000, Lx2*umax*4*M_PI/1e12);
+	// save max*1.5 just to be safe
 	return scalar{val*1.5};
 }
+/*------------------Implementation for 3 -> 2--------------------*/
 template<>
 scalar Xsection<5, double(*)(const double*, void*)>::
 	find_max(std::vector<double> parameters){
-	return scalar{1.0};
+		double sqrts = parameters[0], temp = parameters[1],
+			   xinel = parameters[2], yinel = parameters[3], dt = parameters[4];
+		double s = sqrts*sqrts;
+		LOG_INFO << "dXM "<< sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt;
+		auto dXdPS = [s, temp, xinel, yinel, dt, this](const double * PS){
+			double M = this->_mass;
+			double params[6] = {s, temp, M, xinel, yinel, dt};
+			return this->_f(PS, params);
+		};
+		auto nega_dXdPS = [s, temp, xinel, yinel, dt, this](const double * PS){
+			double M = this->_mass;
+			double params[6] = {s, temp, M, xinel, yinel, dt};
+			return -this->_f(PS, params);
+		};
+		// use MC_maximize to get into the vincinity ot the extrma
+		auto startloc = MC_maximize(dXdPS, 2, {{-.5, .5}, {M_PI/2.,1.5*M_PI}}, 20);
+		// use the best result of MC_maximize and determine the step of the simplex minimization method
+		std::vector<double> step = {0.1, 0.1};
+		double L[2] = {-1., 0.};
+		double H[2] = {1., 2.*M_PI};
+		for(int i=0; i<2; i++){
+			double dx = std::min(H[i]-startloc[i], startloc[i]-L[i])/2.;
+			step[i] = std::min(dx, step[i]);
+		}
+		// find the more precise maximum by the simplex method
+		double val = -minimize_nd(nega_dXdPS, 2, startloc, step, 1000, 2*2*M_PI/1e8);
+		// save max*1.5 just to be safe
+		LOG_INFO << "done "<< sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt;
+		return scalar{val*2.};
 }
 /*****************************************************************/
 /*************************Integrate dX ***************************/
@@ -305,9 +375,11 @@ scalar Xsection<3, double(*)(const double*, void*)>::
 template<>
 scalar Xsection<5, double(*)(const double*, void*)>::
 				calculate_scalar(std::vector<double> parameters){
+
 	// xiel = s12/s
 	double sqrts = parameters[0], temp = parameters[1],
 		   xinel = parameters[2], yinel = parameters[3], dt = parameters[4];
+    LOG_INFO << "Xtot "<< sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt;
 	double s = sqrts*sqrts;
 	auto dXdPS = [s, temp, xinel, yinel, dt, this](const double * PS){
 		double M = this->_mass;
@@ -319,8 +391,9 @@ scalar Xsection<5, double(*)(const double*, void*)>::
 	double xmax[2] = {1., 2.*M_PI};
 	double error;
 	auto res = quad_nd(dXdPS, 2, 1, xmin, xmax, error);
-	if (error/res[0] > 0.01)
-	LOG_INFO << sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt << " " << res[0] << "+/-" << error/res[0];
+	//LOG_INFO << "done "<< sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt;
+	//if (error/res[0] > 0.01)
+	//LOG_INFO << sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt << " " << res[0] << "+/-" << error/res[0];
 	return scalar{res[0]};
 }
 /*****************************************************************/

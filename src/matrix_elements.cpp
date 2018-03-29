@@ -349,7 +349,6 @@ double Ker_Qqg2Qq(const double * x_, void * params_){
 	double E3 = (s+M2)/2./sqrts, p3 = (s-M2)/2./sqrts;
 	double k = (s-s12)/2./sqrts12;
 	double costhetak = (M2 + 2.*E1*k - s1k)/2./p1/k;
-	if (std::abs(costhetak) > 1.) LOG_INFO << "HHHHHH--?> " << costhetak;
 	double sinthetak = std::sqrt(1. - costhetak*costhetak);
 	double kt = k*sinthetak;
 	double kt2 = kt*kt;
@@ -418,7 +417,7 @@ double Ker_Qgg2Qg(const double * x_, void * params_){
 	double kt = k*sinthetak;
 	double kt2 = kt*kt;
 	double kz = k*costhetak;
-	double x = (k+kz)/sqrts12, xbar = (k+std::abs(kz))/sqrts12;
+	double x = -(k+kz)/sqrts12, xbar = (-k+std::abs(kz))/sqrts12;
     double mD2 = t_channel_mD2->get_mD2(T);
 
 	// get final state

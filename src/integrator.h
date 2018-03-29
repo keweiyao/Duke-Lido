@@ -169,7 +169,7 @@ public:
 template < typename F >
 std::vector<double> quad_nd(F func,
 		unsigned ndim, unsigned ndimf, const double * min, const double * max,
-		double&error, double epsabs=0., double epsrel=1e-2, int limit=1000000){
+		double&error, double epsabs=0., double epsrel=1e-2, int limit=10000){
 	return cubeture_nd<F>(func, limit).integrate(ndim, ndimf, min, max, epsabs, epsrel, error);
 }
 

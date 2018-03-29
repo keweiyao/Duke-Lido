@@ -34,6 +34,17 @@ void init_process(Process& r, std::string mode){
                                         }
                                 else return;
                                 break;
+						case 2:
+								if (boost::get<Rate32>(r).IsActive())
+										if(mode == "new"){
+												boost::get<Rate32>(r).initX("table.h5");
+												boost::get<Rate32>(r).init("table.h5");
+										} else{
+												boost::get<Rate32>(r).loadX("table.h5");
+												boost::get<Rate32>(r).load("table.h5");
+										}
+								else return;
+								break;
                         default:
                                 exit(-1);
                                 break;
@@ -51,21 +62,27 @@ void initialize(std::string mode, std::string path, double mu){
 	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", path, dX_Qg2Qg_dt) );
 	AllProcesses[4].push_back( Rate23("Boltzmann/cq2cqg", path, M2_Qq2Qqg) );
 	AllProcesses[4].push_back( Rate23("Boltzmann/cg2cgg", path, M2_Qg2Qgg) );
-        AllProcesses[5] = std::vector<Process>();
-        AllProcesses[5].push_back( Rate22("Boltzmann/bq2bq", path, dX_Qq2Qq_dt) );
-        AllProcesses[5].push_back( Rate22("Boltzmann/bg2bg", path, dX_Qg2Qg_dt) );
-        AllProcesses[5].push_back( Rate23("Boltzmann/bq2bqg", path, M2_Qq2Qqg) );
-        AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", path, M2_Qg2Qgg) );
+	AllProcesses[4].push_back( Rate32("Boltzmann/cqg2cq", path, Ker_Qqg2Qq) );
+	AllProcesses[4].push_back( Rate32("Boltzmann/cgg2cg", path, Ker_Qgg2Qg) );
+
+    AllProcesses[5] = std::vector<Process>();
+    AllProcesses[5].push_back( Rate22("Boltzmann/bq2bq", path, dX_Qq2Qq_dt) );
+    AllProcesses[5].push_back( Rate22("Boltzmann/bg2bg", path, dX_Qg2Qg_dt) );
+    AllProcesses[5].push_back( Rate23("Boltzmann/bq2bqg", path, M2_Qq2Qqg) );
+    AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", path, M2_Qg2Qgg) );
+	AllProcesses[5].push_back( Rate32("Boltzmann/bqg2bq", path, Ker_Qqg2Qq) );
+	AllProcesses[5].push_back( Rate32("Boltzmann/bgg2bg", path, Ker_Qgg2Qg) );
 
 	BOOST_FOREACH(Process& r, AllProcesses[4]) init_process(r, mode);
 	BOOST_FOREACH(Process& r, AllProcesses[5]) init_process(r, mode);
 }
 
 int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
-			int pid, double D_formation_t, fourvec incoming_p, std::vector<fourvec> & FS){
+			int pid, double D_formation_t23, double D_formation_t32, fourvec incoming_p, std::vector<fourvec> & FS){
 	int absid = std::abs(pid);
 	auto p_cell = incoming_p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
-	double D_formation_t_cell = D_formation_t / incoming_p.t() * p_cell.t();
+	double D_formation_t23_cell = D_formation_t23 / incoming_p.t() * p_cell.t();
+	double D_formation_t32_cell = D_formation_t32 / incoming_p.t() * p_cell.t();
 	double dt_cell = dt / incoming_p.t() * p_cell.t();
 	double E_cell = p_cell.t();
         std::vector<double> P_channels(AllProcesses[absid].size());
@@ -84,7 +101,14 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 			case 1:
 				if (boost::get<Rate23>(r).IsActive())
 					dR = boost::get<Rate23>(r).GetZeroM(
-									{E_cell, temp, D_formation_t_cell}).s * dt_cell;
+									{E_cell, temp, D_formation_t23_cell}).s * dt_cell;
+				else dR = 0.0;
+				P_channels[channel] = P_total + dR;
+				break;
+			case 2:
+				if (boost::get<Rate32>(r).IsActive())
+					dR = boost::get<Rate32>(r).GetZeroM(
+									{E_cell, temp, D_formation_t32_cell}).s * dt_cell;
 				else dR = 0.0;
 				P_channels[channel] = P_total + dR;
 				break;
@@ -114,7 +138,11 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 			break;
 		case 1:
 			boost::get<Rate23>(AllProcesses[absid][channel]).sample(
-											{E_cell, temp, D_formation_t_cell}, FS);
+											{E_cell, temp, D_formation_t23_cell}, FS);
+			break;
+		case 2:
+			boost::get<Rate32>(AllProcesses[absid][channel]).sample(
+											{E_cell, temp, D_formation_t32_cell}, FS);
 			break;
 		default:
 			LOG_FATAL << "Channel = " << channel << " not exists";

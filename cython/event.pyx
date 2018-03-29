@@ -226,8 +226,8 @@ cdef extern from "../src/workflow.h":
 	cdef void initialize(string mode, string path, double mu)
 	cdef int update_particle_momentum(double dt, double temp, 
 				vector[double] v3cell, int pid, 
-				double D_formation_t, fourvec incoming_p, 
-				vector[fourvec] & FS)
+				double D_formation_t23, double D_formation_t32,
+				fourvec incoming_p, vector[fourvec] & FS)
 
 cdef extern from "../src/Langevin.h":
 	cdef void initialize_transport_coeff(double A, double B)
@@ -347,6 +347,25 @@ cdef class event:
 				# check the variance of the sampling
 				stdx, stdy = np.std(X), np.std(Y)
 				print("std(x,y) = {:1.3f}, {:1.3f} [fm]".format(stdx, stdy) )
+			elif init_flags['type'] == 'probe':
+				print("Initialize for probe test")
+				E0 = init_flags['E0']
+				it = self.HQ_list[pid].begin()
+				p0 = [E0, 0, 0, sqrt(E0*E0-mass*mass)]
+				r0 = [0.0, 0.0, 0.0, 0.0]
+				while it != self.HQ_list[pid].end():
+					for i in range(4):
+						deref(it).p.a[i] = p0[i]
+						deref(it).p0.a[i] = p0[i]
+						deref(it).x.a[i] = r0[i]
+					deref(it).mass = mass
+					deref(it).t_rad = r0[0]
+					deref(it).t_absorb = r0[0]
+					deref(it).freezeout = False
+					deref(it).vcell = [0., 0., 0.]
+					deref(it).Tf = 0.
+					deref(it).pid = pid
+					inc(it)
 			else:
 				raise ValueError("Initilaiztion mode not defined")
 				exit()
@@ -477,7 +496,8 @@ cdef class event:
 				dt_lab*fmc_to_GeV_m1, # evolve for this time 
 				T, vcell, 	# fluid info
 				deref(it).pid, # particle pid
-				(deref(it).x.t() - deref(it).t_rad)*fmc_to_GeV_m1, # LPM effect
+				(deref(it).x.t() - deref(it).t_rad)*fmc_to_GeV_m1, # LPM effect for 2->3
+				(deref(it).x.t() - deref(it).t_absorb)*fmc_to_GeV_m1, # LPM effect for 3->2
 				deref(it).p, # Initial probe momentum
 				final_state # Final states
 			)
@@ -490,11 +510,11 @@ cdef class event:
 		elif channel == 2 or channel == 3:
 			deref(it).freestream(dt_lab)
 			deref(it).p = final_state[0]
-			#deref(it).t_rad = deref(it).x.t()
+			deref(it).t_rad = deref(it).x.t()
 		elif channel == 4 or channel == 5:
 			deref(it).freestream(dt_lab)
 			deref(it).p = final_state[0]
-			#deref(it).t_absorb = deref(it).x.t()
+			deref(it).t_absorb = deref(it).x.t()
 		else:
 			raise ValueError("Unknown channel")
 

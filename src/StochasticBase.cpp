@@ -18,6 +18,10 @@ _Name(Name)
 	auto process_name = strs[1];
 	auto quantity_name = strs[2];
 
+	// whether calculate moments of the object
+	auto tree1 = config.get_child(model_name+"."+process_name);
+	_with_moments = (tree1.get<std::string>("<xmlattr>.moments")=="on")?true:false;
+
 	auto tree = config.get_child(model_name+"."+process_name+"."+quantity_name);
 	std::string allslots = tree.get<std::string>("<xmlattr>.slots");
 	boost::split(slots, allslots, boost::is_any_of(",") );
@@ -29,14 +33,18 @@ _Name(Name)
 		low.push_back(tree.get<double>("L"+v));
 		high.push_back(tree.get<double>("H"+v));
 	}
+
+
     _FunctionMax =
 		std::make_shared<TableBase<scalar, N>>(Name+"/fmax", shape, low, high);
 	_ZeroMoment =
 		std::make_shared<TableBase<scalar, N>>(Name+"/scalar", shape, low, high);
-	_FirstMoment =
-		std::make_shared<TableBase<fourvec, N>>(Name+"/vector", shape, low, high);
-	_SecondMoment =
-		std::make_shared<TableBase<tensor, N>>(Name+"/tensor", shape, low, high);
+	if (_with_moments){
+		_FirstMoment =
+			std::make_shared<TableBase<fourvec, N>>(Name+"/vector", shape, low, high);
+		_SecondMoment =
+			std::make_shared<TableBase<tensor, N>>(Name+"/tensor", shape, low, high);
+	}
 }
 
 template<size_t N>
@@ -45,10 +53,12 @@ void StochasticBase<N>::load(std::string fname){
     _FunctionMax->Load(fname);
 	LOG_INFO << "Loading " << _Name+"/scalar";
 	_ZeroMoment->Load(fname);
-	/*LOG_INFO << "Loading " << _Name+"/vector";
-	_FirstMoment->Load(fname);
-	LOG_INFO << "Loading " << _Name+"/tensor";
-	_SecondMoment->Load(fname);*/
+	if (_with_moments){
+		LOG_INFO << "Loading " << _Name+"/vector";
+		_FirstMoment->Load(fname);
+		LOG_INFO << "Loading " << _Name+"/tensor";
+		_SecondMoment->Load(fname);
+	}
 }
 
 
@@ -68,8 +78,10 @@ void StochasticBase<N>::init(std::string fname){
 
 	_FunctionMax->Save(fname);
 	_ZeroMoment->Save(fname);
-	/*_FirstMoment->Save(fname);
-	_SecondMoment->Save(fname);*/
+	if (_with_moments){
+		_FirstMoment->Save(fname);
+		_SecondMoment->Save(fname);
+	}
 }
 
 template<size_t N>
@@ -88,10 +100,12 @@ void StochasticBase<N>::compute(int start, int end){
 						find_max(_FunctionMax->parameters(index))	);
 		_ZeroMoment->SetTableValue(index,
 						calculate_scalar(_ZeroMoment->parameters(index))	);
-		/*_FirstMoment->SetTableValue(index,
-						calculate_fourvec(_FirstMoment->parameters(index))	);
-		_SecondMoment->SetTableValue(index,
-						calculate_tensor(_SecondMoment->parameters(index))	);*/
+		if (_with_moments){
+			_FirstMoment->SetTableValue(index,
+							calculate_fourvec(_FirstMoment->parameters(index))	);
+			_SecondMoment->SetTableValue(index,
+							calculate_tensor(_SecondMoment->parameters(index))	);
+		}
 	}
 }
 

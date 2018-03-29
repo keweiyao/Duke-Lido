@@ -16,9 +16,20 @@ void test_table(void);
 
 int main(int argc, char* argv[]){
 	initialize_mD_and_scale(1, 2.0);
+	//auto rQq2Qqg = Rate<3, 3, double(*)(const double*, void*)> ("Boltzmann/cq2cqg", "settings.xml", M2_Qq2Qqg);
+	//rQq2Qqg.initX("table.h5");
+	//rQq2Qqg.init("table.h5");
 	auto rQqg2Qq = Rate<3, 5, double(*)(const double*, void*)> ("Boltzmann/cqg2cq", "settings.xml", Ker_Qqg2Qq);
 	rQqg2Qq.initX("table.h5");
 	rQqg2Qq.init("table.h5");
+	std::vector<fourvec> FS;
+	for (auto i=0; i<10000; i++){
+		double E = std::rand()*30./RAND_MAX + 1.4;
+		double T = std::rand()*0.85/RAND_MAX + 0.15;
+		double dt = std::rand()*29.9/RAND_MAX + 0.1;
+		//LOG_INFO << "E,T,dt = "<<E<< " "<<T<<" "<<dt;
+		rQqg2Qq.sample({E, T, dt}, FS);
+	}
 	return 0;
 }
 
