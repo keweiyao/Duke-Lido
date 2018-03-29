@@ -1,5 +1,7 @@
 *build/
-test/
+test/*
+dist/
+!test/*.py
 *demo/
 cython/*.cpp
 *info/
