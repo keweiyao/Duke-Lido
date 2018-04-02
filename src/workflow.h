@@ -34,6 +34,10 @@ void initialize(std::string, std::string path, double mu);
 int update_particle_momentum(double dt, double temp, std::vector<double> v3cell, int pid,
 				double D_formation_t23, double D_formation_t32, fourvec incoming_p, std::vector<fourvec> & FS);
 
-void probe_test(double E0, double T, double dt, int Nsteps,
+std::vector<double> probe_test(double E0, double T, double dt, int Nsteps,
 				int Nparticles, std::string mode);
+std::vector<std::vector<double>> rate_test(double E0, double T, double dt,
+	int Nsteps, int Nparticles, std::string mode, double rescale);
+
+
 #endif

@@ -1,5 +1,4 @@
 <Boltzmann>
-
 	<!-- (1) Add any 2->2 or 2->3 proceeses you want,
 		     so long as the matrix-elements is provided
 		 (2) The mass of the probe does not have to be heavy,
@@ -171,7 +170,7 @@
 	</bqg2bg>
 
 	<bgg2bg status="inactive" moments="off">
-		<mass>4.3</mass>
+		<mass>4.2</mass>
 		<degeneracy>576</degeneracy>
 		<xsection slots="sqrts,temp,xinel,yinel,delta_t">
 			<Nsqrts>20</Nsqrts> <Lsqrts>4.3</Lsqrts> <Hsqrts>20.0</Hsqrts>

@@ -2,7 +2,6 @@
 #define MATRIX_ELEMENTS_H
 #include <cstdlib>
 
-
 //======running coupling=======================================================
 double alpha_s(double Q2, double T);
 double f_LPM(double x);
@@ -19,6 +18,9 @@ public:
 	~Debye_mass(){delete[] mD2;};
 	double get_mD2(double T);
 };
+
+extern Debye_mass * t_channel_mD2;
+extern double renormalization_scale;
 
 //=====For external initialization of debye mass==============================
 void initialize_mD_and_scale(const unsigned int type, double scale);

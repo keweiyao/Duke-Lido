@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from setuptools import setup, Extension
 from Cython.Build import cythonize
 from glob import glob
@@ -12,9 +13,10 @@ for key, value in cfg_vars.items():
         cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
 
 libs=[path for path in os.environ['LD_LIBRARY_PATH'].split(':') if path]
+print(os.environ.get('LD_LIBRARY_PATH'))
 src = glob("./src/*.cpp")
 #-------------HqEvo Module------------------
-fileLBT = [	'cython/event.pyx'] + src
+fileLBT = ['cython/event.pyx'] + src
 modules = [
         Extension('event', 
         		 sources=fileLBT, 
@@ -24,7 +26,6 @@ modules = [
         		 extra_compile_args=["-std=c++11", '-fPIC'],
         		 libraries=["m", "gsl", "gslcblas", "boost_log", "boost_filesystem", "hdf5", "hdf5_cpp"])
 ]
-
 
 setup(
         ext_modules=cythonize(modules),

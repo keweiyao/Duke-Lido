@@ -5,3 +5,4 @@ dist/
 *demo/
 cython/*.cpp
 *info/
+dist

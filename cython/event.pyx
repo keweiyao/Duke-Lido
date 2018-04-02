@@ -12,13 +12,14 @@ import numpy as np
 cimport numpy as np
 import h5py
 import os
+from cython.parallel import parallel, prange
 
 import fortranformat as ff
 
 cdef double GeV_m1_to_fmc = 0.197
 cdef double fmc_to_GeV_m1 = 5.026
 cdef double little_below_one = 1. - 1e-6
-cdef double little_above_one = 1. + 1e-6		
+cdef double little_above_one = 1. + 1e-6
 
 #-----------Hydro reader class--------------------------------------
 cdef inline double finterp(double *** c, double rx, double ry, double rz):
@@ -224,10 +225,23 @@ cdef extern from "../src/workflow.h":
 		double Tf
 		void freestream(double dt)
 	cdef void initialize(string mode, string path, double mu)
-	cdef int update_particle_momentum(double dt, double temp, 
-				vector[double] v3cell, int pid, 
+	cdef int update_particle_momentum(double dt, double temp,
+				vector[double] v3cell, int pid,
 				double D_formation_t23, double D_formation_t32,
 				fourvec incoming_p, vector[fourvec] & FS)
+
+	cdef vector[double] probe_test(double E0, double T, double dt, int Nsteps,
+				int Nparticles, string mode);
+	cdef vector[vector[double]] rate_test(double E0, double T, double dt, int Nsteps,
+				int Nparticles, string mode, double rescale);
+
+def probe_run(E0, T, dt=0.05, Nsteps=100, Nparticles=10000, mode="old"):
+	dE = probe_test(E0, T, dt, Nsteps, Nparticles, mode,)
+	return dE;
+
+def rate_run(E0, T, dt=0.05, Nsteps=100, Nparticles=10000, mode="old", rescale=1.0):
+	r = rate_test(E0, T, dt, Nsteps, Nparticles, mode, rescale)
+	return r;
 
 cdef extern from "../src/Langevin.h":
 	cdef void initialize_transport_coeff(double A, double B)
@@ -251,7 +265,7 @@ cdef class event:
 	cdef double tau0, tau
 	cdef bool lgv
 
-	def __cinit__(self, preeq=None, medium=None, 
+	def __cinit__(self, preeq=None, medium=None,
 			LBT=None, LGV=None, Tc=0.154):
 		self.mode = medium['type']
 		self.hydro_reader = Medium(medium_flags=medium)
@@ -262,7 +276,7 @@ cdef class event:
 			self.fs_reader = Medium(medium_flags=preeq)
 			self.tau0 = self.fs_reader.init_tau()
 		self.tau = self.tau0
-		self.lgv = False	
+		self.lgv = False
 		self.Tc = Tc
 
 		# initialize LBT
@@ -272,14 +286,14 @@ cdef class event:
 			initialize("new", setting_path, LBT['mu'])
 		else:
 			initialize("old", setting_path, LBT['mu'])
-	
+
 		# initialize LGV
 		if LGV is not None:
 			if LGV['A']>1e-9 and LGV['B'] > 1e-9:
 				initialize_transport_coeff(LGV['A'], LGV['B'])
 				self.lgv = True
-			
-			
+
+
 	# The current time of the evolution.
 	def sys_time(self) :
 		return self.tau
@@ -313,7 +327,7 @@ cdef class event:
 				Y = []
 				while it != self.HQ_list[pid].end():
 					# Uniformly sample pT, phi, and ymin<y<ymax
-					# ymin, ymax are determined by the max-mT 
+					# ymin, ymax are determined by the max-mT
 					pT = np.random.uniform(pTmin, pTmax)
 					mT = sqrt(pT**2 + mass**2)
 					phipt = np.random.uniform(0, 2.*np.pi)
@@ -382,11 +396,11 @@ cdef class event:
 		cdef double T, tau_now, smaller_dtau
 		cdef vector[double] vcell
 		vcell.resize(3)
-		cdef vector[particle].iterator it 
+		cdef vector[particle].iterator it
 		for pid in [4,5]:
 			it = self.HQ_list[pid].begin()
 			while it != self.HQ_list[pid].end():
-				# use smaller time step than hydro 
+				# use smaller time step than hydro
 				for substeps in range(2):
 					smaller_dtau = self.fs_reader.dtau()/2.
 					# only update HQ that are not freezeout yet
@@ -397,17 +411,17 @@ cdef class event:
 						###############################################################
 						tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)
 						T, vcell[0], vcell[1], vcell[2] = \
-								self.fs_reader.interpF(tau_now, 
+								self.fs_reader.interpF(tau_now,
 								[deref(it).x.t(),deref(it).x.x(),
 								deref(it).x.y(),deref(it).x.z()],
 								['Temp', 'Vx', 'Vy', 'Vz'])
-						#	ensure |v| < 1.	
+						#	ensure |v| < 1.
 						vcell = regulate_v(vcell)
 						self.perform_HQ_step(it, tau_now, smaller_dtau, T, vcell)
 				inc(it)
 		return status
 
-	cpdef bool perform_hydro_step(self, 
+	cpdef bool perform_hydro_step(self,
 			StaticProperty={"Temp": 0.4, "Vx":0.0, "Vy":0.0, "Vz":0.0}	):
 		PyErr_CheckSignals()
 		if self.mode == 'dynamic':
@@ -423,11 +437,11 @@ cdef class event:
 		cdef double T, tau_now, smaller_dtau
 		cdef vector[double] vcell
 		vcell.resize(3)
-		cdef vector[particle].iterator it 
+		cdef vector[particle].iterator it
 		for pid in [4,5]:
 			it = self.HQ_list[pid].begin()
 			while it != self.HQ_list[pid].end():
-				# use smaller time step than hydro 
+				# use smaller time step than hydro
 				for substeps in range(2):
 					smaller_dtau = self.hydro_reader.dtau()/2.
 					# only update HQ that are not freezeout yet
@@ -441,18 +455,18 @@ cdef class event:
 						else:
 							tau_now = deref(it).x.t()
 						T, vcell[0], vcell[1], vcell[2] = \
-								self.hydro_reader.interpF(tau_now, 
+								self.hydro_reader.interpF(tau_now,
 								[deref(it).x.t(),deref(it).x.x(),
 								deref(it).x.y(),deref(it).x.z()],
 								['Temp', 'Vx', 'Vy', 'Vz'])
-						#	ensure |v| < 1.	
+						#	ensure |v| < 1.
 						vcell = regulate_v(vcell)
 						self.perform_HQ_step(it, tau_now, smaller_dtau, T, vcell)
-				inc(it)	
+				inc(it)
 		return status
 
-	cdef perform_HQ_step(self, vector[particle].iterator it, 
-						double tau_now, double dtau, 
+	cdef perform_HQ_step(self, vector[particle].iterator it,
+						double tau_now, double dtau,
 						double T, vector[double] vcell):
 		PyErr_CheckSignals()
 		cdef vector[fourvec] final_state
@@ -479,7 +493,7 @@ cdef class event:
 			t_m_zvz = deref(it).x.t() - deref(it).x.z()*vz
 			one_m_vz2 = 1. - vz*vz
 			dtau2 = dtau*(dtau+2*tau_now)
-		 
+
 			dt_lab = \
 				(sqrt(t_m_zvz**2+one_m_vz2*dtau2) - t_m_zvz)/one_m_vz2
 		else:
@@ -491,9 +505,9 @@ cdef class event:
 		# and return the full final states                            #
 		###############################################################
 		# time should be in GeV^-1 in the update function !!!
-		
+
 		channel = update_particle_momentum(
-				dt_lab*fmc_to_GeV_m1, # evolve for this time 
+				dt_lab*fmc_to_GeV_m1, # evolve for this time
 				T, vcell, 	# fluid info
 				deref(it).pid, # particle pid
 				(deref(it).x.t() - deref(it).t_rad)*fmc_to_GeV_m1, # LPM effect for 2->3
@@ -521,7 +535,7 @@ cdef class event:
 		## if langevin is on, additional modification to momentum after LBT
 		cdef fourvec pOut
 		if self.lgv:
-			Ito_update(dt_lab*fmc_to_GeV_m1, deref(it).mass, T, vcell, 
+			Ito_update(dt_lab*fmc_to_GeV_m1, deref(it).mass, T, vcell,
 						deref(it).p, pOut)
 			deref(it).p = pOut
 
@@ -569,4 +583,3 @@ cdef class event:
 					0., 0.])+'\n')
 				i += 1
 				inc(it)
-

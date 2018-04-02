@@ -55,7 +55,7 @@ void init_process(Process& r, std::string mode){
 void initialize(std::string mode, std::string path, double mu){
 
 	boost::property_tree::ptree config;
-    	initialize_mD_and_scale(1, mu);
+    initialize_mD_and_scale(1, mu);
 
 	AllProcesses[4] = std::vector<Process>();
 	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", path, dX_Qq2Qq_dt) );
@@ -157,37 +157,89 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 	return channel;
 }
 
-void probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Nparticles=10000, std::string mode="old"){
-/*	double fmc_to_GeV_m1 = 5.026;
-	initialize(mode,"settings.xml", 2.0);
-	double M = 1.3;
 
+std::vector<double> probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Nparticles=10000, std::string mode="old"){
+	double fmc_to_GeV_m1 = 5.026;
+	initialize(mode, "./settings.xml", 1.0);
+	double M = 1.3;
+	std::vector<double> dE;
 	std::vector<particle> plist(Nparticles);
+  fourvec p0{E0, 0, 0, std::sqrt(E0*E0-M*M)};
 	for (auto & p : plist) {
 		p.pid = 4;
 		p.x = fourvec{0,0,0,0};
-		p.p = fourvec{E0, 0, 0, std::sqrt(E0*E0-M*M)};
+		p.p = p0;
 		p.t_rad = 0.;
+		p.t_absorb = 0.;
 	}
-	std::ofstream history("history.dat");
 	double time = 0.;
+  double sum = 0.;
 	for (int it=0; it<Nsteps; ++it){
+		LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
+		for (auto & p : plist) sum += E0-p.p.t();
+		dE.push_back(sum/Nparticles);
+
 		time += dt;
-		if (it%10 ==0) {
-			LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
-			history << "#" << time << std::endl;
-			for (auto & p : plist) history << p.x << " " << p.p << std::endl;
-		}
 		for (auto & p : plist){
+      p.p = p0; // reset energy for probe test
 			std::vector<fourvec> FS;
 			int channel = update_particle_momentum(dt*fmc_to_GeV_m1, T,
-				{0.0, 0.0, 0.0}, (p.x.t()-p.t_rad)*fmc_to_GeV_m1, p.p, FS);
+				{0.0, 0.0, 0.0}, p.pid, (p.x.t()-p.t_rad)*fmc_to_GeV_m1, (p.x.t()-p.t_absorb)*fmc_to_GeV_m1, p.p, FS);
 
 			p.freestream(dt);
 			if (channel>=0) {
 				p.p = FS[0];
 				if (channel == 2 || channel ==3) p.t_rad = time;
+				if (channel == 4 || channel ==5) p.t_absorb = time;
 			}
 		}
-	}*/
+	}
+	return dE;
+}
+
+std::vector<std::vector<double>> rate_test(double E0, double T, double dt=0.05, int Nsteps=100, int Nparticles=10000, std::string mode="old", double rescale=1.0){
+  double fmc_to_GeV_m1 = 5.026;
+	initialize(mode, "./settings.xml", 1.0);
+	double M = 1.3;
+	std::vector<std::vector<double>> Rate;
+  Rate.resize(Nsteps);
+	std::vector<particle> plist(Nparticles);
+  fourvec p0{E0, 0, 0, std::sqrt(E0*E0-M*M)};
+	for (auto & p : plist) {
+		p.pid = 4;
+		p.x = fourvec{0,0,0,0};
+		p.p = p0;
+		p.t_rad = 0.;
+		p.t_absorb = 0.;
+	}
+	double time = 0.;
+  double sum = 0.;
+	for (int it=0; it<Nsteps; ++it){
+    Rate[it].resize(6);
+    for (int c=0; c<6; c++){
+        Rate[it][c] = 0.;
+    }
+		LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
+		time += dt;
+		for (auto & p : plist){
+      p.p = p0; // reset energy for probe test
+			std::vector<fourvec> FS;
+			int channel = update_particle_momentum(dt*fmc_to_GeV_m1, T,
+				{0.0, 0.0, 0.0}, p.pid, (p.x.t()-p.t_rad)*fmc_to_GeV_m1*rescale, (p.x.t()-p.t_absorb)*fmc_to_GeV_m1*rescale, p.p, FS);
+
+			p.freestream(dt);
+			if (channel>=0) {
+				p.p = FS[0];
+				if (channel == 2 || channel ==3) {p.t_rad = time;
+          if (2.5< FS[2].t() && FS[2].t() < 3.5) Rate[it][channel] += 1.;
+        }
+				if (channel == 4 || channel ==5) p.t_absorb = time;
+
+			}
+		}
+    for (int c=0; c<6; c++){
+        Rate[it][c] /= Nparticles;
+    }
+	}
+	return Rate;
 }

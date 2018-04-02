@@ -12,16 +12,11 @@ double renormalization_scale; // default
 double alpha_s(double Q2, double T){
 	double screen_scale2 = std::pow(renormalization_scale*M_PI*T, 2);
 	double mu2;
-    if (Q2 < 0.){
-		mu2 = std::max(-Q2, screen_scale2);
+    if (Q2 < 0.) mu2 = std::max(-Q2, screen_scale2);
+		else mu2 = std::max(Q2, screen_scale2);
+
 		if (mu2 <= mu2_left) return alpha0;
 		else return alpha0 / std::log(mu2/Lambda2);
-	}
-    else{
-		mu2 = std::max(Q2, screen_scale2);
-		if (mu2 <= mu2_right) return alpha0;
-		else return alpha0 * ( .5 - std::atan(std::log(mu2/Lambda2)/M_PI) / M_PI);
-	}
 }
 
 /// 					   time duration from last emission
@@ -43,7 +38,7 @@ type(_type), mD2(new double[NT])
 		// type==0 use self-consistent Debye mass
 		for (size_t i=0; i<NT; i++){
 			double T = TL+dT*i;
-			mD2[i] = pf_g*alpha_s(T, T)*T*T;
+			mD2[i] = pf_g*alpha_s(0., T)*T*T;
 		}
 	}
 	if (type==1) {
@@ -94,7 +89,7 @@ double M2_Qq2Qq(const double t, void * params){
 	double mt2 = t_channel_mD2->get_mD2(Temp);
 	double At = alpha_s(Q2t, Temp);
 	double Q2t_reg = Q2t - mt2;
-	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/Q2t_reg;
+	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/(Q2t-Lambda2);
 	if (result < 0.) return 0.;
 	else return result;
 }
@@ -111,7 +106,7 @@ double M2_Qq2Qq_rad(const double t, void * params){
 	double At = alpha_s(Q2t, Temp);
 	double mt2 = t_channel_mD2->get_mD2(Temp);
 	double Q2t_reg = Q2t - mt2;
-	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/Q2t_reg;
+	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/(Q2t-Lambda2);
 	if (result < 0.) return 0.;
 	else return result;
 }
@@ -141,7 +136,7 @@ double M2_Qg2Qg(const double t, void * params){
 	double Q2u_reg = Q2u>0?(Q2u + mt2):(Q2u-mt2);
 	double result = 0.0;
 	// t*t
-	result += 2.*At*At * Q2s*(-Q2u)/Q2t_reg/Q2t_reg;
+	result += 2.*At*At * Q2s*(-Q2u)/Q2t_reg/(Q2t-Lambda2);
 	// s*s
 	result += c4d9*As*As *
 			( Q2s*(-Q2u) + 2.*M2*(Q2s + 2.*M2) ) / std::pow(Q2s_reg, 2);
@@ -169,7 +164,7 @@ double M2_Qg2Qg_rad(const double t, void * params) {
 	double At = alpha_s(Q2t, Temp);
 	double mt2 = t_channel_mD2->get_mD2(Temp);
 	double Q2t_reg = Q2t - mt2;
-	double result = c16pi2*2.*At*At * Q2s*(-Q2u)/Q2t_reg/Q2t_reg;
+	double result = c16pi2*2.*At*At * Q2s*(-Q2u)/Q2t_reg/(Q2t-Lambda2);
 	if (result < 0.) return 0.;
 	else return result;
 }
@@ -228,11 +223,10 @@ double M2_Qq2Qqg(const double * x_, void * params_){
 	double x = (kmu.t()+kmu.z())/sqrts,
 	       xbar = (kmu.t()+std::abs(kmu.z()))/sqrts;
 	double one_minus_xbar = 1.-xbar;
+
 	double iD1 = 1./(kt2 + x*x*M2),
-	       iD2 = 1./(kt_qt2 + x*x*M2 + mD2);
+	       iD2 = 1./(kt_qt2 + x*x*M2 + mD2/2.);
 	double tauk = 2.*one_minus_xbar*kmu.t()*iD1;
-	//double tauk2 = 2.*one_minus_xbar*kmu.t()*iD2;
-	//double tauk = kt2*iD1*iD1 > kt_qt2*iD2*iD2 ? tauk1 : tauk2;
 	// here u is the ratio of the mean-free-path over the formation length
 	// mean-free-path \sim mean-free-time*v_HQ,
 	// v_HQ = p/E = (s - M^2)/(s + M^2)
@@ -294,18 +288,14 @@ double M2_Qg2Qgg(const double * x_, void * params_){
 	double qt2 = qx*qx + qy*qy;
 
 	double mD2 = t_channel_mD2->get_mD2(T);
-        double kt2 = kt*kt;
-        double kt_qt2 = kt2 - 2.*qx*kmu.x() + qt2;
-        double x = (kmu.t()+kmu.z())/sqrts,
-               xbar = (kmu.t()+std::abs(kmu.z()))/sqrts;
-        double one_minus_xbar = 1.-xbar;
-        double iD1 = 1./(kt2 + x*x*M2),
-               iD2 = 1./(kt_qt2 + x*x*M2 + mD2);
-        double tauk = 2.*one_minus_xbar*kmu.t()*iD1;
-        //double tauk2 = 2.*one_minus_xbar*kmu.t()*iD2;
-        //double tauk = kt2*iD1*iD1 > kt_qt2*iD2*iD2 ? tauk1 : tauk2;
-
-
+    double kt2 = kt*kt;
+    double kt_qt2 = kt2 - 2.*qx*kmu.x() + qt2;
+    double x = (kmu.t()+kmu.z())/sqrts,
+           xbar = (kmu.t()+std::abs(kmu.z()))/sqrts;
+    double one_minus_xbar = 1.-xbar;
+    double iD1 = 1./(kt2 + x*x*M2),
+           iD2 = 1./(kt_qt2 + x*x*M2 + mD2/2.);
+    double tauk = 2.*one_minus_xbar*kmu.t()*iD1;
 	double u = dt/tauk*(s-M2)/(s+M2);
 
         double t = -2.*Qmax*(p4mu.t()+p4mu.z());
@@ -315,7 +305,6 @@ double M2_Qg2Qgg(const double * x_, void * params_){
         double Pg = alpha_rad*std::pow(one_minus_xbar, 2)
       *f_LPM(u)
       *(kt2*std::pow(iD1-iD2, 2.) + qt2*std::pow(iD2,2) + 2.*kmu.x()*qx*iD2*(iD1-iD2));
-
 
 	// Jacobian
 	double J = (1.0 - M2/s34) * M_PI/8./std::pow(2*M_PI,5) * kt * (kt + T) * ymax;
@@ -394,7 +383,7 @@ double Ker_Qqg2Qq(const double * x_, void * params_){
 	// 1->2
 	double tauk = 2.*(1-xbar)*k/(kt2 + x2M2);
 	double iD1 = 1./(kt2 + x2M2);
-	double iD2 = 1./(kt2 + qt2 + 2.*kt*qmu.x() + x2M2 + mD2);
+	double iD2 = 1./(kt2 + qt2 + 2.*kt*qmu.x() + x2M2 + mD2/2.);
 	double Pg = 48.*M_PI*alpha_s(kt2, T)*std::pow(1.-xbar, 2)*(
 			kt2*std::pow(iD1-iD2, 2) + qt2*std::pow(iD2, 2) - 2.*kt*qmu.x()*(iD1-iD2)*iD2
 		);
@@ -458,7 +447,7 @@ double Ker_Qgg2Qg(const double * x_, void * params_){
 	// 1->2
 	double tauk = 2.*(1-xbar)*k/(kt2 + x2M2);
 	double iD1 = 1./(kt2 + x2M2);
-	double iD2 = 1./(kt2 + qt2 + 2.*kt*qmu.x() + x2M2 + mD2);
+	double iD2 = 1./(kt2 + qt2 + 2.*kt*qmu.x() + x2M2 + mD2/2.);
 	double Pg = 48.*M_PI*alpha_s(kt2, T)*std::pow(1.-xbar, 2)*(
 			kt2*std::pow(iD1-iD2, 2) + qt2*std::pow(iD2, 2) - 2.*kt*qmu.x()*(iD1-iD2)*iD2
 		);
