@@ -299,7 +299,7 @@ cdef class event:
 		return self.tau
 
 	# Initilization
-	cpdef initialize_HQ(self, NQ, init_flags):
+	cpdef initialize_HQ(self, N_charm, N_bottom, init_flags):
 		cdef double x, y, z, s1, s2, mass
 		cdef int pid
 		# for A+B:
@@ -311,7 +311,8 @@ cdef class event:
 		cdef vector[particle].iterator it
 		for pid, mass in zip([4,5],[1.3, 4.2]):
 			self.HQ_list[pid].clear()
-			self.HQ_list[pid].resize(NQ) # NQ charm quark and NQ bottom quark
+			NQ = N_charm if pid == 4 else N_bottom
+			self.HQ_list[pid].resize(NQ) # NQ charm quark and NQ bottom quark, we don't need so many bottom quark
 			if init_flags['type'] == 'A+B':
 				print("Initialize for dynamic medium")
 				HQ_xy_sampler = XY_sampler(init_flags['TAB'],
