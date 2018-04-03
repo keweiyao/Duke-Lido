@@ -380,6 +380,31 @@ cdef class event:
 					deref(it).Tf = 0.
 					deref(it).pid = pid
 					inc(it)
+			elif init_flags['type'] == 'Box':
+				print("Initialize for probe test")
+				pmax = init_flags['pmax']
+				it = self.HQ_list[pid].begin()
+				r0 = [0.0, 0.0, 0.0, 0.0]
+				while it != self.HQ_list[pid].end():
+					pT = np.random.rand()*pmax
+					phi = np.random.rand()*2*np.pi
+					cosz = np.random.rand()*2 - 1.
+					sinz = np.sqrt(1. - cosz**2)
+					E = np.sqrt(mass**2 + pT**2)
+					p0 = [E, pT*sinz*np.cos(phi), pT*sinz*np.sin(phi), pT*cosz]
+					r0 = [0,0,0,0]
+					for i in range(4):
+						deref(it).p.a[i] = p0[i]
+						deref(it).p0.a[i] = p0[i]
+						deref(it).x.a[i] = r0[i]
+					deref(it).mass = mass
+					deref(it).t_rad = r0[0]
+					deref(it).t_absorb = r0[0]
+					deref(it).freezeout = False
+					deref(it).vcell = [0., 0., 0.]
+					deref(it).Tf = 0.
+					deref(it).pid = pid
+					inc(it)
 			else:
 				raise ValueError("Initilaiztion mode not defined")
 				exit()

@@ -102,8 +102,14 @@ void Rate<2, 2, double(*)(const double, void *)>::
 		double Jacobian = E2 + T;
     	return 1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
 	};
+	bool status = true;
 	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}},
-						StochasticBase<2>::GetFmax(parameters).s);
+						StochasticBase<2>::GetFmax(parameters).s, status);
+	if (status == false){
+		final_states.resize(1);
+		final_states[0] = fourvec{E, 0, 0, std::sqrt(E*E-_mass*_mass)};
+		return;
+	}
 	double E2 = T*(std::exp(res[0])-1.),
 		   costheta = res[1];
 	double sintheta = std::sqrt(1. - costheta*costheta);
@@ -154,7 +160,13 @@ void Rate<3, 3, double(*)(const double*, void *)>::
 		double Jacobian = E2 + T;
     	return 1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
 	};
-	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}}, StochasticBase<3>::GetFmax(parameters).s);
+	bool status = true;
+	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}}, StochasticBase<3>::GetFmax(parameters).s, status);
+	if (status == false){
+		final_states.resize(1);
+		final_states[0] = fourvec{E, 0, 0, std::sqrt(E*E-_mass*_mass)};
+		return;
+	}
 	double E2 = T*(std::exp(res[0])-1.), costheta = res[1];
 	double sintheta = std::sqrt(1. - costheta*costheta);
 	double phi = Srandom::dist_phi(Srandom::gen);
@@ -208,7 +220,13 @@ void Rate<3, 4, double(*)(const double*, void *)>::
 		double Xtot = prefix_3to2(s, s12, s1k, dt12, M)*std::exp(this->X->GetZeroM({sqrts, T, xinel, yinel}).s);
 		return std::exp(-(k+E2)/T)*k*E2*Xtot/E/8./std::pow(2.*M_PI, 5);
 	};
-	auto res = sample_nd(code, 5, {{0., 10.*T}, {0., 10.*T}, {-1., 1.}, {-1., 1.}, {0., 2.*M_PI}}, std::exp(StochasticBase<3>::GetFmax(parameters).s) );
+	bool status = true;
+	auto res = sample_nd(code, 5, {{0.0*T, 10.0*T}, {0.0*T, 10.0*T}, {-1., 1.}, {-1., 1.}, {0., 2.*M_PI}}, std::exp(StochasticBase<3>::GetFmax(parameters).s), status);
+	/*if (status == false){
+		final_states.resize(1);
+		final_states[0] = fourvec{E, 0, 0, std::sqrt(E*E-_mass*_mass)};
+		return;
+	}*/
 	// sample Xsection
 	double k = res[0];
 	double E2 = res[1];
@@ -223,18 +241,36 @@ void Rate<3, 4, double(*)(const double*, void *)>::
 	fourvec p2mu{E2, E2*sin2*cosphi2, E2*sin2*sinphi2, E2*cos2};
 	fourvec kmu{k, k*sink*std::cos(phik), k*sink*std::sin(phik), k*cosk};
 	fourvec Ptot = p1mu+p2mu+kmu, P12 = p1mu+p2mu, P1k = p1mu+kmu;
-	fourvec dxmu = {delta_t, 0., 0., delta_t*v1};
 	double s = dot(Ptot, Ptot), s12 = dot(P12, P12), s1k = dot(P1k, P1k);
 	double sqrts = std::sqrt(s), sqrts12 = std::sqrt(s12), sqrts1k = std::sqrt(s1k);
 	double v12[3] = { P12.x()/P12.t(), P12.y()/P12.t(), P12.z()/P12.t() };
-	double dt12 = (dxmu.boost_to(v12[0], v12[1], v12[2])).t();
 	double xinel = (s12-M2)/(s-M2), yinel = (s1k/s-M2/s12)/(1.-s12/s)/(1.-M2/s12);
-    X->sample({sqrts,T,xinel,yinel,dt12}, final_states);
+    X->sample({sqrts,T,xinel,yinel}, final_states);
 
-	// rotate and boost back from E aleign frame
+	// p1 and k in 12-com frame
 	auto p1_in12 = p1mu.boost_to(v12[0], v12[1], v12[2]);
+	auto k_in12 = kmu.boost_to(v12[0], v12[1], v12[2]);
+	// |p1|
+	double p1abs = std::sqrt(p1_in12.x()*p1_in12.x() + p1_in12.y()*p1_in12.y() + p1_in12.z()*p1_in12.z());
+  // X-frame z-direction
+	double zdir[3] = {p1_in12.x()/p1abs, p1_in12.y()/p1abs, p1_in12.z()/p1abs};
+	// project k onto z-dir
+	double kdotz = zdir[0]*k_in12.x() + zdir[1]*k_in12.y() + zdir[2]*k_in12.z();
+	// get kperp_to-zdir
+	double kperp[3] = {k_in12.x() - kdotz*zdir[0], k_in12.y() - kdotz*zdir[1], k_in12.z() - kdotz*zdir[2]};
+	double kperpabs = std::sqrt(kperp[0]*kperp[0]+kperp[1]*kperp[1]+kperp[2]*kperp[2]);
+	// define x-dir
+	double xdir[3] = {kperp[0]/kperpabs, kperp[1]/kperpabs, kperp[2]/kperpabs};
+	// y-dir = z-dir \cross x-dir
+	double ydir[3] = {zdir[1]*xdir[2]-zdir[2]*xdir[1], xdir[0]*zdir[2]-xdir[2]*zdir[0], zdir[0]*xdir[1]-xdir[0]*zdir[1]};
 	for (auto & p : final_states){
-		p = p.rotate_back(p1_in12);
+		// rotate it back
+		double px = p.x()*xdir[0] + p.y()*ydir[0] + p.z()*zdir[0];
+		double py = p.x()*xdir[1] + p.y()*ydir[1] + p.z()*zdir[1];
+		double pz = p.x()*xdir[2] + p.y()*ydir[2] + p.z()*zdir[2];
+		p.a[1] = px;
+		p.a[2] = py;
+		p.a[3] = pz;
 		p = p.boost_back(v12[0], v12[1], v12[2]);
 	}
 }

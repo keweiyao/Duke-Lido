@@ -325,7 +325,7 @@ double prefix_3to2(double s, double s12, double s1k, double dt, double M){
 	double costhetak = (M2 + 2.*E1*k - s1k)/2./p1/k;
 	double kt2 = k*k*(1. - costhetak*costhetak);
 	double kz = k*costhetak;
-	double x = (k+kz)/sqrts, xbar = (k+std::abs(kz))/sqrts;
+	double x = (k-kz)/sqrts12, xbar = (k+std::abs(kz))/sqrts12;
 	double x2M2 = x*x*M2;
 	double tauk = 2.*(1.-xbar)*k/(kt2 + x2M2);
 	return 1./(kt2+x2M2)*f_LPM(dt/tauk*(s-M2)/(s+M2));
@@ -356,7 +356,7 @@ double Ker_Qqg2Qq(const double * x_, void * params_){
 	double kt = k*sinthetak;
 	double kt2 = kt*kt;
 	double kz = k*costhetak;
-	double x = (k+kz)/sqrts, xbar = (k+std::abs(kz))/sqrts;
+	double x = (k-kz)/sqrts12, xbar = (k+std::abs(kz))/sqrts12;
     double mD2 = t_channel_mD2->get_mD2(T);
 
 	// get final state
@@ -420,7 +420,7 @@ double Ker_Qgg2Qg(const double * x_, void * params_){
 	double kt = k*sinthetak;
 	double kt2 = kt*kt;
 	double kz = k*costhetak;
-	double x = (k+kz)/sqrts, xbar = (k+std::abs(kz))/sqrts;
+	double x = (k-kz)/sqrts12, xbar = (k+std::abs(kz))/sqrts12;
     double mD2 = t_channel_mD2->get_mD2(T);
 
 	// get final state

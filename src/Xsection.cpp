@@ -143,9 +143,10 @@ void Xsection<3, double(*)(const double*, void*)>::
 	double xmin[4] = {0., -1.,  x2min, 0.};
 	double xmax[4] = {umax, 1., x2max, 2.*M_PI};
 	double fmax = StochasticBase<3>::GetFmax(parameters).s;
+	bool status = true;
 	auto res = sample_nd(dXdPS, 4, {{xmin[0], xmax[0]}, {xmin[1], xmax[1]},
 									{xmin[2], xmax[2]}, {xmin[3], xmax[3]}},
-									fmax);
+									fmax, status);
 	// deconvolve parameter
 	double kt = temp*(std::exp(res[0])-1.);
 	double yk = res[1]*std::acosh(Qmax/kt);
@@ -193,8 +194,18 @@ void Xsection<4, double(*)(const double*, void*)>::
 	};
 	double fmax = std::exp(StochasticBase<4>::GetFmax(parameters).s);
 	//LOG_INFO << "dX(sqrts, T, x, y, dt) " << sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt;
-	auto res = sample_nd(dXdPS, 2, {{-1., 1.}, {0., 2.*M_PI}}, fmax);
-
+	bool status = true;
+	auto res = sample_nd(dXdPS, 2, {{-1., 1.}, {0., 2.*M_PI}}, fmax, status);
+	/*if (status == false){
+		FS.resize(2);
+		double s12 = xinel*(s-_mass*_mass) + _mass*_mass;
+		double sqrts12 = std::sqrt(s12);
+		fourvec a{(s12+_mass*_mass)/2./sqrts12, 0, 0, (s12-_mass*_mass)/2./sqrts12};
+		fourvec b{(s12-_mass*_mass)/2./sqrts12, 0, 0, -(s12-_mass*_mass)/2./sqrts12};
+		FS[0] = a;
+		FS[1] = b;
+		return;
+	}*/
 	double costheta34 = res[0], phi34 = res[1];
 	double sintheta34 = std::sqrt(1. - costheta34*costheta34),
 			sinphi34 = std::sin(phi34), cosphi34 = std::cos(phi34);
@@ -217,9 +228,9 @@ void Xsection<4, double(*)(const double*, void*)>::
 	// boost final state back to 12-com frame
 	p3mu = p3mu.boost_back(vcom[0], vcom[1], vcom[2]);
 	p4mu = p4mu.boost_back(vcom[0], vcom[1], vcom[2]);
-	FS.clear();
-	FS.push_back(p3mu);
-	FS.push_back(p4mu);
+	FS.resize(2);
+	FS[0] = p3mu;
+	FS[1] = p4mu;
 }
 /*****************************************************************/
 /*******************find max of dX/dPS ***************************/

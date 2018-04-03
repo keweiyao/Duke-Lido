@@ -230,11 +230,9 @@ std::vector<std::vector<double>> rate_test(double E0, double T, double dt=0.05, 
 			p.freestream(dt);
 			if (channel>=0) {
 				p.p = FS[0];
-				if (channel == 2 || channel ==3) {p.t_rad = time;
-          if (2.5< FS[2].t() && FS[2].t() < 3.5) Rate[it][channel] += 1.;
-        }
+				if (channel == 2 || channel ==3) p.t_rad = time;
 				if (channel == 4 || channel ==5) p.t_absorb = time;
-
+        Rate[it][channel] += 1.;
 			}
 		}
     for (int c=0; c<6; c++){
