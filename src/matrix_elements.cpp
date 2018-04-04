@@ -24,7 +24,7 @@ double alpha_s(double Q2, double T){
 ///							formation time of the process
 /// They must be evalutate in the same frame)
 double f_LPM(double x){
-	return 1. - cos(x);
+	return 2*(1. - cos(x));
 }
 
 ///             Debye mass pointer and class
@@ -224,8 +224,8 @@ double M2_Qq2Qqg(const double * x_, void * params_){
 	       xbar = (kmu.t()+std::abs(kmu.z()))/sqrts;
 	double one_minus_xbar = 1.-xbar;
 
-	double iD1 = 1./(kt2 + x*x*M2),
-	       iD2 = 1./(kt_qt2 + x*x*M2 + mD2/2.);
+	double iD1 = 1./(kt2 + x*x*M2 + (1.-xbar)*mD2/2.),
+	       iD2 = 1./(kt_qt2 + x*x*M2 + (1.-xbar)*mD2/2.);
 	double tauk = 2.*one_minus_xbar*kmu.t()*iD1;
 	// here u is the ratio of the mean-free-path over the formation length
 	// mean-free-path \sim mean-free-time*v_HQ,
@@ -293,8 +293,8 @@ double M2_Qg2Qgg(const double * x_, void * params_){
     double x = (kmu.t()+kmu.z())/sqrts,
            xbar = (kmu.t()+std::abs(kmu.z()))/sqrts;
     double one_minus_xbar = 1.-xbar;
-    double iD1 = 1./(kt2 + x*x*M2),
-           iD2 = 1./(kt_qt2 + x*x*M2 + mD2/2.);
+    double iD1 = 1./(kt2 + x*x*M2 + (1.-xbar)*mD2/2.),
+           iD2 = 1./(kt_qt2 + x*x*M2 + (1.-xbar)*mD2/2.);
     double tauk = 2.*one_minus_xbar*kmu.t()*iD1;
 	double u = dt/tauk*(s-M2)/(s+M2);
 
@@ -316,7 +316,7 @@ double M2_Qg2Qgg(const double * x_, void * params_){
 //=============Basic for 3->2===========================================
 // Not CoM frame of  1,2,k, but CoM frame of 1 and 2
 // sampled final states within 3+4 CoM frame
-double prefix_3to2(double s, double s12, double s1k, double dt, double M){
+double prefix_3to2(double s, double s12, double s1k, double dt, double M, double T){
 	double M2 = M*M;
 	double sqrts = std::sqrt(s);
 	double sqrts12 = std::sqrt(s12);
@@ -325,10 +325,11 @@ double prefix_3to2(double s, double s12, double s1k, double dt, double M){
 	double costhetak = (M2 + 2.*E1*k - s1k)/2./p1/k;
 	double kt2 = k*k*(1. - costhetak*costhetak);
 	double kz = k*costhetak;
-	double x = (k-kz)/sqrts12, xbar = (k+std::abs(kz))/sqrts12;
+	double x = (k+kz)/(sqrts12+k+kz), xbar = (k+std::abs(kz))/(sqrts12+k+std::abs(kz));
 	double x2M2 = x*x*M2;
-	double tauk = 2.*(1.-xbar)*k/(kt2 + x2M2);
-	return 1./(kt2+x2M2)*f_LPM(dt/tauk*(s-M2)/(s+M2));
+	double mD2 = t_channel_mD2->get_mD2(T);
+	double tauk = 2.*(1.-xbar)*k/(kt2 + x2M2 + (1.-xbar)*mD2/2.);
+	return f_LPM(dt/tauk*(s12-M2)/(s12+M2));
 }
 
 double Ker_Qqg2Qq(const double * x_, void * params_){
@@ -356,8 +357,8 @@ double Ker_Qqg2Qq(const double * x_, void * params_){
 	double kt = k*sinthetak;
 	double kt2 = kt*kt;
 	double kz = k*costhetak;
-	double x = (k-kz)/sqrts12, xbar = (k+std::abs(kz))/sqrts12;
-    double mD2 = t_channel_mD2->get_mD2(T);
+	double x = (k+kz)/(sqrts12+k+kz), xbar = (k+std::abs(kz))/(sqrts12+k+std::abs(kz));
+  double mD2 = t_channel_mD2->get_mD2(T);
 
 	// get final state
 	fourvec Ptot{sqrts12+k, kt, 0., kz};
@@ -381,18 +382,17 @@ double Ker_Qqg2Qq(const double * x_, void * params_){
 	double x2M2 = x*x*M2;
 
 	// 1->2
-	double tauk = 2.*(1-xbar)*k/(kt2 + x2M2);
-	double iD1 = 1./(kt2 + x2M2);
-	double iD2 = 1./(kt2 + qt2 + 2.*kt*qmu.x() + x2M2 + mD2/2.);
+	double iD1 = 1./(kt2 + x2M2 + (1.-xbar)*mD2/2.);
+	double iD2 = 1./(kt2 + qt2 + 2.*kt*qmu.x() + x2M2 + (1.-xbar)*mD2/2.);
 	double Pg = 48.*M_PI*alpha_s(kt2, T)*std::pow(1.-xbar, 2)*(
 			kt2*std::pow(iD1-iD2, 2) + qt2*std::pow(iD2, 2) - 2.*kt*qmu.x()*(iD1-iD2)*iD2
 		);
 
 	double detail_balance_factor = 1./16.;
 	double Jacobian = 1./std::pow(2*M_PI, 2)/8.*(1. - M2/s);
-	double anti_prefix = kt2+x2M2;
+	//double anti_prefix = kt2 + x2M2 + (1.-xbar)*mD2/2.;
 	// 2->3 = 2->2 * 1->2
-	return anti_prefix * M2_elastic * Pg * Jacobian * detail_balance_factor;
+	return M2_elastic * Pg * Jacobian * detail_balance_factor;
 }
 
 double Ker_Qgg2Qg(const double * x_, void * params_){
@@ -420,7 +420,7 @@ double Ker_Qgg2Qg(const double * x_, void * params_){
 	double kt = k*sinthetak;
 	double kt2 = kt*kt;
 	double kz = k*costhetak;
-	double x = (k-kz)/sqrts12, xbar = (k+std::abs(kz))/sqrts12;
+	double x = (k+kz)/(sqrts12+k+kz), xbar = (k+std::abs(kz))/(sqrts12+k+std::abs(kz));
     double mD2 = t_channel_mD2->get_mD2(T);
 
 	// get final state
@@ -445,16 +445,15 @@ double Ker_Qgg2Qg(const double * x_, void * params_){
 	double x2M2 = x*x*M2;
 
 	// 1->2
-	double tauk = 2.*(1-xbar)*k/(kt2 + x2M2);
-	double iD1 = 1./(kt2 + x2M2);
-	double iD2 = 1./(kt2 + qt2 + 2.*kt*qmu.x() + x2M2 + mD2/2.);
+	double iD1 = 1./(kt2 + x2M2 + (1.-xbar)*mD2/2.);
+	double iD2 = 1./(kt2 + qt2 + 2.*kt*qmu.x() + x2M2 + (1.-xbar)*mD2/2.);
 	double Pg = 48.*M_PI*alpha_s(kt2, T)*std::pow(1.-xbar, 2)*(
 			kt2*std::pow(iD1-iD2, 2) + qt2*std::pow(iD2, 2) - 2.*kt*qmu.x()*(iD1-iD2)*iD2
 		);
 
 	double detail_balance_factor = 1./16.;
 	double Jacobian = 1./std::pow(2*M_PI, 2)/8.*(1. - M2/s);
-	double anti_prefix = kt2+x2M2;
+	//double anti_prefix = kt2+x2M2 + (1.-xbar)*mD2/2.;
 	// 2->3 = 2->2 * 1->2
-	return anti_prefix * M2_elastic * Pg * Jacobian * detail_balance_factor;
+	return M2_elastic * Pg * Jacobian * detail_balance_factor;
 }

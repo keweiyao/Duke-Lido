@@ -10,7 +10,7 @@ Np = 2000
 L = np.arange(Nsteps)*dt
 E = np.exp(np.linspace(np.log(2), np.log(100), 20))
 f = h5py.File("BoxRate.h5", 'a')
-name = 'rad-abs'
+name = 'rad+abs'
 if name in f:
 	del f[name]
 gp = f.create_group(name)
