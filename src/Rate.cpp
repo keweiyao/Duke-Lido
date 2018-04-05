@@ -217,7 +217,7 @@ void Rate<3, 4, double(*)(const double*, void *)>::
 		double dt12 = (dxmu.boost_to(v12[0], v12[1], v12[2])).t();
 		double xinel = (s12-M2)/(s-M2), yinel = (s1k/s-M2/s12)/(1.-s12/s)/(1.-M2/s12);
 		// interp Xsection
-		double Xtot = prefix_3to2(s, s12, s1k, dt12, M)*std::exp(this->X->GetZeroM({sqrts, T, xinel, yinel}).s);
+		double Xtot = prefix_3to2(s, s12, s1k, dt12, M, T)*std::exp(this->X->GetZeroM({sqrts, T, xinel, yinel}).s);
 		return std::exp(-(k+E2)/T)*k*E2*Xtot/E/8./std::pow(2.*M_PI, 5);
 	};
 	bool status = true;
@@ -360,7 +360,7 @@ scalar Rate<3, 4, double(*)(const double*, void*)>::
     	double dt12 = (dxmu.boost_to(v12[0], v12[1], v12[2])).t();
 		double xinel = (s12-M2)/(s-M2), yinel = (s1k/s-M2/s12)/(1.-s12/s)/(1.-M2/s12);
     	// interp Xsection
-		double Xtot = prefix_3to2(s, s12, s1k, dt12, M)*std::exp(this->X->GetZeroM({sqrts, T, xinel, yinel}).s);
+		double Xtot = prefix_3to2(s, s12, s1k, dt12, M, T)*std::exp(this->X->GetZeroM({sqrts, T, xinel, yinel}).s);
 		return std::exp(-(k+E2)/T)*k*E2*Xtot/E/8./std::pow(2.*M_PI, 5);
 	};
 	auto loc = MC_maximize(code, 5,
@@ -451,7 +451,7 @@ scalar Rate<3, 4, double(*)(const double*, void*)>::
     	double dt12 = (dxmu.boost_to(v12[0], v12[1], v12[2])).t();
 		double xinel = (s12-M2)/(s-M2), yinel = (s1k/s-M2/s12)/(1.-s12/s)/(1.-M2/s12);
     	// interp Xsection
-		double Xtot = prefix_3to2(s, s12, s1k, dt12, M)*std::exp(this->X->GetZeroM({sqrts, T, xinel, yinel}).s);
+		double Xtot = prefix_3to2(s, s12, s1k, dt12, M, T)*std::exp(this->X->GetZeroM({sqrts, T, xinel, yinel}).s);
 		return std::exp(-(k+E2)/T)*k*E2*Xtot/E/8./std::pow(2.*M_PI, 5);
 	};
 	double xmin[5] = {0.,   0.,  -1., -1, 0.};

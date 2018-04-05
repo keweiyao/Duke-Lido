@@ -333,7 +333,7 @@ scalar Xsection<4, double(*)(const double*, void*)>::
 			step[i] = std::min(dx, step[i]);
 		}
 		// find the more precise maximum by the simplex method
-		double val = std::log(-minimize_nd(nega_dXdPS, 2, startloc, step, 10000, 2*2*M_PI/1e8)*2.);
+		double val = std::log(-minimize_nd(nega_dXdPS, 2, startloc, step, 1000, 2*2*M_PI/1e8)*2.);
 		// save max*1.5 just to be safe
 
 		return scalar{val};

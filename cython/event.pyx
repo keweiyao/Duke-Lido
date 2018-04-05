@@ -427,8 +427,8 @@ cdef class event:
 			it = self.HQ_list[pid].begin()
 			while it != self.HQ_list[pid].end():
 				# use smaller time step than hydro
-				for substeps in range(2):
-					smaller_dtau = self.fs_reader.dtau()/2.
+				for substeps in range(8):
+					smaller_dtau = self.fs_reader.dtau()/8.
 					# only update HQ that are not freezeout yet
 					if not deref(it).freezeout:
 						###############################################################
@@ -468,8 +468,8 @@ cdef class event:
 			it = self.HQ_list[pid].begin()
 			while it != self.HQ_list[pid].end():
 				# use smaller time step than hydro
-				for substeps in range(2):
-					smaller_dtau = self.hydro_reader.dtau()/2.
+				for substeps in range(4):
+					smaller_dtau = self.hydro_reader.dtau()/4.
 					# only update HQ that are not freezeout yet
 					if not deref(it).freezeout:
 						###############################################################
