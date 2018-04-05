@@ -23,7 +23,7 @@ e1 = event.event(medium={'type':'static', 'static_dt':0.025},
 				 LBT={'mu': 1.0}
 				)
 
-e1.initialize_HQ(10000,
+e1.initialize_HQ(N_charm=10000, N_bottom=1000,
 				init_flags={'type':'probe', 'E0':10.})
 tt = 0
 with h5py.File("thermalization.hdf5", 'a') as f:

@@ -8,6 +8,8 @@
 #include <boost/variant/get.hpp>
 #include <boost/any.hpp>
 #include <boost/foreach.hpp>
+#include "logo.h"
+
 std::map<int, std::vector<Process> > AllProcesses;
 
 void init_process(Process& r, std::string mode){
@@ -53,7 +55,7 @@ void init_process(Process& r, std::string mode){
 
 
 void initialize(std::string mode, std::string path, double mu){
-
+	print_logo();
 	boost::property_tree::ptree config;
     initialize_mD_and_scale(1, mu);
 
