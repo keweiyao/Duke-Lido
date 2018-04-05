@@ -24,7 +24,7 @@ double alpha_s(double Q2, double T){
 ///							formation time of the process
 /// They must be evalutate in the same frame)
 double f_LPM(double x){
-	return 2*(1. - cos(x));
+	return 2*(1. - std::cos(x));
 }
 
 ///             Debye mass pointer and class

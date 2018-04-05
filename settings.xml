@@ -6,29 +6,29 @@
 		 	 the framework can easily incroperate light parton -->
 
 	<!--###########################CHARM QUARKS##############################-->
-	<cq2cq status="inactive" moments="off">
+	<cq2cq status="active" moments="off">
 		<mass>1.3</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
-			<Nsqrts>60</Nsqrts> <Lsqrts>1.31</Lsqrts> <Hsqrts>30.0</Hsqrts>
-			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Nsqrts>60</Nsqrts> <Lsqrts>1.35</Lsqrts> <Hsqrts>30.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>100</Nenergy> <Lenergy>1.31</Lenergy> <Henergy>130.0</Henergy>
-			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Nenergy>100</Nenergy> <Lenergy>1.35</Lenergy> <Henergy>130.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</cq2cq>
 
-	<cg2cg status="inactive" moments="off">
+	<cg2cg status="active" moments="off">
 		<mass>1.3</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
-			<Nsqrts>60</Nsqrts> <Lsqrts>1.31</Lsqrts> <Hsqrts>30.0</Hsqrts>
-			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Nsqrts>60</Nsqrts> <Lsqrts>1.35</Lsqrts> <Hsqrts>30.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>100</Nenergy> <Lenergy>1.31</Lenergy> <Henergy>130.0</Henergy>
-			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Nenergy>100</Nenergy> <Lenergy>1.35</Lenergy> <Henergy>130.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</cg2cg>
 
@@ -36,28 +36,28 @@
 		<mass>1.3</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp,delta_t">
-			<Nsqrts>20</Nsqrts> <Lsqrts>1.31</Lsqrts> <Hsqrts>20.0</Hsqrts>
-			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
-			<Ndelta_t>20</Ndelta_t> <Ldelta_t>0.02</Ldelta_t> <Hdelta_t>20.0</Hdelta_t>
+			<Nsqrts>30</Nsqrts> <Lsqrts>1.35</Lsqrts> <Hsqrts>30.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Ndelta_t>30</Ndelta_t> <Ldelta_t>0.02</Ldelta_t> <Hdelta_t>30.0</Hdelta_t>
 		</xsection>
 		<rate slots="energy,temp,delta_t">
-			<Nenergy>100</Nenergy> <Lenergy>1.31</Lenergy> <Henergy>130.0</Henergy>
-			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Nenergy>100</Nenergy> <Lenergy>1.35</Lenergy> <Henergy>130.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 			<Ndelta_t>30</Ndelta_t> <Ldelta_t>0.1</Ldelta_t> <Hdelta_t>30.0</Hdelta_t>
 		</rate>
 	</cq2cqg>
 
 	<cg2cgg status="active" moments="off">
 		<mass>1.3</mass>
-		<degeneracy>8</degeneracy>
+		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp,delta_t">
-			<Nsqrts>20</Nsqrts> <Lsqrts>1.31</Lsqrts> <Hsqrts>20.0</Hsqrts>
-			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
-			<Ndelta_t>20</Ndelta_t> <Ldelta_t>0.02</Ldelta_t> <Hdelta_t>20.0</Hdelta_t>
+			<Nsqrts>30</Nsqrts> <Lsqrts>1.35</Lsqrts> <Hsqrts>30.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Ndelta_t>30</Ndelta_t> <Ldelta_t>0.02</Ldelta_t> <Hdelta_t>30.0</Hdelta_t>
 		</xsection>
 		<rate slots="energy,temp,delta_t">
-			<Nenergy>100</Nenergy> <Lenergy>1.31</Lenergy> <Henergy>130.0</Henergy>
-			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Nenergy>100</Nenergy> <Lenergy>1.35</Lenergy> <Henergy>130.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 			<Ndelta_t>30</Ndelta_t> <Ldelta_t>0.1</Ldelta_t> <Hdelta_t>30.0</Hdelta_t>
 		</rate>
 	</cg2cgg>
@@ -66,13 +66,13 @@
 		<mass>1.3</mass>
 		<degeneracy>576</degeneracy>
 		<xsection slots="sqrts,temp,xinel,yinel">
-			<Nsqrts>20</Nsqrts> <Lsqrts>1.31</Lsqrts> <Hsqrts>20.0</Hsqrts>
+			<Nsqrts>40</Nsqrts> <Lsqrts>1.35</Lsqrts> <Hsqrts>20.0</Hsqrts>
 			<Ntemp>10</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 			<Nxinel>20</Nxinel> <Lxinel>0.01</Lxinel> <Hxinel>0.99</Hxinel>
 			<Nyinel>20</Nyinel> <Lyinel>0.01</Lyinel> <Hyinel>0.99</Hyinel>
 		</xsection>
 		<rate slots="energy,temp,delta_t">
-			<Nenergy>40</Nenergy> <Lenergy>1.31</Lenergy> <Henergy>40.0</Henergy>
+			<Nenergy>30</Nenergy> <Lenergy>1.35</Lenergy> <Henergy>30.0</Henergy>
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 			<Ndelta_t>20</Ndelta_t> <Ldelta_t>0.1</Ldelta_t> <Hdelta_t>30.0</Hdelta_t>
 		</rate>
@@ -80,15 +80,15 @@
 
 	<cgg2cg status="active" moments="off">
 		<mass>1.3</mass>
-		<degeneracy>128</degeneracy>
+		<degeneracy>256</degeneracy>
 		<xsection slots="sqrts,temp,xinel,yinel">
-			<Nsqrts>20</Nsqrts> <Lsqrts>1.31</Lsqrts> <Hsqrts>20.0</Hsqrts>
+			<Nsqrts>40</Nsqrts> <Lsqrts>1.35</Lsqrts> <Hsqrts>20.0</Hsqrts>
 			<Ntemp>10</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 			<Nxinel>20</Nxinel> <Lxinel>0.01</Lxinel> <Hxinel>0.99</Hxinel>
 			<Nyinel>20</Nyinel> <Lyinel>0.01</Lyinel> <Hyinel>0.99</Hyinel>
 		</xsection>
 		<rate slots="energy,temp,delta_t">
-			<Nenergy>40</Nenergy> <Lenergy>1.31</Lenergy> <Henergy>40.0</Henergy>
+			<Nenergy>30</Nenergy> <Lenergy>1.35</Lenergy> <Henergy>30.0</Henergy>
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 			<Ndelta_t>20</Ndelta_t> <Ldelta_t>0.1</Ldelta_t> <Hdelta_t>30.0</Hdelta_t>
 		</rate>
@@ -138,7 +138,7 @@
 
 	<bg2bgg status="active" moments="off">
 		<mass>4.2</mass>
-		<degeneracy>8</degeneracy>
+		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp,delta_t">
 			<Nsqrts>20</Nsqrts> <Lsqrts>4.3</Lsqrts> <Hsqrts>30.0</Hsqrts>
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
@@ -155,13 +155,13 @@
 		<mass>4.2</mass>
 		<degeneracy>576</degeneracy>
 		<xsection slots="sqrts,temp,xinel,yinel">
-			<Nsqrts>20</Nsqrts> <Lsqrts>4.3</Lsqrts> <Hsqrts>20.0</Hsqrts>
+			<Nsqrts>40</Nsqrts> <Lsqrts>4.3</Lsqrts> <Hsqrts>20.0</Hsqrts>
 			<Ntemp>10</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 			<Nxinel>20</Nxinel> <Lxinel>0.01</Lxinel> <Hxinel>0.99</Hxinel>
 			<Nyinel>20</Nyinel> <Lyinel>0.01</Lyinel> <Hyinel>0.99</Hyinel>
 		</xsection>
 		<rate slots="energy,temp,delta_t">
-			<Nenergy>40</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>40.0</Henergy>
+			<Nenergy>30</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>30.0</Henergy>
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 			<Ndelta_t>20</Ndelta_t> <Ldelta_t>0.1</Ldelta_t> <Hdelta_t>30.0</Hdelta_t>
 		</rate>
@@ -169,15 +169,15 @@
 
 	<bgg2bg status="active" moments="off">
 		<mass>4.2</mass>
-		<degeneracy>128</degeneracy>
+		<degeneracy>256</degeneracy>
 		<xsection slots="sqrts,temp,xinel,yinel">
-			<Nsqrts>20</Nsqrts> <Lsqrts>4.3</Lsqrts> <Hsqrts>20.0</Hsqrts>
+			<Nsqrts>60</Nsqrts> <Lsqrts>4.3</Lsqrts> <Hsqrts>20.0</Hsqrts>
 			<Ntemp>10</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 			<Nxinel>20</Nxinel> <Lxinel>0.01</Lxinel> <Hxinel>0.99</Hxinel>
 			<Nyinel>20</Nyinel> <Lyinel>0.01</Lyinel> <Hyinel>0.99</Hyinel>
 		</xsection>
 		<rate slots="energy,temp,delta_t">
-			<Nenergy>40</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>40.0</Henergy>
+			<Nenergy>30</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>30.0</Henergy>
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 			<Ndelta_t>20</Ndelta_t> <Ldelta_t>0.1</Ldelta_t> <Hdelta_t>30.0</Hdelta_t>
 		</rate>
