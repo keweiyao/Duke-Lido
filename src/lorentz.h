@@ -6,6 +6,11 @@
 #include "hdf5_hl.h"
 #include <cstdlib>
 
+// Lorentz datatype contains: scalar, four-vector, and tensor
+// Each class has method to transform them self with boost-to / boost_back
+// Limited support for rotation.
+// Elementwise  +, -, A/(B), A*(B) are over loaded
+
 const double tiny_v2 = 1e-15;
 struct scalar {
 	static scalar unity(void){
@@ -115,22 +120,22 @@ struct tensor {
   double tx(void) const {return T[0][1];};
   double ty(void) const {return T[0][2];};
   double tz(void) const {return T[0][3];};
-  
+
   double xt(void) const {return T[1][0];};
   double xx(void) const {return T[1][1];};
   double xy(void) const {return T[1][2];};
   double xz(void) const {return T[1][3];};
-  
+
   double yt(void) const {return T[2][0];};
   double yx(void) const {return T[2][1];};
   double yy(void) const {return T[2][2];};
   double yz(void) const {return T[2][3];};
-  
+
   double zt(void) const {return T[3][0];};
   double zx(void) const {return T[3][1];};
   double zy(void) const {return T[3][2];};
   double zz(void) const {return T[3][3];};
-  
+
   friend std::ostream& operator<<(std::ostream& os, const tensor& A){
     for(auto& row : A.T){
     	for(auto& col : row){

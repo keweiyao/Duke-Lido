@@ -589,6 +589,18 @@ cdef class event:
 			inc(it)
 		return np.array(p), np.array(x)
 
+	cpdef reset(self, int pid, double E0=10.):
+		cdef vector[particle].iterator it = self.HQ_list[pid].begin()
+		cdef double p0, rescale
+		while it != self.HQ_list[pid].end():
+			p0 = sqrt(E0**2 - deref(it).mass**2)
+			rescale = p0/sqrt(deref(it).p.x()**2 + deref(it).p.y()**2 + deref(it).p.z()**2 )
+			deref(it).p.a[1] = deref(it).p.x()*rescale
+			deref(it).p.a[2] = deref(it).p.y()*rescale
+			deref(it).p.a[3] = deref(it).p.z()*rescale
+			deref(it).p.a[0] = E0
+			inc(it)
+
 	cpdef output_oscar(self, pid, filename):
 		cdef vector[particle].iterator it = self.HQ_list[pid].begin()
 		cdef size_t i=0
