@@ -104,5 +104,9 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_REQUIRED_FLAGS} --co
 
 set(LIBRARY_NAME "lib${PROJECT_NAME}")
 add_subdirectory(src)
+include_directories(src)
+add_executable(examples1 ./examples/example1.cpp)
+target_link_libraries(examples1 ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread)
+install(TARGETS examples1 DESTINATION bin)
 # add_subdirectory(test)
 # add_subdirectory(doc)
