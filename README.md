@@ -15,6 +15,14 @@ To compile and install exe:
    make install
 ```
 
+After this, you can also find an example under build/ or you/install/path/
+```bash
+   cp path/to/settings.xml ./
+   ./example1 new
+```
+
+It should generate elastic scattering table and then calculate an energy loss for you.
+
 
 To setup python interface, have Cython installed and then
 
