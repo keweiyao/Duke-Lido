@@ -5,6 +5,7 @@
 #include "random.h"
 #include "approx_functions.h"
 #include "matrix_elements.h"
+#include "Langevin.h"
 
 template <>
 Rate<2, 2, double(*)(const double, void *)>::
@@ -552,6 +553,108 @@ tensor Rate<2, 2, double(*)(const double, void*)>::
 }
 
 
+//EffRate Constuctor
+template <>
+EffRate<3, double(*)(const double*, void *)>::
+	EffRate(std::string Name, std::string configfile, double(*f)(const double*, void *)):
+StochasticBase<3>(Name+"/rate", configfile),_f(f)
+{
+	// read configfile
+	boost::property_tree::ptree config;
+	std::ifstream input(configfile);
+	read_xml(input, config);
+
+	std::vector<std::string> strs;
+	boost::split(strs, Name, boost::is_any_of("/"));
+	std::string model_name = strs[0];
+	std::string process_name = strs[1];
+	auto tree = config.get_child(model_name+"."+process_name);
+	_mass = tree.get<double>("mass");
+	_active = (tree.get<std::string>("<xmlattr>.status")=="active")?true:false;
+
+	// Set Approximate function for X and dX_max
+	//StochasticBase<3>::_ZeroMoment->SetApproximateFunction(approx_R23);
+	//StochasticBase<3>::_FunctionMax->SetApproximateFunction(approx_dR23_max);
+}
+//Sample Final states
+template <>
+void EffRate<3, double(*)(const double*, void *)>::
+		sample(std::vector<double> parameters,
+			std::vector< fourvec > & final_states){
+	double E = parameters[0];
+	double T = parameters[1];
+	double delta_t = parameters[2];
+	// The dR/dx/dy function
+	auto dR_dxdy = [E, T, delta_t, this](const double * x){
+		double M = this->_mass;
+		return 1.;
+	};
+	bool status = true;
+	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}}, StochasticBase<3>::GetFmax(parameters).s, status);
+	if (status == false){
+		// If this sampling takes too much time, just give up...
+		final_states.resize(1);
+		final_states[0] = fourvec{E, 0, 0, std::sqrt(E*E-_mass*_mass)};
+		return;
+	}
+	// Put them into final states
+	// final_states[0] = ...
+	// final_states[1] = ... 
+	return;
+}
+// Find the max of dR/dx/dy
+template <>
+scalar EffRate<3, double(*)(const double*, void*)>::
+		find_max(std::vector<double> parameters){
+	double E = parameters[0];
+	double T = parameters[1];
+	double delta_t = parameters[2];
+	auto negdR_dxdy = [E, T, delta_t, this](const double * x){
+		double M = this->_mass;
+		// return the negative of dR/dx/dy
+        // if out of physics range, please return 0.
+		return -1;
+	};
+	// Use 2-D simplex method to find the extrema
+    //                        (func,  dim, start-loc, steps, #of inter, accuracy)
+	auto val = -minimize_nd(negdR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*1.5;
+    return scalar{val};
+}
+// Calculate Rate Here!!
+template <>
+scalar EffRate<3, double(*)(const double*, void*)>::
+		calculate_scalar(std::vector<double> parameters){
+	double E = parameters[0];
+	double T = parameters[1];
+	double delta_t = parameters[2];
+	// dR/dx/dy to be intergated
+	auto dR_dxdy = [E, T, delta_t, this](const double * x){
+		double M = this->_mass;
+		// Implement the function to be integrated here
+		// x is variable x and y as the case for Shanshan
+		// this->_f is the kernel
+		std::vector<double> res{1.};
+		return res;
+	};
+	double xmin[2] = {0., 0.};
+	double xmax[2] = {1., 1.};
+	double err;
+	auto val = quad_nd(dR_dxdy, 2, 1, xmin, xmax, err); // 2D intergation
+	// multipliy it by qhat in the very end
+	double qhat_quark_at_E_T = 2.*kperp(E, _mass, T);
+	return scalar{qhat_quark_at_E_T*val[0]};
+}
+template <size_t N, typename F>
+fourvec EffRate<N, F>::calculate_fourvec(std::vector<double> parameters){
+	return fourvec::unity();
+}
+template <size_t N, typename F>
+tensor EffRate<N, F>::calculate_tensor(std::vector<double> parameters){
+	return tensor::unity();
+}
+
+
 template class Rate<2,2,double(*)(const double, void*)>; // For 2->2
 template class Rate<3,3,double(*)(const double*, void*)>; // For 2->3
 template class Rate<3,4,double(*)(const double*, void*)>; // For 3->2
+template class EffRate<3,double(*)(const double*, void*)>; // For 1->2 and 2->1
