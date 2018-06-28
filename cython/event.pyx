@@ -1,4 +1,4 @@
-# cython: c_string_type=str, c_string_encoding=ascii
+# cython: c_string_type=str, c_string_encoding=ascii, boundscheck=False
 from libcpp cimport bool
 from libcpp.map cimport map
 from libcpp.vector cimport vector
@@ -50,8 +50,8 @@ cdef class Medium:
 		self._mode = medium_flags['type']
 
 		if self._mode == 'static':
-			print "works in static meidum mode!"
-			print "Medium property can be specified step by step"
+			print("works in static meidum mode!")
+			print("Medium property can be specified step by step")
 			self._Nx = 0
 			self._Ny = 0
 			self._dx = 0.
@@ -211,6 +211,10 @@ cdef extern from "../src/lorentz.h":
 		fourvec boost_to(double vx, double vy, double vz)
 		fourvec rotate_back(const fourvec p)
 
+#--------alpha_s--------------------------------
+cdef extern from "../src/matrix_elements.h":
+	cdef double alpha_s(double Q2, double T)
+falphas = open("alphas.dat", 'w')
 #---------------------C++ lib for LBT and diffusion----------------
 cdef extern from "../src/workflow.h":
 	cdef struct particle:
@@ -318,18 +322,18 @@ cdef class event:
 				HQ_xy_sampler = XY_sampler(init_flags['TAB'],
 							   init_flags['dxy'],
 							   init_flags['b'])
-				pTmax = init_flags['pTmax']
-				pTmin = init_flags['pTmin']
+				logpTmax = log(init_flags['pTmax'])
+				logpTmin = log(init_flags['pTmin'])
 				Emax = init_flags['Emax']
-
+				
 				print("Heavy quarks are freestreamed to {} fm/c".format(self.tau0))
 				it = self.HQ_list[pid].begin()
 				X = []
 				Y = []
 				while it != self.HQ_list[pid].end():
-					# Uniformly sample pT, phi, and ymin<y<ymax
+					# Uniformly sample log(pT), phi, and ny = y/ymax
 					# ymin, ymax are determined by the max-mT
-					pT = np.random.uniform(pTmin, pTmax)
+					pT = np.exp(np.random.uniform(logpTmin, logpTmax))
 					mT = sqrt(pT**2 + mass**2)
 					phipt = np.random.uniform(0, 2.*np.pi)
 					ymax = np.min([np.arccosh(Emax/mT), 3.0])
@@ -419,7 +423,7 @@ cdef class event:
 		status = self.fs_reader.hydro_status()
 
 		self.tau += self.fs_reader.dtau()
-		cdef double T, tau_now, smaller_dtau
+		cdef double T, tau_now, smaller_dtau, T1,T2
 		cdef vector[double] vcell
 		vcell.resize(3)
 		cdef vector[particle].iterator it
@@ -427,8 +431,8 @@ cdef class event:
 			it = self.HQ_list[pid].begin()
 			while it != self.HQ_list[pid].end():
 				# use smaller time step than hydro
-				for substeps in range(8):
-					smaller_dtau = self.fs_reader.dtau()/8.
+				for substeps in range(4):
+					smaller_dtau = self.fs_reader.dtau()/4.
 					# only update HQ that are not freezeout yet
 					if not deref(it).freezeout:
 						###############################################################
@@ -468,8 +472,8 @@ cdef class event:
 			it = self.HQ_list[pid].begin()
 			while it != self.HQ_list[pid].end():
 				# use smaller time step than hydro
-				for substeps in range(4):
-					smaller_dtau = self.hydro_reader.dtau()/4.
+				for substeps in range(10):
+					smaller_dtau = self.hydro_reader.dtau()/10.
 					# only update HQ that are not freezeout yet
 					if not deref(it).freezeout:
 						###############################################################
@@ -542,6 +546,11 @@ cdef class event:
 				final_state # Final states
 			)
 
+		# take down scattering info
+		#if channel >= 0:
+		#	Mt = (deref(it).p.t() - final_state[0].t())**2 - (deref(it).p.x() - final_state[0].x())**2 - (deref(it).p.y() - final_state[0].y())**2 - (deref(it).p.z() - final_state[0].z())**2
+		#	falphas.write("{}\t{}\t{}\n".format(deref(it).p.t(), T, alpha_s(Mt, T)) )
+
 		if channel < 0: # Nothing happens
 			deref(it).freestream(dt_lab)
 		elif channel == 0 or channel == 1: #elastic
@@ -564,6 +573,7 @@ cdef class event:
 			Ito_update(dt_lab*fmc_to_GeV_m1, deref(it).mass, T, vcell,
 						deref(it).p, pOut)
 			deref(it).p = pOut
+ 
 
 	cpdef HQ_hist(self, pid):
 		cdef vector[particle].iterator it = self.HQ_list[pid].begin()
