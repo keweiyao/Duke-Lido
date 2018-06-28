@@ -13,7 +13,7 @@ Xsection<2, double(*)(const double, void*)>::
 	Xsection(std::string Name, std::string configfile,
 			double(*f)(const double, void*)):
 StochasticBase<2>(Name+"/xsection", configfile),
-_f(f), fast_exp_(0., 15., 1000)
+_f(f)
 {
 	// read configfile
 	boost::property_tree::ptree config;
@@ -37,7 +37,7 @@ Xsection<3, double(*)(const double *, void*)>::
 	Xsection(std::string Name, std::string configfile,
 			double(*f)(const double*, void*)):
 StochasticBase<3>(Name+"/xsection", configfile),
-_f(f), fast_exp_(0., 15., 1000)
+_f(f)
 {
 	// read configfile
 	boost::property_tree::ptree config;
@@ -61,7 +61,7 @@ Xsection<4, double(*)(const double *, void*)>::
 	Xsection(std::string Name, std::string configfile,
 			double(*f)(const double*, void*)):
 StochasticBase<4>(Name+"/xsection", configfile),
-_f(f), fast_exp_(0., 15., 1000)
+_f(f)
 {
 	// read configfile
 	boost::property_tree::ptree config;
@@ -95,7 +95,7 @@ void Xsection<2, double(*)(const double, void*)>::
 	auto dXdw = [s, temp, this](double w) {
         double T2 = temp*temp;
 		double params[3] = {s, temp, this->_mass};
-		double t = T2*(1.-fast_exp_(-w));
+		double t = T2*(1.-std::exp(-w));
 		double Jacobian = T2 - t;
 		return this->_f(t, params)*Jacobian;
 	};
@@ -103,7 +103,7 @@ void Xsection<2, double(*)(const double, void*)>::
     double wmin = -std::log(1.-tmin/temp/temp),
 		   wmax = -std::log(1.-tmax/temp/temp);
 	double w = sample_1d(dXdw, {wmin, wmax}, StochasticBase<2>::GetFmax(parameters).s);
-	double t = temp*temp*(1.-fast_exp_(-w));
+	double t = temp*temp*(1.-std::exp(-w));
 	// sample phi
 	double phi = Srandom::dist_phi(Srandom::gen);
 	double cosphi = std::cos(phi), sinphi = std::sin(phi);
@@ -245,7 +245,7 @@ scalar Xsection<2, double(*)(const double, void*)>::
 	auto minus_dXdw = [s, temp, this](const double w) {
         double T2 = temp*temp;
 		double params[3] = {s, temp, this->_mass};
-		double t = T2*(1.-fast_exp_(-w));
+		double t = T2*(1.-std::exp(-w));
 		double Jacobian = T2 - t;
 		return -(this->_f(t, params)*Jacobian);
 	};
@@ -351,7 +351,7 @@ scalar Xsection<2, double(*)(const double, void*)>::
 	auto dXdw = [s, temp, this](double w) {
         double T2 = temp*temp;
 		double params[3] = {s, temp, this->_mass};
-		double t = T2*(1.-fast_exp_(-w));
+		double t = T2*(1.-std::exp(-w));
 		double Jacobian = T2 - t;
 		return this->_f(t, params)*Jacobian;
 	};
@@ -423,7 +423,7 @@ fourvec Xsection<2, double(*)(const double, void*)>::
 	auto dpz_dXdw = [s, temp, p0, this](double w) {
         double T2 = temp*temp;
 		double params[3] = {s, temp, this->_mass};
-		double t = T2*(1.-fast_exp_(-w));
+		double t = T2*(1.-std::exp(-w));
 		double Jacobian = T2 - t;
         double cos_theta13 = 1. + t/(2*p0*p0);
         double dpz = p0*(cos_theta13-1.);
@@ -455,7 +455,7 @@ tensor Xsection<2, double(*)(const double, void*)>::
 	auto dpzdpz_dXdw = [s, temp, p0, this](double w) {
         double T2 = temp*temp;
 		double params[3] = {s, temp, this->_mass};
-		double t = T2*(1.-fast_exp_(-w));
+		double t = T2*(1.-std::exp(-w));
 		double Jacobian = T2 - t;
         double cos_theta13 = 1. + t/(2*p0*p0);
         double dpz = p0*(cos_theta13-1.);
