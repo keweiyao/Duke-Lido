@@ -13,6 +13,7 @@ stat.cpp
 approx_functions.cpp
 workflow.cpp
 Langevin.cpp
+predefine.cpp
 	)
 
 set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "")

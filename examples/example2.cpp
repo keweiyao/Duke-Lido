@@ -4,13 +4,14 @@
 
 #include "simpleLogger.h"
 #include "workflow.h"
-
-// This sample program evolve heavy quark (E0=30, M=1.3) in a static medium for t=3.0fm/c and calculate the average energy loss (<E-E0>)
+// This sample program evolve heavy quark (E0=30, M=1.3) in a Bjorken medium at mid-rapidity for 0.5<t<5.0fm/c and calculate the average energy loss (<E-E0>)
+// T = 0.5GeV(0.5/t)^(1/3)
 int main(int argc, char* argv[]){
-	double fmc_to_GeV_m1 = 5.026, M=1.3, E0=30., T=0.3;
-	double time = 0.; // system time start from t=0
+	double fmc_to_GeV_m1 = 5.026, M=1.3, E0=50., T=0.5;	
+	double t0 = 0.5;
+	double time = t0; // system time start from t=0
     double dt = 0.005; // time step 0.02 fm/c
-	int Nsteps=600, Nparticles=10000;
+	int Nsteps=int((5.0-t0)/dt), Nparticles=10000;
 	if (argc==1){
 		std::cout << "Please tell the program whether use old table (if exists)." << std::endl;
 		std::cout << "   $>./example1 new" << std::endl;
@@ -24,19 +25,19 @@ int main(int argc, char* argv[]){
     fourvec p0{E0, 0, 0, std::sqrt(E0*E0-M*M)};
 	for (auto & p : plist) {
 		p.pid = 4; // pid for charm
-		p.x = fourvec{0,0,0,0}; // initialize position at the origin
+		p.x = fourvec{t0*fmc_to_GeV_m1,0,0,0}; // initialize position at the origin
 		p.p = p0; // initial momentum
 		p.has_k_rad = false;
 		p.has_k_abs = false;
-		p.t_rad = 0.; // initilize the time of last radiation
-		p.t_abs = 0.; // initilize the time of last absorption
+		p.t_rad = t0*fmc_to_GeV_m1; // initilize the time of last radiation
+		p.t_abs = t0*fmc_to_GeV_m1; // initilize the time of last absorption
 		p.k_rad = fourvec{0,0,0,0};
 		p.k_abs = fourvec{0,0,0,0};
 		p.resum_counts = 0;
 		p.mass = M;
 	}
 	for (int it=0; it<Nsteps; ++it){
-		LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
+		LOG_INFO << it << " steps, " << "time = " << time << " [fm/c], T=" << T*std::pow(t0/time, 0.5) << " [GeV]";
 		time += dt;
 		for (auto & p : plist){
 			// loop over each particle
@@ -50,7 +51,7 @@ int main(int argc, char* argv[]){
 			// 3: Qg->Qgg
 			// 4: Qqg->Qq
 			// 5: Qgg->Qg
-			int channel = update_particle_momentum_BDMPSZ(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
+			int channel = update_particle_momentum_BDMPSZ(dt*fmc_to_GeV_m1, T*std::pow(t0/time, 0.5), {0.0, 0.0, 0.0}, p);
 		}
 	}
 	// Calculate average loss in energy
@@ -69,5 +70,3 @@ int main(int argc, char* argv[]){
 
 	return 0;
 }
-
-

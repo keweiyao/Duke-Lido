@@ -9,15 +9,16 @@
 #include <boost/property_tree/ptree.hpp>
 #include "StochasticBase.h"
 #include "Xsection.h"
-
+#include "predefine.h"
 
 // Cross-section based rate:
+// Label: a label for different implementation of the same process
 // N1: dimension of rate table, N2: dimension of Xsection table, 
 // F: matrix element function type
-template <size_t N1, size_t N2, typename F>
+template <char const *str, size_t N1, size_t N2, typename F>
 class Rate: public virtual StochasticBase<N1>{
 private:
-	std::shared_ptr<Xsection<N2, F>> X;
+	std::shared_ptr<Xsection<str, N2, F>> X;
     scalar find_max(std::vector<double> parameters);
 	scalar calculate_scalar(std::vector<double> parameters);
 	fourvec calculate_fourvec(std::vector<double> parameters);
@@ -31,6 +32,7 @@ public:
 	void initX(std::string fname){X->init(fname);}
 	void loadX(std::string fname){X->load(fname);}
 	bool IsActive(void) {return _active;}
+	const char * which_implementation() const { return str;}
 };
 
 // Diffusion induced rate: (effective rate)

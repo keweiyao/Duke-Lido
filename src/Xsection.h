@@ -10,7 +10,7 @@
 #include "StochasticBase.h"
 
 
-template <size_t N, typename F>
+template <const char * str, size_t N, typename F>
 class Xsection: public virtual StochasticBase<N> {
 private:
     scalar find_max(std::vector<double> parameters);

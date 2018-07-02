@@ -28,6 +28,14 @@ void initialize_mD_and_scale(const unsigned int type, double scale);
 //========resonance?? Q+q-->D-->Q+q============
 double dX_res_dt(const double t, void * params);
 
+//=============Baisc function for g+q --> g+q==================================
+double M2_gq2gq(const double t, void * params);
+double dX_gq2gq_dt(const double t, void * params);
+
+//=============Baisc function for g+g --> g+g==================================
+double M2_gg2gg(const double t, void * params);
+double dX_gg2gg_dt(const double t, void * params);
+
 //=============Baisc function for Q+q --> Q+q==================================
 double M2_Qq2Qq(const double t, void * params);
 double M2_Qq2Qq_rad(const double t, void * params);
@@ -42,6 +50,12 @@ double dX_Qg2Qg_dt(const double t, void * params);
 double M2_Qq2Qqg(const double * x_, void * params_);
 //=============Baisc function for Q+g --> Q+g+g==================================
 double M2_Qg2Qgg(const double * x_, void * params_);
+
+// No LPM
+//=============Baisc function for Q+q --> Q+q+g==================================
+double M2_Qq2Qqg_0(const double * x_, void * params_);
+//=============Baisc function for Q+g --> Q+g+g==================================
+double M2_Qg2Qgg_0(const double * x_, void * params_);
 
 // 3->2 prefix
 double prefix_3to2(double s, double s12, double s1k, double dt, double M, double T);

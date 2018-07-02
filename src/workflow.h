@@ -7,12 +7,15 @@
 #include <map>
 
 struct particle{
+	// mass, x, p, t, all in units of [GeV^a]
 	int pid;
 	bool freezeout;
 	double mass;
 	fourvec x;
 	fourvec p;
-	double t_rad, t_absorb;
+	bool has_k_rad, has_k_abs;
+	double t_rad, t_abs;
+	fourvec k_rad, k_abs;
 	fourvec p0;
 	std::vector<double> vcell;
 	double Tf;
@@ -23,21 +26,30 @@ struct particle{
 		x.a[2] = x.y() + p.y()*a;
 		x.a[3] = x.z() + p.z()*a;
 	}
+	int resum_counts;
 };
 
-typedef Rate<2, 2, double(*)(const double, void*)> Rate22;
-typedef Rate<3, 3, double(*)(const double*, void*)> Rate23;
-typedef Rate<3, 4, double(*)(const double*, void*)> Rate32;
+typedef Rate<LO, 2, 2, double(*)(const double, void*)> Rate22;
+//typedef Rate<GBHT, 3, 3, double(*)(const double*, void*)> Rate23;
+//typedef Rate<GBHT, 3, 4, double(*)(const double*, void*)> Rate32;
+typedef Rate<GB, 2, 2, double(*)(const double*, void*)> Rate23;
+typedef Rate<GB, 2, 4, double(*)(const double*, void*)> Rate32;
 typedef boost::variant<Rate22, Rate23, Rate32> Process;
+
+
 extern std::map<int, std::vector<Process>> AllProcesses;
 void initialize(std::string, std::string path, double mu);
-int update_particle_momentum(double dt, double temp, std::vector<double> v3cell, int pid,
-				double D_formation_t23, double D_formation_t32, fourvec incoming_p, std::vector<fourvec> & FS);
+
+double formation_time(fourvec p, fourvec k, double M, double T);
+
+int gluon_elastic_scattering(double dt, double temp, std::vector<double> v3cell, fourvec incomping_p, fourvec & outgoing_p);
+
+int update_particle_momentum_HT(double dt, double temp, std::vector<double> v3cell, particle & pIn);
+
+int update_particle_momentum_BDMPSZ(double dt, double temp, std::vector<double> v3cell, particle & pIn);
 
 std::vector<double> probe_test(double E0, double T, double dt, int Nsteps,
 				int Nparticles, std::string mode);
-std::vector<std::vector<double>> rate_test(double E0, double T, double dt,
-	int Nsteps, int Nparticles, std::string mode, double rescale);
 
 
 #endif

@@ -218,34 +218,33 @@ falphas = open("alphas.dat", 'w')
 #---------------------C++ lib for LBT and diffusion----------------
 cdef extern from "../src/workflow.h":
 	cdef struct particle:
-		int pid
-		bool freezeout
-		double mass
-		fourvec x
-		fourvec p
-		double t_rad, t_absorb
-		fourvec p0
-		vector[double] vcell
-		double Tf
-		void freestream(double dt)
-	cdef void initialize(string mode, string path, double mu)
-	cdef int update_particle_momentum(double dt, double temp,
-				vector[double] v3cell, int pid,
-				double D_formation_t23, double D_formation_t32,
-				fourvec incoming_p, vector[fourvec] & FS)
+		int pid;
+		bool freezeout;
+		double mass;
+		fourvec x;
+		fourvec p;
+		bool has_k_rad, has_k_abs;
+		double t_rad, t_abs;
+		fourvec k_rad, k_abs;
+		fourvec p0;
+		vector[double] vcell;
+		void freestream(double dt);
+		double Tf;
+		int resum_counts;
 
+	cdef void initialize(string mode, string path, double mu)
+	cdef int update_particle_momentum_BDMPSZ(double dt, double temp,
+				vector[double] v3cell, particle)
+	cdef int update_particle_momentum_HT(double dt, double temp,
+				vector[double] v3cell, particle)
+	cdef int gluon_elastic_scattering(double dt, double temp, vector[double] v3cell, fourvec incomping_p, fourvec & outgoing_p);
 	cdef vector[double] probe_test(double E0, double T, double dt, int Nsteps,
 				int Nparticles, string mode);
-	cdef vector[vector[double]] rate_test(double E0, double T, double dt, int Nsteps,
-				int Nparticles, string mode, double rescale);
 
 def probe_run(E0, T, dt=0.05, Nsteps=100, Nparticles=10000, mode="old"):
 	dE = probe_test(E0, T, dt, Nsteps, Nparticles, mode,)
 	return dE;
 
-def rate_run(E0, T, dt=0.05, Nsteps=100, Nparticles=10000, mode="old", rescale=1.0):
-	r = rate_test(E0, T, dt, Nsteps, Nparticles, mode, rescale)
-	return r;
 
 cdef extern from "../src/Langevin.h":
 	cdef void initialize_transport_coeff(double A, double B)
@@ -342,8 +341,8 @@ cdef class event:
 							   pT*sin(phipt), mT*sinh(rapidity)]
 					# sample initial x-y from TRENTo at time = 0+
 					x, y, s1, s2 = HQ_xy_sampler.sample_xy()
-					r0 = [0.0, x, y, 0.0]
-					t0 = self.tau0/sqrt(1. - (pcharm[3]/pcharm[0])**2)
+					r0 = [0.0, x*fmc_to_GeV_m1, y*fmc_to_GeV_m1, 0.0]
+					t0 = self.tau0/sqrt(1. - (pcharm[3]/pcharm[0])**2)*fmc_to_GeV_m1
 					X.append(x)
 					Y.append(y)
 					# Initialize positional space at tau = 0+
@@ -356,7 +355,7 @@ cdef class event:
 					deref(it).freestream(t0)
 					# set last interaction vertex (assumed to be hydro start time)
 					deref(it).t_rad = t0
-					deref(it).t_absorb = t0
+					deref(it).t_abs = t0
 					# initialize others
 					deref(it).freezeout = False
 					deref(it).vcell = [0., 0., 0.]
@@ -379,7 +378,7 @@ cdef class event:
 						deref(it).x.a[i] = r0[i]
 					deref(it).mass = mass
 					deref(it).t_rad = r0[0]
-					deref(it).t_absorb = r0[0]
+					deref(it).t_abs = r0[0]
 					deref(it).freezeout = False
 					deref(it).vcell = [0., 0., 0.]
 					deref(it).Tf = 0.
@@ -404,7 +403,7 @@ cdef class event:
 						deref(it).x.a[i] = r0[i]
 					deref(it).mass = mass
 					deref(it).t_rad = r0[0]
-					deref(it).t_absorb = r0[0]
+					deref(it).t_abs = r0[0]
 					deref(it).freezeout = False
 					deref(it).vcell = [0., 0., 0.]
 					deref(it).Tf = 0.
@@ -439,11 +438,13 @@ cdef class event:
 						###############################################################
 						# Get the cell temperature and velocity for this heavy quark, #
 						###############################################################
-						tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)
+						tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)/fmc_to_GeV_m1
 						T, vcell[0], vcell[1], vcell[2] = \
-								self.fs_reader.interpF(tau_now,
-								[deref(it).x.t(),deref(it).x.x(),
-								deref(it).x.y(),deref(it).x.z()],
+								self.hydro_reader.interpF(tau_now,
+								[deref(it).x.t()/fmc_to_GeV_m1, 
+								 deref(it).x.x()/fmc_to_GeV_m1,
+								 deref(it).x.y()/fmc_to_GeV_m1,
+								 deref(it).x.z()/fmc_to_GeV_m1],
 								['Temp', 'Vx', 'Vy', 'Vz'])
 						#	ensure |v| < 1.
 						vcell = regulate_v(vcell)
@@ -481,13 +482,15 @@ cdef class event:
 						# Get the cell temperature and velocity for this heavy quark, #
 						###############################################################
 						if self.mode == "dynamic":
-							tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)
+							tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)/fmc_to_GeV_m1
 						else:
 							tau_now = deref(it).x.t()
 						T, vcell[0], vcell[1], vcell[2] = \
 								self.hydro_reader.interpF(tau_now,
-								[deref(it).x.t(),deref(it).x.x(),
-								deref(it).x.y(),deref(it).x.z()],
+								[deref(it).x.t()/fmc_to_GeV_m1, 
+								 deref(it).x.x()/fmc_to_GeV_m1,
+								 deref(it).x.y()/fmc_to_GeV_m1,
+								 deref(it).x.z()/fmc_to_GeV_m1],
 								['Temp', 'Vx', 'Vy', 'Vz'])
 						#	ensure |v| < 1.
 						vcell = regulate_v(vcell)
@@ -536,36 +539,10 @@ cdef class event:
 		###############################################################
 		# time should be in GeV^-1 in the update function !!!
 
-		channel = update_particle_momentum(
+		deref(it).freestream(dt_lab*fmc_to_GeV_m1)
+		channel = update_particle_momentum_BDMPSZ(
 				dt_lab*fmc_to_GeV_m1, # evolve for this time
-				T, vcell, 	# fluid info
-				deref(it).pid, # particle pid
-				(deref(it).x.t() - deref(it).t_rad)*fmc_to_GeV_m1, # LPM effect for 2->3
-				(deref(it).x.t() - deref(it).t_absorb)*fmc_to_GeV_m1, # LPM effect for 3->2
-				deref(it).p, # Initial probe momentum
-				final_state # Final states
-			)
-
-		# take down scattering info
-		#if channel >= 0:
-		#	Mt = (deref(it).p.t() - final_state[0].t())**2 - (deref(it).p.x() - final_state[0].x())**2 - (deref(it).p.y() - final_state[0].y())**2 - (deref(it).p.z() - final_state[0].z())**2
-		#	falphas.write("{}\t{}\t{}\n".format(deref(it).p.t(), T, alpha_s(Mt, T)) )
-
-		if channel < 0: # Nothing happens
-			deref(it).freestream(dt_lab)
-		elif channel == 0 or channel == 1: #elastic
-			deref(it).freestream(dt_lab)
-			deref(it).p = final_state[0]
-		elif channel == 2 or channel == 3:
-			deref(it).freestream(dt_lab)
-			deref(it).p = final_state[0]
-			deref(it).t_rad = deref(it).x.t()
-		elif channel == 4 or channel == 5:
-			deref(it).freestream(dt_lab)
-			deref(it).p = final_state[0]
-			deref(it).t_absorb = deref(it).x.t()
-		else:
-			raise ValueError("Unknown channel")
+				T, vcell, deref(it))
 
 		## if langevin is on, additional modification to momentum after LBT
 		cdef fourvec pOut
@@ -585,7 +562,7 @@ cdef class event:
 			ip = deref(it).p
 			ix = deref(it).x
 			p.push_back([ip.t(),ip.x(),ip.y(),ip.z()])
-			x.push_back([ix.t(),ix.x(),ix.y(),ix.z()])
+			x.push_back([ix.t()/fmc_to_GeV_m1,ix.x()/fmc_to_GeV_m1,ix.y()/fmc_to_GeV_m1,ix.z()/fmc_to_GeV_m1])
 			inc(it)
 		return np.array(p), np.array(x)
 
@@ -622,8 +599,8 @@ cdef class event:
 					deref(it).p.x(),deref(it).p.y(),
 					deref(it).p.z(),deref(it).p.t(),
 					deref(it).mass,
-					deref(it).x.x(),deref(it).x.y(),
-					deref(it).x.z(),deref(it).x.t(),
+					deref(it).x.x()/fmc_to_GeV_m1,deref(it).x.y()/fmc_to_GeV_m1,
+					deref(it).x.z()/fmc_to_GeV_m1,deref(it).x.t()/fmc_to_GeV_m1,
 					deref(it).Tf,
 					deref(it).vcell[0], deref(it).vcell[1], deref(it).vcell[2],
 					deref(it).p0.x(), deref(it).p0.y(),
