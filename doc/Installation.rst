@@ -1,6 +1,10 @@
 Installation
 =================
 
+Download the source from `here`_.
+
+.. _here: https://github.com/keweiyao/Duke-Lido
+
 Requirements: c++11, libraries: gsl, hdf5, and boost
 
 To compile and install exe:
