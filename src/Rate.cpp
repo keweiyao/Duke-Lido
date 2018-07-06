@@ -570,12 +570,14 @@ StochasticBase<3>(Name+"/rate", configfile),_f(f)
 	std::string process_name = strs[1];
 	auto tree = config.get_child(model_name+"."+process_name);
 	_mass = tree.get<double>("mass");
+    _degen = tree.get<double>("degeneracy");
 	_active = (tree.get<std::string>("<xmlattr>.status")=="active")?true:false;
 
 	// Set Approximate function for X and dX_max
 	//StochasticBase<3>::_ZeroMoment->SetApproximateFunction(approx_R23);
 	//StochasticBase<3>::_FunctionMax->SetApproximateFunction(approx_dR23_max);
 }
+
 //Sample Final states
 template <>
 void EffRate<3, double(*)(const double*, void *)>::
@@ -587,10 +589,20 @@ void EffRate<3, double(*)(const double*, void *)>::
 	// The dR/dx/dy function
 	auto dR_dxdy = [E, T, delta_t, this](const double * x){
 		double M = this->_mass;
-		return 1.;
+        int CF = 4./3;
+        double splitting = (2. - 2.*x[0] + x[0]*x[0]) * CF/ x[0];  // splitting function
+        double k0_gluon = x[0] * E;
+        double kT_gluon = x[0] * x[1] * E;
+        double tauF = 2.*k0_gluon * (1. - x[0])/(pow(kT_gluon, 2)  + pow(x[0]*M, 2)); // gluon formation time
+        double alphaS = 0.3;  // coupling??
+        double inv_fm_to_GeV = 0.1973;
+        double result = 4./M_PI * Nc * alphaS * splitting * pow(sin(delta_t/(2*tauF*inv_fm_to_GeV)), 2) 
+                        * pow(x[1]*x[1] * E * E/(x[1]*x[1]*E*E + M*M), 4) / (pow(x[0]*E, 2) * pow(x[1], 3)) 
+                        / inv_fm_to_GeV;
+		return result;
 	};
 	bool status = true;
-	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}}, StochasticBase<3>::GetFmax(parameters).s, status);
+	auto res = sample_nd(dR_dxdy, 2, {{0., 1.}, {0., 1.}}, StochasticBase<3>::GetFmax(parameters).s, status);
 	if (status == false){
 		// If this sampling takes too much time, just give up...
 		final_states.resize(1);
@@ -598,8 +610,17 @@ void EffRate<3, double(*)(const double*, void *)>::
 		return;
 	}
 	// Put them into final states
-	// final_states[0] = ...
-	// final_states[1] = ... 
+    // generate a random phi angle for gluons
+    double phi = Srandom::dist_phi(Srandom::gen);
+    double gluon[3] = {res[0] * res[1] * cos(phi),
+                       res[0] * res[1] * sin(phi),
+                       res[0] * E * sqrt(1. - res[1]*res[1]) };
+    // comment by Yingru (should we remove the momentum broadenning from gluons??
+    final_states.resize(2);
+    final_states[0] = fourvec{E, 0.-gluon[0], 0-gluon[1], std::sqrt(E*E-_mass*_mass) - gluon[2]};
+    final_states[1] = {res[0] * E, gluon[0], gluon[1], gluon[2]};
+
+    // comment by Yingru (do we need to rotate and boost back now? maybe not)
 	return;
 }
 // Find the max of dR/dx/dy
@@ -610,14 +631,24 @@ scalar EffRate<3, double(*)(const double*, void*)>::
 	double T = parameters[1];
 	double delta_t = parameters[2];
 	auto negdR_dxdy = [E, T, delta_t, this](const double * x){
-		double M = this->_mass;
 		// return the negative of dR/dx/dy
         // if out of physics range, please return 0.
-		return -1;
+        double M = this->_mass;
+        int CF = 4./3;
+        double splitting = (2. - 2.*x[0] + x[0]*x[0]) * CF/ x[0];  // splitting function
+        double k0_gluon = x[0] * E;
+        double kT_gluon = x[0] * x[1] * E;
+        double tauF = 2.*k0_gluon * (1. - x[0])/(pow(kT_gluon, 2)  + pow(x[0]*M, 2)); // gluon formation time
+        double alphaS = 0.3;  // coupling??
+        double inv_fm_to_GeV = 0.1973;
+        double result = 4./M_PI * Nc * alphaS * splitting * pow(sin(delta_t/(2*tauF*inv_fm_to_GeV)), 2) 
+                        * pow(x[1]*x[1] * E * E/(x[1]*x[1]*E*E + M*M), 4) / (pow(x[0]*E, 2) * pow(x[1], 3)) 
+                        / inv_fm_to_GeV;
+		return -result;
 	};
 	// Use 2-D simplex method to find the extrema
     //                        (func,  dim, start-loc, steps, #of inter, accuracy)
-	auto val = -minimize_nd(negdR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*1.5;
+	auto val = -minimize_nd(negdR_dxdy, 2, {-1., -1.}, {0.2, 0.2}, 1000, 1e-8)*1.5;
     return scalar{val};
 }
 // Calculate Rate Here!!
@@ -633,7 +664,17 @@ scalar EffRate<3, double(*)(const double*, void*)>::
 		// Implement the function to be integrated here
 		// x is variable x and y as the case for Shanshan
 		// this->_f is the kernel
-		std::vector<double> res{1.};
+        int CF = 4./3;
+        double splitting = (2. - 2.*x[0] + x[0]*x[0]) * CF/ x[0];  // splitting function
+        double k0_gluon = x[0] * E;
+        double kT_gluon = x[0] * x[1] * E;
+        double tauF = 2.*k0_gluon * (1. - x[0])/(pow(kT_gluon, 2)  + pow(x[0]*M, 2)); // gluon formation time
+        double alphaS = 0.3;  // coupling??
+        double inv_fm_to_GeV = 0.1973;
+        double result = 4./M_PI * Nc * alphaS * splitting * pow(sin(delta_t/(2*tauF*inv_fm_to_GeV)), 2) 
+                        * pow(x[1]*x[1] * E * E/(x[1]*x[1]*E*E + M*M), 4) / (pow(x[0]*E, 2) * pow(x[1], 3)) 
+                        / inv_fm_to_GeV;
+		std::vector<double> res{result};
 		return res;
 	};
 	double xmin[2] = {0., 0.};
