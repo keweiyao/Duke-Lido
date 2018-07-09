@@ -47,6 +47,16 @@ void init_process(Process& r, std::string mode){
 										}
 								else return;
 								break;
+                         case 3:
+                                if (boost::get<Rate12>(r).IsActive())
+                                        if (mode == "new") {
+                                                boost::get<Rate12>(r).init("table.h5");
+                                    } else{
+                                                boost::get<Rate12>(r).load("table.h5");
+                                    }
+                                else return;
+                                break;
+
                         default:
                                 exit(-1);
                                 break;
@@ -66,6 +76,8 @@ void initialize(std::string mode, std::string path, double mu){
 	AllProcesses[4].push_back( Rate23("Boltzmann/cg2cgg", path, M2_Qg2Qgg) );
 	AllProcesses[4].push_back( Rate32("Boltzmann/cqg2cq", path, Ker_Qqg2Qq) );
 	AllProcesses[4].push_back( Rate32("Boltzmann/cgg2cg", path, Ker_Qgg2Qg) );
+    AllProcesses[4].push_back( Rate12("Boltzmann/c2cg", path, LGV_Q2Qg) );
+    AllProcesses[4].push_back( Rate12("Boltzmann/cg2c", path, LGV_Qg2Q) );
 
     AllProcesses[5] = std::vector<Process>();
     AllProcesses[5].push_back( Rate22("Boltzmann/bq2bq", path, dX_Qq2Qq_dt) );
@@ -74,6 +86,8 @@ void initialize(std::string mode, std::string path, double mu){
     AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", path, M2_Qg2Qgg) );
 	AllProcesses[5].push_back( Rate32("Boltzmann/bqg2bq", path, Ker_Qqg2Qq) );
 	AllProcesses[5].push_back( Rate32("Boltzmann/bgg2bg", path, Ker_Qgg2Qg) );
+    AllProcesses[5].push_back( Rate12("Boltzmann/b2bg", path, LGV_Q2Qg) );
+    AllProcesses[5].push_back( Rate12("Boltzmann/bg2b", path, LGV_Qg2Q) );
 
 	BOOST_FOREACH(Process& r, AllProcesses[4]) init_process(r, mode);
 	BOOST_FOREACH(Process& r, AllProcesses[5]) init_process(r, mode);

@@ -51,4 +51,9 @@ double Ker_Qqg2Qq(const double * x_,  void * params_);
 double Ker_Qgg2Qg(const double * x_, void * params_);
 
 
+
+// diffusion-like Q -> Q + g process
+// July-06-2018 Yingru
+double LGV_Q2Qg(const double * x_, void *params_);  // params_={E, T, M, delta_t}, x_={gluon_x, gluon_y}
+double LGV_Qg2Q(const double * x_, void *params_);  // params_={E, T, M, delta_t}, x_={gluon_x, gluon_y}
 #endif
