@@ -128,6 +128,13 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 				else dR = 0.0;
 				P_channels[channel] = P_total + dR;
 				break;
+            case 3:
+                if (boost::get<Rate12>(r).IsActive())
+                    dR = boost::get<Rate12>(r).GetZeroM(
+                                    {E_cell, temp, D_formation_t23_cell}).s * dt_cell;
+                else dR = 0.0;
+                P_channels[channel] = P_total + dR;
+                break;
 			default:
 				exit(-1);
 				break;
@@ -160,6 +167,10 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 			boost::get<Rate32>(AllProcesses[absid][channel]).sample(
 											{E_cell, temp, D_formation_t32_cell}, FS);
 			break;
+        case 3:
+            boost::get<Rate12>(AllProcesses[absid][channel]).sample(
+                                            {E_cell, temp, D_formation_t23_cell}, FS);
+            break;
 		default:
 			LOG_FATAL << "Channel = " << channel << " not exists";
 			exit(-1);

@@ -469,13 +469,17 @@ double LGV_Q2Qg(const double * x_, void * params_){
     double delta_t = params[3];
     double gluon_k0 = x_[0]*E;
     double gluon_kT = x_[1]*x_[0]*E;
+    // add a cut first (we will come back to this later)
+    if (gluon_k0 < M_PI * T)
+        return 0.;
     
     int CF = 4./3;
     double splitting = (2. - 2.*x_[0] + x_[0]*x_[0]) * CF/x_[0]; // gluon splitting function
     double alpha_rad = alpha_s(gluon_kT, T); // a scale dependent alphaS??? Question mark here!
     double tauF = 2.*gluon_k0 * (1. - x_[0])/(std::pow(gluon_kT,2) + std::pow(x_[0]*M,2)); // gluon formation time
     double dN_dxdy = 4./M_PI*Nc*alpha_rad*splitting * std::pow(sin(delta_t/(2*tauF)), 2)
-                     * std::pow(x_[1]*x_[1]*E*E/(x_[1]*x_[1]*E*E + M*M), 4)  * std::pow(x_[1], 3)
+                     * std::pow(E*E/(x_[1]*x_[1]*E*E + M*M), 4)  
+                     * std::pow(x_[1], 5)
                      / std::pow(x_[0]*E, 2) ;
     return dN_dxdy;
 }

@@ -629,7 +629,7 @@ scalar EffRate<3, double(*)(const double*, void*)>::
 	};
 	// Use 2-D simplex method to find the extrema
     //                        (func,  dim, start-loc, steps, #of inter, accuracy)
-	auto val = -minimize_nd(negdR_dxdy, 2, {-1., -1.}, {0.2, 0.2}, 1000, 1e-8)*1.5;
+	auto val = -minimize_nd(negdR_dxdy, 2, {0.5, 0.5}, {0.2, 0.2}, 1000, 1e-8)*1.5;
     return scalar{val};
 }
 
@@ -653,7 +653,7 @@ scalar EffRate<3, double(*)(const double*, void*)>::
 	double err;
 	auto val = quad_nd(dR_dxdy, 2, 1, xmin, xmax, err); // 2D intergation
 	// multipliy it by qhat in the very end
-	double qhat_quark_at_E_T = 2.*kperp(E, _mass, T);
+	double qhat_quark_at_E_T = 1. ;//2.*kperp(E, _mass, T);
 	return scalar{qhat_quark_at_E_T*val[0]};
 }
 
