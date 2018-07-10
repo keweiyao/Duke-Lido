@@ -8,6 +8,9 @@
 #include "simpleLogger.h"
 #include "workflow.h"
 #include "matrix_elements.h"
+#include <fstream>
+#include <vector>
+#include <iterator>
 
 
 void test_config(void);
@@ -15,7 +18,14 @@ void test_table(void);
 
 
 int main(int argc, char* argv[]){
-	probe_test(10, 0.3, 0.05, 100, 10000, "new");
+    std::ofstream outputFile("output.txt");
+
+	std::vector<double> dE;
+    dE = probe_test(10, 0.3, 0.05, 100, 10000, "new");
+
+    for (const auto &e: dE)
+        outputFile << e << std::endl;
+
 	return 0;
 }
 

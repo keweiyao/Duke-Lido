@@ -6,6 +6,7 @@
 #include "approx_functions.h"
 #include "matrix_elements.h"
 #include "Langevin.h"
+#include <ostream>
 
 template <>
 Rate<2, 2, double(*)(const double, void *)>::
@@ -653,7 +654,8 @@ scalar EffRate<3, double(*)(const double*, void*)>::
 	double err;
 	auto val = quad_nd(dR_dxdy, 2, 1, xmin, xmax, err); // 2D intergation
 	// multipliy it by qhat in the very end
-	double qhat_quark_at_E_T = 1. ;//2.*kperp(E, _mass, T);
+	double qhat_quark_at_E_T = 1.; //2.*kperp(E, _mass, T);
+    std::cout << qhat_quark_at_E_T << std::endl;
 	return scalar{qhat_quark_at_E_T*val[0]};
 }
 
