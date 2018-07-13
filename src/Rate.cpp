@@ -6,7 +6,7 @@
 #include "approx_functions.h"
 #include "matrix_elements.h"
 #include "Langevin.h"
-#include <ostream>
+#include <iostream>
 
 template <>
 Rate<2, 2, double(*)(const double, void *)>::
@@ -581,6 +581,7 @@ void EffRate<3, double(*)(const double*, void *)>::
     sample(std::vector<double> parameters, std::vector< fourvec > & final_states){
     double E = parameters[0];
     double T = parameters[1];
+    double plength = std::sqrt(E*E - _mass*_mass);
     double delta_t = parameters[2];
 
     auto dR_dxdy = [E, T, delta_t, this](const double *x){
@@ -591,22 +592,19 @@ void EffRate<3, double(*)(const double*, void *)>::
 
     bool status=true;
     auto res = sample_nd(dR_dxdy, 2, {{0.,1.},{0.,1.}}, StochasticBase<3>::GetFmax(parameters).s, status);
-    if (status == false) {
-        final_states.resize(1);
-        final_states[0] = fourvec{E, 0, 0, std::sqrt(E*E - _mass*_mass)};
-        return ;
-    }
 
     // put them into final states
     // generate a random phi angle for gluons
     double phi = Srandom::dist_phi(Srandom::gen);
+
     double gluon[3] = { res[0] * E * res[1] * std::cos(phi),
                         res[0] * E * res[1] * std::sin(phi),
                         res[0] * E * std::sqrt(1. - res[1]*res[1]) };
 
-    // comment by Yingru (should we remove the momentum broadening from gluons??
+    // comment by Yingru (should we remove the momentum broadening from gluons?)
+    // There are various ways to remove the momentum broadenning, currently leave this as it is
     final_states.resize(2);
-    final_states[0] = fourvec{E, -gluon[0], -gluon[1], std::sqrt(E*E - _mass*_mass) - gluon[2]};
+    final_states[0] = fourvec{ std::sqrt(std::pow(-gluon[0],2) + std::pow(-gluon[1], 2) + std::pow(plength - gluon[2], 2) + _mass*_mass),   -gluon[0], -gluon[1], plength - gluon[2]};
     final_states[1] = fourvec{res[0]*E, gluon[0], gluon[1], gluon[2]};
 
     // comment by Yingru (do we need to rotate and boost back?)
@@ -621,17 +619,35 @@ scalar EffRate<3, double(*)(const double*, void*)>::
 	double E = parameters[0];
 	double T = parameters[1];
 	double delta_t = parameters[2];
+    // First, use Monte Carlo to find local maxima region (kind of crucial here)
+    auto dR_dxdy = [E, T, delta_t, this](const double * x){
+        // if out of physics range, please return 0.
+        if (x[0] >= 1 || x[0] <= 0 || x[1] <=0 || x[1] >= 1)
+            return 0.;
+        double params[4] = {E, T, this->_mass, delta_t};
+        double result = this->_f(x, params);
+        return result;
+    };
+    auto loc = MC_maximize(dR_dxdy, 2, {{0,1}, {0,1}}, 500);
+    double xloc[2] = {loc[0],loc[1]};
+    
+    /*
+     * problematic in this case, 
 	auto negdR_dxdy = [E, T, delta_t, this](const double * x){
 		// return the negative of dR/dx/dy
         // if out of physics range, please return 0.
+        if (x[0] >= 1 || x[0] <= 0 || x[1] <=0 || x[1] >= 1)    
+            return 0.;
         double params[4] = {E, T, this->_mass, delta_t};
         double result = this->_f(x, params);
         return -result;
 	};
 	// Use 2-D simplex method to find the extrema
     //                        (func,  dim, start-loc, steps, #of inter, accuracy)
-	auto val = -minimize_nd(negdR_dxdy, 2, {0.5, 0.5}, {0.2, 0.2}, 1000, 1e-8)*1.5;
-    return scalar{val};
+	auto val = -minimize_nd(negdR_dxdy, 2, xloc, {std::min(0.2, , 0.2}, 1000, 1e-8)*1.5;
+    return scalar{val};*/
+    
+    return scalar{dR_dxdy(xloc)*2};
 }
 
 
@@ -642,21 +658,25 @@ scalar EffRate<3, double(*)(const double*, void*)>::
 	double E = parameters[0];
 	double T = parameters[1];
 	double delta_t = parameters[2];
+
 	// dR/dx/dy to be intergated
 	auto dR_dxdy = [E, T, delta_t, this](const double * x){
         double params[4] = {E, T, this->_mass, delta_t};
         double result = this->_f(x, params);
         std::vector<double> res{result};
-		return res;
+		//return res;
+        return result;
 	};
 	double xmin[2] = {0., 0.};
 	double xmax[2] = {1., 1.};
 	double err;
-	auto val = quad_nd(dR_dxdy, 2, 1, xmin, xmax, err); // 2D intergation
+	//auto val = quad_nd(dR_dxdy, 2, 1, xmin, xmax, err); // 2D intergation, quad_nd integrate <vector> f, return <vector>
+    auto val = vegas(dR_dxdy, 2, xmin, xmax, err, 10000);  // vegas use double f, and return double. Turns out vegas gives a better convergence than quad_nd without approx_Rate. (sacrifice some efficiency)
 	// multipliy it by qhat in the very end
-	double qhat_quark_at_E_T = 1.; //2.*kperp(E, _mass, T);
-    std::cout << qhat_quark_at_E_T << std::endl;
-	return scalar{qhat_quark_at_E_T*val[0]};
+
+    double qhat_quark_at_E_T = 2.*kperp(E, _mass, T);
+    //LOG_INFO << "Rate: " << delta_t << " " << T  << " " << E  << " " << val << std::endl;
+	return scalar{qhat_quark_at_E_T*val};
 }
 
 

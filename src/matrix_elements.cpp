@@ -19,6 +19,36 @@ double alpha_s(double Q2, double T){
 		else return alpha0 / std::log(mu2/Lambda2);
 }
 
+//========= for debugging purpose, a flavor-dependent coupling ===============
+double alpha_s_LGV(double Q2, double T){
+    double cMass = 1.3;
+    double bMass = 4.2;
+    double error_para = 1.0;
+    double kT;
+
+    if (Q2 < M_PI*T*error_para)
+        kT = M_PI*T*error_para;
+    else
+        kT = Q2;
+
+    double nflavor, lambdaS;
+    if (kT < cMass) {
+        nflavor = 3.;
+        lambdaS = 0.2;
+    } else if (kT < bMass) {
+        nflavor = 4.;
+        lambdaS = 0.172508;
+    } else{
+        nflavor = 5.;
+        lambdaS = 0.130719;
+    }
+
+    double result = 4.0*M_PI / (11. - 2*nflavor/3.)/2./std::log(kT/lambdaS);
+    return result;
+
+}
+
+
 /// 					   time duration from last emission
 ///	LPM factor, x = ------------------------------------------
 ///							formation time of the process
@@ -458,31 +488,36 @@ double Ker_Qgg2Qg(const double * x_, void * params_){
 	return M2_elastic * Pg * Jacobian * detail_balance_factor;
 }
 
-
 // July-06-2019
 // Diffusion-induced Radiative process Q -> Q + g
+//
 double LGV_Q2Qg(const double * x_, void * params_){
     double *params = static_cast<double*>(params_);
     double E = params[0];
     double T = params[1];
     double M = params[2];
     double delta_t = params[3];
+    if (2*E*(E-M_PI*T) < M*M)  return 1e-12;
+
     double gluon_k0 = x_[0]*E;
     double gluon_kT = x_[1]*x_[0]*E;
     // add a cut first (we will come back to this later)
-    if (gluon_k0 < M_PI * T)
-        return 0.;
+    if (gluon_k0 < M_PI * T) return 1e-12;
     
     int CF = 4./3;
     double splitting = (2. - 2.*x_[0] + x_[0]*x_[0]) * CF/x_[0]; // gluon splitting function
-    double alpha_rad = alpha_s(gluon_kT, T); // a scale dependent alphaS??? Question mark here!
+    double alpha_rad = alpha_s_LGV(gluon_kT, T); // a scale/flavor dependent alphaS
     double tauF = 2.*gluon_k0 * (1. - x_[0])/(std::pow(gluon_kT,2) + std::pow(x_[0]*M,2)); // gluon formation time
+
+    if (tauF <  1./(M_PI*T))  return 1e-12; // ?? why? another cutoff
     double dN_dxdy = 4./M_PI*Nc*alpha_rad*splitting * std::pow(sin(delta_t/(2*tauF)), 2)
                      * std::pow(E*E/(x_[1]*x_[1]*E*E + M*M), 4)  
-                     * std::pow(x_[1], 5)
-                     / std::pow(x_[0]*E, 2) ;
+                     * std::pow(x_[1], 5) / std::pow(x_[0]*E, 2) 
+                     / CF;
+
     return dN_dxdy;
 }
+
 
 // Diffusion-induced gluon absorption process Q + g -> Q
 double LGV_Qg2Q(const double * x_, void * params_){
