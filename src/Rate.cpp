@@ -690,7 +690,121 @@ tensor EffRate<N, F>::calculate_tensor(std::vector<double> parameters){
 }
 
 
+
+//AbpRate constructor
+template<>
+AbpRate<3, double(*)(const double*, void *)>::
+    AbpRate(std::string Name, std::string configfile, double(*f)(const double *, void *)):
+StochasticBase<3>(Name+"/rate", configfile),
+_f(f)
+{
+    // read configfile
+    boost::property_tree::ptree config;
+    std::ifstream input(configfile);
+    read_xml(input, config);
+
+    std::vector<std::string> strs;
+    boost::split(strs, Name, boost::is_any_of("/"));
+    std::string model_name = strs[0];
+    std::string process_name = strs[1];
+    auto tree = config.get_child(model_name + "." + process_name);
+    _mass = tree.get<double>("mass");
+    _active = (tree.get<std::string>("<xmlattr>.status") == "active") ? true: false;
+}
+
+// Sample Final status
+template<>
+void AbpRate<3, double(*)(const double*, void *)>::
+    sample(std::vector<double> parameters, std::vector< fourvec > & final_states){
+    double E = parameters[0];
+    double T = parameters[1];
+    double delta_t = parameters[2];
+    double plength = std::sqrt(E*E - _mass*_mass);
+
+    auto dR_dxdy = [E, T, delta_t, this](const double *x){
+        double params[4] = {E, T, this->_mass, delta_t};
+        double result = this->_f(x, params);
+        return result;
+    };
+
+    bool status=true;
+    auto res = sample_nd(dR_dxdy, 2, {{0., 1.}, {0., 1.}}, StochasticBase<3>::GetFmax(parameters).s, status);
+
+    // put them into final states
+    // generate a random phi angle for gluons
+    double phi = Srandom::dist_phi(Srandom::gen);
+
+    double gluon[3] = { res[0] * E * res[1] * std::cos(phi),
+                        res[0] * E * res[1] * std::sin(phi),
+                        res[0] * E * std::sqrt(1 - res[1] * res[1])  };
+
+    final_states.resize(2);
+    final_states[0] = fourvec{ std::sqrt(std::pow(gluon[0], 2) + std::pow(gluon[1], 2) + std::pow(plength+gluon[2], 2) + _mass*_mass), gluon[0], gluon[1], plength + gluon[2]};
+    final_states[1] = fourvec{ res[0]*E, -gluon[0], -gluon[1], -gluon[2]};
+
+    return ;
+}
+
+
+// Find the max of dR/dx/dy
+template <>
+scalar AbpRate<3, double(*)(const double*, void*)>::
+		find_max(std::vector<double> parameters){
+	double E = parameters[0];
+	double T = parameters[1];
+	double delta_t = parameters[2];
+    auto dR_dxdy = [E, T, delta_t, this](const double * x){
+        // if out of physics range, please return 0.
+        if (x[0] >= 1 || x[0] <= 0 || x[1] <=0 || x[1] >= 1)
+            return 0.;
+        double params[4] = {E, T, this->_mass, delta_t};
+        double result = this->_f(x, params);
+        return result;
+    };
+    auto loc = MC_maximize(dR_dxdy, 2, {{0,1}, {0,1}}, 500);
+    double xloc[2] = {loc[0],loc[1]};
+    
+    return scalar{dR_dxdy(xloc)*2};
+}
+
+
+
+
+// Calculate the Rate here!
+template<>
+scalar AbpRate<3, double(*)(const double*, void*)>::
+        calculate_scalar(std::vector<double> parameters){
+    double E = parameters[0];
+    double T = parameters[1];
+    double delta_t = parameters[2];
+
+    auto dR_dxdy = [E, T, delta_t, this](const double *x){
+        double params[4] = {E, T, this->_mass, delta_t};
+        double result = this->_f(x, params);
+        std::vector<double> res{result};
+        return result;
+    };
+
+    double xmin[2] = {0., 0.};
+    double xmax[2] = {1., 1.};
+    double err;
+
+    auto val = vegas(dR_dxdy, 2, xmin, xmax, err, 10000);
+    double qhat_quark_at_E_T = 2. * kperp(E, _mass, T);
+    return scalar{qhat_quark_at_E_T*val};
+}
+
+template<size_t N, typename F>
+fourvec AbpRate<N, F>::calculate_fourvec(std::vector<double> parameters){
+    return fourvec::unity();
+}
+template<size_t N, typename F>
+tensor AbpRate<N, F>::calculate_tensor(std::vector<double> parameters){
+    return tensor::unity();    
+}
+
 template class Rate<2,2,double(*)(const double, void*)>; // For 2->2
 template class Rate<3,3,double(*)(const double*, void*)>; // For 2->3
 template class Rate<3,4,double(*)(const double*, void*)>; // For 3->2
-template class EffRate<3,double(*)(const double*, void*)>; // For 1->2 and 2->1
+template class EffRate<3,double(*)(const double*, void*)>; // For 1->2 
+template class AbpRate<3,double(*)(const double*, void*)>; // For 2->1 
