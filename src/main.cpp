@@ -21,7 +21,7 @@ int main(int argc, char* argv[]){
     std::ofstream outputFile("output.txt");
 
 	std::vector<double> dE;
-    dE = probe_test(10, 0.3, 0.01, 300, 100000, "old");
+    dE = probe_test(10, 0.3, 0.01, 30000, 100000, "new");
 
     for (const auto &e: dE)
         outputFile << e << std::endl;

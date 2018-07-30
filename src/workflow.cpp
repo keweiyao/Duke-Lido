@@ -252,13 +252,11 @@ std::vector<double> probe_test(double E0, double T, double dt=0.05, int Nsteps=1
 			}
          
 
-        /*
         if (lgv){
                 fourvec pOut;
                 Ito_update(dt*fmc_to_GeV_m1, M, T, {0.0,0.0,0.0}, p.p, pOut);
                 p.p = pOut;
             }
-        */
     	p.freestream(dt);
 		}
 	}
