@@ -5,10 +5,6 @@
 #include "simpleLogger.h"
 #include "workflow.h"
 
-
-void test_config(void);
-void test_table(void);
-
 // This sample program evolve heavy quark (E0=30, M=1.3) in a static medium for t=3.0fm/c and calculate the average energy loss (<E-E0>)
 int main(int argc, char* argv[]){
 	double fmc_to_GeV_m1 = 5.026, M=1.3, E0=30., T=0.3;

@@ -53,7 +53,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Duke Heavy Quark Transport Project'
+project = u'Duke Heavy Quark Transport Project (Lido)'
 copyright = u'2016, Weiyao Ke, Yingru Xu, Steffen A. Bass'
 author = u'Weiyao Ke, Yingru Xu, Steffen A. Bass'
 
@@ -145,7 +145,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'dukeHeavyQuarkProject', u'Duke Heavy Quark Transport Project',
+    (master_doc, 'dukeHeavyQuarkProject', u'Duke Heavy Quark Transport Project (Lido)',
      [author], 1)
 ]
 
