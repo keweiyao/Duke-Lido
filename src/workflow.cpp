@@ -54,10 +54,10 @@ void init_process(Process& r, std::string mode){
 }
 
 
-void initialize(std::string mode, std::string path, double mu){
+void initialize(std::string mode, std::string path, 
+				double mu, double const_alpha_s){
 	print_logo();
-	boost::property_tree::ptree config;
-    initialize_mD_and_scale(1, mu);
+    initialize_mD_and_scale(0, mu, const_alpha_s);
 
 	AllProcesses[4] = std::vector<Process>();
 	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", path, dX_Qq2Qq_dt) );
@@ -187,7 +187,10 @@ int gluon_elastic_scattering(double dt, double temp, std::vector<double> v3cell,
 		channel ++;
 	}
 	for(auto& item : P_channels) {item /= P_total;}
-	if (P_total > 0.15) LOG_WARNING << "P(g) = " << P_total << " may be too large";
+	if (P_total > 0.15 && !type1_warned) {
+		LOG_WARNING << "P(g) = " << P_total << " may be too large";
+		type1_warned = true;
+	}
 	if ( Srandom::init_dis(Srandom::gen) > P_total) return -1;
 	else{
 		double p = Srandom::init_dis(Srandom::gen);
@@ -217,69 +220,51 @@ int gluon_elastic_scattering(double dt, double temp, std::vector<double> v3cell,
 	return channel;
 }
 
-double formation_time(fourvec p, fourvec k, double M, double T){
+
+// one only use the 3-vec component of it
+fourvec measure_perp(fourvec p, fourvec k){
+	double kdotp = (k.x()*p.x() + k.y()*p.y() + k.z()*p.z());
+	return k - p*(kdotp/p.pabs2()); // k_perp  vector
+}
+
+double formation_time(fourvec p, fourvec k, fourvec k0, double M, double T){
 	// do everything in the frame where heavy quark moves in z-direction
-	double p0 = p.t();
-	double pz = std::sqrt(p0*p0 - M*M);
-	double k0 = k.t();
-	double kz = (k.x()*p.x() + k.y()*p.y() + k.z()*p.z() ) / pz;
-	double x = (k0+kz)/(p0+pz+k0+kz);
-	double kt2 = k0*k0 - kz*kz;
-	double mD2 = t_channel_mD2->get_mD2(T);
-	double tauf = 2.*x*(1-x)*p0/(kt2 + x*x*M*M + (1-x)*mD2/2.);
+	//double kz = (k0.x()*p.x() + k0.y()*p.y() + k0.z()*p.z() ) / p.pabs();
+	double x = k0.t()/p.t();//(k0.t()+kz)/(p.t()+p.pabs());
+	double Q2 = measure_perp(p,k).pabs2();
+	double mu2 = t_channel_mD2->get_mD2(T)/2.;
+	double tauf = 2*x*(1-x)*p.t()/(Q2 + x*x*M*M + (1.-x)*mu2);
 	return tauf;
 }
-//std::ofstream fc("counts.dat");
+
+//std::ofstream fc("count.dat");
 
 int update_particle_momentum_BDMPSZ(double dt, double temp, std::vector<double> v3cell, particle & pIn){
-	std::vector<fourvec> FS; // Final state holder
-	// Perform pre-gluon scattering if there is one
-	if (pIn.has_k_rad){
-		//LOG_INFO << formation_time(pIn.p, pIn.k_rad, pIn.mass, temp);
-		// check if it is formed already (t-t0 > tau_f)
-		// if formed, let the heavy quark forget the gluon, else keep evolving it
-		if (pIn.x.t()-pIn.t_rad > formation_time(pIn.p, pIn.k_rad, pIn.mass, temp)) {
-			pIn.has_k_rad = false;
-			//fc << pIn.resum_counts << std::endl;
-			// take out the gluon energy from the original heavy quark, note the possible mismatch in 4-momentum conservation due to other rescatterings
-			pIn.p.a[1] = pIn.p.x() - pIn.k_rad.x();
-			pIn.p.a[2] = pIn.p.y() - pIn.k_rad.y();
-			pIn.p.a[3] = pIn.p.z() - pIn.k_rad.z();
-			pIn.p.a[0] = std::sqrt(pIn.p.x()*pIn.p.x() + pIn.p.y()*pIn.p.y() + pIn.p.z()*pIn.p.z() + pIn.mass*pIn.mass);
-			pIn.resum_counts = 0;
-		}	
-		else{ 
-			fourvec k_rad_new;
-			// if the pre-gluon scatterings, update its momentum.
-			if ( gluon_elastic_scattering(dt, temp, v3cell, pIn.k_rad, k_rad_new) >= 0) {
-				pIn.k_rad = k_rad_new;		
-				pIn.resum_counts ++;
-			}
-		}
-	}
 
-	// Now we can preform the heavy quark scattering as always,
-	// except that: we don't let the heavy quark radiate if it has a pre-gluon
+	std::vector<fourvec> FS; 
+
 	int absid = std::abs(pIn.pid), channel = 0;
 	auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
 	double dt_cell = dt / pIn.p.t() * p_cell.t();
 	double E_cell = p_cell.t();
     std::vector<double> P_channels(AllProcesses[absid].size());
 	double P_total = 0., dP;
+
 	// Calculate Rate for Heavy Quark
 	BOOST_FOREACH(Process& r, AllProcesses[absid]){
 		switch(r.which()){
 			case 0:
-				if (boost::get<Rate22>(r).IsActive())
+				if (boost::get<Rate22>(r).IsActive()){
 					dP = boost::get<Rate22>(r).GetZeroM({E_cell, temp}).s * dt_cell;
-				else dP = 0.0;
+				}
+				else {dP = 0.0;}
 				P_channels[channel] = P_total + dP;
 				break;
 			case 1:
-				// if 2->3 is on and there is no pre-gluon, include 2->3 rate
-				if (boost::get<Rate23>(r).IsActive() && (!pIn.has_k_rad))
+				if (boost::get<Rate23>(r).IsActive()){
 					dP = boost::get<Rate23>(r).GetZeroM({E_cell, temp}).s * dt_cell;
-				else dP = 0.0;
+				}
+				else {dP = 0.0;}
 				P_channels[channel] = P_total + dP;
 				break;
 			case 2:
@@ -297,9 +282,12 @@ int update_particle_momentum_BDMPSZ(double dt, double temp, std::vector<double> 
 	}
 	// Normalize Rate
 	for(auto& item : P_channels) {item /= P_total;}
-	if (P_total > 0.15) LOG_WARNING << "P_total = " << P_total << " may be too large";
-	// Sample Rate
-	if ( Srandom::init_dis(Srandom::gen) > P_total) return -1;
+	if (P_total > 0.15 && !type2_warned) {
+		LOG_WARNING << "P(Q) = " << P_total << " may be too large";
+		type2_warned = true;
+	}
+	// Sample channel
+	if ( Srandom::init_dis(Srandom::gen) > P_total) channel = -1;
 	else{
 		double p = Srandom::init_dis(Srandom::gen);
 		for(int i=0; i<P_channels.size(); ++i){
@@ -309,77 +297,170 @@ int update_particle_momentum_BDMPSZ(double dt, double temp, std::vector<double> 
 			}
 		}
 	}
-	// Do scattering
-	switch(AllProcesses[absid][channel].which()){
-		case 0:
-			boost::get<Rate22>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
-			break;
-		case 1:
-			boost::get<Rate23>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
-			break;
-		case 2:
-			boost::get<Rate32>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
-			break;
-		default:
-			LOG_FATAL << "Channel = " << channel << " not exists";
-			exit(-1);
-			break;
+	
+	if (channel >=0){
+		// Do scattering
+		switch(AllProcesses[absid][channel].which()){
+			case 0:
+				boost::get<Rate22>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
+				break;
+			case 1:
+				boost::get<Rate23>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
+				break;
+			case 2:
+				boost::get<Rate32>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
+				break;
+			default:
+				LOG_FATAL << "Channel = " << channel << " not exists";
+				exit(-1);
+				break;
+		}
+		// rotate it back and boost it back to lab frame
+		for(auto & pmu : FS) {
+			pmu = pmu.rotate_back(p_cell);
+			pmu = pmu.boost_back(v3cell[0], v3cell[1], v3cell[2]);
+		}
+		// If it radiates, add a pre-gluon
+		if (channel == 2 || channel == 3){
+			pregluon g;
+			g.p0 = pIn.p;
+			g.k0 = pIn.p - FS[0];
+			g.k1 = FS[2]; 
+			g.kn = g.k1;
+			g.t0 = pIn.x.t();
+			g.n = 1;
+			g.T0 = temp;
+			
+			double local_qhat = 0.;
+			BOOST_FOREACH(Process& r, AllProcesses[21]){
+				switch(r.which()){
+					case 0:
+						if (boost::get<Rate22>(r).IsActive()){
+							tensor A = boost::get<Rate22>(r).GetSecondM({E_cell, temp});			
+							local_qhat += A.T[1][1]+A.T[2][2];
+						}
+						break;
+					default:
+						break;
+				}
+			}
+			double xfrac = g.k1.t()/g.p0.t();
+			local_qhat = local_qhat;
+			double mD2 = t_channel_mD2->get_mD2(temp);
+			g.local_mfp = mD2/local_qhat*pIn.p.t()/E_cell;
+			pIn.radlist.push_back(g);
+
+			// merge the k into the Q
+		}
+		else{
+			pIn.p = FS[0];
+		}
 	}
-	// rotate it back and boost it back to lab frame
-	for(auto & pmu : FS) {
-		pmu = pmu.rotate_back(p_cell);
-		pmu = pmu.boost_back(v3cell[0], v3cell[1], v3cell[2]);
+
+	// Perform pre-gluon scattering if there is one
+	if (!pIn.radlist.empty()){
+		// loop over each pre-gluon
+		for(std::vector<pregluon>::iterator it=pIn.radlist.begin(); it!=pIn.radlist.end();){
+			double taun = formation_time(it->p0,it->kn,it->k0,pIn.mass,temp);
+			if (pIn.x.t()-it->t0 > taun){
+				double kt20 = measure_perp(it->p0, it->k1).pabs2();
+				double kt2n = measure_perp(it->p0, it->kn).pabs2();
+				double theta2 = kt2n/std::pow(it->kn.t(),2);
+				double thetaM2 = std::pow(pIn.mass/it->p0.t(),2);
+				double ratio = 1.5*it->local_mfp/taun*alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0)*std::pow(theta2/(theta2+thetaM2), 2);
+				if (Srandom::rejection(Srandom::gen) < std::min(ratio, 1.0)){
+					double pabs0 = pIn.p.pabs();
+					pIn.p.a[0] -= it->k1.t();
+					double pabs1 = std::sqrt(pIn.p.a[0]*pIn.p.a[0] - pIn.mass*pIn.mass);
+					double rescale = pabs1/pabs0;
+					pIn.p.a[1] *= rescale;
+					pIn.p.a[2] *= rescale;
+					pIn.p.a[3] *= rescale;
+					
+				}
+				it = pIn.radlist.erase(it);
+			}else{ // else, evolve it
+				fourvec k_new;
+				if (gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new)>=0){
+					it->kn = k_new*(it->kn.t()/k_new.t());
+					it->n++;
+				}
+				it++;
+			}
+		}
 	}
-	// If it radiates, add a pre-gluon
-	if (channel == 2 || channel == 3){
-		pIn.t_rad = pIn.x.t();
-		pIn.k_rad = FS[2];
-		pIn.has_k_rad = true;
-		pIn.resum_counts = 1;
-		// merge the k into the Q 
-		//pIn.p.a[1] = FS[0].x() + pIn.k_rad.x();
-		//pIn.p.a[2] = FS[0].y() + pIn.k_rad.y();
-		//pIn.p.a[3] = FS[0].z() + pIn.k_rad.z();
-		//pIn.p.a[0] = std::sqrt(pIn.p.x()*pIn.p.x() + pIn.p.y()*pIn.p.y() + pIn.p.z()*pIn.p.z() + pIn.mass*pIn.mass);
-		//LOG_INFO << pIn.p.t() << " " << pIn.p.x() << " " << pIn.p.y() << " " << pIn.p.z() << " " << dot(pIn.p, pIn.p); 
-		//LOG_INFO << pIn.k_rad.t() << " " << pIn.k_rad.x() << " " << pIn.k_rad.y() << " " << pIn.k_rad.z() << " " << dot(pIn.k_rad, pIn.k_rad); 
-	}
-	else{
-		pIn.p = FS[0];
-	}
+
+
 	return channel;
 }
 
 
-std::vector<double> probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Nparticles=10000, std::string mode="old"){
+std::vector<double> probe_test(double M, double E0, double T, double dt, int Nsteps, int Nparticles, std::string mode, double mu, double const_alphas){
+	initialize(mode, "./settings.xml", mu, const_alphas);
 	double fmc_to_GeV_m1 = 5.026;
-	initialize(mode, "./settings.xml", 1.0);
-	double M = 1.3;
 	std::vector<double> dE;
 	std::vector<particle> plist(Nparticles);
-    fourvec p0{E0, 0, 0, std::sqrt(E0*E0-M*M)};
+	double pabs0 = std::sqrt(E0*E0-M*M);
+	fourvec p0{E0, 0, 0, pabs0};
+
 	for (auto & p : plist) {
 		p.pid = 4;
 		p.x = fourvec{0,0,0,0};
 		p.p = p0;
-		p.has_k_rad = false;
-		p.has_k_abs = false;
 		p.t_rad = 0.;
 		p.t_abs = 0.;
-		p.k_rad = fourvec{0,0,0,0};
-		p.k_abs = fourvec{0,0,0,0};
 		p.mass = M;
 	}
 	double time = 0.;
     double sum = 0.;
 	for (int it=0; it<Nsteps; ++it){
-		LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
+		if (it%100 ==0) LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
 		for (auto & p : plist) sum += E0-p.p.t();
 		dE.push_back(sum/Nparticles);
 		time += dt;
 		for (auto & p : plist){
-      		p.p = p0; // reset energy for probe test
+      		// reset energy for probe test
+			p.p = p0;
+			// x-update
 			p.freestream(dt*fmc_to_GeV_m1);
+			// p-update
+			int channel = update_particle_momentum_BDMPSZ(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
+		}
+	}
+	return dE;
+}
+
+std::vector<double> Bjorken_test(double E0, double T0, double t0, double dt, int Nsteps, int Nparticles, std::string mode, double mu, double const_alphas){
+	initialize(mode, "./settings.xml", mu, const_alphas);
+	double fmc_to_GeV_m1 = 5.026;
+	double M = 1.3;
+	std::vector<double> dE;
+	std::vector<particle> plist(Nparticles);
+	double pabs0 = std::sqrt(E0*E0-M*M);
+	fourvec p0{E0, 0, 0, pabs0};
+
+	for (auto & p : plist) {
+		p.pid = 4;
+		p.x = fourvec{0,0,0,0};
+		p.p = p0;
+		p.t_rad = 0.;
+		p.t_abs = 0.;
+		p.mass = M;
+	}
+	double time = 0.;
+    double sum = 0.;
+	for (int it=0; it<Nsteps; ++it){
+		double T = T0*std::pow(t0/(t0+time), 1./3.);
+		if (it%100 ==0) LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
+		for (auto & p : plist) sum += E0-p.p.t();
+		dE.push_back(sum/Nparticles);
+		time += dt;
+		for (auto & p : plist){
+      		// reset energy for probe test
+			p.p = p0;
+			// x-update
+			p.freestream(dt*fmc_to_GeV_m1);
+			// p-update
 			int channel = update_particle_momentum_BDMPSZ(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
 		}
 	}

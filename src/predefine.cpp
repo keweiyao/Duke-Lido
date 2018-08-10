@@ -5,6 +5,9 @@ char LO[] = "Leading-order";
 char GB[] = "Gunion-Bertsch";
 char GBHT[] = "Gunion-Bertsch-higher-twist";
 
+bool type1_warned = false;
+bool type2_warned = false; 
+
 const double c4d9 = 4./9.;
 const double c1d9 = 1./9.;
 const double c16pi = 16.*M_PI;

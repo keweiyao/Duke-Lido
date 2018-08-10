@@ -15,7 +15,7 @@ void test_table(void);
 
 
 int main(int argc, char* argv[]){
-	probe_test(10, 0.3, 0.05, 100, 10000, "new");
+	//probe_test(10, 0.3, 0.05, 100, 10000, "new");
 	return 0;
 }
 

@@ -240,7 +240,7 @@ void Xsection<GB, 2, double(*)(const double*, void*)>::
 
 	double xmin[4] = {0., -1.,  x2min, 0.};
 	double xmax[4] = {umax, 1., x2max, 2.*M_PI};
-	double fmax = StochasticBase<2>::GetFmax(parameters).s;
+	double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
 	bool status = true;
 	auto res = sample_nd(dXdPS, 4, {{xmin[0], xmax[0]}, {xmin[1], xmax[1]},
 									{xmin[2], xmax[2]}, {xmin[3], xmax[3]}},
@@ -486,7 +486,7 @@ scalar Xsection<GB, 2, double(*)(const double*, void*)>::
     double val = -minimize_nd(nega_dXdPS, 4, startloc, step,
 										4000, Lx2*umax*4*M_PI/1e12);
 	// save max*1.5 just to be safe
-	return scalar{val*1.5};
+	return scalar{std::log(val*1.5)};
 }
 
 /*------------------Implementation for 3 -> 2--------------------*/

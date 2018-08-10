@@ -28,8 +28,8 @@ X(std::make_shared<Xsection<LO, 2, double(*)(const double, void *)>>(Name, confi
 	_active = (tree.get<std::string>("<xmlattr>.status")=="active")?true:false;
 
 	// Set Approximate function for X and dX_max
-	StochasticBase<2>::_ZeroMoment->SetApproximateFunction(approx_R22);
-	StochasticBase<2>::_FunctionMax->SetApproximateFunction(approx_dR22_max);
+	//StochasticBase<2>::_ZeroMoment->SetApproximateFunction(approx_R22);
+	//StochasticBase<2>::_FunctionMax->SetApproximateFunction(approx_dR22_max);
 }
 
 template <>
@@ -143,7 +143,7 @@ void Rate<LO, 2, 2, double(*)(const double, void *)>::
 	};
 	bool status = true;
 	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}},
-						StochasticBase<2>::GetFmax(parameters).s, status);
+						std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
 	if (status == false){
 		final_states.resize(1);
 		final_states[0] = fourvec{E, 0, 0, std::sqrt(E*E-_mass*_mass)};
@@ -200,7 +200,8 @@ void Rate<GBHT, 3, 3, double(*)(const double*, void *)>::
     	return 1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
 	};
 	bool status = true;
-	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}}, StochasticBase<3>::GetFmax(parameters).s, status);
+	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}}, 		
+		std::exp(StochasticBase<3>::GetFmax(parameters).s), status);
 	double E2 = T*(std::exp(res[0])-1.), costheta = res[1];
 	double sintheta = std::sqrt(1. - costheta*costheta);
 	double phi = Srandom::dist_phi(Srandom::gen);
@@ -242,7 +243,7 @@ void Rate<GB, 2, 2, double(*)(const double*, void *)>::
     	return 1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
 	};
 	bool status = true;
-	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}}, StochasticBase<2>::GetFmax(parameters).s, status);
+	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}}, std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
 	double E2 = T*(std::exp(res[0])-1.), costheta = res[1];
 	double sintheta = std::sqrt(1. - costheta*costheta);
 	double phi = Srandom::dist_phi(Srandom::gen);
@@ -455,7 +456,7 @@ scalar Rate<LO, 2, 2, double(*)(const double, void*)>::
     // x step 0.3, cosphi step 0.3
     // save a slightly larger fmax
 	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*1.5;
-    return scalar{val};
+    return scalar{std::log(val)};
 }
 /*------------------Implementation for 2 -> 3--------------------*/
 template <>
@@ -486,7 +487,7 @@ scalar Rate<GBHT, 3, 3, double(*)(const double*, void*)>::
     // x step 0.3, cosphi step 0.3
     // save a slightly larger fmax
 	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*1.5;
-    return scalar{val};
+    return scalar{std::log(val)};
 }
 // Pure Gunion Bertsch
 template <>
@@ -510,8 +511,8 @@ scalar Rate<GB, 2, 2, double(*)(const double*, void*)>::
     // x start from 1, y start from 0
     // x step 0.3, cosphi step 0.3
     // save a slightly larger fmax
-	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*1.5;
-    return scalar{val};
+	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*3;
+    return scalar{std::log(val)};
 }
 /*------------------Implementation for 3 -> 2--------------------*/
 template <>
@@ -546,9 +547,8 @@ scalar Rate<GBHT, 3, 4, double(*)(const double*, void*)>::
 	auto loc = MC_maximize(code, 5,
 				{{T, T*2}, {T, T*2},{-.5, .5}, {-0.5, 0.5}, {1.5,2.}}, 500);
 	double xloc[5] = {loc[0],loc[1],loc[2],loc[3],loc[4]};
-	auto val = std::log(code(xloc)*2.);
-	//auto val = -minimize_nd(code, 5, {2*T,2*T,0,0,M_PI}, {T/2., T/2., 0.2, 0.2, 0.5}, 1000, 1e-12);
-	return scalar{val};
+	auto val = code(xloc)*2.;
+	return scalar{std::log(val)};
 }
 // Pure Gunion-Bertsch
 template <>
@@ -580,9 +580,8 @@ scalar Rate<GB, 2, 4, double(*)(const double*, void*)>::
 	auto loc = MC_maximize(code, 5,
 				{{T, T*2}, {T, T*2},{-.5, .5}, {-0.5, 0.5}, {1.5,2.}}, 500);
 	double xloc[5] = {loc[0],loc[1],loc[2],loc[3],loc[4]};
-	auto val = std::log(code(xloc)*2.);
-	//auto val = -minimize_nd(code, 5, {2*T,2*T,0,0,M_PI}, {T/2., T/2., 0.2, 0.2, 0.5}, 1000, 1e-12);
-	return scalar{val};
+	auto val = code(xloc)*2.;
+	return scalar{std::log(val)};
 }
 
 

@@ -232,19 +232,24 @@ cdef extern from "../src/workflow.h":
 		double Tf;
 		int resum_counts;
 
-	cdef void initialize(string mode, string path, double mu)
+	cdef void initialize(string mode, string path, double mu, double alphafix)
 	cdef int update_particle_momentum_BDMPSZ(double dt, double temp,
 				vector[double] v3cell, particle)
 	cdef int update_particle_momentum_HT(double dt, double temp,
 				vector[double] v3cell, particle)
 	cdef int gluon_elastic_scattering(double dt, double temp, vector[double] v3cell, fourvec incomping_p, fourvec & outgoing_p);
-	cdef vector[double] probe_test(double E0, double T, double dt, int Nsteps,
-				int Nparticles, string mode);
+	cdef vector[double] probe_test(double M, double E0, double T, double dt, int Nsteps,
+				int Nparticles, string mode, double mu, double alphafix);
 
-def probe_run(E0, T, dt=0.05, Nsteps=100, Nparticles=10000, mode="old"):
-	dE = probe_test(E0, T, dt, Nsteps, Nparticles, mode,)
+	cdef vector[double] Bjorken_test(double E0, double T0, double t0, double dt, int Nsteps, int Nparticles, string mode, double mu, double const_alphas);
+
+def probe_run(M, E0, T, dt=0.05, Nsteps=100, Nparticles=10000, mode="old", mu=1.0, alphafix=-1.0):
+	dE = probe_test(M, E0, T, dt, Nsteps, Nparticles, mode, mu, alphafix)
 	return dE;
 
+def Bjorken_run(E0, T, t0=0.6, dt=0.05, Nsteps=100, Nparticles=10000, mode="old", mu=1.0, alphafix=-1.0):
+	dE = Bjorken_test(E0, T, t0, dt, Nsteps, Nparticles, mode, mu, alphafix)
+	return dE;
 
 cdef extern from "../src/Langevin.h":
 	cdef void initialize_transport_coeff(double A, double B)
@@ -286,9 +291,9 @@ cdef class event:
 		setting_path = os.environ['XDG_DATA_HOME']+"/event/settings.xml"
 		print(setting_path)
 		if not os.path.exists("table.h5"):
-			initialize("new", setting_path, LBT['mu'])
+			initialize("new", setting_path, LBT['mu'], -1.0)
 		else:
-			initialize("old", setting_path, LBT['mu'])
+			initialize("old", setting_path, LBT['mu'], -1.0)
 
 		# initialize LGV
 		if LGV is not None:

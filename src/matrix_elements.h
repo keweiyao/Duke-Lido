@@ -23,7 +23,7 @@ extern Debye_mass * t_channel_mD2;
 extern double renormalization_scale;
 
 //=====For external initialization of debye mass==============================
-void initialize_mD_and_scale(const unsigned int type, double scale);
+void initialize_mD_and_scale(const unsigned int type, double scale, double alpha_s_fixed);
 
 //========resonance?? Q+q-->D-->Q+q============
 double dX_res_dt(const double t, void * params);

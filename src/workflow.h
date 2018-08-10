@@ -6,6 +6,13 @@
 #include <vector>
 #include <map>
 
+struct pregluon{
+	fourvec p0, k0, k1, kn;
+	double t0, T0;
+	int n;
+	double local_mfp;
+};
+
 struct particle{
 	// mass, x, p, t, all in units of [GeV^a]
 	int pid;
@@ -13,9 +20,8 @@ struct particle{
 	double mass;
 	fourvec x;
 	fourvec p;
-	bool has_k_rad, has_k_abs;
+	std::vector<pregluon> radlist, abslist;
 	double t_rad, t_abs;
-	fourvec k_rad, k_abs;
 	fourvec p0;
 	std::vector<double> vcell;
 	double Tf;
@@ -26,7 +32,6 @@ struct particle{
 		x.a[2] = x.y() + p.y()*a;
 		x.a[3] = x.z() + p.z()*a;
 	}
-	int resum_counts;
 };
 
 typedef Rate<LO, 2, 2, double(*)(const double, void*)> Rate22;
@@ -38,7 +43,7 @@ typedef boost::variant<Rate22, Rate23, Rate32> Process;
 
 
 extern std::map<int, std::vector<Process>> AllProcesses;
-void initialize(std::string, std::string path, double mu);
+void initialize(std::string, std::string path, double mu, double alpha_s_fixed);
 
 double formation_time(fourvec p, fourvec k, double M, double T);
 
@@ -48,8 +53,9 @@ int update_particle_momentum_HT(double dt, double temp, std::vector<double> v3ce
 
 int update_particle_momentum_BDMPSZ(double dt, double temp, std::vector<double> v3cell, particle & pIn);
 
-std::vector<double> probe_test(double E0, double T, double dt, int Nsteps,
-				int Nparticles, std::string mode);
+std::vector<double> probe_test(double M, double E0, double T, double dt, int Nsteps,
+				int Nparticles, std::string mode, double mu, double const_alphas);
 
+std::vector<double> Bjorken_test(double E0, double T0, double t0, double dt, int Nsteps, int Nparticles, std::string mode, double mu, double const_alphas);
 
 #endif

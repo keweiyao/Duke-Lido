@@ -19,7 +19,7 @@ int main(int argc, char* argv[]){
 		return 1;
 	}
 	std::string mode = argv[1];
-	initialize(mode, "./settings.xml", 1.0);
+	initialize(mode, "./settings.xml", 1.0, 0.1);
 	std::vector<particle> plist(Nparticles); // a list of particles
 	std::vector<fourvec> FS; // final state holder for each scattering
     fourvec p0{E0, 0, 0, std::sqrt(E0*E0-M*M)};
@@ -37,7 +37,7 @@ int main(int argc, char* argv[]){
 		p.mass = M;
 	}
 	for (int it=0; it<Nsteps; ++it){
-		LOG_INFO << it << " steps, " << "time = " << time << " [fm/c], T=" << T*std::pow(t0/time, 0.5) << " [GeV]";
+		LOG_INFO << it << " steps, " << "time = " << time << " [fm/c], T=" << T << " [GeV]";
 		time += dt;
 		for (auto & p : plist){
 			// loop over each particle
@@ -51,7 +51,8 @@ int main(int argc, char* argv[]){
 			// 3: Qg->Qgg
 			// 4: Qqg->Qq
 			// 5: Qgg->Qg
-			int channel = update_particle_momentum_BDMPSZ(dt*fmc_to_GeV_m1, T*std::pow(t0/time, 0.5), {0.0, 0.0, 0.0}, p);
+			int channel = update_particle_momentum_BDMPSZ(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
+			//int channel = update_particle_momentum_HT(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
 		}
 	}
 	// Calculate average loss in energy

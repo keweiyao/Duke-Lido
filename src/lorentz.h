@@ -106,6 +106,8 @@ struct fourvec {
   static size_t size(void){return 4;}
   void set(int i, double value) {a[i] = value;};
   double get(int i) {return a[i];};
+  double pabs2(){return a[1]*a[1]+a[2]*a[2]+a[3]*a[3];};
+  double pabs(){return std::sqrt(pabs2());};
 };
 
 struct tensor {

@@ -8,6 +8,9 @@ extern char LO[];
 extern char GB[];
 extern char GBHT[];
 
+extern bool type1_warned;
+extern bool type2_warned;
+
 //=============useful constants=============================================
 extern const double c4d9;
 extern const double c1d9;
