@@ -346,21 +346,21 @@ cdef class event:
 							   pT*sin(phipt), mT*sinh(rapidity)]
 					# sample initial x-y from TRENTo at time = 0+
 					x, y, s1, s2 = HQ_xy_sampler.sample_xy()
-					r0 = [0.0, x*fmc_to_GeV_m1, y*fmc_to_GeV_m1, 0.0]
-					t0 = self.tau0/sqrt(1. - (pcharm[3]/pcharm[0])**2)*fmc_to_GeV_m1
+					r0 = [0.0, x, y, 0.0]
+					t0 = self.tau0/sqrt(1. - (pcharm[3]/pcharm[0])**2)
 					X.append(x)
 					Y.append(y)
 					# Initialize positional space at tau = 0+
 					for i in range(4):
 						deref(it).p.a[i] = pcharm[i]
 						deref(it).p0.a[i] = pcharm[i]
-						deref(it).x.a[i] = r0[i]
+						deref(it).x.a[i] = r0[i]*fmc_to_GeV_m1
 					deref(it).mass = mass
 					# free streaming to hydro starting time tau = tau0
-					deref(it).freestream(t0)
+					deref(it).freestream(t0*fmc_to_GeV_m1)
 					# set last interaction vertex (assumed to be hydro start time)
-					deref(it).t_rad = t0
-					deref(it).t_abs = t0
+					deref(it).t_rad = t0*fmc_to_GeV_m1
+					deref(it).t_abs = t0*fmc_to_GeV_m1
 					# initialize others
 					deref(it).freezeout = False
 					deref(it).vcell = [0., 0., 0.]
@@ -380,10 +380,10 @@ cdef class event:
 					for i in range(4):
 						deref(it).p.a[i] = p0[i]
 						deref(it).p0.a[i] = p0[i]
-						deref(it).x.a[i] = r0[i]
+						deref(it).x.a[i] = r0[i]*fmc_to_GeV_m1
 					deref(it).mass = mass
-					deref(it).t_rad = r0[0]
-					deref(it).t_abs = r0[0]
+					deref(it).t_rad = r0[0]*fmc_to_GeV_m1
+					deref(it).t_abs = r0[0]*fmc_to_GeV_m1
 					deref(it).freezeout = False
 					deref(it).vcell = [0., 0., 0.]
 					deref(it).Tf = 0.
@@ -405,10 +405,10 @@ cdef class event:
 					for i in range(4):
 						deref(it).p.a[i] = p0[i]
 						deref(it).p0.a[i] = p0[i]
-						deref(it).x.a[i] = r0[i]
+						deref(it).x.a[i] = r0[i]*fmc_to_GeV_m1
 					deref(it).mass = mass
-					deref(it).t_rad = r0[0]
-					deref(it).t_abs = r0[0]
+					deref(it).t_rad = r0[0]*fmc_to_GeV_m1
+					deref(it).t_abs = r0[0]*fmc_to_GeV_m1
 					deref(it).freezeout = False
 					deref(it).vcell = [0., 0., 0.]
 					deref(it).Tf = 0.
@@ -427,7 +427,7 @@ cdef class event:
 		status = self.fs_reader.hydro_status()
 
 		self.tau += self.fs_reader.dtau()
-		cdef double T, tau_now, smaller_dtau, T1,T2
+		cdef double T, tau_now, smaller_dtau, T1, T2
 		cdef vector[double] vcell
 		vcell.resize(3)
 		cdef vector[particle].iterator it
@@ -489,7 +489,7 @@ cdef class event:
 						if self.mode == "dynamic":
 							tau_now = sqrt(deref(it).x.t()**2 - deref(it).x.z()**2)/fmc_to_GeV_m1
 						else:
-							tau_now = deref(it).x.t()
+							tau_now = deref(it).x.t()/fmc_to_GeV_m1
 						T, vcell[0], vcell[1], vcell[2] = \
 								self.hydro_reader.interpF(tau_now,
 								[deref(it).x.t()/fmc_to_GeV_m1, 
@@ -528,7 +528,7 @@ cdef class event:
 		cdef double vz, t_m_zvz, one_m_vz2, dtau2, dt_lab
 		if self.mode == "dynamic":
 			vz = deref(it).p.z()/deref(it).p.t()
-			t_m_zvz = deref(it).x.t() - deref(it).x.z()*vz
+			t_m_zvz = deref(it).x.t()/fmc_to_GeV_m1 - deref(it).x.z()/fmc_to_GeV_m1*vz
 			one_m_vz2 = 1. - vz*vz
 			dtau2 = dtau*(dtau+2*tau_now)
 

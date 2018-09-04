@@ -329,6 +329,11 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			g.kn = g.k1;
 			g.t0 = pIn.x.t();
 			g.T0 = temp;
+			pIn.p.a[1] = FS[0].x() + g.k1.x();
+            pIn.p.a[2] = FS[0].y() + g.k1.y();
+            pIn.p.a[3] = FS[0].z() + g.k1.z();
+            pIn.p.a[0] = std::sqrt(pIn.p.x()*pIn.p.x()+pIn.p.y()*pIn.p.y()+pIn.p.z()*pIn.p.z()+pIn.mass*pIn.mass);
+
 			
 			double xfrac = g.k1.t()/g.p0.t();
 			double local_qhat = 0.;
