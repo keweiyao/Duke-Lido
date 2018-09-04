@@ -227,19 +227,21 @@ fourvec measure_perp(fourvec p, fourvec k){
 	return k - p*(kdotp/p.pabs2()); // k_perp  vector
 }
 
-double formation_time(fourvec p, fourvec k, fourvec k0, double M, double T){
-	// do everything in the frame where heavy quark moves in z-direction
-	//double kz = (k0.x()*p.x() + k0.y()*p.y() + k0.z()*p.z() ) / p.pabs();
-	double x = k0.t()/p.t();//(k0.t()+kz)/(p.t()+p.pabs());
-	double Q2 = measure_perp(p,k).pabs2();
-	double mu2 = t_channel_mD2->get_mD2(T)/2.;
-	double tauf = 2*x*(1-x)*p.t()/(Q2 + x*x*M*M + (1.-x)*mu2);
-	return tauf;
+double formation_time(fourvec p, fourvec k, double M, double T, double mpf){
+	double x = k.t()/p.t();
+	double mD2 = t_channel_mD2->get_mD2(T);
+	double mg2 = mD2/2.;
+	double Q0 = 2*x*(1-x)*p.t();
+	double mass_sqrs = x*x*M*M + (1.-x)*mg2;
+
+	double QT2_LL = measure_perp(p,k).pabs2()*(1.-x+4./9.*x*x);
+	double tauf_LL = Q0/(QT2_LL + mass_sqrs);
+	return tauf_LL;
 }
 
-//std::ofstream fc("count.dat");
+std::ofstream fc("stat.dat");
 
-int update_particle_momentum_BDMPSZ(double dt, double temp, std::vector<double> v3cell, particle & pIn){
+int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn){
 
 	std::vector<fourvec> FS; 
 
@@ -297,7 +299,6 @@ int update_particle_momentum_BDMPSZ(double dt, double temp, std::vector<double> 
 			}
 		}
 	}
-	
 	if (channel >=0){
 		// Do scattering
 		switch(AllProcesses[absid][channel].which()){
@@ -324,33 +325,34 @@ int update_particle_momentum_BDMPSZ(double dt, double temp, std::vector<double> 
 		if (channel == 2 || channel == 3){
 			pregluon g;
 			g.p0 = pIn.p;
-			g.k0 = pIn.p - FS[0];
 			g.k1 = FS[2]; 
 			g.kn = g.k1;
 			g.t0 = pIn.x.t();
-			g.n = 1;
 			g.T0 = temp;
 			
+			double xfrac = g.k1.t()/g.p0.t();
 			double local_qhat = 0.;
+			double k1_cell = g.k1.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
 			BOOST_FOREACH(Process& r, AllProcesses[21]){
 				switch(r.which()){
 					case 0:
 						if (boost::get<Rate22>(r).IsActive()){
-							tensor A = boost::get<Rate22>(r).GetSecondM({E_cell, temp});			
+							tensor A = boost::get<Rate22>(r).GetSecondM(
+								{std::min(k1_cell, (1-xfrac)*E_cell), temp}
+							);			
 							local_qhat += A.T[1][1]+A.T[2][2];
+
 						}
 						break;
 					default:
 						break;
 				}
 			}
-			double xfrac = g.k1.t()/g.p0.t();
-			local_qhat = local_qhat;
+			
 			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = mD2/local_qhat*pIn.p.t()/E_cell;
+			g.local_mfp = mD2/local_qhat
+						* g.k1.t()/k1_cell; // transform back to lab frame
 			pIn.radlist.push_back(g);
-
-			// merge the k into the Q
 		}
 		else{
 			pIn.p = FS[0];
@@ -361,14 +363,23 @@ int update_particle_momentum_BDMPSZ(double dt, double temp, std::vector<double> 
 	if (!pIn.radlist.empty()){
 		// loop over each pre-gluon
 		for(std::vector<pregluon>::iterator it=pIn.radlist.begin(); it!=pIn.radlist.end();){
-			double taun = formation_time(it->p0,it->kn,it->k0,pIn.mass,temp);
+			
+			double taun = formation_time(it->p0,it->kn,pIn.mass,temp,it->local_mfp);
 			if (pIn.x.t()-it->t0 > taun){
 				double kt20 = measure_perp(it->p0, it->k1).pabs2();
 				double kt2n = measure_perp(it->p0, it->kn).pabs2();
 				double theta2 = kt2n/std::pow(it->kn.t(),2);
 				double thetaM2 = std::pow(pIn.mass/it->p0.t(),2);
-				double ratio = 1.5*it->local_mfp/taun*alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0)*std::pow(theta2/(theta2+thetaM2), 2);
-				if (Srandom::rejection(Srandom::gen) < std::min(ratio, 1.0)){
+				double mD2 = t_channel_mD2->get_mD2(temp);
+
+				double LPM = 1.8*it->local_mfp/taun
+				*std::sqrt(std::log(1+taun/it->local_mfp)/std::log(1+6*it->k1.t()*temp/mD2) );
+				double DeadCone = std::pow(theta2/(theta2+thetaM2), 2);
+				double RuningCoupling = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
+				double Acceptance = std::min(1.0, LPM*RuningCoupling*DeadCone);
+
+
+				if (Srandom::rejection(Srandom::gen) < Acceptance){
 					double pabs0 = pIn.p.pabs();
 					pIn.p.a[0] -= it->k1.t();
 					double pabs1 = std::sqrt(pIn.p.a[0]*pIn.p.a[0] - pIn.mass*pIn.mass);
@@ -376,6 +387,8 @@ int update_particle_momentum_BDMPSZ(double dt, double temp, std::vector<double> 
 					pIn.p.a[1] *= rescale;
 					pIn.p.a[2] *= rescale;
 					pIn.p.a[3] *= rescale;
+
+					//fc << it->t0 << " " << it->k1.t() << " " << kt20 << " " << kt2n << " " << taun << std::endl;
 					
 				}
 				it = pIn.radlist.erase(it);
@@ -383,7 +396,6 @@ int update_particle_momentum_BDMPSZ(double dt, double temp, std::vector<double> 
 				fourvec k_new;
 				if (gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new)>=0){
 					it->kn = k_new*(it->kn.t()/k_new.t());
-					it->n++;
 				}
 				it++;
 			}
@@ -424,7 +436,7 @@ std::vector<double> probe_test(double M, double E0, double T, double dt, int Nst
 			// x-update
 			p.freestream(dt*fmc_to_GeV_m1);
 			// p-update
-			int channel = update_particle_momentum_BDMPSZ(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
+			int channel = update_particle_momentum_Lido(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
 		}
 	}
 	return dE;
@@ -461,7 +473,7 @@ std::vector<double> Bjorken_test(double E0, double T0, double t0, double dt, int
 			// x-update
 			p.freestream(dt*fmc_to_GeV_m1);
 			// p-update
-			int channel = update_particle_momentum_BDMPSZ(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
+			int channel = update_particle_momentum_Lido(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
 		}
 	}
 	return dE;

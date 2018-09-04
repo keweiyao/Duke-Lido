@@ -7,9 +7,8 @@
 #include <map>
 
 struct pregluon{
-	fourvec p0, k0, k1, kn;
+	fourvec p0, k1, kn;
 	double t0, T0;
-	int n;
 	double local_mfp;
 };
 
@@ -45,13 +44,13 @@ typedef boost::variant<Rate22, Rate23, Rate32> Process;
 extern std::map<int, std::vector<Process>> AllProcesses;
 void initialize(std::string, std::string path, double mu, double alpha_s_fixed);
 
-double formation_time(fourvec p, fourvec k, double M, double T);
+double formation_time(fourvec p, fourvec k, double M, double T, double mpf);
 
 int gluon_elastic_scattering(double dt, double temp, std::vector<double> v3cell, fourvec incomping_p, fourvec & outgoing_p);
 
 int update_particle_momentum_HT(double dt, double temp, std::vector<double> v3cell, particle & pIn);
 
-int update_particle_momentum_BDMPSZ(double dt, double temp, std::vector<double> v3cell, particle & pIn);
+int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn);
 
 std::vector<double> probe_test(double M, double E0, double T, double dt, int Nsteps,
 				int Nparticles, std::string mode, double mu, double const_alphas);

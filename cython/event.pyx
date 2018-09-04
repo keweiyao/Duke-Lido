@@ -233,7 +233,7 @@ cdef extern from "../src/workflow.h":
 		int resum_counts;
 
 	cdef void initialize(string mode, string path, double mu, double alphafix)
-	cdef int update_particle_momentum_BDMPSZ(double dt, double temp,
+	cdef int update_particle_momentum_Lido(double dt, double temp,
 				vector[double] v3cell, particle)
 	cdef int update_particle_momentum_HT(double dt, double temp,
 				vector[double] v3cell, particle)
@@ -545,7 +545,7 @@ cdef class event:
 		# time should be in GeV^-1 in the update function !!!
 
 		deref(it).freestream(dt_lab*fmc_to_GeV_m1)
-		channel = update_particle_momentum_BDMPSZ(
+		channel = update_particle_momentum_Lido(
 				dt_lab*fmc_to_GeV_m1, # evolve for this time
 				T, vcell, deref(it))
 
