@@ -28,7 +28,9 @@ struct particle{
 typedef Rate<2, 2, double(*)(const double, void*)> Rate22;
 typedef Rate<3, 3, double(*)(const double*, void*)> Rate23;
 typedef Rate<3, 4, double(*)(const double*, void*)> Rate32;
-typedef boost::variant<Rate22, Rate23, Rate32> Process;
+typedef EffRate<3, double(*)(const double*, void*)> Rate12;
+typedef AbpRate<3, double(*)(const double*, void*)> Rate21;
+typedef boost::variant<Rate22, Rate23, Rate32, Rate12, Rate21> Process;
 extern std::map<int, std::vector<Process>> AllProcesses;
 void initialize(std::string, std::string path, double mu);
 int update_particle_momentum(double dt, double temp, std::vector<double> v3cell, int pid,

@@ -9,6 +9,7 @@
 #include <boost/any.hpp>
 #include <boost/foreach.hpp>
 #include "logo.h"
+#include "Langevin.h"
 
 std::map<int, std::vector<Process> > AllProcesses;
 
@@ -47,6 +48,24 @@ void init_process(Process& r, std::string mode){
 										}
 								else return;
 								break;
+                         case 3:
+                                if (boost::get<Rate12>(r).IsActive())
+                                        if (mode == "new") {
+                                                boost::get<Rate12>(r).init("table.h5");
+                                    } else{
+                                                boost::get<Rate12>(r).load("table.h5");
+                                    }
+                                else return;
+                                break;
+                         case 4:
+                                if (boost::get<Rate21>(r).IsActive())
+                                        if (mode == "new") {
+                                                boost::get<Rate21>(r).init("table.h5");
+                                        } else {
+                                                boost::get<Rate21>(r).load("table.h5");
+                                        }
+                                else return;
+                                break;
                         default:
                                 exit(-1);
                                 break;
@@ -66,6 +85,8 @@ void initialize(std::string mode, std::string path, double mu){
 	AllProcesses[4].push_back( Rate23("Boltzmann/cg2cgg", path, M2_Qg2Qgg) );
 	AllProcesses[4].push_back( Rate32("Boltzmann/cqg2cq", path, Ker_Qqg2Qq) );
 	AllProcesses[4].push_back( Rate32("Boltzmann/cgg2cg", path, Ker_Qgg2Qg) );
+    AllProcesses[4].push_back( Rate12("Boltzmann/c2cg", path, LGV_Q2Qg) );
+    AllProcesses[4].push_back( Rate21("Boltzmann/cg2c", path, LGV_Qg2Q) );
 
     AllProcesses[5] = std::vector<Process>();
     AllProcesses[5].push_back( Rate22("Boltzmann/bq2bq", path, dX_Qq2Qq_dt) );
@@ -74,6 +95,8 @@ void initialize(std::string mode, std::string path, double mu){
     AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", path, M2_Qg2Qgg) );
 	AllProcesses[5].push_back( Rate32("Boltzmann/bqg2bq", path, Ker_Qqg2Qq) );
 	AllProcesses[5].push_back( Rate32("Boltzmann/bgg2bg", path, Ker_Qgg2Qg) );
+    AllProcesses[5].push_back( Rate12("Boltzmann/b2bg", path, LGV_Q2Qg) );
+    AllProcesses[5].push_back( Rate21("Boltzmann/bg2b", path, LGV_Qg2Q) );
 
 	BOOST_FOREACH(Process& r, AllProcesses[4]) init_process(r, mode);
 	BOOST_FOREACH(Process& r, AllProcesses[5]) init_process(r, mode);
@@ -114,6 +137,21 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 				else dR = 0.0;
 				P_channels[channel] = P_total + dR;
 				break;
+            case 3:
+                if (boost::get<Rate12>(r).IsActive())
+                    dR = boost::get<Rate12>(r).GetZeroM(
+                                    {E_cell, temp, D_formation_t23_cell}).s * dt_cell;
+                else dR = 0.0;
+
+                P_channels[channel] = P_total + dR;
+                break;
+            case 4:
+                if (boost::get<Rate21>(r).IsActive())
+                    dR = boost::get<Rate21>(r).GetZeroM(
+                                    {E_cell, temp, D_formation_t32_cell}).s * dt_cell;
+                else dR  = 0.0;
+                P_channels[channel] = P_total + dR;
+                break;
 			default:
 				exit(-1);
 				break;
@@ -122,7 +160,7 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 		channel ++;
 	}
 	for(auto& item : P_channels) {item /= P_total;}
-	if (P_total > 0.15) LOG_WARNING << "P_total = " << P_total << " may be too large";
+	if (P_total > 0.20) LOG_WARNING << "P_total = " << P_total << " may be too large";
 	if ( Srandom::init_dis(Srandom::gen) > P_total) return -1;
 	else{
 		double p = Srandom::init_dis(Srandom::gen);
@@ -146,6 +184,14 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 			boost::get<Rate32>(AllProcesses[absid][channel]).sample(
 											{E_cell, temp, D_formation_t32_cell}, FS);
 			break;
+        case 3:
+            boost::get<Rate12>(AllProcesses[absid][channel]).sample(
+                                            {E_cell, temp, D_formation_t23_cell}, FS);
+            break;
+        case 4:
+            boost::get<Rate21>(AllProcesses[absid][channel]).sample(
+                                            {E_cell, temp, D_formation_t32_cell}, FS);
+            break;
 		default:
 			LOG_FATAL << "Channel = " << channel << " not exists";
 			exit(-1);
@@ -161,21 +207,27 @@ int update_particle_momentum(double dt, double temp, std::vector<double> v3cell,
 
 
 std::vector<double> probe_test(double E0, double T, double dt=0.05, int Nsteps=100, int Nparticles=10000, std::string mode="old"){
+    // initialize LGV process
+    bool lgv = true;
+    if (lgv)
+        initialize_transport_coeff(4.*M_PI/5., 0.0);
+
 	double fmc_to_GeV_m1 = 5.026;
 	initialize(mode, "./settings.xml", 1.0);
 	double M = 1.3;
 	std::vector<double> dE;
 	std::vector<particle> plist(Nparticles);
-  fourvec p0{E0, 0, 0, std::sqrt(E0*E0-M*M)};
+    fourvec p0{E0, 0, 0, std::sqrt(E0*E0-M*M)};
 	for (auto & p : plist) {
+        p.mass = M;
 		p.pid = 4;
 		p.x = fourvec{0,0,0,0};
 		p.p = p0;
 		p.t_rad = 0.;
 		p.t_absorb = 0.;
 	}
-	double time = 0.;
-  double sum = 0.;
+	double time = 0.0;
+    double sum = 0.;
 	for (int it=0; it<Nsteps; ++it){
 		LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
 		for (auto & p : plist) sum += E0-p.p.t();
@@ -183,19 +235,38 @@ std::vector<double> probe_test(double E0, double T, double dt=0.05, int Nsteps=1
 
 		time += dt;
 		for (auto & p : plist){
-      p.p = p0; // reset energy for probe test
+            //p.p = p0; // reset energy for probe test
 			std::vector<fourvec> FS;
 			int channel = update_particle_momentum(dt*fmc_to_GeV_m1, T,
 				{0.0, 0.0, 0.0}, p.pid, (p.x.t()-p.t_rad)*fmc_to_GeV_m1, (p.x.t()-p.t_absorb)*fmc_to_GeV_m1, p.p, FS);
 
-			p.freestream(dt);
-			if (channel>=0) {
+		if (channel>=0) {
+                //auto p1 = FS[0];
+                //double p1abs = std::sqrt(p1.t()*p1.t()-M*M);
+                //double pabs = std::sqrt(p.p.t()*p.p.t() - M*M);
+                //LOG_INFO << channel << " " << p.p.t()-p1.t() << " " << (p.p.x()*p1.x() + p.p.y()*p1.y() + p.p.z()*p1.z() ) / p1abs/pabs << "#";
+                
 				p.p = FS[0];
-				if (channel == 2 || channel ==3) p.t_rad = time;
-				if (channel == 4 || channel ==5) p.t_absorb = time;
+				if (channel == 2 || channel ==3 || channel == 6) p.t_rad = time;
+				if (channel == 4 || channel ==5 || channel == 7) p.t_absorb = time;
 			}
+         
+
+        if (lgv){
+                fourvec pOut;
+                Ito_update(dt*fmc_to_GeV_m1, M, T, {0.0,0.0,0.0}, p.p, pOut);
+                p.p = pOut;
+            }
+    	p.freestream(dt);
 		}
 	}
+
+    std::ofstream outputFile("particle_list.dat");
+    outputFile.precision(5);
+    std::cout << "Now record particle information : " << std::endl;
+    for (auto & p: plist){
+            outputFile << p.pid << " " <<  p.mass << " " << p.x.x() << " " << p.x.y() << " " << p.x.z() << " " << p.x.t() << " " << p.p.x() << " " << p.p.y() << " " << p.p.z() << " " << p.p.t() << std::endl;
+    }
 	return dE;
 }
 
@@ -224,7 +295,7 @@ std::vector<std::vector<double>> rate_test(double E0, double T, double dt=0.05, 
 		LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
 		time += dt;
 		for (auto & p : plist){
-      p.p = p0; // reset energy for probe test
+            p.p = p0; // reset energy for probe test
 			std::vector<fourvec> FS;
 			int channel = update_particle_momentum(dt*fmc_to_GeV_m1, T,
 				{0.0, 0.0, 0.0}, p.pid, (p.x.t()-p.t_rad)*fmc_to_GeV_m1*rescale, (p.x.t()-p.t_absorb)*fmc_to_GeV_m1*rescale, p.p, FS);
@@ -232,8 +303,8 @@ std::vector<std::vector<double>> rate_test(double E0, double T, double dt=0.05, 
 			p.freestream(dt);
 			if (channel>=0) {
 				p.p = FS[0];
-				if (channel == 2 || channel ==3) p.t_rad = time;
-				if (channel == 4 || channel ==5) p.t_absorb = time;
+				if (channel == 2 || channel ==3 || channel == 6) p.t_rad = time;
+				if (channel == 4 || channel ==5 || channel == 7) p.t_absorb = time;
         Rate[it][channel] += 1.;
 			}
 		}
