@@ -69,7 +69,7 @@ void postpoint_update(	double dt_lab, double M, double T, std::vector<double> v,
 	pOut = pOut.boost_back(v[0], v[1], v[2]);
 }
 
-void Ito_update(	double dt, double M, double T, std::vector<double> v, 
+void Ito_update(	double dt_lab, double M, double T, std::vector<double> v, 
 						const fourvec & pIn, fourvec & pOut){
 	// Boost pIn to medium frame
 	auto pIn_cell = pIn.boost_to(v[0], v[1], v[2]);
