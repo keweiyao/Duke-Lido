@@ -299,6 +299,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			}
 		}
 	}
+
 	if (channel >=0){
 		// Do scattering
 		switch(AllProcesses[absid][channel].which()){
@@ -306,6 +307,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				boost::get<Rate22>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
 				break;
 			case 1:
+
 				boost::get<Rate23>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
 				break;
 			case 2:
@@ -329,11 +331,6 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			g.kn = g.k1;
 			g.t0 = pIn.x.t();
 			g.T0 = temp;
-			pIn.p.a[1] = FS[0].x() + g.k1.x();
-            pIn.p.a[2] = FS[0].y() + g.k1.y();
-            pIn.p.a[3] = FS[0].z() + g.k1.z();
-            pIn.p.a[0] = std::sqrt(pIn.p.x()*pIn.p.x()+pIn.p.y()*pIn.p.y()+pIn.p.z()*pIn.p.z()+pIn.mass*pIn.mass);
-
 			
 			double xfrac = g.k1.t()/g.p0.t();
 			double local_qhat = 0.;
@@ -384,27 +381,28 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
-					double pabs0 = pIn.p.pabs();
+					/*
 					pIn.p.a[1] -= it->k1.x();	
 					pIn.p.a[2] -= it->k1.y();	
 					pIn.p.a[3] -= it->k1.z();
-					pIn.p.a[0] = std::sqrt(pIn.p.x()*pIn.p.x()+pIn.p.y()*pIn.p.y()+pIn.p.z()*pIn.p.z()+pIn.mass*pIn.mass);
- 					/*pIn.p.a[0] = std::max(pIn.p.t()-it->k1.t(), 1.01*pIn.mass);
-					
+					pIn.p.a[0] = std::sqrt(pIn.p.x()*pIn.p.x()+pIn.p.y()*pIn.p.y()+pIn.p.z()*pIn.p.z()+pIn.mass*pIn.mass);*/
+
+					double pabs0 = pIn.p.pabs();
+ 					pIn.p.a[0] = std::max(pIn.p.t()-it->k1.t(), 1.01*pIn.mass);					
 					double pabs1 = std::sqrt(pIn.p.a[0]*pIn.p.a[0] - pIn.mass*pIn.mass);
 					double rescale = pabs1/pabs0;
 					pIn.p.a[1] *= rescale;
 					pIn.p.a[2] *= rescale;
 					pIn.p.a[3] *= rescale;
 
-					//fc << it->t0 << " " << it->k1.t() << " " << kt20 << " " << kt2n << " " << taun << std::endl;*/
+					//fc << it->t0 << " " << it->k1.t() << " " << kt20 << " " << kt2n << " " << taun << std::endl;
 					
 				}
 				it = pIn.radlist.erase(it);
 			}else{ // else, evolve it
 				fourvec k_new;
 				if (gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new)>=0){
-					it->kn = k_new;//*(it->kn.t()/k_new.t());
+					it->kn = k_new*(it->kn.t()/k_new.t());
 				}
 				it++;
 			}

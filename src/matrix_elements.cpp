@@ -200,7 +200,7 @@ double M2_gq2gq(const double t, void * params){
 	double Q2t_reg = Q2t - mt2;
 	double Q2s_reg = Q2s + mt2;
 	double Q2u_reg = Q2u>0?(Q2u + mt2):(Q2u-mt2);
-	double result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*(9./4./Q2t_reg/(Q2t-Lambda2));
+	double result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*(-1./Q2s_reg/Q2u_reg + 9./4./Q2t_reg/(Q2t-Lambda2));
 	if (result < 0.) return 0.;
 	return result;
 }
