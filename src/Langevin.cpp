@@ -22,10 +22,11 @@ void initialize_transport_coeff(double _A, double _B){
 	std::cout << "A = " << A << ", B = " << B << std::endl;
 };
 
-void postpoint_update(	double dt, double M, double T, std::vector<double> v, 
+void postpoint_update(	double dt_lab, double M, double T, std::vector<double> v, 
 						const fourvec & pIn, fourvec & pOut){
 	// Boost pIn to medium frame
 	auto pIn_cell = pIn.boost_to(v[0], v[1], v[2]);
+	double dt = dt_lab*pIn_cell.t()/pIn.t();
 	// imaging rotating to a frame where pIn lies on z-axis
 	double E0 = pIn_cell.t();
 	double p0 = std::sqrt(E0*E0 - M*M + 1e-9);
@@ -67,10 +68,11 @@ void postpoint_update(	double dt, double M, double T, std::vector<double> v,
 	pOut = pOut.boost_back(v[0], v[1], v[2]);
 }
 
-void Ito_update(	double dt, double M, double T, std::vector<double> v, 
+void Ito_update(	double dt_lab, double M, double T, std::vector<double> v, 
 						const fourvec & pIn, fourvec & pOut){
 	// Boost pIn to medium frame
 	auto pIn_cell = pIn.boost_to(v[0], v[1], v[2]);
+	double dt = dt_lab*pIn_cell.t()/pIn.t();
 	// imaging rotating to a frame where pIn lies on z-axis
 	double E0 = pIn_cell.t();
 	double p0 = std::sqrt(E0*E0 - M*M+1e-9);

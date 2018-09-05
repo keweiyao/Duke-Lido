@@ -381,14 +381,8 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
-					/*
-					pIn.p.a[1] -= it->k1.x();	
-					pIn.p.a[2] -= it->k1.y();	
-					pIn.p.a[3] -= it->k1.z();
-					pIn.p.a[0] = std::sqrt(pIn.p.x()*pIn.p.x()+pIn.p.y()*pIn.p.y()+pIn.p.z()*pIn.p.z()+pIn.mass*pIn.mass);*/
-
 					double pabs0 = pIn.p.pabs();
- 					pIn.p.a[0] = std::max(pIn.p.t()-it->k1.t(), 1.01*pIn.mass);					
+ 					pIn.p.a[0] = std::max(pIn.p.t()-it->kn.t(), 1.01*pIn.mass);					
 					double pabs1 = std::sqrt(pIn.p.a[0]*pIn.p.a[0] - pIn.mass*pIn.mass);
 					double rescale = pabs1/pabs0;
 					pIn.p.a[1] *= rescale;
@@ -402,7 +396,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			}else{ // else, evolve it
 				fourvec k_new;
 				if (gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new)>=0){
-					it->kn = k_new*(it->kn.t()/k_new.t());
+					it->kn = k_new;//*(it->kn.t()/k_new.t());
 				}
 				it++;
 			}
