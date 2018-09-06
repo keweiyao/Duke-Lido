@@ -232,29 +232,23 @@ cdef extern from "../src/workflow.h":
 		double Tf;
 		int resum_counts;
 
-	cdef void initialize(string mode, string path, double mu, double alphafix)
+	cdef void initialize(string mode, string path, double mu, double alphafix, double A, double B)
 	cdef int update_particle_momentum_Lido(double dt, double temp,
 				vector[double] v3cell, particle)
 	cdef int update_particle_momentum_HT(double dt, double temp,
 				vector[double] v3cell, particle)
 	cdef int gluon_elastic_scattering(double dt, double temp, vector[double] v3cell, fourvec incomping_p, fourvec & outgoing_p);
-	cdef vector[double] probe_test(double M, double E0, double T, double dt, int Nsteps,
-				int Nparticles, string mode, double mu, double alphafix);
+	cdef vector[double] probe_test(double M, double E0, double T, double dt, int Nsteps, int Nparticles, string mode, double mu, double alphafix, double A, double B);
 
-	cdef vector[double] Bjorken_test(double E0, double T0, double t0, double dt, int Nsteps, int Nparticles, string mode, double mu, double const_alphas);
+	cdef vector[double] Bjorken_test(double M, double E0, double T0, double t0, double dt, int Nsteps, int Nparticles, string mode, double mu, double const_alphas, double A, double B);
 
-def probe_run(M, E0, T, dt=0.05, Nsteps=100, Nparticles=10000, mode="old", mu=1.0, alphafix=-1.0):
-	dE = probe_test(M, E0, T, dt, Nsteps, Nparticles, mode, mu, alphafix)
+def probe_run(M, E0, T, dt=0.05, Nsteps=100, Nparticles=10000, mode="old", mu=1.0, alphafix=-1.0, A=0, B=0):
+	dE = probe_test(M, E0, T, dt, Nsteps, Nparticles, mode, mu, alphafix, A, B)
 	return dE;
 
-def Bjorken_run(E0, T, t0=0.6, dt=0.05, Nsteps=100, Nparticles=10000, mode="old", mu=1.0, alphafix=-1.0):
-	dE = Bjorken_test(E0, T, t0, dt, Nsteps, Nparticles, mode, mu, alphafix)
+def Bjorken_run(M, E0, T, t0=0.6, dt=0.05, Nsteps=100, Nparticles=10000, mode="old", mu=1.0, alphafix=-1.0, A=0, B=0):
+	dE = Bjorken_test(M, E0, T, t0, dt, Nsteps, Nparticles, mode, mu, alphafix, A, B)
 	return dE;
-
-cdef extern from "../src/Langevin.h":
-	cdef void initialize_transport_coeff(double A, double B)
-	cdef void Ito_update(double dt, double M, double temp, vector[double] v3cell,
-						const fourvec & pIn, fourvec & pOut)
 
 cdef vector[double] regulate_v(vector[double] v):
 	vabs2 = v[0]**2 + v[1]**2 + v[2]**2
@@ -287,19 +281,13 @@ cdef class event:
 		self.lgv = False
 		self.Tc = Tc
 
-		# initialize LBT
+		# initialize
 		setting_path = os.environ['XDG_DATA_HOME']+"/event/settings.xml"
 		print(setting_path)
 		if not os.path.exists("table.h5"):
-			initialize("new", setting_path, LBT['mu'], -1.0)
+			initialize("new", setting_path, LBT['mu'], -1.0, LGV['A'], LGV['B'])
 		else:
-			initialize("old", setting_path, LBT['mu'], -1.0)
-
-		# initialize LGV
-		if LGV is not None:
-			if LGV['A']>1e-9 and LGV['B'] > 1e-9:
-				initialize_transport_coeff(LGV['A'], LGV['B'])
-				self.lgv = True
+			initialize("old", setting_path, LBT['mu'], -1.0, LGV['A'], LGV['B'])
 
 
 	# The current time of the evolution.
@@ -546,15 +534,8 @@ cdef class event:
 
 		deref(it).freestream(dt_lab*fmc_to_GeV_m1)
 		channel = update_particle_momentum_Lido(
-				dt_lab*fmc_to_GeV_m1, # evolve for this time
+				dt_lab*fmc_to_GeV_m1, # evolve for this time, Langevin included
 				T, vcell, deref(it))
-
-		## if langevin is on, additional modification to momentum after LBT
-		cdef fourvec pOut
-		if self.lgv:
-			Ito_update(dt_lab*fmc_to_GeV_m1, deref(it).mass, T, vcell,
-						deref(it).p, pOut)
-			deref(it).p = pOut
  
 
 	cpdef HQ_hist(self, pid):

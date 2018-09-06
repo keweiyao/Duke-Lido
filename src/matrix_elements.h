@@ -1,6 +1,15 @@
 #ifndef MATRIX_ELEMENTS_H
 #define MATRIX_ELEMENTS_H
 #include <cstdlib>
+#include <vector>
+#include "lorentz.h"
+//======Langevin section===============
+extern double A, B;
+double kperp(double E, double M, double T);
+double kpara(double E, double M, double T);
+void initialize_transport_coeff(double A, double B);
+void postpoint_update( double dt, double M, double T, std::vector<double> v, const fourvec & pIn, fourvec & pOut);
+void Ito_update( double dt, double M, double T, std::vector<double> v, const fourvec & pIn, fourvec & pOut);
 
 //======running coupling=======================================================
 double alpha_s(double Q2, double T);
@@ -65,4 +74,9 @@ double Ker_Qqg2Qq(const double * x_,  void * params_);
 double Ker_Qgg2Qg(const double * x_, void * params_);
 
 
+
+// diffusion-like Q -> Q + g process
+// July-06-2018 Yingru
+double LGV_Q2Qg(const double * x_, void *params_);  // params_={E, T, M, delta_t}, x_={gluon_x, gluon_y}
+double LGV_Qg2Q(const double * x_, void *params_);  // params_={E, T, M, delta_t}, x_={gluon_x, gluon_y}
 #endif

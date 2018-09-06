@@ -97,7 +97,7 @@ double M2_Qq2Qq(const double t, void * params){
 	double mt2 = t_channel_mD2->get_mD2(Temp);
 	double At = alpha_s(Q2t, Temp);
 	double Q2t_reg = Q2t - mt2;
-	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/(Q2t-Lambda2);
+	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/(Q2t-0.05*Lambda2);
 	if (result < 0.) return 0.;
 	else return result;
 }
@@ -114,7 +114,10 @@ double M2_Qq2Qq_rad(const double t, void * params){
 	double At = alpha_s(Q2t, Temp);
 	double mt2 = t_channel_mD2->get_mD2(Temp);
 	double Q2t_reg = Q2t - mt2;
-	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/(Q2t-Lambda2);
+	double result = 0.;
+	if (-Q2t > mt2) result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/Q2t;
+	else result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/(mt2*mt2*2);
+
 	if (result < 0.) return 0.;
 	else return result;
 }
@@ -144,7 +147,7 @@ double M2_Qg2Qg(const double t, void * params){
 	double Q2u_reg = Q2u>0?(Q2u + mt2):(Q2u-mt2);
 	double result = 0.0;
 	// t*t
-	result += 2.*At*At * Q2s*(-Q2u)/Q2t_reg/(Q2t-Lambda2);
+	result += 2.*At*At * Q2s*(-Q2u)/Q2t_reg/(Q2t-0.05*Lambda2);
 	// s*s
 	result += c4d9*As*As *
 			( Q2s*(-Q2u) + 2.*M2*(Q2s + 2.*M2) ) / std::pow(Q2s_reg, 2);
@@ -176,7 +179,9 @@ double M2_gg2gg(const double t, void * params){
 	double Q2t_reg = Q2t - mt2;
 	double Q2s_reg = Q2s + mt2;
 	double Q2u_reg = Q2u>0?(Q2u + mt2):(Q2u-mt2);
-	double result = 72.*M_PI*M_PI*At*At*(-Q2s*Q2u/Q2t_reg/(Q2t-Lambda2));
+	double result = 0.;
+	if (-Q2t > mt2) result = 72.*M_PI*M_PI*At*At*(-Q2s*Q2u/Q2t/Q2t_reg);
+	if (-Q2t <= mt2) result = 72.*M_PI*M_PI*At*At*(-Q2s*Q2u/(mt2*mt2*2));
 	if (result < 0.) return 0.;
 	return result;
 }
@@ -200,7 +205,9 @@ double M2_gq2gq(const double t, void * params){
 	double Q2t_reg = Q2t - mt2;
 	double Q2s_reg = Q2s + mt2;
 	double Q2u_reg = Q2u>0?(Q2u + mt2):(Q2u-mt2);
-	double result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*(-1./Q2s_reg/Q2u_reg + 9./4./Q2t_reg/(Q2t-Lambda2));
+	double result = 0.;
+	if (-Q2t > mt2) result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*( 9./4./Q2t/Q2t_reg);
+	if (-Q2t <= mt2) result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*( 9./4./(mt2*mt2*2));
 	if (result < 0.) return 0.;
 	return result;
 }
@@ -222,7 +229,10 @@ double M2_Qg2Qg_rad(const double t, void * params) {
 	double At = alpha_s(Q2t, Temp);
 	double mt2 = t_channel_mD2->get_mD2(Temp);
 	double Q2t_reg = Q2t - mt2;
-	double result = c16pi2*2.*At*At * Q2s*(-Q2u)/Q2t_reg/(Q2t-Lambda2);
+	double result = 0.;
+	if (-Q2t > mt2) result = c16pi2*2.*At*At * Q2s*(-Q2u)/Q2t/Q2t_reg;
+	else result = c16pi2*2.*At*At * Q2s*(-Q2u)/(mt2*mt2*2);
+
 	if (result < 0.) return 0.;
 	else return result;
 }
@@ -640,4 +650,44 @@ double Ker_Qgg2Qg(const double * x_, void * params_){
 	//double anti_prefix = kt2+x2M2 + (1.-xbar)*mD2/2.;
 	// 2->3 = 2->2 * 1->2
 	return M2_elastic * Pg * Jacobian * detail_balance_factor;
+}
+
+// July-06-2019
+// Diffusion-induced Radiative process Q -> Q + g
+double P_q2qg(double x){
+	return CF*(1 + std::pow(1-x, 2))/x;
+}
+
+double LGV_Q2Qg(const double * x_, void * params_){
+    double *params = static_cast<double*>(params_);
+    double E = params[0];
+    double T = params[1];
+    double M = params[2];
+    
+	double x = x_[0]; // k/E
+	double y = x_[1]; // kT/k0
+
+    double k0 = x*E;
+    double kT = y*k0;
+	double kT2 = kT*kT;
+    
+	double mg2 = t_channel_mD2->get_mD2(T)/2.;
+
+	// No dead cone
+	double Jacobian = 2*k0*kT;
+    double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) * P_q2qg(x)
+                     * 1./std::pow(kT2+mg2, 2)
+                     * Jacobian;
+    return dR_dxdy;
+}
+
+
+// Diffusion-induced gluon absorption process Q + g -> Q
+double LGV_Qg2Q(const double * x_, void * params_){
+    double *params = static_cast<double*>(params_);
+    double E = params[0];
+    double T = params[1];
+    double gluon_k0 = x_[0] * E;
+    double dN_dxdy = LGV_Q2Qg(x_, params);
+    return dN_dxdy * std::exp(-gluon_k0/T);
 }

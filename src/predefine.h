@@ -22,6 +22,9 @@ extern const double c256pi4;
 
 // number of color=3 (3*3-1 = 8 gluons), number of flavor=3, (u,d,s quark)
 extern const int Nc, nf;
+extern const double CF;
+extern const double CA;
+extern const double CF_over_CA;
 
 // the prefractor for gluon debye mass with Boltzmann statistics
 // mD^2 = 8\pi*(Nc+nf)*alpha_s*T^2 ~ 15*alpha_s*T^2

@@ -18,6 +18,9 @@ const double c256pi4 = 256.*std::pow(M_PI, 4);
 
 // number of color=3 (3*3-1 = 8 gluons), number of flavor=3, (u,d,s quark)
 const int Nc = 3, nf = 3;
+const double CF = 4./3.;
+const double CA = 3.;
+const double CF_over_CA = CF/CA;
 
 // the prefractor for gluon debye mass with Boltzmann statistics
 // mD^2 = 8\pi*(Nc+nf)*alpha_s*T^2 ~ 15*alpha_s*T^2

@@ -38,10 +38,10 @@ public:
 // Diffusion induced rate: (effective rate)
 // N: dimension of rate table
 // F: matrix element function type
-// Given E, T, Delta t, determine rate and sample p' and k
+// Given E, T determine rate and sample p' and k
 // k could be initial or final state depending on which process it is
 template <size_t N, typename F>
-class EffRate: public virtual StochasticBase<N>{
+class EffRate12: public virtual StochasticBase<N>{
 private:
     scalar find_max(std::vector<double> parameters);
 	scalar calculate_scalar(std::vector<double> parameters);
@@ -51,10 +51,30 @@ private:
 	double _mass;
 	bool _active;
 public:
-	EffRate(std::string Name, std::string configfile, F f);
+	EffRate12(std::string Name, std::string configfile, F f);
 	void sample(std::vector<double> arg, 
 				std::vector< fourvec > & FS);
 	bool IsActive(void) {return _active;}
+};
+
+
+// Diffusion inducd aborption: (currently for some reason, we cannot combine the 
+// radiation and absorption together)
+template <size_t N, typename F>
+class EffRate21: public virtual StochasticBase<N>{
+private:
+    scalar find_max(std::vector<double> parameters);
+    scalar calculate_scalar(std::vector<double> parameters);
+    fourvec calculate_fourvec(std::vector<double> parameters);
+    tensor calculate_tensor(std::vector<double> parameters);
+    F _f; // the kernel (function)
+    double _mass;
+    bool _active;
+public:
+    EffRate21(std::string Name, std::string configfile, F f);
+    void sample(std::vector<double> arg,
+                std::vector< fourvec > & FS);
+    bool IsActive(void) {return _active;}
 };
 
 #endif
