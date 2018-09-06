@@ -97,7 +97,10 @@ double M2_Qq2Qq(const double t, void * params){
 	double mt2 = t_channel_mD2->get_mD2(Temp);
 	double At = alpha_s(Q2t, Temp);
 	double Q2t_reg = Q2t - mt2;
-	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/(Q2t-0.05*Lambda2);
+
+	double result = 0.;
+	if (-Q2t > mt2) result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/Q2t;
+	else result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/(2.*mt2*mt2);
 	if (result < 0.) return 0.;
 	else return result;
 }
@@ -114,6 +117,7 @@ double M2_Qq2Qq_rad(const double t, void * params){
 	double At = alpha_s(Q2t, Temp);
 	double mt2 = t_channel_mD2->get_mD2(Temp);
 	double Q2t_reg = Q2t - mt2;
+
 	double result = 0.;
 	if (-Q2t > mt2) result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/Q2t;
 	else result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/(mt2*mt2*2);
@@ -145,9 +149,11 @@ double M2_Qg2Qg(const double t, void * params){
 	double Q2t_reg = Q2t - mt2;
 	double Q2s_reg = Q2s + mt2;
 	double Q2u_reg = Q2u>0?(Q2u + mt2):(Q2u-mt2);
+
 	double result = 0.0;
 	// t*t
-	result += 2.*At*At * Q2s*(-Q2u)/Q2t_reg/(Q2t-0.05*Lambda2);
+	if (-Q2t > mt2) result += 2.*At*At * Q2s*(-Q2u)/Q2t_reg/Q2t;
+	else result += 2.*At*At * Q2s*(-Q2u)/(2.*mt2*mt2);
 	// s*s
 	result += c4d9*As*As *
 			( Q2s*(-Q2u) + 2.*M2*(Q2s + 2.*M2) ) / std::pow(Q2s_reg, 2);
@@ -179,9 +185,11 @@ double M2_gg2gg(const double t, void * params){
 	double Q2t_reg = Q2t - mt2;
 	double Q2s_reg = Q2s + mt2;
 	double Q2u_reg = Q2u>0?(Q2u + mt2):(Q2u-mt2);
+
 	double result = 0.;
 	if (-Q2t > mt2) result = 72.*M_PI*M_PI*At*At*(-Q2s*Q2u/Q2t/Q2t_reg);
 	if (-Q2t <= mt2) result = 72.*M_PI*M_PI*At*At*(-Q2s*Q2u/(mt2*mt2*2));
+
 	if (result < 0.) return 0.;
 	return result;
 }
@@ -205,9 +213,11 @@ double M2_gq2gq(const double t, void * params){
 	double Q2t_reg = Q2t - mt2;
 	double Q2s_reg = Q2s + mt2;
 	double Q2u_reg = Q2u>0?(Q2u + mt2):(Q2u-mt2);
+
 	double result = 0.;
 	if (-Q2t > mt2) result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*( 9./4./Q2t/Q2t_reg);
 	if (-Q2t <= mt2) result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*( 9./4./(mt2*mt2*2));
+
 	if (result < 0.) return 0.;
 	return result;
 }
@@ -229,6 +239,7 @@ double M2_Qg2Qg_rad(const double t, void * params) {
 	double At = alpha_s(Q2t, Temp);
 	double mt2 = t_channel_mD2->get_mD2(Temp);
 	double Q2t_reg = Q2t - mt2;
+
 	double result = 0.;
 	if (-Q2t > mt2) result = c16pi2*2.*At*At * Q2s*(-Q2u)/Q2t/Q2t_reg;
 	else result = c16pi2*2.*At*At * Q2s*(-Q2u)/(mt2*mt2*2);
