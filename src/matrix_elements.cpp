@@ -120,7 +120,7 @@ double M2_Qq2Qq_rad(const double t, void * params){
 
 	double result = 0.;
 	if (-Q2t > mt2) result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/Q2t;
-	else result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/(mt2*mt2*2);
+	else result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/(2.*mt2*mt2);
 
 	if (result < 0.) return 0.;
 	else return result;
@@ -188,7 +188,7 @@ double M2_gg2gg(const double t, void * params){
 
 	double result = 0.;
 	if (-Q2t > mt2) result = 72.*M_PI*M_PI*At*At*(-Q2s*Q2u/Q2t/Q2t_reg);
-	if (-Q2t <= mt2) result = 72.*M_PI*M_PI*At*At*(-Q2s*Q2u/(mt2*mt2*2));
+	else result = 72.*M_PI*M_PI*At*At*(-Q2s*Q2u/(2.*mt2*mt2));
 
 	if (result < 0.) return 0.;
 	return result;
@@ -216,7 +216,7 @@ double M2_gq2gq(const double t, void * params){
 
 	double result = 0.;
 	if (-Q2t > mt2) result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*( 9./4./Q2t/Q2t_reg);
-	if (-Q2t <= mt2) result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*( 9./4./(mt2*mt2*2));
+	else result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*( 9./4./(2.*mt2*mt2));
 
 	if (result < 0.) return 0.;
 	return result;
@@ -242,7 +242,7 @@ double M2_Qg2Qg_rad(const double t, void * params) {
 
 	double result = 0.;
 	if (-Q2t > mt2) result = c16pi2*2.*At*At * Q2s*(-Q2u)/Q2t/Q2t_reg;
-	else result = c16pi2*2.*At*At * Q2s*(-Q2u)/(mt2*mt2*2);
+	else result = c16pi2*2.*At*At * Q2s*(-Q2u)/(2.*mt2*mt2);
 
 	if (result < 0.) return 0.;
 	else return result;
@@ -698,7 +698,23 @@ double LGV_Qg2Q(const double * x_, void * params_){
     double *params = static_cast<double*>(params_);
     double E = params[0];
     double T = params[1];
-    double gluon_k0 = x_[0] * E;
-    double dN_dxdy = LGV_Q2Qg(x_, params);
-    return dN_dxdy * std::exp(-gluon_k0/T);
+    double M = params[2];
+    
+	double xp = x_[0]; 
+	double yp = x_[1];
+
+	double x = xp/(1.-xp);
+
+    double k0 = x*E;
+    double kT = yp*k0;
+	double kT2 = kT*kT;
+    
+	double mg2 = t_channel_mD2->get_mD2(T)/2.;
+
+	// No dead cone
+	double Jacobian = 2*k0*kT;
+    double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) * P_q2qg(x)
+                     * 1./std::pow(kT2+mg2, 2)
+                     * Jacobian * std::exp(-x*E);
+    return dR_dxdy;
 }

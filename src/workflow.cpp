@@ -470,7 +470,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				double LPM = it->local_mfp/taun
 					*std::sqrt(  std::log(1+taun/it->local_mfp)
 								/std::log(1+6*it->k1.t()*temp/mD2) );
-				double DeadCone = std::pow(theta2/(theta2+thetaM2), 2);
+				double DeadCone = std::pow(theta2/(theta2+thetaM2), 4);
 				double RuningCoupling = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
 				double Acceptance = std::min(1.0, LPM*RuningCoupling*DeadCone);
 

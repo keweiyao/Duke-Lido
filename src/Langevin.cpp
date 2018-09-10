@@ -12,7 +12,7 @@ double qhat_pQCD(int pid, double E, double T){
 	double alphas = alpha_s(0, T);
 	double mD2 = t_channel_mD2->get_mD2(T);
 	double shat_avg = 6*E*T;
-	return A*factor*alphas*CF*T * mD2 * logof2;
+	return A*factor*alphas*CF*T * mD2;
 }
 double dqhat_pQCD_dp2(int pid, double E, double T){
 	return 0.;

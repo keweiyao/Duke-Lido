@@ -959,7 +959,7 @@ void EffRate21<2, double(*)(const double*, void *)>::
     sample(std::vector<double> parameters, std::vector< fourvec > & final_states){
     double E = parameters[0];
     double T = parameters[1];
-    double plength = std::sqrt(E*E - _mass*_mass);
+    double pabs = std::sqrt(E*E - _mass*_mass);
 
     auto dR_dxdy = [E, T, this](const double *x){
         double params[3] = {E, T, this->_mass};
@@ -970,17 +970,20 @@ void EffRate21<2, double(*)(const double*, void *)>::
     bool status=true;
     auto res = sample_nd(dR_dxdy, 2, {{0., 1.}, {0., 1.}}, StochasticBase<2>::GetFmax(parameters).s, status);
 
-    // put them into final states
-    // generate a random phi angle for gluons
-    double phi = Srandom::dist_phi(Srandom::gen);
+	double xp = res[0], yp = res[1];
+	double x = xp/(1.-xp);
+	double y = std::sqrt(1. - std::pow(1.-(1.+x)*yp*yp, 2) / (1.-(1.-xp*xp)*yp*yp) );
+	double k0 = x*E;
+	double kT = x*y*E;
+	double phi = Srandom::dist_phi(Srandom::gen);
+	double kx = kT*std::cos(phi), ky = kT*std::sin(phi);
+	double kz = std::sqrt(k0*k0-kT*kT);
+	double pznew = pabs+kz;
+	double Enew = std::sqrt(pznew*pznew + kT*kT + _mass*_mass);
 
-    double gluon[3] = { res[0] * E * res[1] * std::cos(phi),
-                        res[0] * E * res[1] * std::sin(phi),
-                        res[0] * E * std::sqrt(1 - res[1] * res[1])  };
-
-    final_states.resize(2);
-    final_states[0] = fourvec{ std::sqrt(std::pow(gluon[0], 2) + std::pow(gluon[1], 2) + std::pow(plength+gluon[2], 2) + _mass*_mass), gluon[0], gluon[1], plength + gluon[2]};
-    final_states[1] = fourvec{ res[0]*E, -gluon[0], -gluon[1], -gluon[2]};
+	final_states.resize(2);
+    final_states[0] = fourvec{Enew, kx, ky, pznew};
+    final_states[1] = fourvec{k0, kx, ky, kz};
 
     return ;
 }
