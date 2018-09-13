@@ -587,8 +587,8 @@ double Ker_Qqg2Qq(const double * x_, void * params_){
 	double x2M2 = x*x*M2;
 
 	// 1->2
-	double iD1 = 1./(kt2 + x2M2 + (1.-xbar)*mD2/2.);
-	double iD2 = 1./(kt2 + qt2 + 2.*kt*qmu.x() + x2M2 + (1.-xbar)*mD2/2.);
+	double iD1 = 1./(kt2 + (1.-xbar)*mD2/2.);
+	double iD2 = 1./(kt2 + qt2 + 2.*kt*qmu.x() + (1.-xbar)*mD2/2.);
 	double Pg = 48.*M_PI*alpha_s(kt2, T)*std::pow(1.-xbar, 2)*(
 			kt2*std::pow(iD1-iD2, 2) + qt2*std::pow(iD2, 2) - 2.*kt*qmu.x()*(iD1-iD2)*iD2
 		);
@@ -650,8 +650,8 @@ double Ker_Qgg2Qg(const double * x_, void * params_){
 	double x2M2 = x*x*M2;
 
 	// 1->2
-	double iD1 = 1./(kt2 + x2M2 + (1.-xbar)*mD2/2.);
-	double iD2 = 1./(kt2 + qt2 + 2.*kt*qmu.x() + x2M2 + (1.-xbar)*mD2/2.);
+	double iD1 = 1./(kt2 + (1.-xbar)*mD2/2.);
+	double iD2 = 1./(kt2 + qt2 + 2.*kt*qmu.x() + (1.-xbar)*mD2/2.);
 	double Pg = 48.*M_PI*alpha_s(kt2, T)*std::pow(1.-xbar, 2)*(
 			kt2*std::pow(iD1-iD2, 2) + qt2*std::pow(iD2, 2) - 2.*kt*qmu.x()*(iD1-iD2)*iD2
 		);
@@ -668,25 +668,29 @@ double Ker_Qgg2Qg(const double * x_, void * params_){
 double P_q2qg(double x){
 	return CF*(1 + std::pow(1-x, 2))/x;
 }
+double x_P_q2qg(double x){
+	return CF*(1 + std::pow(1-x, 2));
+}
 
 double LGV_Q2Qg(const double * x_, void * params_){
     double *params = static_cast<double*>(params_);
     double E = params[0];
     double T = params[1];
     double M = params[2];
+	double pabs = std::sqrt(E*E-M*M);
     
-	double x = x_[0]; // k/E
+	double x = x_[0]; // k/p
 	double y = x_[1]; // kT/k0
 
-    double k0 = x*E;
+    double k0 = x*pabs;
     double kT = y*k0;
 	double kT2 = kT*kT;
     
 	double mg2 = t_channel_mD2->get_mD2(T)/2.;
-
+	double x0 = k0/E;
 	// No dead cone
 	double Jacobian = 2*k0*kT;
-    double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) * P_q2qg(x)
+    double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) * P_q2qg(x0)
                      * 1./std::pow(kT2+mg2, 2)
                      * Jacobian;
     return dR_dxdy;
@@ -699,22 +703,25 @@ double LGV_Qg2Q(const double * x_, void * params_){
     double E = params[0];
     double T = params[1];
     double M = params[2];
+	double pabs = std::sqrt(E*E-M*M);
     
-	double xp = x_[0]; 
-	double yp = x_[1];
+	double xp = x_[0];// tanh(x)
+	double x = std::atanh(xp); // kz/pabs
+	double y = x_[1];// kT/k
 
-	double x = xp/(1.-xp);
+	double kz = x*pabs;
+	double k0 = std::abs(kz)/std::sqrt(1.001-y*y);
+	double kT = y*k0;
 
-    double k0 = x*E;
-    double kT = yp*k0;
 	double kT2 = kT*kT;
-    
+	double x0 = k0/(k0+E); // k0/(E0)
+
 	double mg2 = t_channel_mD2->get_mD2(T)/2.;
 
 	// No dead cone
-	double Jacobian = 2*k0*kT;
-    double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) * P_q2qg(x)
+	double Jacobian = 2*(k0+E)*kT/(1-xp*xp);
+    double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) * x_P_q2qg(x0)
                      * 1./std::pow(kT2+mg2, 2)
-                     * Jacobian * std::exp(-x*E);
+                     * Jacobian * std::exp(-k0/T);
     return dR_dxdy;
 }

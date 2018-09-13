@@ -100,9 +100,6 @@ struct fourvec {
 					c3*a[1] - s3*(c2*a[2] - s2*a[3]),
 	             	s2*a[2] + c2*a[3] };
 	}
-  friend double dot(const fourvec& A, const fourvec& B) {
-	return A.t()*B.t() - A.x()*B.x() - A.y()*B.y() - A.z()*B.z();
-  }
   static size_t size(void){return 4;}
   void set(int i, double value) {a[i] = value;};
   double get(int i) {return a[i];};
@@ -261,6 +258,8 @@ struct tensor {
   static size_t size(void){return 16;}
 };
 
-
+// one only use the 3-vec component of it
+fourvec measure_perp(fourvec p, fourvec k);
+double dot(const fourvec& A, const fourvec& B);
 
 #endif

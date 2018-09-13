@@ -279,12 +279,6 @@ int gluon_elastic_scattering(double dt, double temp, std::vector<double> v3cell,
 	return channel;
 }
 
-// one only use the 3-vec component of it
-fourvec measure_perp(fourvec p, fourvec k){
-	double kdotp = (k.x()*p.x() + k.y()*p.y() + k.z()*p.z());
-	return k - p*(kdotp/p.pabs2()); // k_perp  vector
-}
-
 double formation_time(fourvec p, fourvec k, double M, double T, double mpf){
 	double x = k.t()/p.t();
 	double mD2 = t_channel_mD2->get_mD2(T);
@@ -297,7 +291,7 @@ double formation_time(fourvec p, fourvec k, double M, double T, double mpf){
 	return tauf_LL;
 }
 
-//std::ofstream fc("stat.dat");
+std::ofstream fc("stat.dat");
 
 int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn){
 	int absid = std::abs(pIn.pid);
@@ -378,7 +372,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 		}
 	}
 
-	if (channel >=0){
+	if (channel >= 0){
 		// Do scattering
 		switch(AllProcesses[absid][channel].which()){
 			case 0:
@@ -406,8 +400,11 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			pmu = pmu.rotate_back(p_cell);
 			pmu = pmu.boost_back(v3cell[0], v3cell[1], v3cell[2]);
 		}
-		// If it radiates, add a pre-gluon
-		if (channel == 2 || channel == 3){
+		if (channel ==0 || channel == 1){
+			pIn.p = FS[0]; // elastic processes change it inmediately
+		}
+		else if (channel == 2 || channel == 3){
+			// If it radiates, add a pre-gluon
 			pregluon g;
 			g.p0 = pIn.p;
 			g.k1 = FS[2]; 
@@ -437,6 +434,51 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			pIn.radlist.push_back(g);
 		}
 		else if(channel == 6){
+			// If it radiates, add a pre-gluon
+			pregluon g;
+			g.p0 = pIn.p;
+			g.k1 = FS[1]; 
+			g.kn = g.k1;
+			g.t0 = pIn.x.t();
+			g.T0 = temp;
+			
+			double local_qhat = qhat_pQCD(21, E_cell, temp);
+			double mD2 = t_channel_mD2->get_mD2(temp);
+			g.local_mfp = mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
+			pIn.radlist.push_back(g);
+		}
+		else if (channel == 4 || channel == 5){
+			// If it absorb, add a pre-gluon
+			pregluon g;
+			g.p0 = pIn.p;
+			g.k1 = FS[2]; 
+			g.kn = g.k1;
+			g.t0 = pIn.x.t();
+			g.T0 = temp;
+			
+			double xfrac = g.k1.t()/g.p0.t();
+			double local_qhat = 0.;
+			double k1_cell = g.k1.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
+			BOOST_FOREACH(Process& r, AllProcesses[21]){
+				switch(r.which()){
+					case 0:
+						if (boost::get<Rate22>(r).IsActive()){
+							tensor A = boost::get<Rate22>(r).GetSecondM(
+								{std::min(k1_cell, (1-xfrac)*E_cell), temp}
+							);			
+							local_qhat += A.T[1][1]+A.T[2][2];
+						}
+						break;
+					default:
+						break;
+				}
+			}
+			double mD2 = t_channel_mD2->get_mD2(temp);
+			g.local_mfp = mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
+			pIn.abslist.push_back(g);
+		}
+		else if(channel == 7){
+			// If it absorb, add a pre-gluon
 			pregluon g;
 			g.p0 = pIn.p;
 			g.k1 = FS[1]; 
@@ -447,10 +489,11 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			double local_qhat = qhat_pQCD(21, E_cell, temp);
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			g.local_mfp = mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
-			pIn.radlist.push_back(g);
+			pIn.abslist.push_back(g);
 		}
 		else{
-			pIn.p = FS[0];
+			LOG_FATAL << "3. Channel = " << channel << " not exists";
+			exit(-1);
 		}
 	}
 
@@ -476,18 +519,46 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
-					double pabs0 = pIn.p.pabs();
- 					pIn.p.a[0] = std::max(pIn.p.t()-it->k1.t(), 1.01*pIn.mass);					
-					double pabs1 = std::sqrt(pIn.p.a[0]*pIn.p.a[0] - pIn.mass*pIn.mass);
-					double rescale = pabs1/pabs0;
-					pIn.p.a[1] *= rescale;
-					pIn.p.a[2] *= rescale;
-					pIn.p.a[3] *= rescale;
-
-					//fc << it->t0 << " " << it->k1.t() << " " << kt20 << " " << kt2n << " " << taun << std::endl;
+					pIn.p = pIn.p - it->k1;
+					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);
+					fc << it->t0 << " " << it->k1.t() << " " << kt20 << " " << kt2n << " " << taun << std::endl;
 					
 				}
 				it = pIn.radlist.erase(it);
+			}else{ // else, evolve it
+				fourvec k_new;
+				if (gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new)>=0){
+					it->kn = k_new*(it->kn.t()/k_new.t());
+				}
+				it++;
+			}
+		}
+	}
+
+	if (!pIn.abslist.empty()){
+		// loop over each pre-gluon
+		for(std::vector<pregluon>::iterator it=pIn.abslist.begin(); it!=pIn.abslist.end();){
+			fourvec ptot = it->p0+it->kn;
+			ptot.a[0] = std::sqrt(ptot.pabs2()+pIn.mass*pIn.mass);
+			double taun = formation_time(ptot,it->kn,pIn.mass,temp,it->local_mfp);
+			if (pIn.x.t()-it->t0 > taun){
+				double kt20 = measure_perp(it->p0, it->k1).pabs2();
+				double kt2n = measure_perp(it->p0, it->kn).pabs2();
+				double theta2 = kt2n/std::pow(it->kn.t(),2);
+				double thetaM2 = std::pow(pIn.mass/(it->p0.t()+it->kn.t()),2);
+				double mD2 = t_channel_mD2->get_mD2(temp);
+
+				double LPM = it->local_mfp/taun
+					*std::sqrt(  std::log(1+taun/it->local_mfp)
+								/std::log(1+6*it->k1.t()*temp/mD2) );
+				double DeadCone = std::pow(theta2/(theta2+thetaM2), 4);
+				double RuningCoupling = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
+				double Acceptance = std::min(1.0, LPM*RuningCoupling*DeadCone);
+				if (Srandom::rejection(Srandom::gen) < Acceptance){
+					pIn.p = pIn.p + it->k1;
+					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);
+				}
+				it = pIn.abslist.erase(it);
 			}else{ // else, evolve it
 				fourvec k_new;
 				if (gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new)>=0){

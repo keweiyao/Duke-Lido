@@ -409,7 +409,7 @@ void Rate<GB, 2, 4, double(*)(const double*, void *)>::
 	auto k_in12 = kmu.boost_to(v12[0], v12[1], v12[2]);
 	// |p1|
 	double p1abs = std::sqrt(p1_in12.x()*p1_in12.x() + p1_in12.y()*p1_in12.y() + p1_in12.z()*p1_in12.z());
-  // X-frame z-direction
+    // X-frame z-direction
 	double zdir[3] = {p1_in12.x()/p1abs, p1_in12.y()/p1abs, p1_in12.z()/p1abs};
 	// project k onto z-dir
 	double kdotz = zdir[0]*k_in12.x() + zdir[1]*k_in12.y() + zdir[2]*k_in12.z();
@@ -430,6 +430,7 @@ void Rate<GB, 2, 4, double(*)(const double*, void *)>::
 		p.a[3] = pz;
 		p = p.boost_back(v12[0], v12[1], v12[2]);
 	}
+	final_states.push_back(kmu);
 }
 
 /*****************************************************************/
@@ -968,16 +969,16 @@ void EffRate21<2, double(*)(const double*, void *)>::
     };
 
     bool status=true;
-    auto res = sample_nd(dR_dxdy, 2, {{0., 1.}, {0., 1.}}, StochasticBase<2>::GetFmax(parameters).s, status);
+    auto res = sample_nd(dR_dxdy, 2, {{-.999, .999}, {0., 1.}}, StochasticBase<2>::GetFmax(parameters).s, status);
 
-	double xp = res[0], yp = res[1];
-	double x = xp/(1.-xp);
-	double y = std::sqrt(1. - std::pow(1.-(1.+x)*yp*yp, 2) / (1.-(1.-xp*xp)*yp*yp) );
-	double k0 = x*E;
-	double kT = x*y*E;
+	double xp = res[0], y = res[1];
+	double x = std::atanh(xp);
+	double kz = x*pabs;
+	double k0 = std::abs(kz)/std::sqrt(1.01-y*y);
+	double kT = y*k0;
+	//LOG_INFO << xp << " " << y << " " << x << " " << kz << " " << kT; 
 	double phi = Srandom::dist_phi(Srandom::gen);
 	double kx = kT*std::cos(phi), ky = kT*std::sin(phi);
-	double kz = std::sqrt(k0*k0-kT*kT);
 	double pznew = pabs+kz;
 	double Enew = std::sqrt(pznew*pznew + kT*kT + _mass*_mass);
 
@@ -997,13 +998,13 @@ scalar EffRate21<2, double(*)(const double*, void*)>::
 	double T = parameters[1];
     auto dR_dxdy = [E, T, this](const double * x){
         // if out of physics range, please return 0.
-        if (x[0] >= 1 || x[0] <= 0 || x[1] <=0 || x[1] >= 1)
+        if (x[0] >= .999 || x[0] <= -.999 || x[1] <=0 || x[1] >= 1)
             return 0.;
         double params[4] = {E, T, this->_mass};
         double result = this->_f(x, params);
         return result;
     };
-    auto loc = MC_maximize(dR_dxdy, 2, {{0,1}, {0,1}}, 500);
+    auto loc = MC_maximize(dR_dxdy, 2, {{-.999,.999}, {0,1}}, 500);
     double xloc[2] = {loc[0],loc[1]};
     
     return scalar{dR_dxdy(xloc)*2};
@@ -1026,8 +1027,8 @@ scalar EffRate21<2, double(*)(const double*, void*)>::
         return result;
     };
 
-    double xmin[2] = {0., 0.};
-    double xmax[2] = {1., 1.};
+    double xmin[2] = {-.999, 0.};
+    double xmax[2] = {.999, 1.};
     double err;
 
     auto val = vegas(dR_dxdy, 2, xmin, xmax, err, 10000);
