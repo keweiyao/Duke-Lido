@@ -249,7 +249,10 @@ int gluon_elastic_scattering(double dt, double temp, std::vector<double> v3cell,
 		LOG_WARNING << "P(g) = " << P_total << " may be too large";
 		type1_warned = true;
 	}
-	if ( Srandom::init_dis(Srandom::gen) > P_total) return -1;
+	if ( Srandom::init_dis(Srandom::gen) > P_total) {
+		outgoing_p = incoming_p;
+		return -1;
+	}
 	else{
 		double p = Srandom::init_dis(Srandom::gen);
 		for(int i=0; i<P_channels.size(); ++i){
@@ -400,10 +403,10 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			pmu = pmu.rotate_back(p_cell);
 			pmu = pmu.boost_back(v3cell[0], v3cell[1], v3cell[2]);
 		}
-		if (channel ==0 || channel == 1){
-			pIn.p = FS[0]; // elastic processes change it inmediately
-		}
-		else if (channel == 2 || channel == 3){
+		// elastic processes change it inmediately
+		if (channel ==0 || channel == 1) pIn.p = FS[0]; 
+
+		if(channel == 2 || channel == 3){
 			// If it radiates, add a pre-gluon
 			pregluon g;
 			g.p0 = pIn.p;
@@ -433,7 +436,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			g.local_mfp = mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
 			pIn.radlist.push_back(g);
 		}
-		else if(channel == 6){
+		if(channel == 6){
 			// If it radiates, add a pre-gluon
 			pregluon g;
 			g.p0 = pIn.p;
@@ -447,7 +450,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			g.local_mfp = mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
 			pIn.radlist.push_back(g);
 		}
-		else if (channel == 4 || channel == 5){
+		if (channel == 4 || channel == 5){
 			// If it absorb, add a pre-gluon
 			pregluon g;
 			g.p0 = pIn.p;
@@ -477,7 +480,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			g.local_mfp = mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
 			pIn.abslist.push_back(g);
 		}
-		else if(channel == 7){
+		if(channel == 7){
 			// If it absorb, add a pre-gluon
 			pregluon g;
 			g.p0 = pIn.p;
@@ -491,7 +494,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			g.local_mfp = mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
 			pIn.abslist.push_back(g);
 		}
-		else{
+		if(channel>= AllProcesses[absid].size()){
 			LOG_FATAL << "3. Channel = " << channel << " not exists";
 			exit(-1);
 		}
@@ -527,9 +530,8 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				it = pIn.radlist.erase(it);
 			}else{ // else, evolve it
 				fourvec k_new;
-				if (gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new)>=0){
-					it->kn = k_new*(it->kn.t()/k_new.t());
-				}
+				gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new);
+				it->kn = k_new*(it->kn.t()/k_new.t());
 				it++;
 			}
 		}
@@ -561,9 +563,8 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				it = pIn.abslist.erase(it);
 			}else{ // else, evolve it
 				fourvec k_new;
-				if (gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new)>=0){
-					it->kn = k_new*(it->kn.t()/k_new.t());
-				}
+				gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new);
+				it->kn = k_new*(it->kn.t()/k_new.t());
 				it++;
 			}
 		}

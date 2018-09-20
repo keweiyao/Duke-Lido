@@ -6,6 +6,7 @@ double A=0., B=0.;
 double const tiny = 1e-10;
 double logof2 = std::log(2);
 // for quarks, upto t=mD^2
+
 double qhat_pQCD(int pid, double E, double T){
 	double factor = 1.0;
 	if (pid==21) factor = CA/CF; 
