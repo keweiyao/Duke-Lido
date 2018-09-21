@@ -505,16 +505,16 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 		// loop over each pre-gluon
 		for(std::vector<pregluon>::iterator it=pIn.radlist.begin(); it!=pIn.radlist.end();){
 			
-			double taun = formation_time(it->p0,it->kn,pIn.mass,temp,it->local_mfp);
+			double taun = formation_time(pIn.p,it->kn,pIn.mass,temp,it->local_mfp);
 			if (pIn.x.t()-it->t0 > taun){
-				double kt20 = measure_perp(it->p0, it->k1).pabs2();
-				double kt2n = measure_perp(it->p0, it->kn).pabs2();
+				double kt20 = measure_perp(pIn.p, it->k1).pabs2();
+				double kt2n = measure_perp(pIn.p, it->kn).pabs2();
 				double theta2 = kt2n/std::pow(it->kn.t(),2);
 				double thetaM2 = std::pow(pIn.mass/it->p0.t(),2);
 				double mD2 = t_channel_mD2->get_mD2(temp);
 
 				double LPM = it->local_mfp/taun
-					*std::sqrt(  std::log(1+taun/it->local_mfp)
+					* std::sqrt(  std::log(1+taun/it->local_mfp)
 								/std::log(1+6*it->k1.t()*temp/mD2) );
 				double DeadCone = std::pow(theta2/(theta2+thetaM2), 4);
 				double RuningCoupling = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
@@ -523,9 +523,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
 					pIn.p = pIn.p - it->k1;
-					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);
-					fc << it->t0 << " " << it->k1.t() << " " << kt20 << " " << kt2n << " " << taun << std::endl;
-					
+					pIn.p.a[0] = std::sqrt(pIn.p.pabs2() + pIn.mass*pIn.mass);
 				}
 				it = pIn.radlist.erase(it);
 			}else{ // else, evolve it

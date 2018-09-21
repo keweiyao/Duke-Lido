@@ -12,10 +12,15 @@ double qhat_pQCD(int pid, double E, double T){
 	if (pid==21) factor = CA/CF; 
 	double alphas = alpha_s(0, T);
 	double mD2 = t_channel_mD2->get_mD2(T);
-	return A*factor*alphas*CF*T * mD2;
+	return A*factor*alphas*CF*T * mD2*std::log(1+6*E*T/mD2) + factor*B/(E*T)*std::pow(T,3);
 }
 double dqhat_pQCD_dp2(int pid, double E, double T){
-	return 0.;
+        double factor = 1.0;
+        if (pid==21) factor = CA/CF;
+        double alphas = alpha_s(0, T);
+        double mD2 = t_channel_mD2->get_mD2(T);
+        return A*factor*alphas*CF*T * mD2/(mD2+6*E*T) * 3*T/2./E -factor*B/(2*E*E*E*T)*std::pow(T,3);
+
 }
 
 /*
