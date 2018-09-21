@@ -477,7 +477,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				}
 			}
 			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
+			g.local_mfp = 1.5*mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
 			pIn.abslist.push_back(g);
 		}
 		if(channel == 7){
@@ -491,7 +491,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			// add diffusion part
 			double local_qhat = qhat_pQCD(21, E_cell, temp);
 			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
+			g.local_mfp = .5*mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
 			pIn.abslist.push_back(g);
 		}
 		if(channel>= AllProcesses[absid].size()){
@@ -523,8 +523,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
 					pIn.p = pIn.p - it->k1;
 					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);
-					fc << it->t0 << " " << it->k1.t() << " " << kt20 << " " << kt2n << " " << taun << std::endl;
-					
+					//fc << it->t0 << " " << it->k1.t() << " " << kt20 << " " << kt2n << " " << taun << std::endl;
 				}
 				it = pIn.radlist.erase(it);
 			}else{ // else, evolve it

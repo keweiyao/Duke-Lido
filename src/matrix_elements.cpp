@@ -8,7 +8,7 @@
 
 double renormalization_scale;
 double const_alpha_s;
-double cut = 2.;
+double cut = 1.;
 
 //=============running coupling=================================================
 double alpha_s(double Q2, double T){
