@@ -8,6 +8,7 @@
 
 double renormalization_scale;
 double const_alpha_s;
+double cut = 2.;
 
 //=============running coupling=================================================
 double alpha_s(double Q2, double T){
@@ -91,16 +92,14 @@ double M2_Qq2Qq(const double t, void * params){
 	// unpacking parameters
 	double * p = static_cast<double*>(params);
 	double s = p[0], Temp = p[1], M2 = p[2]*p[2];
-	// define energy scales for each channel
-	double Q2s = s - M2, Q2t = t, Q2u = M2 - s - t;
 	// Deybe mass (t-channel)
 	double mt2 = t_channel_mD2->get_mD2(Temp);
+	// define energy scales for each channel
+	double Q2s = s - M2, Q2t = std::min(t, -cut*mt2), Q2u = M2 - s - t;
 	double At = alpha_s(Q2t, Temp);
 	double Q2t_reg = Q2t - mt2;
 
-	double result = 0.;
-	if (-Q2t > mt2) result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/Q2t;
-	else result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/(2.*mt2*mt2);
+	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/Q2t;
 	if (result < 0.) return 0.;
 	else return result;
 }
@@ -112,15 +111,14 @@ double M2_Qq2Qq_rad(const double t, void * params){
 	// unpacking parameters
 	double * p = static_cast<double*>(params);
 	double s = p[0], Temp = p[1], M2 = p[2]*p[2];
-	// define energy scales for each channel
-	double Q2s = s - M2, Q2t = t, Q2u = M2 - s - t;
-	double At = alpha_s(Q2t, Temp);
+	// Deybe mass (t-channel)
 	double mt2 = t_channel_mD2->get_mD2(Temp);
+	// define energy scales for each channel
+	double Q2s = s - M2, Q2t = std::min(t, -cut*mt2), Q2u = M2 - s - t;
+	double At = alpha_s(Q2t, Temp);
 	double Q2t_reg = Q2t - mt2;
 
-	double result = 0.;
-	if (-Q2t > mt2) result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/Q2t;
-	else result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/(2.*mt2*mt2);
+	double result = c64d9pi2*At*At*(Q2u*Q2u + Q2s*Q2s + 2.*M2*Q2t)/Q2t_reg/Q2t;
 
 	if (result < 0.) return 0.;
 	else return result;
@@ -137,11 +135,10 @@ double M2_Qg2Qg(const double t, void * params){
 	// unpacking parameters
 	double * p = static_cast<double*>(params);
 	double s = p[0], Temp = p[1], M2 = p[2]*p[2];
-	// define energy scales for each channel
-	double Q2s = s - M2, Q2t = t, Q2u = M2 - s - t;
 	// Deybe mass (t-channel)
 	double mt2 = t_channel_mD2->get_mD2(Temp);
-
+	// define energy scales for each channel
+	double Q2s = s - M2, Q2t = std::min(t, -cut*mt2), Q2u = M2 - s - t;
 	// define coupling constant for each channel
 	double At = alpha_s(Q2t, Temp),
 		   Au = alpha_s(Q2u, Temp),
@@ -152,8 +149,7 @@ double M2_Qg2Qg(const double t, void * params){
 
 	double result = 0.0;
 	// t*t
-	if (-Q2t > mt2) result += 2.*At*At * Q2s*(-Q2u)/Q2t_reg/Q2t;
-	else result += 2.*At*At * Q2s*(-Q2u)/(2.*mt2*mt2);
+	result += 2.*At*At * Q2s*(-Q2u)/Q2t_reg/Q2t;
 	// s*s
 	result += c4d9*As*As *
 			( Q2s*(-Q2u) + 2.*M2*(Q2s + 2.*M2) ) / std::pow(Q2s_reg, 2);
@@ -175,20 +171,17 @@ double M2_gg2gg(const double t, void * params){
 	// unpacking parameters
 	double * p = static_cast<double*>(params);
 	double s = p[0], Temp = p[1], M2 = 0.;
-	// define energy scales for each channel
-	double Q2s = s - M2, Q2t = t, Q2u = M2 - s - t;
 	// Deybe mass (t-channel)
 	double mt2 = t_channel_mD2->get_mD2(Temp);
-
+	// define energy scales for each channel
+	double Q2s = s - M2, Q2t = std::min(t, -cut*mt2), Q2u = M2 - s - t;
 	// define coupling constant for each channel
 	double At = alpha_s(Q2t, Temp);
 	double Q2t_reg = Q2t - mt2;
 	double Q2s_reg = Q2s + mt2;
 	double Q2u_reg = Q2u>0?(Q2u + mt2):(Q2u-mt2);
 
-	double result = 0.;
-	if (-Q2t > mt2) result = 72.*M_PI*M_PI*At*At*(-Q2s*Q2u/Q2t/Q2t_reg);
-	else result = 72.*M_PI*M_PI*At*At*(-Q2s*Q2u/(2.*mt2*mt2));
+	double result = 72.*M_PI*M_PI*At*At*(-Q2s*Q2u/Q2t/Q2t_reg);
 
 	if (result < 0.) return 0.;
 	return result;
@@ -203,20 +196,17 @@ double M2_gq2gq(const double t, void * params){
 	// unpacking parameters
 	double * p = static_cast<double*>(params);
 	double s = p[0], Temp = p[1], M2 = 0.;
-	// define energy scales for each channel
-	double Q2s = s - M2, Q2t = t, Q2u = M2 - s - t;
 	// Deybe mass (t-channel)
 	double mt2 = t_channel_mD2->get_mD2(Temp);
-
+	// define energy scales for each channel
+	double Q2s = s - M2, Q2t = std::min(t, -cut*mt2), Q2u = M2 - s - t;
 	// define coupling constant for each channel
 	double At = alpha_s(Q2t, Temp);
 	double Q2t_reg = Q2t - mt2;
 	double Q2s_reg = Q2s + mt2;
 	double Q2u_reg = Q2u>0?(Q2u + mt2):(Q2u-mt2);
 
-	double result = 0.;
-	if (-Q2t > mt2) result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*( 9./4./Q2t/Q2t_reg);
-	else result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*( 9./4./(2.*mt2*mt2));
+	double result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*( 9./4./Q2t/Q2t_reg);
 
 	if (result < 0.) return 0.;
 	return result;
@@ -235,14 +225,13 @@ double M2_Qg2Qg_rad(const double t, void * params) {
 	// unpacking parameters
 	double * p = static_cast<double *>(params);
 	double s = p[0], Temp = p[1], M2 = p[2]*p[2];
-	double Q2s = s - M2, Q2t = t, Q2u = M2 - s - t;
-	double At = alpha_s(Q2t, Temp);
+	// Deybe mass (t-channel)
 	double mt2 = t_channel_mD2->get_mD2(Temp);
+	double Q2s = s - M2, Q2t = std::min(t, -cut*mt2), Q2u = M2 - s - t;
+	double At = alpha_s(Q2t, Temp);
 	double Q2t_reg = Q2t - mt2;
 
-	double result = 0.;
-	if (-Q2t > mt2) result = c16pi2*2.*At*At * Q2s*(-Q2u)/Q2t/Q2t_reg;
-	else result = c16pi2*2.*At*At * Q2s*(-Q2u)/(2.*mt2*mt2);
+	double result = c16pi2*2.*At*At * Q2s*(-Q2u)/Q2t/Q2t_reg;
 
 	if (result < 0.) return 0.;
 	else return result;

@@ -4,7 +4,6 @@
 #include "matrix_elements.h"
 double A=0., B=0.;
 double const tiny = 1e-10;
-double logof2 = std::log(2);
 // for quarks, upto t=mD^2
 
 double qhat_pQCD(int pid, double E, double T){
