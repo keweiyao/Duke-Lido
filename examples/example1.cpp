@@ -30,12 +30,23 @@ int main(int argc, char* argv[]){
 	double pabs0 = std::sqrt(E0*E0-M*M);
 	fourvec p0{E0, 0, 0, pabs0};
 	for (auto & p : plist) {
-		p.mass = M;
-		p.pid = 4;
-		p.x = fourvec{0,0,0,0};
-		p.p = p0;
-		p.t_rad = 0.;
-		p.t_abs = 0.;
+		p.mass = M; // mass
+		p.pid = 4; // charm quark
+		p.x = fourvec{0,0,0,0}; // initial position
+		p.p = p0; // initial momenta
+		// uncomment this and modify to initialize the pre-gluon list 
+		// create a preformed gluon
+		// pregluon G1;
+		// G1.p0 = p0; // the mother parton energy
+		// G1.k1 = ... ; // the initial four-momenta of the preformed gluon
+		// G1.kn = G1.k1; // the current four-momenta of the preformed gluon
+		// G1.t0 = p.x.t(); // creation time, in units of [GeV^{-1}]
+		// G1.T0 = T; // Temperature at the creation time;
+		// G1.local_mfp = ...; // for medium-incuded gluon, this shoul be ~ qhat/mD^2
+					// for vacuum radiated gluon, this quantity should not be used
+		// Add it to the preformed gluon list
+		// p.radlist.push_back(G1);
+		// You can add more preformed gluons
 	}
 	double time = 0.;
     double sum = 0.;
