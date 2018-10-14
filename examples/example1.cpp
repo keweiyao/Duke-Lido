@@ -7,66 +7,56 @@
 
 // This sample program evolve heavy quark (E0=30, M=1.3) in a static medium for t=3.0fm/c and calculate the average energy loss (<E-E0>)
 int main(int argc, char* argv[]){
-	double fmc_to_GeV_m1 = 5.026, M=1.3, E0=30., T=0.3;
-	double time = 0.; // system time start from t=0
-    double dt = 0.005; // time step 0.02 fm/c
-	int Nsteps=600, Nparticles=10000;
-	if (argc==1){
-		std::cout << "Please tell the program whether use old table (if exists)." << std::endl;
-		std::cout << "   $>./example1 new" << std::endl;
-		std::cout << "Or $>./example1 old" << std::endl;
-		return 1;
-	}
-	std::string mode = argv[1];
-	initialize(mode, "./settings.xml", 1.0);
-	std::vector<particle> plist(Nparticles); // a list of particles
-	std::vector<fourvec> FS; // final state holder for each scattering
-    fourvec p0{E0, 0, 0, std::sqrt(E0*E0-M*M)};
+	////////////////////////////////////////////
+	double mu = 2.0; // don't change...
+	double const_alphas = 0.3; // don't change...
+	double A = std::log(2)-0.25; // don't change...
+	double B = 0.0; // don't change...
+	////////////////////////////////////////////
+	double M = 1.3; // GeV
+	double T = 0.3; // GeV
+	double L = 3; // fm
+	double dt = 0.01; // fm/c
+	double fmc_to_GeV_m1 = 5.026;
+	int Nsteps = int(L/dt);
+	
+
+	initialize("new", "./settings.xml", mu, const_alphas, A, B);
+
+	// Initialization
+	double E0 = 100; // GeV
+	int Nparticles = 1000;
+	std::vector<particle> plist(Nparticles);
+	double pabs0 = std::sqrt(E0*E0-M*M);
+	fourvec p0{E0, 0, 0, pabs0};
 	for (auto & p : plist) {
-		p.pid = 4; // pid for charm
-		p.x = fourvec{0,0,0,0}; // initialize position at the origin
-		p.p = p0; // initial momentum
-		p.has_k_rad = false;
-		p.has_k_abs = false;
-		p.t_rad = 0.; // initilize the time of last radiation
-		p.t_abs = 0.; // initilize the time of last absorption
-		p.k_rad = fourvec{0,0,0,0};
-		p.k_abs = fourvec{0,0,0,0};
-		p.resum_counts = 0;
 		p.mass = M;
+		p.pid = 4;
+		p.x = fourvec{0,0,0,0};
+		p.p = p0;
+		p.t_rad = 0.;
+		p.t_abs = 0.;
 	}
+	double time = 0.;
+    double sum = 0.;
+	
 	for (int it=0; it<Nsteps; ++it){
-		LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
+		if (it%100 ==0) LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
 		time += dt;
 		for (auto & p : plist){
-			// loop over each particle
-			// perform freestreaming
+			// x-update
 			p.freestream(dt*fmc_to_GeV_m1);
-			// Determine scattering channel:
-			// <0: nothing happened
-			// 0: Qq->Qq
-			// 1: Qg->Qg
-			// 2: Qq->Qqg
-			// 3: Qg->Qgg
-			// 4: Qqg->Qq
-			// 5: Qgg->Qg
-			int channel = update_particle_momentum_BDMPSZ(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
+			// p-update
+			int channel = update_particle_momentum_Lido(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
 		}
 	}
-	// Calculate average loss in energy
-	double sum=0.;
-	for (auto & p : plist){
-		sum += p.p.t();
-	}
-	double E1 = sum/Nparticles;
-	// Print summary
-	LOG_INFO << "Summary:";
-	LOG_INFO << "E0 = " << E0 << " GeV";
-	LOG_INFO << "T = " << T << " GeV";
-	LOG_INFO << "t-t0 = " << Nsteps*dt << " fm/c";
-	LOG_INFO << "Type = charm quark";
-	LOG_INFO << "Average E-loss = " << E1-E0 << " GeV";
+	
+	double Ef = 0.;
+	for (auto & p : plist) Ef += p.p.t();
+	Ef /= Nparticles;
 
+	LOG_INFO << "Initial energy: " << E0 << " GeV";
+	LOG_INFO << "Final average energy: " << Ef << " GeV";
 	return 0;
 }
 

@@ -294,7 +294,7 @@ double formation_time(fourvec p, fourvec k, double M, double T, double mpf){
 	return tauf_LL;
 }
 
-std::ofstream fc("stat.dat");
+//std::ofstream fc("stat.dat");
 
 int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn){
 	int absid = std::abs(pIn.pid);
@@ -512,8 +512,8 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				double thetaM2 = std::pow(pIn.mass/it->p0.t(),2);
 				double mD2 = t_channel_mD2->get_mD2(temp);
 
-				double LPM = it->local_mfp/taun
-					*std::sqrt(  std::log(1+taun/it->local_mfp)
+				double LPM = it->local_mfp/taun*
+					std::sqrt(  std::log(1+taun/it->local_mfp)
 								/std::log(1+6*it->k1.t()*temp/mD2) );
 				double DeadCone = std::pow(theta2/(theta2+thetaM2), 4);
 				double RuningCoupling = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
@@ -626,7 +626,7 @@ std::vector<double> Bjorken_test(double M, double E0, double T0, double t0, doub
 	double time = 0.;
     double sum = 0.;
 	for (int it=0; it<Nsteps; ++it){
-		double T = T0*std::pow(t0/(t0+time), 1./3.);
+		double T = T0*std::pow(t0/(t0+time+dt/2.), .2);
 		if (it%100 ==0) LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
 		for (auto & p : plist) sum += E0-p.p.t();
 		dE.push_back(sum/Nparticles);
