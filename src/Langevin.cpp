@@ -4,23 +4,54 @@
 #include "matrix_elements.h"
 double A=0., B=0.;
 double const tiny = 1e-10;
-double logof2 = std::log(2);
 // for quarks, upto t=mD^2
 
 double qhat_pQCD(int pid, double E, double T){
 	double factor = 1.0;
 	if (pid==21) factor = CA/CF; 
-	double alphas = alpha_s(0, T);
+	double alphas = alpha_s(0, T); // at mu*pi*T
 	double mD2 = t_channel_mD2->get_mD2(T);
-	return A*factor*alphas*CF*T * mD2*std::log(1+6*E*T/mD2) + factor*B/(E*T)*std::pow(T,3);
+	// run version
+        double tmax = mD2; // on avergae...
+	double mscale = renormalization_scale*M_PI*T;
+	if (tmax > mscale){
+	    double log0 = std::log(1.+mscale*mscale/mD2);
+	    double log1 = std::log(mscale*mscale/Lambda2);
+	    double log2 = std::log(tmax/Lambda2);
+	    double log_combinations = log0 + log1*(1. - log1/log2);
+	    double qhat = A*factor*alphas*CF*T*mD2 * log_combinations;
+	    return qhat;
+	}
+	else{
+	    double log0 = std::log(1.+tmax/mD2);
+	    double qhat = A*factor*alphas*CF*T*mD2 * log0;
+	    return qhat;
+	}
+	// fix version
+	//return A*factor*alphas*CF*T * mD2 ;//* std::log(1. + 6*E*T/mD2);
 }
 double dqhat_pQCD_dp2(int pid, double E, double T){
-        double factor = 1.0;
+	return 0.;
+	/*double factor = 1.0;
         if (pid==21) factor = CA/CF;
-        double alphas = alpha_s(0, T);
+        double alphas = alpha_s(E*T, T); // at mu*pi*T
         double mD2 = t_channel_mD2->get_mD2(T);
-        return A*factor*alphas*CF*T * mD2/(mD2+6*E*T) * 3*T/2./E -factor*B/(2*E*E*E*T)*std::pow(T,3);
-
+        // run version
+        double tmax = mD2; // on avergae...         
+        double mscale = renormalization_scale*M_PI*T;
+        if (tmax > mscale){
+            double log0 = std::log(1.+mscale*mscale/mD2);
+            double log1 = std::log(mscale*mscale/Lambda2);
+            double log2 = std::log(tmax/Lambda2);
+            double dlog_combinations_dp2 = std::pow(log1/log2,2)/2./E/E;
+            double qhat = A*factor*alphas*CF*T*mD2 * dlog_combinations_dp2;
+            return qhat;
+        }
+        else{
+            double dlog0_dp2 = tmax/(mD2 + tmax)/2./E/E;
+            double qhat = A*factor*alphas*CF*T*mD2 * dlog0_dp2;
+            return qhat;
+        }*/
 }
 
 /*

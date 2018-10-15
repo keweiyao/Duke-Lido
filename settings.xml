@@ -6,7 +6,7 @@
 		 	 the framework can easily incroperate light parton -->
 
 	<!--###########################Gluons##############################-->
-	<gq2gq status="inactive" moments="on">
+	<gq2gq status="active" moments="on">
 		<mass>.0</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -19,7 +19,7 @@
 		</rate>
 	</gq2gq>
 
-	<gg2gg status="inactive" moments="on">
+	<gg2gg status="active" moments="on">
 		<mass>.0</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -32,7 +32,7 @@
 		</rate>
 	</gg2gg>
     <!--###########################CHARM QUARKS##############################-->
-	<cq2cq status="inactive" moments="on">
+	<cq2cq status="active" moments="on">
 		<mass>1.3</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -45,7 +45,7 @@
 		</rate>
 	</cq2cq>
 
-	<cg2cg status="inactive" moments="on">
+	<cg2cg status="active" moments="on">
 		<mass>1.3</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -58,7 +58,7 @@
 		</rate>
 	</cg2cg>
 
-	<cq2cqg status="inactive" moments="off">
+	<cq2cqg status="active" moments="off">
 		<mass>1.3</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -71,7 +71,7 @@
 		</rate>
 	</cq2cqg>
 
-	<cg2cgg status="inactive" moments="off">
+	<cg2cgg status="active" moments="off">
 		<mass>1.3</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">

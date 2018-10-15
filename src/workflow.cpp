@@ -294,8 +294,6 @@ double formation_time(fourvec p, fourvec k, double M, double T, double mpf){
 	return tauf_LL;
 }
 
-std::ofstream fc("stat.dat");
-
 int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn){
 	int absid = std::abs(pIn.pid);
 	// A Langevin step, does nothing if A and B very small
@@ -423,7 +421,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 					case 0:
 						if (boost::get<Rate22>(r).IsActive()){
 							tensor A = boost::get<Rate22>(r).GetSecondM(
-								{std::min(k1_cell, (1-xfrac)*E_cell), temp}
+								{std::min(k1_cell, E_cell-k1_cell), temp}
 							);			
 							local_qhat += A.T[1][1]+A.T[2][2];
 						}
@@ -433,7 +431,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				}
 			}
 			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
+			g.local_mfp = 1.5*mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
 			pIn.radlist.push_back(g);
 		}
 		if(channel == 6){
@@ -447,7 +445,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			
 			double local_qhat = qhat_pQCD(21, E_cell, temp);
 			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
+			g.local_mfp = .5*mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
 			pIn.radlist.push_back(g);
 		}
 		if (channel == 4 || channel == 5){
@@ -477,7 +475,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				}
 			}
 			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
+			g.local_mfp = 1.5*mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
 			pIn.abslist.push_back(g);
 		}
 		if(channel == 7){
@@ -491,7 +489,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			// add diffusion part
 			double local_qhat = qhat_pQCD(21, E_cell, temp);
 			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
+			g.local_mfp = .5*mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
 			pIn.abslist.push_back(g);
 		}
 		if(channel>= AllProcesses[absid].size()){
@@ -504,16 +502,16 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 	if (!pIn.radlist.empty()){
 		// loop over each pre-gluon
 		for(std::vector<pregluon>::iterator it=pIn.radlist.begin(); it!=pIn.radlist.end();){
-			
-			double taun = formation_time(pIn.p,it->kn,pIn.mass,temp,it->local_mfp);
+			double taun = formation_time(it->p0,it->kn,pIn.mass,temp,it->local_mfp);
 			if (pIn.x.t()-it->t0 > taun){
-				double kt20 = measure_perp(pIn.p, it->k1).pabs2();
-				double kt2n = measure_perp(pIn.p, it->kn).pabs2();
+				double kt20 = measure_perp(it->p0, it->k1).pabs2();
+				double kt2n = measure_perp(it->p0, it->kn).pabs2();
 				double theta2 = kt2n/std::pow(it->kn.t(),2);
 				double thetaM2 = std::pow(pIn.mass/it->p0.t(),2);
 				double mD2 = t_channel_mD2->get_mD2(temp);
 
-				double LPM = it->local_mfp/taun
+				double vacuum_condition = (taun>it->t0)? 0.0 : 1.0;
+				double LPM = it->local_mfp/taun * vacuum_condition
 					* std::sqrt(  std::log(1+taun/it->local_mfp)
 								/std::log(1+6*it->k1.t()*temp/mD2) );
 				double DeadCone = std::pow(theta2/(theta2+thetaM2), 4);
@@ -523,7 +521,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
 					pIn.p = pIn.p - it->k1;
-					pIn.p.a[0] = std::sqrt(pIn.p.pabs2() + pIn.mass*pIn.mass);
+					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);
 				}
 				it = pIn.radlist.erase(it);
 			}else{ // else, evolve it
