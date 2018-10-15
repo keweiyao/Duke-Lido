@@ -285,9 +285,9 @@ cdef class event:
 		setting_path = os.environ['XDG_DATA_HOME']+"/event/settings.xml"
 		print(setting_path)
 		if not os.path.exists("table.h5"):
-			initialize("new", setting_path, LBT['mu'], -1.0, LGV['A'], LGV['B'])
+			initialize("new", setting_path, LBT['mu'], LBT['afix'], LGV['A'], LGV['B'])
 		else:
-			initialize("old", setting_path, LBT['mu'], -1.0, LGV['A'], LGV['B'])
+			initialize("old", setting_path, LBT['mu'], LBT['afix'], LGV['A'], LGV['B'])
 
 
 	# The current time of the evolution.
