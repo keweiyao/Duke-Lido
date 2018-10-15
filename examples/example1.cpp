@@ -37,8 +37,9 @@ int main(int argc, char* argv[]){
 		// uncomment this and modify to initialize the pre-gluon list 
 		// create a preformed gluon
 		pregluon G1;
+		G1.nature = 0; // 0 for vacuum-shower gluon and 1 for medium-induced gluon
 		G1.p0 = p0; // the mother parton energy
-		G1.k1 = fourvec{10,0,0,10} ; // the initial four-momenta of the preformed gluon
+		G1.k1 = fourvec{15,0,1,std::sqrt(15*15-1*1)} ; // the initial four-momenta of the preformed gluon
 		G1.kn = G1.k1; // the current four-momenta of the preformed gluon
 		G1.t0 = p.x.t(); // creation time, in units of [GeV^{-1}]
 		G1.T0 = T; // Temperature at the creation time;
@@ -48,7 +49,7 @@ int main(int argc, char* argv[]){
 		// 2) For vacuum-shower gluon, a reasonble choice is tau_f_0
 		//	  and avoid double counting the phase-space by rejection on
 		// 	  tau_f_self_consistent/tau_f_0.
-		G1.local_mfp = formation_time(G1.p0, G1.k1, p.mass, T);
+		G1.local_mfp = 0.0;//
 		// Add it to the preformed gluon list
 		p.radlist.push_back(G1);
 		// You can add more preformed gluons

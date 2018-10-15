@@ -7,6 +7,7 @@
 #include <map>
 
 struct pregluon{
+	int nature; // vacuum-shower: 0, medium-induced: 1
 	fourvec p0, k1, kn;
 	double t0, T0;
 	double local_mfp;

@@ -407,6 +407,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 		if(channel == 2 || channel == 3){
 			// If it radiates, add a pre-gluon
 			pregluon g;
+			g.nature = 1;
 			g.p0 = pIn.p;
 			g.k1 = FS[2]; 
 			g.kn = g.k1;
@@ -437,6 +438,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 		if(channel == 6){
 			// If it radiates, add a pre-gluon
 			pregluon g;
+			g.nature = 1;
 			g.p0 = pIn.p;
 			g.k1 = FS[1]; 
 			g.kn = g.k1;
@@ -451,6 +453,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 		if (channel == 4 || channel == 5){
 			// If it absorb, add a pre-gluon
 			pregluon g;
+			g.nature = 1;
 			g.p0 = pIn.p;
 			g.k1 = FS[2]; 
 			g.kn = g.k1;
@@ -481,6 +484,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 		if(channel == 7){
 			// If it absorb, add a pre-gluon
 			pregluon g;
+			g.nature = 1;
 			g.p0 = pIn.p;
 			g.k1 = FS[1]; 
 			g.kn = g.k1;
@@ -504,19 +508,25 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 		for(std::vector<pregluon>::iterator it=pIn.radlist.begin(); it!=pIn.radlist.end();){
 			double taun = formation_time(it->p0,it->kn,pIn.mass,temp);
 			if (pIn.x.t()-it->t0 > taun){
-				double kt20 = measure_perp(it->p0, it->k1).pabs2();
-				double kt2n = measure_perp(it->p0, it->kn).pabs2();
-				double theta2 = kt2n/std::pow(it->kn.t(),2);
-				double thetaM2 = std::pow(pIn.mass/it->p0.t(),2);
-				double mD2 = t_channel_mD2->get_mD2(temp);
+				double Acceptance = 0.;
+				if (it->nature == 1){ // medium-induced
+					double kt20 = measure_perp(it->p0, it->k1).pabs2();
+					double kt2n = measure_perp(it->p0, it->kn).pabs2();
+					double theta2 = kt2n/std::pow(it->kn.t(),2);
+					double thetaM2 = std::pow(pIn.mass/it->p0.t(),2);
+					double mD2 = t_channel_mD2->get_mD2(temp);
 
-				double LPM = it->local_mfp/taun
-					* std::sqrt(  std::log(1+taun/it->local_mfp)
-								/std::log(1+6*it->k1.t()*temp/mD2) );
-				double DeadCone = std::pow(theta2/(theta2+thetaM2), 4);
-				double RuningCoupling = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
-				double Acceptance = std::min(1.0, LPM*RuningCoupling*DeadCone);
-
+					double LPM = it->local_mfp/taun
+						* std::sqrt(  std::log(1+taun/it->local_mfp)
+									/std::log(1+6*it->k1.t()*temp/mD2) );
+					double DeadCone = std::pow(theta2/(theta2+thetaM2), 4);
+					double Running = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
+					Acceptance = std::min(1.0, LPM*Running*DeadCone);
+				} else { // vacuum shower
+					double kt20 = measure_perp(it->p0, it->k1).pabs2();
+					double kt2n = measure_perp(it->p0, it->kn).pabs2();
+					Acceptance = std::min(1.0, kt20/kt2n);
+				}				
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
 					pIn.p = pIn.p - it->k1;
