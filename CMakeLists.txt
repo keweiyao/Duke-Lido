@@ -7,6 +7,8 @@ if(NOT CXX11)
   message(FATAL_ERROR "Your compiler does not support C++11")
 endif()
 
+
+
 # Find and use Boost.
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -40,6 +42,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 FIND_PACKAGE(GSL REQUIRED)
 include_directories(${GSL_INCLUDE_DIRS} ${GSLCBLAS_INCLUDE_DIRS})
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmakemodules")
+
+message("Looking for Pythia8 ...")
+find_package(Pythia8)
+if (${PYTHIA8_FOUND})
+  include_directories(${PYTHIA8_INCLUDE_DIR})
+  Message(STATUS "Pythia8 Include dir : " ${PYTHIA8_INCLUDE_DIR})
+endif()
 
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 1)
@@ -108,6 +118,10 @@ include_directories(src)
 add_executable(examples1 ./examples/example1.cpp)
 target_link_libraries(examples1 ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread)
 install(TARGETS examples1 DESTINATION bin)
+
+add_executable(examples2 ./examples/example2.cpp)
+target_link_libraries(examples2 ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+install(TARGETS examples2 DESTINATION bin)
 
 install(FILES settings.xml DESTINATION share)
 # add_subdirectory(test)

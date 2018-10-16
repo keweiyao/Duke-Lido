@@ -37,7 +37,7 @@ int main(int argc, char* argv[]){
 		// uncomment this and modify to initialize the pre-gluon list 
 		// create a preformed gluon
 		pregluon G1;
-		G1.nature = 0; // 0 for vacuum-shower gluon and 1 for medium-induced gluon
+		G1.is_vac = true; // 0 for vacuum-shower gluon and 1 for medium-induced gluon
 		G1.p0 = p0; // the mother parton energy
 		G1.k1 = fourvec{15,0,1,std::sqrt(15*15-1*1)} ; // the initial four-momenta of the preformed gluon
 		G1.kn = G1.k1; // the current four-momenta of the preformed gluon

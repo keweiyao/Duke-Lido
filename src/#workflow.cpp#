@@ -294,7 +294,7 @@ double formation_time(fourvec p, fourvec k, double M, double T){
 	return tauf_LL;
 }
 
- std::ofstream fs("hq_gluon_modified2.dat", std::fstream::app);
+ std::ofstream fs("hq_gluon_modified.dat", std::fstr);
 
 
 int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn){
@@ -530,8 +530,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				} else { // vacuum shower
 					double kt20 = measure_perp(it->p0, it->k1).pabs2();
 					double kt2n = measure_perp(it->p0, it->kn).pabs2();
-					//Acceptance = std::min(1.0, kt20/kt2n);
-					Acceptance=1;
+					Acceptance = std::min(1.0, kt20/kt2n);
 				}				
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
@@ -539,7 +538,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);
 					if(it->is_vac == true)
                                         {
-					  fs<<it->kn<<" "<<it->p0<<std::endl;
+			                   fs<<it->kn<<" "<<it->p0<<endl;
                                         }
 
 				}
