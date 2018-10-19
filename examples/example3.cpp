@@ -8,55 +8,44 @@
 
 using namespace Pythia8;
 
-// This sample program evolve heavy quark (E0=30, M=1.3) in a static medium for t=3.0fm/c and calculate the average energy loss (<E-E0>)
 int main(int argc, char* argv[]){
+	if (argc < 3){
+		LOG_FATAL << "need a pythia setting file and number of event";
+		exit(-1);
+	}
+	std::string filename(argv[1]);
+	int Neve = atoi(argv[2]);
+	
+	// read settings
 	Pythia pythia;
+	pythia.readFile(filename);
 	Event& event = pythia.event;
-	// Declare Pythia object
-  	pythia.readString("HardQCD:all = off"); // will repeat this line in the xml for demonstration  
-	pythia.readString("HardQCD:hardccbar = on");
-  	//pythia.readString("SoftQCD:all = on");
-  	pythia.readString("HadronLevel:Decay = off");
-  	pythia.readString("HadronLevel:all = off");
-    pythia.readString("PartonLevel:all = on");
-  	pythia.readString("PartonLevel:ISR = on");
-  	pythia.readString("PartonLevel:MPI = off");
-  	pythia.readString("PartonLevel:FSR = on");
-	pythia.readString("PartonLevel:remnants = off");
-	//pythia.readString("PromptPhoton:all=on");
+	Info& info = pythia.info;
+
+	// suppress output
+	pythia.readString("SoftQCD:all = off");
+	pythia.readString("PromptPhoton:all=off");
   	pythia.readString("WeakSingleBoson:all=off");
   	pythia.readString("WeakDoubleBoson:all=off");
-  	pythia.readString("Beams:idA = 2212");
-  	pythia.readString("Beams:idB = 2212");
-  	pythia.readString("Beams:eCM = 5020");
-  	//pythia.readString("HardQCD:hardbbbar = on");
-  	//pythia.readString("HardQCD:hardccbar = on");
-  	pythia.readString("PhaseSpace:pTHatMin = 200");
-    pythia.readString("PhaseSpace:pTHatMin = 210");
-	pythia.readString("PhaseSpace:bias2Selection = off");
-	pythia.readString("PhaseSpace:bias2SelectionPow = 6.");
-	pythia.readString("Random:setSeed = on");
-	pythia.readString("Random:seed = 120");
+
+	pythia.readString("Init:showProcesses = off");  
+    pythia.readString("Init:showMultipartonInteractions = off");  
+    pythia.readString("Init:showChangedSettings = off");  
+    pythia.readString("Init:showChangedParticleData = off");  
+    pythia.readString("Next:numberCount = 1000");  
+    pythia.readString("Next:numberShowInfo = 0");  
+    pythia.readString("Next:numberShowProcess = 0");  
+    pythia.readString("Next:numberShowEvent = 0"); 
+
     pythia.init();
 
 	std::vector<particle> plist;
-    ////////////////////////////////////////////
-	double mu = 2.0; // don't change...
-	double const_alphas = 0.3; // don't change...
-	double A = 1.0; // don't change...
-	double B = 0.0; // don't change...
-	////////////////////////////////////////////
 	double M = 1.5; // GeV
-	double T = 0.3; // GeV
-	double L = 3; // fm
-	double dt = 0.02; // fm/c
-	double fmc_to_GeV_m1 = 5.026;
-
-	for (int iEvent = 0; iEvent < 1000000; ++iEvent) 
+	for (int iEvent = 0; iEvent < Neve; ++iEvent) 
     {
-
 	    pythia.next();
-		for (size_t i = 0; i < pythia.event.size(); ++i) 
+		double weight = pythia.info.weight();
+		for (size_t i = 0; i < event.size(); ++i) 
 		{
 			auto p = event[i];
 			if (p.isFinal() && p.idAbs() == 4) 
@@ -67,10 +56,10 @@ int main(int argc, char* argv[]){
 				c_entry.mass = M; // mass
 				c_entry.pid = 4; // charm quark
 				c_entry.x = fourvec{0,0,0,0}; // initial position
+				c_entry.weight = weight;
 				// trace back to its first production to 
 				// find out final state gluon radiation
-				while(true)
-				{
+				while(true){
 					auto m1 = p.mother1();
 					auto m2 = p.mother2();
 					auto d1 = p.daughter1();
@@ -84,12 +73,15 @@ int main(int argc, char* argv[]){
 					else break;
 					
 					int gluon_eid = -1;
-					if (event[p.daughter1()].idAbs() == 21) 
+					if (event[p.daughter1()].idAbs() == 21 
+					&& std::abs(event[p.daughter1()].status()) == 51)
 						gluon_eid = p.daughter1();
-					else if (event[p.daughter2()].idAbs() == 21) 
+						
+					else if (event[p.daughter2()].idAbs() == 21 
+					&& std::abs(event[p.daughter2()].status()) == 51) 
 						gluon_eid = p.daughter2();
 
-					if (gluon_eid >0 ) { // a radiated gluon:
+					if (gluon_eid >0) { // a radiated gluon:
 						// make it pre-formed gluon
 						auto g = event[gluon_eid];
 						fourvec k{g.e(), g.px(), g.py(), g.pz()};
@@ -100,7 +92,7 @@ int main(int argc, char* argv[]){
 						G1.p0 = p0;
 						G1.k1 = k;
 						G1.kn = G1.k1;
-						G1.t0 = 0.0;
+						G1.t0 = c_entry.x.t();
 						G1.T0 = 0.0; // not used
 						G1.local_mfp = 0.0; // not used
 						c_entry.radlist.push_back(G1);
@@ -110,15 +102,27 @@ int main(int argc, char* argv[]){
 				plist.push_back(c_entry); 
 			}
     	}
-  }
+  	}
 	
+    ////////////////////////////////////////////
+	double mu = 2.0;
+	double const_alphas = 0.3; 
+	double A = 1. - 0.25/std::log(2); 
+	double B = 0.0; 
+	////////////////////////////////////////////
+	double T = 0.3; // GeV
+	double L = 3; // fm
+	double dt = 0.02; // fm/c
+	double fmc_to_GeV_m1 = 5.026;
 	int Nsteps = int(L/dt);
 	int Nparticles=plist.size();
+
+
 	double Ei= 0.;
-	for (auto & p : plist) Ei += p.p.t();
+	for (auto & p : plist) Ei += std::sqrt(p.p.x()*p.p.x()+p.p.y()*p.p.y());
 	Ei /= Nparticles;
 
-	initialize("new", "./settings.xml", mu, const_alphas, A, B);
+	initialize("old", "./settings.xml", mu, const_alphas, A, B);
 
 	double time = 0.;
     double sum = 0.;
@@ -135,26 +139,13 @@ int main(int argc, char* argv[]){
 	}
 	
 	double Ef = 0.;
-	for (auto & p : plist) Ef += p.p.t();
+	for (auto & p : plist) Ef += std::sqrt(p.p.x()*p.p.x()+p.p.y()*p.p.y());
 	Ef /= Nparticles;
 
-	LOG_INFO << "Initial energy: " << Ei << " GeV";
-	LOG_INFO << "Final average energy: " << Ef << " GeV";
+	LOG_INFO << "Nparticles: " << Nparticles;
+	LOG_INFO << "Initial pT: " << Ei << " GeV";
+	LOG_INFO << "Final pT: " << Ef << " GeV";
 
-	/*
-	std::fstream fs;
-    fs.open ("hq_gluon_modified.dat", std::fstream::out | std::fstream::app);
-    for (auto & p : plist)
-	{
-		for (auto& g : p.radlist)
-		{
-			if(g.is_vac == true)
-			{
-				fs<<g.kn.x()<<" "<<g.kn.y()<<" "<<g.kn.z()<<" "<<g.kn.t()<<" "<<g.p0.x()<<" "<<g.p0.y()<<" "<<g.p0.z()<<" "<<g.p0.t()<<endl;
-			}
-		}
-	}
-	*/
 	return 0;
 }
 

@@ -117,8 +117,8 @@
 	<c2cg status="active" moments="off">
 		<mass>1.5</mass>
 		<rate slots="energy,temp">
-			<Nenergy>200</Nenergy> <Lenergy>1.6</Lenergy> <Henergy>200.0</Henergy>
-			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Nenergy>400</Nenergy> <Lenergy>1.6</Lenergy> <Henergy>200.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</c2cg>
 
@@ -128,7 +128,7 @@
 			<Nenergy>60</Nenergy> <Lenergy>1.6</Lenergy> <Henergy>60.0</Henergy>
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
-	</c2cg>
+	</cg2c>
 
 
 
@@ -198,7 +198,7 @@
 			<Nenergy>60</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>60.0</Henergy>
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
-	</bqg2bg>
+	</bqg2bq>
 
 	<bgg2bg status="inactive" moments="off">
 		<mass>4.2</mass>
@@ -230,6 +230,6 @@
 			<Nenergy>60</Nenergy> <Lenergy>0.05</Lenergy> <Henergy>60.0</Henergy>
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
-	</b2bg>
+	</bg2b>
 
 </Boltzmann>
