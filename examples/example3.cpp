@@ -11,6 +11,7 @@ using namespace Pythia8;
 // This sample program evolve heavy quark (E0=30, M=1.3) in a static medium for t=3.0fm/c and calculate the average energy loss (<E-E0>)
 int main(int argc, char* argv[]){
 	Pythia pythia;
+	Event& event = pythia.event;
 	// Declare Pythia object
   	pythia.readString("HardQCD:all = off"); // will repeat this line in the xml for demonstration  
 	pythia.readString("HardQCD:hardccbar = on");
@@ -55,48 +56,60 @@ int main(int argc, char* argv[]){
     {
 
 	    pythia.next();
-        std::map<int,std::vector<std::vector<double>>> gluon_list;
 		for (size_t i = 0; i < pythia.event.size(); ++i) 
 		{
-     		if(pythia.event[i].id() ==21 && pythia.event[i].status() == -51)
-            {
-            	int mother1=pythia.event[i].mother1();
-           		int mother2=pythia.event[i].mother2();
-            	if(mother2 == 0 && (abs(pythia.event[mother1].id())==4))
-            	{
-                	int motherid=pythia.event[mother1].iTopCopyId();
-            		gluon_list[motherid].push_back({pythia.event[i].e(),pythia.event[i].px(),pythia.event[i].py(),pythia.event[i].pz(),pythia.event[mother1].e(),pythia.event[mother1].px(),pythia.event[mother1].py(),pythia.event[mother1].pz()});
-            	}
-            }
+			auto p = event[i];
+			if (p.isFinal() && p.idAbs() == 4) 
+			{
+				// final momenta 
+				fourvec p0{p.e(), p.px(), p.py(), p.pz()};
+				particle c_entry;
+				c_entry.mass = M; // mass
+				c_entry.pid = 4; // charm quark
+				c_entry.x = fourvec{0,0,0,0}; // initial position
+				// trace back to its first production to 
+				// find out final state gluon radiation
+				while(true)
+				{
+					auto m1 = p.mother1();
+					auto m2 = p.mother2();
+					auto d1 = p.daughter1();
+					auto d2 = p.daughter2();
+
+					// trace the fermion line back, else break
+					if (event[m1].id() == p.id()) 
+						p = event[m1];
+					else if (event[m2].id() == p.id()) 
+						p = event[m2];
+					else break;
+					
+					int gluon_eid = -1;
+					if (event[p.daughter1()].idAbs() == 21) 
+						gluon_eid = p.daughter1();
+					else if (event[p.daughter2()].idAbs() == 21) 
+						gluon_eid = p.daughter2();
+
+					if (gluon_eid >0 ) { // a radiated gluon:
+						// make it pre-formed gluon
+						auto g = event[gluon_eid];
+						fourvec k{g.e(), g.px(), g.py(), g.pz()};
+						p0 = p0 + k; // add back the pre-gluon, put on shell
+						p0.a[0] = std::sqrt(p0.pabs2() + M*M);
+						pregluon G1;
+						G1.is_vac = true;// vacuum 
+						G1.p0 = p0;
+						G1.k1 = k;
+						G1.kn = G1.k1;
+						G1.t0 = 0.0;
+						G1.T0 = 0.0; // not used
+						G1.local_mfp = 0.0; // not used
+						c_entry.radlist.push_back(G1);
+					}
+				}
+				c_entry.p = p0; // without FSR energy loss
+				plist.push_back(c_entry); 
+			}
     	}
-    for(auto& kv : gluon_list)
-    {
-	  particle p;
-	  int fi=kv.first;
-	  double e0=sqrt(pythia.event[fi].px()*pythia.event[fi].px()+pythia.event[fi].py()*pythia.event[fi].py()+pythia.event[fi].pz()*pythia.event[fi].pz()+M*M);
-	  fourvec p0{e0, pythia.event[fi].px(), pythia.event[fi].py(), pythia.event[fi].pz()};
-	  //std::cout<<pythia.event[fi].id()<<" "<<dot(p0,p0)<<std::endl;
-	  p.mass = M; // mass
-	  p.pid = 4; // charm quark
-	  p.x = fourvec{0,0,0,0}; // initial position
-	  p.p = p0; // initial momenta
-      for (auto& p4 : kv.second)
-      {
-        pregluon G1;
-		double qe0=sqrt(p4[5]*p4[5]+p4[6]*p4[6]+p4[7]*p4[7]+M*M);
-		G1.p0 = fourvec{qe0,p4[5],p4[6],p4[7]}; // the mother parton energy
-		G1.k1 = fourvec{p4[0],p4[1],p4[2],p4[3]}; // the initial four-momenta of the preformed gluon
-	    G1.kn = G1.k1; // the current four-momenta of the preformed gluon
-		G1.t0 = p.x.t(); // creation time, in units of [GeV^{-1}]
-		G1.T0 = T; // Temperature at the creation time;
-		//G1.local_mfp = ...; // for medium-incuded gluon, this shoul be ~ qhat/mD^2
-					// for vacuum radiated gluon, this quantity should not be used
-		//Add it to the preformed gluon list
-		G1.is_vac=true;
-		p.radlist.push_back(G1);
-      }
-	  plist.push_back(p);
-    }
   }
 	
 	int Nsteps = int(L/dt);
