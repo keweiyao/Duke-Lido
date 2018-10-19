@@ -15,7 +15,7 @@ int main(int argc, char* argv[]){
 	////////////////////////////////////////////
 	double M = 1.5; // GeV
 	double T = 0.3; // GeV
-	double L = 3; // fm
+	double L = 5; // fm
 	double dt = 0.05; // fm/c
 	double fmc_to_GeV_m1 = 5.026;
 	int Nsteps = int(L/dt);

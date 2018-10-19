@@ -7,7 +7,6 @@
 #include <map>
 
 struct pregluon{
-        //int nature; // vacuum-shower: 0, medium-induced: 1
 	fourvec p0, k1, kn;
 	double t0, T0;
 	double local_mfp;
@@ -33,6 +32,7 @@ struct particle{
 		x.a[2] = x.y() + p.y()*a;
 		x.a[3] = x.z() + p.z()*a;
 	}
+	double weight;
 };
 
 typedef Rate<LO, 2, 2, double(*)(const double, void*)> Rate22;

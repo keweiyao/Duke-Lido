@@ -218,9 +218,10 @@ int gluon_elastic_scattering(double dt, double temp, std::vector<double> v3cell,
 	int absid = 21;
 	// A Langevin step, does nothing if A and B very small
 	fourvec pnew;
-	Ito_update(absid, dt, 0.0, temp, v3cell, incoming_p, pnew);
-	incoming_p = pnew;
-	
+	if (temp > 0.154) {
+		Ito_update(absid, dt, 0.0, temp, v3cell, incoming_p, pnew);
+		incoming_p = pnew;
+	}
 	// Elastic Scattering
 	std::vector<fourvec> FS;
 	int channel = 0;
@@ -249,7 +250,7 @@ int gluon_elastic_scattering(double dt, double temp, std::vector<double> v3cell,
 		LOG_WARNING << "P(g) = " << P_total << " may be too large";
 		type1_warned = true;
 	}
-	if ( Srandom::init_dis(Srandom::gen) > P_total) {
+	if ( Srandom::init_dis(Srandom::gen) > P_total || temp < 0.154) {
 		outgoing_p = incoming_p;
 		return -1;
 	}
@@ -294,15 +295,14 @@ double formation_time(fourvec p, fourvec k, double M, double T){
 	return tauf_LL;
 }
 
- std::ofstream fs("hq_gluon_modified2.dat", std::fstream::app);
-
-
 int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn){
 	int absid = std::abs(pIn.pid);
-	// A Langevin step, does nothing if A and B very small
-	fourvec pnew;
-	Ito_update(pIn.pid, dt, pIn.mass, temp, v3cell, pIn.p, pnew);
-	pIn.p = pnew;
+	if (temp > 0.154) {
+		// A Langevin step, does nothing if A and B very small
+		fourvec pnew;
+		Ito_update(pIn.pid, dt, pIn.mass, temp, v3cell, pIn.p, pnew);
+		pIn.p = pnew;
+	}
 
 	// Maxtrix element scattering
 	std::vector<fourvec> FS; 
@@ -365,7 +365,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 		type2_warned = true;
 	}
 	// Sample channel
-	if ( Srandom::init_dis(Srandom::gen) > P_total) channel = -1;
+	if ( Srandom::init_dis(Srandom::gen) > P_total || temp < 0.154) channel = -1;
 	else{
 		double p = Srandom::init_dis(Srandom::gen);
 		for(int i=0; i<P_channels.size(); ++i){
@@ -511,10 +511,15 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 	if (!pIn.radlist.empty()){
 		// loop over each pre-gluon
 		for(std::vector<pregluon>::iterator it=pIn.radlist.begin(); it!=pIn.radlist.end();){
-			double taun = formation_time(it->p0,it->kn,pIn.mass,temp);
+			double taun;
+			if (it->is_vac)
+				taun = formation_time(it->p0,it->kn,pIn.mass,temp);
+			else
+				taun = formation_time(it->p0,it->kn,pIn.mass,temp);
+
 			if (pIn.x.t()-it->t0 > taun){
 				double Acceptance = 0.;
-				if (it->is_vac == false){ // medium-induced
+				if (!it->is_vac){ // medium-induced
 					double kt20 = measure_perp(it->p0, it->k1).pabs2();
 					double kt2n = measure_perp(it->p0, it->kn).pabs2();
 					double theta2 = kt2n/std::pow(it->kn.t(),2);
@@ -530,24 +535,19 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				} else { // vacuum shower
 					double kt20 = measure_perp(it->p0, it->k1).pabs2();
 					double kt2n = measure_perp(it->p0, it->kn).pabs2();
-					//Acceptance = std::min(1.0, kt20/kt2n);
-					Acceptance=1;
+					Acceptance = (temp>0.154) ? std::min(1.0, kt20/kt2n) : 1.0;
 				}				
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
 					pIn.p = pIn.p - it->k1;
 					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);
-					if(it->is_vac == true)
-                                        {
-					  fs<<it->kn<<" "<<it->p0<<std::endl;
-                                        }
-
 				}
+
 				it = pIn.radlist.erase(it);
 			}else{ // else, evolve it
 				fourvec k_new;
 				gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new);
-				it->kn = k_new*(it->kn.t()/k_new.t());
+				it->kn = k_new;
 				it++;
 			}
 		}
@@ -580,7 +580,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			}else{ // else, evolve it
 				fourvec k_new;
 				gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new);
-				it->kn = k_new*(it->kn.t()/k_new.t());
+				it->kn = k_new;
 				it++;
 			}
 		}

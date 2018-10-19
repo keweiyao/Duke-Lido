@@ -35,8 +35,6 @@ else()
   message(STATUS "${HDF5_LIBRARIES}")
 endif()
 
-
-
 # find and use gsl
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 FIND_PACKAGE(GSL REQUIRED)
@@ -116,7 +114,11 @@ set(LIBRARY_NAME "lib${PROJECT_NAME}")
 add_subdirectory(src)
 include_directories(src)
 add_executable(examples1 ./examples/example1.cpp)
-target_link_libraries(examples1 ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread)
+target_link_libraries(examples1 ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
+install(TARGETS examples1 DESTINATION bin)
+
+add_executable(examples-pythia8 ./examples/example-pythia8.cpp)
+target_link_libraries(examples-pythia8 ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread -ldl)
 install(TARGETS examples1 DESTINATION bin)
 
 add_executable(examples2 ./examples/example2.cpp)
