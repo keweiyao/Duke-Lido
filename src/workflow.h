@@ -10,6 +10,7 @@ struct pregluon{
 	fourvec p0, k1, kn;
 	double t0, T0;
 	double local_mfp;
+	bool is_vac;
 };
 
 struct particle{
@@ -31,6 +32,7 @@ struct particle{
 		x.a[2] = x.y() + p.y()*a;
 		x.a[3] = x.z() + p.z()*a;
 	}
+	double weight;
 };
 
 typedef Rate<LO, 2, 2, double(*)(const double, void*)> Rate22;
@@ -43,7 +45,7 @@ typedef boost::variant<Rate22, Rate23, Rate32, Rate12, Rate21> Process;
 extern std::map<int, std::vector<Process>> AllProcesses;
 void initialize(std::string, std::string path, double mu, double alpha_s_fixed, double A, double B);
 
-double formation_time(fourvec p, fourvec k, double M, double T, double mpf);
+double formation_time(fourvec p, fourvec k, double M, double T);
 
 int gluon_elastic_scattering(double dt, double temp, std::vector<double> v3cell, fourvec incomping_p, fourvec & outgoing_p);
 

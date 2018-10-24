@@ -11,8 +11,9 @@ double qhat_pQCD(int pid, double E, double T){
 	if (pid==21) factor = CA/CF; 
 	double alphas = alpha_s(0, T); // at mu*pi*T
 	double mD2 = t_channel_mD2->get_mD2(T);
+
 	// run version
-        double tmax = mD2; // on avergae...
+    double tmax = mD2; // on avergae...
 	double mscale = renormalization_scale*M_PI*T;
 	if (tmax > mscale){
 	    double log0 = std::log(1.+mscale*mscale/mD2);
@@ -27,8 +28,6 @@ double qhat_pQCD(int pid, double E, double T){
 	    double qhat = A*factor*alphas*CF*T*mD2 * log0;
 	    return qhat;
 	}
-	// fix version
-	//return A*factor*alphas*CF*T * mD2 ;//* std::log(1. + 6*E*T/mD2);
 }
 double dqhat_pQCD_dp2(int pid, double E, double T){
 	return 0.;
