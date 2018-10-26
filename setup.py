@@ -29,5 +29,5 @@ modules = [
 
 setup(
         ext_modules=cythonize(modules),
-	data_files=[('/share/event/', ['settings.xml'])]
+	data_files=[('/share/event/', ['./examples/settings.xml'])]
 )

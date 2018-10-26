@@ -517,7 +517,10 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			else
 				taun = formation_time(it->p0,it->kn,pIn.mass,temp);
 
-			if (pIn.x.t()-it->t0 > taun){
+			// gluon will form in two cases:
+			// 1) t-t0 > tauf
+			// 2) T < 0.16: means the heavy quark will fly out of medium, where it will form sooner or later
+			if (pIn.x.t()-it->t0 > taun || temp<0.16){ 
 				double Acceptance = 0.;
 				if (!it->is_vac){ // medium-induced
 					double kt20 = measure_perp(it->p0, it->k1).pabs2();
@@ -535,7 +538,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				} else { // vacuum shower
 					double kt20 = measure_perp(it->p0, it->k1).pabs2();
 					double kt2n = measure_perp(it->p0, it->kn).pabs2();
-					Acceptance = (temp>0.154) ? std::min(1.0, kt20/kt2n) : 1.0;
+					Acceptance = (temp>0.16) ? std::min(1.0, kt20/kt2n) : 1.0;
 				}				
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){

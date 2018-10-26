@@ -13,9 +13,9 @@ double qhat_pQCD(int pid, double E, double T){
 	double mD2 = t_channel_mD2->get_mD2(T);
 
 	// run version
-    double tmax = mD2; // on avergae...
+        double tmax = mD2; // on avergae...
 	double mscale = renormalization_scale*M_PI*T;
-	if (tmax > mscale){
+	if (tmax > mscale*mscale){
 	    double log0 = std::log(1.+mscale*mscale/mD2);
 	    double log1 = std::log(mscale*mscale/Lambda2);
 	    double log2 = std::log(tmax/Lambda2);
