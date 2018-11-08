@@ -416,15 +416,6 @@ cdef class event:
 						double T, vector[double] vcell):
 		PyErr_CheckSignals()
 		cdef vector[fourvec] final_state
-		###############################################################
-		###############################################################
-		# 	if T<Tc, label it as "freezout=True"			          #
-		###############################################################
-		if T <= self.Tc:
-			deref(it).freezeout = True
-			deref(it).Tf = T
-			deref(it).vcell = vcell
-			return
 
 		###############################################################
 		###############################################################

@@ -14,6 +14,7 @@ double qhat_pQCD(int pid, double E, double T){
 
 	// run version
         double tmax = mD2; // on avergae...
+	//double Og = std::sqrt(mD2)/T;
 	double mscale = renormalization_scale*M_PI*T;
 	if (tmax > mscale*mscale){
 	    double log0 = std::log(1.+mscale*mscale/mD2);
@@ -25,7 +26,8 @@ double qhat_pQCD(int pid, double E, double T){
 	}
 	else{
 	    double log0 = std::log(1.+tmax/mD2);
-	    double qhat = A*factor*alphas*CF*T*mD2 * log0;
+	    double logE = std::log(1+6*E*T/mD2);
+	    double qhat = A*factor*alphas*CF*T*mD2*log0;
 	    return qhat;
 	}
 }
