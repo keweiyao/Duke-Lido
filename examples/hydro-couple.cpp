@@ -119,7 +119,7 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events,
   	}
 
 	// get the correct normalization for cross-section
-	double normW = pythia.info.sigmaGen()/pythia.info.weightSum();
+	double normW = 0.5*pythia.info.sigmaGen()/pythia.info.weightSum();
 	for (auto & p : plist) p.weight *= normW;
 }
 
