@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-project(hybrid CXX)
+cmake_minimum_required(VERSION 3.1)
+project(lido CXX)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++11" CXX11)
