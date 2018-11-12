@@ -40,7 +40,7 @@ int main(int argc, char* argv[]){
     pythia.init();
 
 	std::vector<particle> plist;
-	double M = 1.5; // GeV
+	double M = 1.3; // GeV
 	for (int iEvent = 0; iEvent < Neve; ++iEvent) 
     {
 	    pythia.next();
@@ -148,5 +148,3 @@ int main(int argc, char* argv[]){
 
 	return 0;
 }
-
-

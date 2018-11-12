@@ -110,6 +110,9 @@ endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_REQUIRED_FLAGS} --coverage")
 
+
+MESSAGE(" ${HDF5_LIBRARIES} ${Boost_LIBRARIES}")
+
 set(LIBRARY_NAME "lib${PROJECT_NAME}")
 add_subdirectory(src)
 include_directories(src)
@@ -125,6 +128,10 @@ install(TARGETS examples2 DESTINATION bin)
 add_executable(examples3 ./examples/example3.cpp)
 target_link_libraries(examples3 ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 install(TARGETS examples3 DESTINATION bin)
+
+add_executable(hydro-couple ./examples/hydro-couple.cpp)
+target_link_libraries(hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+install(TARGETS hydro-couple DESTINATION bin)
 
 install(FILES settings.xml DESTINATION share)
 # add_subdirectory(test)

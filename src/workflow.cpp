@@ -82,20 +82,20 @@ void initialize(std::string mode, std::string path,
 	AllProcesses[4] = std::vector<Process>();
 	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", path, dX_Qq2Qq_dt) ); // 2->2
 	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", path, dX_Qg2Qg_dt) ); // 2->2
-	AllProcesses[4].push_back( Rate23("Boltzmann/cq2cqg", path, M2_Qq2Qqg_0) ); // 2->3
-	AllProcesses[4].push_back( Rate23("Boltzmann/cg2cgg", path, M2_Qg2Qgg_0) ); // 2->3
-	AllProcesses[4].push_back( Rate32("Boltzmann/cqg2cq", path, Ker_Qqg2Qq) );  // 3->2
-	AllProcesses[4].push_back( Rate32("Boltzmann/cgg2cg", path, Ker_Qgg2Qg) );  // 3->2
+	AllProcesses[4].push_back( Rate23("Boltzmann/cq2cqg", path, M2_Qq2Qqg) ); // 2->3
+	AllProcesses[4].push_back( Rate23("Boltzmann/cg2cgg", path, M2_Qg2Qgg) ); // 2->3
+	AllProcesses[4].push_back( Rate32("Boltzmann/cqg2cq", path, M2_Qqg2Qq) );  // 3->2
+	AllProcesses[4].push_back( Rate32("Boltzmann/cgg2cg", path, M2_Qgg2Qg) );  // 3->2
     AllProcesses[4].push_back( Rate12("Boltzmann/c2cg", path, LGV_Q2Qg) );  // 1->2
     AllProcesses[4].push_back( Rate21("Boltzmann/cg2c", path, LGV_Qg2Q) );  // 2->1
 
     AllProcesses[5] = std::vector<Process>();
     AllProcesses[5].push_back( Rate22("Boltzmann/bq2bq", path, dX_Qq2Qq_dt) );// 2->2
     AllProcesses[5].push_back( Rate22("Boltzmann/bg2bg", path, dX_Qg2Qg_dt) );// 2->2
-    AllProcesses[5].push_back( Rate23("Boltzmann/bq2bqg", path, M2_Qq2Qqg_0) );// 2->3
-    AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", path, M2_Qg2Qgg_0) );// 2->3
-	AllProcesses[5].push_back( Rate32("Boltzmann/bqg2bq", path, Ker_Qqg2Qq) );// 3->2
-	AllProcesses[5].push_back( Rate32("Boltzmann/bgg2bg", path, Ker_Qgg2Qg) );// 3->2
+    AllProcesses[5].push_back( Rate23("Boltzmann/bq2bqg", path, M2_Qq2Qqg) );// 2->3
+    AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", path, M2_Qg2Qgg) );// 2->3
+	AllProcesses[5].push_back( Rate32("Boltzmann/bqg2bq", path, M2_Qqg2Qq) );// 3->2
+	AllProcesses[5].push_back( Rate32("Boltzmann/bgg2bg", path, M2_Qgg2Qg) );// 3->2
     AllProcesses[5].push_back( Rate12("Boltzmann/b2bg", path, LGV_Q2Qg) );// 1->2
     AllProcesses[5].push_back( Rate21("Boltzmann/bg2b", path, LGV_Qg2Q) );// 2->1
 
@@ -107,110 +107,6 @@ void initialize(std::string mode, std::string path,
 	BOOST_FOREACH(Process& r, AllProcesses[4]) init_process(r, mode);
 	BOOST_FOREACH(Process& r, AllProcesses[5]) init_process(r, mode);
 	BOOST_FOREACH(Process& r, AllProcesses[21]) init_process(r, mode);
-}
-
-int update_particle_momentum_HT(double dt, double temp, std::vector<double> v3cell, particle & pIn){
-	int absid = std::abs(pIn.pid);
-	// A Langevin step, does nothing if A and B very small
-	fourvec pnew;
-	Ito_update(pIn.pid, dt, pIn.mass, temp, v3cell, pIn.p, pnew);
-	pIn.p = pnew;
-	
-	// Matrix-element scattering
-	std::vector<fourvec> FS;
-	int channel=0.;
-	auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
-	double D_formation_t23_cell = (pIn.x.t()-pIn.t_rad) / pIn.p.t() * p_cell.t();
-	double D_formation_t32_cell = (pIn.x.t()-pIn.t_abs) / pIn.p.t() * p_cell.t();
-	double dt_cell = dt / pIn.p.t() * p_cell.t();
-	double E_cell = p_cell.t();
-    std::vector<double> P_channels(AllProcesses[absid].size());
-	double P_total = 0., dP;
-	double qhatg = qhat_pQCD(21, E_cell, temp);
-	BOOST_FOREACH(Process& r, AllProcesses[absid]){
-		switch(r.which()){
-			case 0:
-				if (boost::get<Rate22>(r).IsActive())
-					dP = boost::get<Rate22>(r).GetZeroM({E_cell, temp}).s * dt_cell;
-				else dP = 0.0;
-				P_channels[channel] = P_total + dP;
-				break;
-			case 1:
-				if (boost::get<Rate23>(r).IsActive())
-					dP = boost::get<Rate23>(r).GetZeroM({E_cell, temp, D_formation_t23_cell}).s * dt_cell;
-				else dP = 0.0;
-				P_channels[channel] = P_total + dP;
-				break;
-			case 2:
-				if (boost::get<Rate32>(r).IsActive())
-					dP = boost::get<Rate32>(r).GetZeroM({E_cell, temp, D_formation_t32_cell}).s * dt_cell;
-				else dP = 0.0;
-				P_channels[channel] = P_total + dP;
-				break;
-			case 3:
-				if (boost::get<Rate12>(r).IsActive())
-					dP = qhatg*boost::get<Rate12>(r).GetZeroM({E_cell, temp, D_formation_t23_cell}).s * dt_cell;
-				else dP = 0.0;
-				P_channels[channel] = P_total + dP;
-				break;
-			case 4:
-				if (boost::get<Rate21>(r).IsActive())
-					dP = qhatg*boost::get<Rate21>(r).GetZeroM({E_cell, temp, D_formation_t32_cell}).s * dt_cell;
-				else dP  = 0.0;
-				P_channels[channel] = P_total + dP;
-				break;
-			break;
-				default:
-					exit(-1);
-					break;
-		}
-		P_total += dP;
-		channel ++;
-	}
-	for(auto& item : P_channels) {item /= P_total;}
-	if (P_total > 0.20) LOG_WARNING << "P_total = " << P_total << " may be too large";
-	if ( Srandom::init_dis(Srandom::gen) > P_total) return -1;
-	else{
-		double p = Srandom::init_dis(Srandom::gen);
-		for(int i=0; i<P_channels.size(); ++i){
-			if (P_channels[i] > p) {
-				channel = i;
-				break;
-			}
-		}
-	}
-	// Do scattering
-	switch(AllProcesses[absid][channel].which()){
-		case 0:
-			boost::get<Rate22>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
-			break;
-		case 1:
-			boost::get<Rate23>(AllProcesses[absid][channel]).sample({E_cell, temp, D_formation_t23_cell}, FS);
-			break;
-		case 2:
-			boost::get<Rate32>(AllProcesses[absid][channel]).sample({E_cell, temp, D_formation_t32_cell}, FS);
-			break;
-		case 3:
-		    boost::get<Rate12>(AllProcesses[absid][channel]).sample({E_cell, temp, D_formation_t23_cell}, FS);
-	    	break;
-		case 4:
-	    	boost::get<Rate21>(AllProcesses[absid][channel]).sample({E_cell, temp, D_formation_t32_cell}, FS);
-	    	break;
-		default:
-			LOG_FATAL << "Channel = " << channel << " not exists";
-			exit(-1);
-			break;
-	}
-	// rotate it back and boost it back
-	for(auto & pmu : FS) {
-		pmu = pmu.rotate_back(p_cell);
-		pmu = pmu.boost_back(v3cell[0], v3cell[1], v3cell[2]);
-	}
-	// Update formation time
-	if (channel == 2 || channel == 3 || channel == 6) pIn.t_rad = pIn.x.t();
-	if (channel == 4 || channel == 5 || channel == 7) pIn.t_abs = pIn.x.t();
-
-	return channel;
 }
 
 // Gluon elastic scattering
@@ -602,75 +498,57 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 	return channel;
 }
 
-std::vector<double> probe_test(double M, double E0, double T, double dt, int Nsteps, int Nparticles, std::string mode, double mu, double const_alphas, double A, double B){
-	initialize(mode, "./settings.xml", mu, const_alphas, A, B);
-	double fmc_to_GeV_m1 = 5.026;
-	std::vector<double> dE;
-	std::vector<particle> plist(Nparticles);
-	double pabs0 = std::sqrt(E0*E0-M*M);
-	fourvec p0{E0, 0, 0, pabs0};
-	for (auto & p : plist) {
-		p.mass = M;
-		p.pid = 4;
-		p.x = fourvec{0,0,0,0};
-		p.p = p0;
-		p.t_rad = 0.;
-		p.t_abs = 0.;
-	}
-	double time = 0.;
-    double sum = 0.;
-	for (int it=0; it<Nsteps; ++it){
-		if (it%100 ==0) LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
-		for (auto & p : plist) sum += E0-p.p.t();
-		dE.push_back(sum/Nparticles);
-		time += dt;
+void output_oscar(const std::vector<particle> plist, std::string fname){
+	// output OSCAR Format
+	int Nparticles=plist.size();
+	std::ofstream f(fname);
+	f << "OSC1997A\n";
+	f << "final_id_p_x\n";
+	f << "     lbt  1.0alpha   208     82   208     82   aacm  0.1380E+04         1\n";
+	f << "         1  "<< std::setw(10) 
+	  << Nparticles << "     0.001     0.001     1     1        1\n";
 
-		for (auto & p : plist){
-      		// reset energy for probe test
-			p.p = p0;
-			// x-update
-			p.freestream(dt*fmc_to_GeV_m1);
-			// p-update
-			int channel = update_particle_momentum_Lido(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
-		}
-
+	int i=0;
+	for (auto & p : plist){
+		f << std::setw(10) << std::setfill(' ') << i << "  " // particle index, i10,2x
+		  << std::setw(10) << std::setfill(' ') << p.pid << "  "; // particle id, i10,2x
+		f << ff(p.p.x()) << "  "
+		  << ff(p.p.y()) << "  "
+		  << ff(p.p.z()) << "  "
+		  << ff(p.p.t()) << "  "
+		  << ff(p.mass) << "  "
+		  << ff(p.x.x()/fmc_to_GeV_m1) << "  "
+		  << ff(p.x.y()/fmc_to_GeV_m1) << "  "
+		  << ff(p.x.z()/fmc_to_GeV_m1) << "  "
+		  << ff(p.x.t()/fmc_to_GeV_m1) << "  "
+	      << ff(p.Tf) << "  "
+	      << ff(p.vcell[0]) << "  "		  
+	      << ff(p.vcell[1]) << "  "		
+	      << ff(p.vcell[2]) << "  "	
+		  << ff(p.p0.x()) << "  "
+		  << ff(p.p0.y()) << "  "
+		  << ff(p.p0.z()) << "  "
+		  << ff(p.p0.t()) << "  "	
+		  << ff(p.weight) << "  "
+		  << ff(0.0) << "\n";
+		i++;
 	}
-	return dE;
 }
 
-std::vector<double> Bjorken_test(double M, double E0, double T0, double t0, double dt, int Nsteps, int Nparticles, std::string mode, double mu, double const_alphas, double A, double B){
-	initialize(mode, "./settings.xml", mu, const_alphas, A, B);
-	double fmc_to_GeV_m1 = 5.026;
-	std::vector<double> dE;
-	std::vector<particle> plist(Nparticles);
-	double pabs0 = std::sqrt(E0*E0-M*M);
-	fourvec p0{E0, 0, 0, pabs0};
-
-	for (auto & p : plist) {
-		p.pid = 4;
-		p.x = fourvec{0,0,0,0};
-		p.p = p0;
-		p.t_rad = 0.;
-		p.t_abs = 0.;
-		p.mass = M;
-	}
-	double time = 0.;
-    double sum = 0.;
-	for (int it=0; it<Nsteps; ++it){
-		double T = T0*std::pow(t0/(t0+time+dt/2.), .2);
-		if (it%100 ==0) LOG_INFO << it << " steps, " << "time = " << time << " [fm/c]";
-		for (auto & p : plist) sum += E0-p.p.t();
-		dE.push_back(sum/Nparticles);
-		time += dt;
-		for (auto & p : plist){
-      		// reset energy for probe test
-			p.p = p0;
-			// x-update
-			p.freestream(dt*fmc_to_GeV_m1);
-			// p-update
-			int channel = update_particle_momentum_Lido(dt*fmc_to_GeV_m1, T, {0.0, 0.0, 0.0}, p);
-		}
-	}
-	return dE;
+double calcualte_dt_from_dtau(fourvec x, fourvec p, double tau, double dtau){
+	double vz = p.z()/p.t();
+	double t_m_zvz= x.t() - x.z()*vz;
+	double one_m_vz2 = 1. - vz*vz;
+	double dtau2 = dtau*(dtau+2.*tau);
+	double dt_lab = (std::sqrt(t_m_zvz*t_m_zvz+one_m_vz2*dtau2) - t_m_zvz)/one_m_vz2;
+	return dt_lab;
 }
 
+double mean_pT(const std::vector<particle> plist){
+	double W = 0., wsum_pT = 0.;
+	for (auto & p : plist) {
+		wsum_pT += p.weight * std::sqrt(p.p.x()*p.p.x()+p.p.y()*p.p.y());
+		W += p.weight;
+	}
+	return wsum_pT/W;
+}

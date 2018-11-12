@@ -60,20 +60,10 @@ double M2_Qq2Qqg(const double * x_, void * params_);
 //=============Baisc function for Q+g --> Q+g+g==================================
 double M2_Qg2Qgg(const double * x_, void * params_);
 
-// No LPM
-//=============Baisc function for Q+q --> Q+q+g==================================
-double M2_Qq2Qqg_0(const double * x_, void * params_);
-//=============Baisc function for Q+g --> Q+g+g==================================
-double M2_Qg2Qgg_0(const double * x_, void * params_);
-
-// 3->2 prefix
-double prefix_3to2(double s, double s12, double s1k, double dt, double M, double T);
 //=============Baisc function for Q+q+g --> Q+q==================================
-double Ker_Qqg2Qq(const double * x_,  void * params_);
+double M2_Qqg2Qq(const double * x_,  void * params_);
 //=============Baisc function for Q+g+g --> Q+g==================================
-double Ker_Qgg2Qg(const double * x_, void * params_);
-
-
+double M2_Qgg2Qg(const double * x_, void * params_);
 
 // diffusion-like Q -> Q + g process
 // July-06-2018 Yingru

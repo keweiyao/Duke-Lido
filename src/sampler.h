@@ -9,6 +9,7 @@
 #include "random.h"
 #include "simpleLogger.h"
 #include "stat.h"
+#include "predefine.h"
 
 template < typename F >
 double sample_1d(F f, std::pair<double,double> const& range, double fmax){
@@ -40,10 +41,11 @@ std::vector<double> sample_nd(F f, int dim, std::vector<std::pair<double,double>
 		for(int i=0; i<dim; i++) 
 			x[i] = range[i].first+Srandom::init_dis(Srandom::gen)*interval[i];
 		y = f(x)/fmax;
-		if (y > 1.0) {
+		if (y > 1.0 && !type3_warned) {
 			LOG_WARNING << "nd rejection, f/fmax = " << y << " > 1";
-			status = false;
+			type3_warned = true;
 		}
+		if (y > 1.0) status = false;
 		counter ++;
 	}while(Srandom::rejection(Srandom::gen)>y && counter < limit);
 	std::vector<double> res(dim);

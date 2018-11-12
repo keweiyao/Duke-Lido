@@ -8,13 +8,13 @@ Beams:idB = 2212            ! second beam, p = 2212, pbar = -2212
 Beams:eCM = 5020.                 ! CM energy of collision
 
 ! 3) Hard process
-HardQCD:all = off
+HardQCD:all = on
 HardQCD:hardccbar = on
 
 ! 4) Parton shower / MPI / Remnants
 PartonLevel:all = on
 PartonLevel:MPI = off
-PartonLevel:ISR = off
+PartonLevel:ISR = on
 PartonLevel:FSR = on
 PartonLevel:Remnants = off
 Check:event = off
@@ -23,13 +23,15 @@ Check:event = off
 HadronLevel:all = off
 
 ! 6) Phase space selection and bias
-PhaseSpace:pTHatMin = 100
-PhaseSpace:pTHatMax = 110
+PhaseSpace:pTHatMin = 3
+PhaseSpace:pTHatMax = 200
 PhaseSpace:bias2Selection = on
 PhaseSpace:bias2SelectionPow = 4.
 
 ! 7) Decay
+4:m0 = 1.3
 4:mayDecay = off
+#5:m0 = 4.2
 #5:mayDecay = off
 #411:mayDecay = off
 #421:mayDecay = off
@@ -37,11 +39,11 @@ PhaseSpace:bias2SelectionPow = 4.
 #423:mayDecay = off
 
 ! 8) PDF
-#PDF:useHard = on
-#PDF:useHardNPDFA = on
-#PDF:nPDFSetA = 1
-#PDF:nPDFBeamA = 100822080 # nuclei = 10LZZZAAAI
-#PDF:useHardNPDFB = on
-#PDF:nPDFSetB = 1
-#PDF:nPDFBeamB = 100822080 # nuclei = 10LZZZAAAI
+PDF:useHard = on
+PDF:useHardNPDFA = on
+PDF:nPDFSetA = 1
+PDF:nPDFBeamA = 100822080 # nuclei = 10LZZZAAAI
+PDF:useHardNPDFB = on
+PDF:nPDFSetB = 1
+PDF:nPDFBeamB = 100822080 # nuclei = 10LZZZAAAI
 

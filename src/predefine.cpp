@@ -7,6 +7,7 @@ char GBHT[] = "Gunion-Bertsch-higher-twist";
 
 bool type1_warned = false;
 bool type2_warned = false; 
+bool type3_warned = false; 
 
 const double c4d9 = 4./9.;
 const double c1d9 = 1./9.;
@@ -15,6 +16,7 @@ const double c48pi = 48.*M_PI;
 const double c16pi2 = 16.*M_PI*M_PI;
 const double c64d9pi2 = 64./9.*M_PI*M_PI;
 const double c256pi4 = 256.*std::pow(M_PI, 4);
+const double fmc_to_GeV_m1 = 5.026;
 
 // number of color=3 (3*3-1 = 8 gluons), number of flavor=3, (u,d,s quark)
 const int Nc = 3, nf = 3;

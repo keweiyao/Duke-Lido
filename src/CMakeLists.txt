@@ -15,6 +15,7 @@ workflow.cpp
 Langevin.cpp
 predefine.cpp
 lorentz.cpp
+Medium_Reader.cpp
 	)
 
 set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "")
