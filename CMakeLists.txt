@@ -133,6 +133,7 @@ add_executable(hydro-couple ./examples/hydro-couple.cpp)
 target_link_libraries(hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 install(TARGETS hydro-couple DESTINATION bin)
 
-install(FILES settings.xml DESTINATION share)
+install(FILES ./examples/pythia-setting.txt DESTINATION share)
+install(FILES ./examples/settings.xml DESTINATION share)
 # add_subdirectory(test)
 # add_subdirectory(doc)
