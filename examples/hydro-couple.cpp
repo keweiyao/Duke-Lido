@@ -124,15 +124,16 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events,
 }
 
 int main(int argc, char* argv[]){
-	if (argc < 6){
-		std::cout << "Usage: hydro-couple <pythia-setting> <initial-file> <TRTENTo-eid> <hydro-file>  <NpythiaEevents>" << std::endl;
+	if (argc < 7){
+		std::cout << "Usage: hydro-couple <pythia-setting> <initial-file> <TRTENTo-eid> <hydro-file> <lido-setting> <NpythiaEevents>" << std::endl;
 		exit(-1);
 	}
 	std::string pythia_config(argv[1]);
 	std::string trento_initial(argv[2]);
 	int trento_eid = atoi(argv[3]);
 	std::string hydro_data(argv[4]);
-	int NPythiaEvents = atoi(argv[5]);
+	std::string lido_setting(argv[5]);
+	int NPythiaEvents = atoi(argv[6]);
 
 	std::vector<particle> plist;
 
@@ -155,8 +156,7 @@ int main(int argc, char* argv[]){
 	double const_alphas = 0.3; 
 	double A = 1. - 0.25/std::log(2); 
 	double B = 0.0; 
-	int Nparticles=plist.size();
-	initialize("old", "./settings.xml", mu, const_alphas, A, B);
+	initialize("new", lido_setting, mu, const_alphas, A, B);
 
 	// initial pT
 	double pTi = mean_pT(plist);
@@ -164,8 +164,7 @@ int main(int argc, char* argv[]){
 	// run
 	int counter = 0;
 	int Ns = 10;
-	std::ofstream f("tab.dat");
-	
+
 	while(med1.load_next()){
 		double current_hydro_clock = med1.get_tauL();
 		double hydro_dtau = med1.get_hydro_time_step();
@@ -188,11 +187,10 @@ int main(int argc, char* argv[]){
 		}
 		counter ++;
 	}
-	f.close();
 
 	// final pT
 	double pTf = mean_pT(plist);
-	LOG_INFO << "Nparticles: " << Nparticles;
+	LOG_INFO << "Nparticles: " << plist.size();
 	LOG_INFO << "Initial pT: " << pTi << " GeV";
 	LOG_INFO << "Final pT: " << pTf << " GeV";
 
