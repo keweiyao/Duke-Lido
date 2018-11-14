@@ -123,9 +123,15 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events,
 	for (auto & p : plist) p.weight *= normW;
 }
 
+bool is_file_exist(std::string fileName)
+{
+    std::ifstream infile(fileName);
+    return infile.good();
+}
+
 int main(int argc, char* argv[]){
-	if (argc < 7){
-		std::cout << "Usage: hydro-couple <pythia-setting> <initial-file> <TRTENTo-eid> <hydro-file> <lido-setting> <NpythiaEevents>" << std::endl;
+	if (argc < 11){
+		std::cout << "Usage: hydro-couple <pythia-setting> <initial-file> <TRTENTo-eid> <hydro-file> <lido-setting> <NpythiaEevents> <mu> <afix> <A> <B>" << std::endl;
 		exit(-1);
 	}
 	std::string pythia_config(argv[1]);
@@ -134,6 +140,10 @@ int main(int argc, char* argv[]){
 	std::string hydro_data(argv[4]);
 	std::string lido_setting(argv[5]);
 	int NPythiaEvents = atoi(argv[6]);
+	double mu = atof(argv[7]);
+	double afix = atof(argv[8]);
+	double A = atof(argv[9]);
+	double B = atof(argv[10]);
 
 	std::vector<particle> plist;
 
@@ -152,11 +162,10 @@ int main(int argc, char* argv[]){
 	}
 
     ////////////////////////////////////////////
-	double mu = 2.0;
-	double const_alphas = 0.3; 
-	double A = 1. - 0.25/std::log(2); 
-	double B = 0.0; 
-	initialize("new", lido_setting, mu, const_alphas, A, B);
+	std::string tab_mode;
+	if (!is_file_exist("./table.h5")) tab_mode = "new";
+	else tab_mode = "old";
+	initialize(tab_mode, lido_setting, mu, afix, A, B);
 
 	// initial pT
 	double pTi = mean_pT(plist);
