@@ -148,6 +148,7 @@ public:
 
   std::vector<double> integrate(unsigned ndimx, unsigned ndimf, const double * min, const double * max, double epsabs, double epsrel, double &error){
 	double * result = new double[ndimf];
+	double * error_v = new double[ndimf];
 	hcubature(ndimf, // dim-f()
 			&cubeture_wrapper, // f()
 			this, // data pointer
@@ -158,11 +159,19 @@ public:
 			epsabs, // AbsErr
 			epsrel, // relErr
 			ERROR_INDIVIDUAL, // Error norm
-			result, &error);
+			result,  // result vector
+			error_v // error vector
+		);
 	std::vector<double> y;
-	for (int i=0; i< ndimf; i++) {y.push_back(result[i]);}
+	error = 0.;
+	for (int i=0; i< ndimf; i++) {
+		y.push_back(result[i]);
+		error += std::pow(error_v[i], 2);
+	}
+	error = std::sqrt(error)/ndimf;
 	delete[] result;
-    return y;
+    	delete[] error_v;
+	return y;
   }
 };
 

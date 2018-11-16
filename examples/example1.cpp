@@ -21,7 +21,7 @@ int main(int argc, char* argv[]){
 	int Nsteps = int(L/dt);
 	
 
-	initialize("old", "./settings.xml", mu, const_alphas, A, B);
+	initialize("new", "./settings.xml", mu, const_alphas, A, B);
 
 	// Initialization
 	double E0 = 100; // GeV
