@@ -134,24 +134,24 @@ if(NATIVE)
   endif()
 endif()
 
-#string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
+string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
 
-#option(MORE_WARNINGS "enable more compiler warnings" ON)
-#if(MORE_WARNINGS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-#  # adapted from http://stackoverflow.com/a/9862800
-#  string(APPEND CMAKE_CXX_FLAGS " -Wpedantic -Wcast-align -Wcast-qual -Wdisabled-optimization -Wformat=2 -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wsign-conversion -Wsign-promo -Wstrict-overflow=2 -Wundef")
-#endif()
+option(MORE_WARNINGS "enable more compiler warnings" ON)
+if(MORE_WARNINGS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  # adapted from http://stackoverflow.com/a/9862800
+  string(APPEND CMAKE_CXX_FLAGS " -Wpedantic -Wcast-align -Wcast-qual -Wdisabled-optimization -Wformat=2 -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wsign-conversion -Wsign-promo -Wstrict-overflow=2 -Wundef")
+endif()
 
 # disable silly clang warnings
-#if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-#  string(APPEND CMAKE_CXX_FLAGS " -Wno-missing-braces -Wno-c++11-narrowing")
-#endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  string(APPEND CMAKE_CXX_FLAGS " -Wno-missing-braces -Wno-c++11-narrowing")
+endif()
 
-#string(APPEND CMAKE_CXX_FLAGS_DEBUG " -Werror")
+string(APPEND CMAKE_CXX_FLAGS_DEBUG " -Werror")
 
-#if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-#  string(APPEND CMAKE_CXX_FLAGS_DEBUG " -Og")
-#endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  string(APPEND CMAKE_CXX_FLAGS_DEBUG " -Og")
+endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
@@ -205,5 +205,3 @@ install(TARGETS hydro-couple DESTINATION bin)
 
 install(FILES ./examples/pythia-setting.txt DESTINATION share)
 install(FILES ./examples/settings.xml DESTINATION share)
-# add_subdirectory(test)
-# add_subdirectory(doc)
