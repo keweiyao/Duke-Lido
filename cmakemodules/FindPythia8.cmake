@@ -14,7 +14,7 @@ set(_pythia8dirs
     ${PYTHIA8_DIR}
     $ENV{PYTHIA8_DIR}
     $ENV{PYTHIA8DIR}
-    /usr
+    $ENV{HOME}/.local
     /opt/pythia8
     )
 

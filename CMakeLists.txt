@@ -192,7 +192,7 @@ target_link_libraries(Lido-TabGen ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LI
 install(TARGETS Lido-TabGen DESTINATION bin)
 
 add_executable(hydro-couple ./examples/hydro-couple.cpp)
-target_link_libraries(hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread)
+target_link_libraries(hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 install(TARGETS hydro-couple DESTINATION bin)
 
 install(FILES ./examples/pythia-setting.txt DESTINATION share)

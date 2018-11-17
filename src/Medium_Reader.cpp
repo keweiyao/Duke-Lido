@@ -152,7 +152,6 @@ void Medium<N>::interpolate(fourvec x, double & T, double & vx, double & vy, dou
 	vx = 0.;
 	vy = 0.;
 	vz = x.z()/x.t();
-	fourvec umu{0.0};
 	for(int i=0; i<_power_rank; ++i) {
 		double W = 1.0;
 		for (int j=0; j<N+1; ++j) {
