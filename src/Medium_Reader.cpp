@@ -29,6 +29,7 @@ void Medium<N>::init(){
 	_dy *=  fmc_to_GeV_m1;
 	_tau0 *=  fmc_to_GeV_m1;
 	_dtau *=  fmc_to_GeV_m1;
+
 	_xl = _iXL * _dx;
 	_xh = _iXH * _dx;
 	_yl = _iYL * _dy;
@@ -44,8 +45,8 @@ void Medium<N>::init(){
 	for (auto i=0; i<N; ++i) spatial_shape[i]=_shape[i+1];	
 	_buffer.resize(spatial_shape);
 	_Temp.resize(_shape);
-	_Velocity.resize(_shape);
-	_VisTensor.resize(_shape);
+	_Vx.resize(_shape);
+	_Vy.resize(_shape);
 	_power_rank = std::pow(2, N+1);
 
 	_xl_limits.resize(N+1); _xh_limits.resize(N+1); _x_steps.resize(N+1);
@@ -64,9 +65,9 @@ bool Medium<N>::load_next(){
 	for (auto i=0; i<N; ++i) spatial_dims[i]=_shape[i+1];	
 	H5::DataSpace spatial_dataspace(N, spatial_dims);
 
+	// load data
 	for (int iTau=0; iTau<2; ++iTau){
 		int istart = _buffer.num_elements()*iTau;
-
 		std::stringstream FrameNumber;
 		FrameNumber << std::setw(4) << std::setfill('0') << _frame_count+iTau;
 		std::string FrameName = "/Event/Frame_"+FrameNumber.str();
@@ -75,42 +76,39 @@ bool Medium<N>::load_next(){
 		// Temp
 		dataset = _file.openDataSet(FrameName+"/Temp");
 		dataset.read(_buffer.data(), H5::PredType::NATIVE_DOUBLE,
-					 spatial_dataspace, dataset.getSpace());
-		
+					 spatial_dataspace, dataset.getSpace());	
 		for(int i=0; i<_buffer.num_elements(); ++i) 
-			_Temp.data()[i+istart].s = _buffer.data()[i];
+			_Temp.data()[i+istart] = _buffer.data()[i];
 
 		// Vx
 		dataset = _file.openDataSet(FrameName+"/Vx");
 		dataset.read(_buffer.data(), H5::PredType::NATIVE_DOUBLE,
 					 spatial_dataspace, dataset.getSpace());
 		for(int i=0; i<_buffer.num_elements(); ++i) 
-			_Velocity.data()[i+istart].a[1] = _buffer.data()[i];
+			_Vx.data()[i+istart] = _buffer.data()[i];
 		// Vy
 		dataset = _file.openDataSet(FrameName+"/Vy");
 		dataset.read(_buffer.data(), H5::PredType::NATIVE_DOUBLE,
 					 spatial_dataspace, dataset.getSpace());
 		for(int i=0; i<_buffer.num_elements(); ++i) 
-			_Velocity.data()[i+istart].a[2] = _buffer.data()[i];
-		// Convert Vx Vy to u^mu
-		for(int i=0; i< _Velocity.num_elements(); ++i){
-			double vx = _Velocity.data()[i].a[1];
-			double vy = _Velocity.data()[i].a[2];
-			double vz = 0.0; // at mid-rapidity
-			//regulate v
-			double vabs = std::sqrt(vx*vx + vy*vy + vz*vz);
-			if (vabs > 1.+1e-6) {
-				double rescale = (1.-1e-6)/vabs;
-				vx *= rescale;
-				vy *= rescale;	
-				vz *= rescale;	
-			}
-			double gamma = 1.0/std::sqrt(1.- vx*vx - vy*vy - vz*vz);
-			_Velocity.data()[i].a[0] = gamma;
-			_Velocity.data()[i].a[1] = gamma*vx;
-			_Velocity.data()[i].a[2] = gamma*vy;
-			_Velocity.data()[i].a[3] = gamma*vz;
+			_Vy.data()[i+istart] = _buffer.data()[i];
+	}
+
+	//regulate v
+	for(int i=0; i< _Vx.num_elements(); ++i){
+		double vx = _Vx.data()[i];
+		double vy = _Vy.data()[i];
+		double vz = 0.0; // at mid-rapidity
+		double vabs = std::sqrt(vx*vx + vy*vy + vz*vz);
+		if (vabs > 1.-1e-6) {
+			double rescale = (1.-1e-6)/vabs;
+			vx *= rescale;
+			vy *= rescale;	
+			vz *= rescale;	
 		}
+		double gamma = 1.0/std::sqrt(1.- vx*vx - vy*vy - vz*vz);
+		_Vx.data()[i] = vx;
+		_Vy.data()[i] = vy;
 	}
 	
 	_frame_count ++;
@@ -143,30 +141,33 @@ void Medium<N>::interpolate(fourvec x, double & T, double & vx, double & vy, dou
 		else { // spatial component
 			double var = (x.a[i]-_xl_limits[i])/_x_steps[i];
 			var = std::min(std::max(var, 0.), _shape[i]-2.);
-			size_t n = size_t(std::floor(var));
+			size_t n = size_t(floor(var));
 			double rx = var-n;
 			w[i] = rx;
 			start_index[i] = n;
 		}
 	}
 	std::vector<size_t> index(N+1);
-	scalar Temp{0.0};
-	fourvec umu_midrapdity{0.0};
+	T = 0.;
+	vx = 0.;
+	vy = 0.;
+	vz = x.z()/x.t();
+	fourvec umu{0.0};
 	for(int i=0; i<_power_rank; ++i) {
 		double W = 1.0;
 		for (int j=0; j<N+1; ++j) {
 		    index[j] = start_index[j] + ((i & ( 1 << j )) >> j);
 		    W *= (index[j]==start_index[j])?(1.-w[j]):w[j];
 		}
-		Temp = Temp + _Temp(index)*W;
-		umu_midrapdity = umu_midrapdity + _Velocity(index)*W;
+		T = T + _Temp(index)*W;
+		vx = vx + _Vx(index)*W;
+		vy = vy + _Vy(index)*W;
 	}
-	// boost mid-rapidity solution to finite rapidity
-	fourvec umu = umu_midrapdity.boost_back(0., 0., x.z()/x.t());
-	T = Temp.s;
-	vx = umu.x()/umu.t();
-	vy = umu.y()/umu.t();
-	vz = umu.z()/umu.t();
+	
+	double gammaZ = 1./std::sqrt(1. - vz*vz);
+	vx /= gammaZ;
+	vy /= gammaZ;
+	
 	return;
 }
 

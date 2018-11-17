@@ -50,7 +50,6 @@ Mc(1.3),TRENToSampler(f_trento, iev){
 void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events, 
 				int POI, double yabs_cut){
 	double x, y;
-
 	for (int iEvent = 0; iEvent < N_pythia_events; ++iEvent) 
     {
 	    pythia.next();
@@ -63,7 +62,9 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events,
 			{
 				// final momenta 
 				fourvec p0{p.e(), p.px(), p.py(), p.pz()};
+				
 				particle c_entry;
+				c_entry.p0 = p0; // 
 				c_entry.mass = Mc; // mass
 				c_entry.pid = POI; // charm quark
 				c_entry.x = fourvec{0,x,y,0}; // initial position
@@ -112,7 +113,7 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events,
 					}
 				}
 				c_entry.p = p0; // without FSR energy loss
-				c_entry.p0 = p0;
+				
 				plist.push_back(c_entry); 
 			}
     	}
@@ -120,7 +121,7 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events,
 
 	// get the correct normalization for cross-section
 	double normW = 0.5*pythia.info.sigmaGen()/pythia.info.weightSum();
-	for (auto & p : plist) p.weight *= normW;
+	//for (auto & p : plist) p.weight *= normW;
 }
 
 bool is_file_exist(std::string fileName)
@@ -181,14 +182,26 @@ int main(int argc, char* argv[]){
 			double dtau = hydro_dtau/Ns; // use smaller dt step
 			for (auto & p : plist){
 				if (p.freezeout) continue; // do not touch freezeout ones
+
 				// determine dt needed to evolve to the next tau
 				double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
 				double dt_lab = calcualte_dt_from_dtau(p.x, p.p, tau, dtau);
-				// get hydro information
-				double T = 0., vx = 0., vy = 0., vz = 0.;
-				med1.interpolate(p.x, T, vx, vy, vz);
 				// x-update
 				p.freestream(dt_lab);
+
+				// get hydro information
+				double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.;
+				med1.interpolate(p.x, T, vx, vy, vz);
+				double vabs = std::sqrt(vx*vx + vy*vy + vz*vy);
+				if (vabs > 1.){
+					LOG_WARNING << "regulate |v| = " << vabs << " > 1."; 
+					if (vabs > 1.-1e-6) {
+						double rescale = (1.-1e-6)/vabs;
+						vx *= rescale;
+						vy *= rescale;	
+						vz *= rescale;	
+					}
+				}
 				// p-update
 				int channel = 
 					update_particle_momentum_Lido(dt_lab, T, {vx, vy, vz}, p);
@@ -203,7 +216,11 @@ int main(int argc, char* argv[]){
 	LOG_INFO << "Initial pT: " << pTi << " GeV";
 	LOG_INFO << "Final pT: " << pTf << " GeV";
 
-	output_oscar(plist, "c-quark-frzout.dat");
+	std::ofstream f("O.dat");
+	for (auto & p : plist){
+		f << p.p0 << " " << p.p << " " << p.weight << std::endl;
+	}
+	//output_oscar(plist, "c-quark-frzout.dat");
 	return 0;
 }
 

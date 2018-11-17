@@ -25,9 +25,9 @@ private:
 	H5::H5File _file;
 	H5::Group _event;
 	boost::multi_array<double, N> _buffer;
-    boost::multi_array<scalar, N+1> _Temp;
-    boost::multi_array<fourvec, N+1> _Velocity;
-    boost::multi_array<tensor, N+1> _VisTensor;
+    boost::multi_array<double, N+1> _Temp;
+    boost::multi_array<double, N+1> _Vx;
+	boost::multi_array<double, N+1> _Vy;
 public:
 	Medium(std::string filename);
 	~Medium(){_file.close();};
