@@ -13,56 +13,56 @@
 
 std::map<int, std::vector<Process> > AllProcesses;
 
-void init_process(Process& r, std::string mode){
+void init_process(Process& r, std::string mode, std::string table_path){
      switch(r.which()){
 			case 0:
 				if (boost::get<Rate22>(r).IsActive())
 					if(mode == "new"){
-						boost::get<Rate22>(r).initX("table.h5");
-						boost::get<Rate22>(r).init("table.h5");
+						boost::get<Rate22>(r).initX(table_path);
+						boost::get<Rate22>(r).init(table_path);
 					} else{
-						boost::get<Rate22>(r).loadX("table.h5");
-						boost::get<Rate22>(r).load("table.h5");
+						boost::get<Rate22>(r).loadX(table_path);
+						boost::get<Rate22>(r).load(table_path);
 					}
 				else return;
 				break;
 			case 1:
 				if (boost::get<Rate23>(r).IsActive())
 					if(mode == "new"){
-						boost::get<Rate23>(r).initX("table.h5");
-						boost::get<Rate23>(r).init("table.h5");
+						boost::get<Rate23>(r).initX(table_path);
+						boost::get<Rate23>(r).init(table_path);
 					} else{
-						boost::get<Rate23>(r).loadX("table.h5");
-						boost::get<Rate23>(r).load("table.h5");
+						boost::get<Rate23>(r).loadX(table_path);
+						boost::get<Rate23>(r).load(table_path);
 					}
 				else return;
 				break;
 			case 2:
 				if (boost::get<Rate32>(r).IsActive())
-						if(mode == "new"){
-								boost::get<Rate32>(r).initX("table.h5");
-								boost::get<Rate32>(r).init("table.h5");
-						} else{
-								boost::get<Rate32>(r).loadX("table.h5");
-								boost::get<Rate32>(r).load("table.h5");
-						}
+					if(mode == "new"){
+						boost::get<Rate32>(r).initX(table_path);
+						boost::get<Rate32>(r).init(table_path);
+					} else{
+						boost::get<Rate32>(r).loadX(table_path);
+						boost::get<Rate32>(r).load(table_path);
+					}
 				else return;
 				break;
 			 case 3:
 				if (boost::get<Rate12>(r).IsActive())
 					if (mode == "new") {
-						boost::get<Rate12>(r).init("table.h5");
+						boost::get<Rate12>(r).init(table_path);
 				    } else{
-						boost::get<Rate12>(r).load("table.h5");
+						boost::get<Rate12>(r).load(table_path);
 				    }
 				else return;
 				break;
 			 case 4:
 				if (boost::get<Rate21>(r).IsActive())
 					if (mode == "new") {
-						boost::get<Rate21>(r).init("table.h5");
+						boost::get<Rate21>(r).init(table_path);
 					} else {
-						boost::get<Rate21>(r).load("table.h5");
+						boost::get<Rate21>(r).load(table_path);
 					}
 				else return;
 				break;
@@ -73,40 +73,39 @@ void init_process(Process& r, std::string mode){
 }
 
 
-void initialize(std::string mode, std::string path, 
+void initialize(std::string mode, std::string setting_path, std::string table_path, 
 				double mu, double const_alpha_s, double A, double B){
 	print_logo();
-    initialize_mD_and_scale(0, mu, const_alpha_s);
+    	initialize_mD_and_scale(0, mu, const_alpha_s);
 	initialize_transport_coeff(A, B);
 
 	AllProcesses[4] = std::vector<Process>();
-	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", path, dX_Qq2Qq_dt) ); // 2->2
-	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", path, dX_Qg2Qg_dt) ); // 2->2
-	AllProcesses[4].push_back( Rate23("Boltzmann/cq2cqg", path, M2_Qq2Qqg) ); // 2->3
-	AllProcesses[4].push_back( Rate23("Boltzmann/cg2cgg", path, M2_Qg2Qgg) ); // 2->3
-	AllProcesses[4].push_back( Rate32("Boltzmann/cqg2cq", path, M2_Qqg2Qq) );  // 3->2
-	AllProcesses[4].push_back( Rate32("Boltzmann/cgg2cg", path, M2_Qgg2Qg) );  // 3->2
-    AllProcesses[4].push_back( Rate12("Boltzmann/c2cg", path, LGV_Q2Qg) );  // 1->2
-    AllProcesses[4].push_back( Rate21("Boltzmann/cg2c", path, LGV_Qg2Q) );  // 2->1
+	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", setting_path, dX_Qq2Qq_dt) ); // 2->2
+	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", setting_path, dX_Qg2Qg_dt) ); // 2->2
+	AllProcesses[4].push_back( Rate23("Boltzmann/cq2cqg", setting_path, M2_Qq2Qqg) ); // 2->3
+	AllProcesses[4].push_back( Rate23("Boltzmann/cg2cgg", setting_path, M2_Qg2Qgg) ); // 2->3
+	AllProcesses[4].push_back( Rate32("Boltzmann/cqg2cq", setting_path, M2_Qqg2Qq) );  // 3->2
+	AllProcesses[4].push_back( Rate32("Boltzmann/cgg2cg", setting_path, M2_Qgg2Qg) );  // 3->2
+  	AllProcesses[4].push_back( Rate12("Boltzmann/c2cg", setting_path, LGV_Q2Qg) );  // 1->2
+	AllProcesses[4].push_back( Rate21("Boltzmann/cg2c", setting_path, LGV_Qg2Q) );  // 2->1
 
-    AllProcesses[5] = std::vector<Process>();
-    AllProcesses[5].push_back( Rate22("Boltzmann/bq2bq", path, dX_Qq2Qq_dt) );// 2->2
-    AllProcesses[5].push_back( Rate22("Boltzmann/bg2bg", path, dX_Qg2Qg_dt) );// 2->2
-    AllProcesses[5].push_back( Rate23("Boltzmann/bq2bqg", path, M2_Qq2Qqg) );// 2->3
-    AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", path, M2_Qg2Qgg) );// 2->3
-	AllProcesses[5].push_back( Rate32("Boltzmann/bqg2bq", path, M2_Qqg2Qq) );// 3->2
-	AllProcesses[5].push_back( Rate32("Boltzmann/bgg2bg", path, M2_Qgg2Qg) );// 3->2
-    AllProcesses[5].push_back( Rate12("Boltzmann/b2bg", path, LGV_Q2Qg) );// 1->2
-    AllProcesses[5].push_back( Rate21("Boltzmann/bg2b", path, LGV_Qg2Q) );// 2->1
+    	AllProcesses[5] = std::vector<Process>();
+    	AllProcesses[5].push_back( Rate22("Boltzmann/bq2bq", setting_path, dX_Qq2Qq_dt) );// 2->2
+    	AllProcesses[5].push_back( Rate22("Boltzmann/bg2bg", setting_path, dX_Qg2Qg_dt) );// 2->2
+    	AllProcesses[5].push_back( Rate23("Boltzmann/bq2bqg", setting_path, M2_Qq2Qqg) );// 2->3
+    	AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", setting_path, M2_Qg2Qgg) );// 2->3
+	AllProcesses[5].push_back( Rate32("Boltzmann/bqg2bq", setting_path, M2_Qqg2Qq) );// 3->2
+	AllProcesses[5].push_back( Rate32("Boltzmann/bgg2bg", setting_path, M2_Qgg2Qg) );// 3->2
+    	AllProcesses[5].push_back( Rate12("Boltzmann/b2bg", setting_path, LGV_Q2Qg) );// 1->2
+    	AllProcesses[5].push_back( Rate21("Boltzmann/bg2b", setting_path, LGV_Qg2Q) );// 2->1
 
-    AllProcesses[21] = std::vector<Process>();
-    AllProcesses[21].push_back( Rate22("Boltzmann/gq2gq", path, dX_gq2gq_dt) ); // 2->2
-    AllProcesses[21].push_back( Rate22("Boltzmann/gg2gg", path, dX_gg2gg_dt) ); // 2->2
+    	AllProcesses[21] = std::vector<Process>();
+    	AllProcesses[21].push_back( Rate22("Boltzmann/gq2gq", setting_path, dX_gq2gq_dt) ); // 2->2
+    	AllProcesses[21].push_back( Rate22("Boltzmann/gg2gg", setting_path, dX_gg2gg_dt) ); // 2->2
 
-
-	BOOST_FOREACH(Process& r, AllProcesses[4]) init_process(r, mode);
-	BOOST_FOREACH(Process& r, AllProcesses[5]) init_process(r, mode);
-	BOOST_FOREACH(Process& r, AllProcesses[21]) init_process(r, mode);
+	BOOST_FOREACH(Process& r, AllProcesses[4]) init_process(r, mode, table_path);
+	BOOST_FOREACH(Process& r, AllProcesses[5]) init_process(r, mode, table_path);
+	BOOST_FOREACH(Process& r, AllProcesses[21]) init_process(r, mode, table_path);
 }
 
 // Gluon elastic scattering
