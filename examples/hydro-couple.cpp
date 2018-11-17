@@ -130,8 +130,8 @@ bool is_file_exist(std::string fileName)
 }
 
 int main(int argc, char* argv[]){
-	if (argc < 11){
-		std::cout << "Usage: hydro-couple <pythia-setting> <initial-file> <TRTENTo-eid> <hydro-file> <lido-setting> <NpythiaEevents> <mu> <afix> <A> <B>" << std::endl;
+	if (argc < 12){
+		std::cout << "Usage: hydro-couple <pythia-setting> <initial-file> <TRTENTo-eid> <hydro-file> <lido-setting> <lido-tab> <NpythiaEevents> <mu> <afix> <A> <B>" << std::endl;
 		exit(-1);
 	}
 	std::string pythia_config(argv[1]);
@@ -139,11 +139,13 @@ int main(int argc, char* argv[]){
 	int trento_eid = atoi(argv[3]);
 	std::string hydro_data(argv[4]);
 	std::string lido_setting(argv[5]);
-	int NPythiaEvents = atoi(argv[6]);
-	double mu = atof(argv[7]);
-	double afix = atof(argv[8]);
-	double A = atof(argv[9]);
-	double B = atof(argv[10]);
+	std::string lido_tab(argv[6]);
+	int NPythiaEvents = atoi(argv[7]);
+
+	double mu = atof(argv[8]);
+	double afix = atof(argv[9]);
+	double A = atof(argv[10]);
+	double B = atof(argv[11]);
 
 	std::vector<particle> plist;
 
@@ -163,9 +165,9 @@ int main(int argc, char* argv[]){
 
     ////////////////////////////////////////////
 	std::string tab_mode;
-	if (!is_file_exist("./table.h5")) tab_mode = "new";
+	if (!is_file_exist(lido_tab)) tab_mode = "new";
 	else tab_mode = "old";
-	initialize(tab_mode, lido_setting, mu, afix, A, B);
+	initialize(tab_mode, lido_setting, lido_tab, mu, afix, A, B);
 
 	// initial pT
 	double pTi = mean_pT(plist);

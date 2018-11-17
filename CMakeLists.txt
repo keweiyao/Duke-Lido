@@ -187,17 +187,9 @@ add_subdirectory(src)
 include_directories(src)
 
 
-add_executable(examples1 ./examples/example1.cpp)
-target_link_libraries(examples1 ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
-install(TARGETS examples1 DESTINATION bin)
-
-add_executable(examples2 ./examples/example2.cpp)
-target_link_libraries(examples2 ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread)
-install(TARGETS examples2 DESTINATION bin)
-
-add_executable(examples3 ./examples/example3.cpp)
-target_link_libraries(examples3 ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread)
-install(TARGETS examples3 DESTINATION bin)
+add_executable(Lido-TabGen ./examples/Lido-TabGen.cpp)
+target_link_libraries(Lido-TabGen ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
+install(TARGETS Lido-TabGen DESTINATION bin)
 
 add_executable(hydro-couple ./examples/hydro-couple.cpp)
 target_link_libraries(hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread)

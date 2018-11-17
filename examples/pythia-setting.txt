@@ -23,7 +23,7 @@ Check:event = off
 HadronLevel:all = off
 
 ! 6) Phase space selection and bias
-PhaseSpace:pTHatMin = 3
+PhaseSpace:pTHatMin = 5
 PhaseSpace:pTHatMax = 200
 PhaseSpace:bias2Selection = on
 PhaseSpace:bias2SelectionPow = 4.
