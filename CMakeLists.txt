@@ -182,6 +182,9 @@ endif()
 string(APPEND CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_REQUIRED_FLAGS} --coverage")
 
 
+
+MESSAGE(" ${HDF5_LIBRARIES} ${Boost_LIBRARIES}")
+
 set(LIBRARY_NAME "lib${PROJECT_NAME}")
 add_subdirectory(src)
 include_directories(src)

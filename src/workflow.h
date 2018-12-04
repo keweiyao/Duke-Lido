@@ -25,6 +25,7 @@ struct particle{
 	fourvec p0;
 	std::vector<double> vcell;
 	double Tf;
+	double weight;
 	void freestream(double dt){
 		double a = dt/p.t();
 		x.a[0] = x.t() + dt;
@@ -32,7 +33,6 @@ struct particle{
 		x.a[2] = x.y() + p.y()*a;
 		x.a[3] = x.z() + p.z()*a;
 	}
-	double weight;
 };
 
 typedef Rate<LO, 2, 2, double(*)(const double, void*)> Rate22;
