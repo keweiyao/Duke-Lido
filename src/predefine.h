@@ -42,6 +42,35 @@ extern const double alpha0; // alpha_s(Q2 = e*Lambda2)
 extern const double Lambda; // [GeV] Lambda QCD = 0.2 GeV
 extern const double Lambda2; // [GeV^2] Lambda QCD squared
 extern const double mu2_left; // minimum cut on Q2, where alpha = alpha_0
+extern const double Tc;
+extern double scale; // mu*pi*T
+extern double afix; // fixed alphas, -1 is running
+extern double cut; // separation between diffusion and scattering
+struct qhat_params_struct {
+	double K, a, b, p, q, gamma; // for qhat parametrization
+};
+extern qhat_params_struct qhat_params;
+
+void initialize_mD_and_scale(int _mD_type, double _scale, double _afix, double _cut, double _Rvac);
+void initialize_transport_coeff(double K, double a, double b, double p, double q, double gamma);
+double alpha_s(double Q2, double T); //runing coupling
+void echo(void);
+
+class Debye_mass{
+private:
+        const double TL, TH;
+        const size_t NT;
+        const double dT;
+        const unsigned int type;
+        double * mD2;
+public:
+        Debye_mass(const unsigned int _type);
+        ~Debye_mass(){delete[] mD2;};
+        double get_mD2(double T);
+};
+
+extern Debye_mass * t_channel_mD2;
+
 
 // helper function for read/write hdf5 scalar attributes
 template <typename T> inline const H5::PredType& type();

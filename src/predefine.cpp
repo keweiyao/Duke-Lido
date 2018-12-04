@@ -1,5 +1,8 @@
 #include "predefine.h"
 #include <cmath>
+#include <boost/math/tools/roots.hpp>
+#include "simpleLogger.h"
+
 
 char LO[] = "Leading-order";
 char GB[] = "Gunion-Bertsch";
@@ -36,3 +39,95 @@ const double alpha0 = 4.*M_PI/(11./3.*Nc - 2./3.*nf); // alpha_s(Q2 = e*Lambda2)
 const double Lambda = 0.2; // [GeV] Lambda QCD = 0.2 GeV
 const double Lambda2 = Lambda*Lambda; // [GeV^2] Lambda QCD squared
 const double mu2_left = Lambda2*std::exp(1.0); // minimum cut on Q2, where alpha = alpha_0
+const double Tc = 0.154;
+double cut;
+double scale;
+double afix;
+double Rvac;
+Debye_mass * t_channel_mD2;
+qhat_params_struct qhat_params;
+
+void initialize_mD_and_scale(int _mD_type, double _scale, double _afix, double _cut, double _Rvac){
+        cut = _cut;
+        scale = _scale;
+        afix = _afix;
+	Rvac = Rvac;
+        t_channel_mD2 = new Debye_mass(_mD_type);
+}
+
+void initialize_transport_coeff(double _K, double _a, double _b, double _p, double _q, double _gamma){
+	qhat_params.K = _K;
+	qhat_params.a = _a;
+	qhat_params.b = _b;
+	qhat_params.p = _p;
+	qhat_params.q = _q;
+	qhat_params.gamma = _gamma;
+}
+
+void echo(void){
+	std::cout << "mu\tafix\tK\ta\tb\tp\tq\tgamma\tQcut\tRvac\n";
+	std::cout <<scale<<"\t"<<afix<<"\t"<<qhat_params.K<<"\t"<<qhat_params.a
+               <<"\t"<<qhat_params.b<<"\t"<<qhat_params.p<<"\t"<<qhat_params.q
+               <<"\t"<<qhat_params.gamma<<"\t"<<cut<<"\t"<<Rvac<<"\n";
+}
+
+Debye_mass::Debye_mass(const unsigned int _type):
+TL(0.1), TH(1.0), NT(100), dT((TH-TL)/(NT-1.)),
+type(_type), mD2(new double[NT])
+{
+        if (type==0) {
+                LOG_INFO << "# leading order Debye mass";
+                // type==0 use self-consistent Debye mass
+                for (size_t i=0; i<NT; i++){
+                        double T = TL+dT*i;
+                        mD2[i] = pf_g*alpha_s(0., T)*T*T;
+                }
+        }
+        if (type==1) {
+                LOG_INFO << "# self-consistent Debye mass";
+                // type==1 use self-consistent Debye mass
+                for (size_t i=0; i<NT; i++){
+                        double T = TL+dT*i;
+                        size_t maxiter=200;
+                        boost::math::tools::eps_tolerance<double> tol{
+                         (std::numeric_limits<double>::digits * 3) / 4};
+                        try{
+                                auto result = boost::math::tools::toms748_solve(
+                                        [&T](double x) {return pf_g*alpha_s(-x, T)*T*T - x;},
+                                        0.001, 100., tol, maxiter);
+                                mD2[i] = .5*(result.first + result.second);
+                        }
+                        catch (const std::domain_error&) {
+                                throw std::domain_error{
+                                "unable to calculate mD2"};
+                        }
+                }
+        }
+}
+
+double Debye_mass::get_mD2(double T){
+        if (T<TL) T=TL;
+        if (T>=TH-dT) T=TH-dT;
+        double x = (T-TL)/dT;
+        size_t index = std::floor(x);
+        double r = x-index;
+        return (1.-r)*mD2[index] + r*mD2[index+1];
+}
+
+
+//=============running coupling=================================================
+double alpha_s(double Q2, double T){
+        if (afix > 0) {
+                return afix;
+        }
+        else{
+                double screen_scale2 = std::pow(scale*M_PI*T, 2);
+                double mu2;
+                if (Q2 < 0.) mu2 = std::max(-Q2, screen_scale2);
+                else mu2 = std::max(Q2, screen_scale2);
+
+                if (mu2 <= mu2_left) return alpha0;
+                else return alpha0 / std::log(mu2/Lambda2);
+        }
+}
+

@@ -134,13 +134,13 @@ if(NATIVE)
   endif()
 endif()
 
-string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
+#string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
 
-option(MORE_WARNINGS "enable more compiler warnings" ON)
-if(MORE_WARNINGS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+#option(MORE_WARNINGS "enable more compiler warnings" ON)
+#if(MORE_WARNINGS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   # adapted from http://stackoverflow.com/a/9862800
-  string(APPEND CMAKE_CXX_FLAGS " -Wpedantic -Wcast-align -Wcast-qual -Wdisabled-optimization -Wformat=2 -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wsign-conversion -Wsign-promo -Wstrict-overflow=2 -Wundef")
-endif()
+#  string(APPEND CMAKE_CXX_FLAGS " -Wpedantic -Wcast-align -Wcast-qual -Wdisabled-optimization -Wformat=2 -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wsign-conversion -Wsign-promo -Wstrict-overflow=2 -Wundef")
+#endif()
 
 # disable silly clang warnings
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -195,5 +195,10 @@ add_executable(hydro-couple ./examples/hydro-couple.cpp)
 target_link_libraries(hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 install(TARGETS hydro-couple DESTINATION bin)
 
+add_executable(pythia-pp ./examples/pythia-pp.cpp)
+target_link_libraries(pythia-pp ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+install(TARGETS pythia-pp DESTINATION bin)
+
 install(FILES ./examples/pythia-setting.txt DESTINATION share)
+install(FILES ./examples/pythia-pp-setting.txt DESTINATION share)
 install(FILES ./examples/settings.xml DESTINATION share)

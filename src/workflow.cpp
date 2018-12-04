@@ -10,6 +10,7 @@
 #include <boost/foreach.hpp>
 #include "logo.h"
 #include "Langevin.h"
+#include "predefine.h"
 
 std::map<int, std::vector<Process> > AllProcesses;
 
@@ -73,12 +74,12 @@ void init_process(Process& r, std::string mode, std::string table_path){
 }
 
 
-void initialize(std::string mode, std::string setting_path, std::string table_path, 
-				double mu, double const_alpha_s, double A, double B){
+void initialize(std::string mode, std::string setting_path, std::string table_path, double mu, double afix,
+                double K, double a, double b, double p, double q, double gamma, double cut, double Rvac){
 	print_logo();
-    	initialize_mD_and_scale(0, mu, const_alpha_s);
-	initialize_transport_coeff(A, B);
-
+    	initialize_mD_and_scale(0, mu, afix, cut, Rvac);
+	initialize_transport_coeff(K, a, b, p, q, gamma);
+        echo();
 	AllProcesses[4] = std::vector<Process>();
 	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", setting_path, dX_Qq2Qq_dt) ); // 2->2
 	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", setting_path, dX_Qg2Qg_dt) ); // 2->2
@@ -215,7 +216,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 	double P_total = 0., dP;
 
 	// Calculate Rate for Heavy Quark
-	double qhatg = qhat_pQCD(21, E_cell, temp);
+	double qhatg = qhat(21, E_cell, 0., temp);
 	BOOST_FOREACH(Process& r, AllProcesses[absid]){
 		switch(r.which()){
 			case 0:
@@ -351,7 +352,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			g.T0 = temp;
 			g.is_vac = false;
 			
-			double local_qhat = qhat_pQCD(21, E_cell, temp);
+			double local_qhat = qhat(21, E_cell, 0., temp);
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			g.local_mfp = .5*mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
 			pIn.radlist.push_back(g);
@@ -397,7 +398,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			g.t0 = pIn.x.t();
 			g.T0 = temp;
 			// add diffusion part
-			double local_qhat = qhat_pQCD(21, E_cell, temp);
+			double local_qhat = qhat(21, E_cell, 0., temp);
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			g.local_mfp = .5*mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
 			pIn.abslist.push_back(g);

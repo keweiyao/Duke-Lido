@@ -2,77 +2,75 @@
 #include "random.h"
 #include "predefine.h"
 #include "matrix_elements.h"
-double A=0., B=0.;
 double const tiny = 1e-10;
 // for quarks, upto t=mD^2
 
-double qhat_pQCD(int pid, double E, double T){
-	double factor = 1.0;
-	if (pid==21) factor = CA/CF; 
-	double alphas = alpha_s(0, T); // at mu*pi*T
-	double mD2 = t_channel_mD2->get_mD2(T);
-
-	// run version
-        double tmax = mD2; // on avergae...
-	//double Og = std::sqrt(mD2)/T;
-	double mscale = renormalization_scale*M_PI*T;
-	if (tmax > mscale*mscale){
-	    double log0 = std::log(1.+mscale*mscale/mD2);
-	    double log1 = std::log(mscale*mscale/Lambda2);
-	    double log2 = std::log(tmax/Lambda2);
-	    double log_combinations = log0 + log1*(1. - log1/log2);
-	    double qhat = A*factor*alphas*CF*T*mD2 * log_combinations;
-	    return qhat;
-	}
-	else{
-	    double log0 = std::log(1.+tmax/mD2);
-	    double logE = std::log(1+6*E*T/mD2);
-	    double qhat = A*factor*alphas*CF*T*mD2*log0;
-	    return qhat;
-	}
+double delta_qhat(int pid, double E, double M, double T){
+	double p = std::sqrt(E*E-M*M);
+	double CR = (pid==21) ? CA : CF;
+	double delta_qhat = CR * qhat_params.K * std::pow(T,3)
+			   /(1.+std::pow(qhat_params.a*T/Tc, qhat_params.p))
+			   /(1.+std::pow(qhat_params.b*p/T, qhat_params.q));
+	return delta_qhat;
 }
-double dqhat_pQCD_dp2(int pid, double E, double T){
-	return 0.;
-	/*double factor = 1.0;
-        if (pid==21) factor = CA/CF;
-        double alphas = alpha_s(E*T, T); // at mu*pi*T
+
+double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
+        double CR = (pid==21) ? CA : CF;
+        double alphas_at_T = alpha_s(0, T); 
         double mD2 = t_channel_mD2->get_mD2(T);
-        // run version
-        double tmax = mD2; // on avergae...         
-        double mscale = renormalization_scale*M_PI*T;
-        if (tmax > mscale){
-            double log0 = std::log(1.+mscale*mscale/mD2);
-            double log1 = std::log(mscale*mscale/Lambda2);
-            double log2 = std::log(tmax/Lambda2);
-            double dlog_combinations_dp2 = std::pow(log1/log2,2)/2./E/E;
-            double qhat = A*factor*alphas*CF*T*mD2 * dlog_combinations_dp2;
-            return qhat;
+        double Q2cut = cut*mD2;
+        double thermal2 = std::pow(scale*M_PI*T, 2);
+        double qhat_pQCD, logs;
+        if (Q2cut > thermal2){
+            double log0 = std::log(1.+thermal2/mD2);
+            double log1 = std::log(thermal2/Lambda2);
+            double log2 = std::log(Q2cut/Lambda2);
+            logs = log0 + log1*(1. - log1/log2);
         }
         else{
-            double dlog0_dp2 = tmax/(mD2 + tmax)/2./E/E;
-            double qhat = A*factor*alphas*CF*T*mD2 * dlog0_dp2;
-            return qhat;
-        }*/
+            logs = std::log(1.+Q2cut/mD2);
+        }
+	return alphas_at_T * CR * T * mD2 * logs;
 }
 
-/*
-double kperp(double E, double M, double T){
-	return std::pow(T,3)*( A + B/(E*T) );
+double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
+        double CR = (pid==21) ? CA : CF;
+        double alphas_at_T = alpha_s(0, T);
+        double mD2 = t_channel_mD2->get_mD2(T);
+        double Q2cut = cut*mD2;
+	double minf2 = .5*mD2;
+        double thermal2 = std::pow(scale*M_PI*T, 2);
+        double qhat_pQCD, logs;
+        if (Q2cut > thermal2){
+            double log0 = std::log(1.+thermal2/minf2);
+            double log1 = std::log(thermal2/Lambda2);
+            double log2 = std::log(Q2cut/Lambda2);
+            logs = log0 + log1*(1. - log1/log2);
+        }
+        else{
+            logs = std::log(1.+Q2cut/minf2);
+        }
+        return alphas_at_T * CR * T * minf2 * logs;
 }
 
-double kpara(double E, double M, double T){
-	return std::pow(T,3)*( A + B/(E*T) );
+
+double qhat(int pid, double E, double M, double T){
+	return  qhat_small_angle_LOpQCD(pid, E, M, T) 
+	      + delta_qhat(pid, E, M, T);
 }
 
-double dkpara_dp2(double E, double M, double T){
-	return std::pow(T,3)*B*(-1.)/(2.*E*E*E*T);
-}*/
 
+double qhat_L(int pid, double E, double M, double T){
+        return  qhat_L_small_angle_LOpQCD(pid, E, M, T)
+              + delta_qhat(pid, E, M, T)/2. * std::pow(E/M, qhat_params.gamma);                       
+}
 
-void initialize_transport_coeff(double _A, double _B){
-	A = _A; B = _B;
-	std::cout << "A = " << A << ", B = " << B << std::endl;
-};
+double dqhat_L_dp2(int pid, double E, double M, double T){
+	double p2 = E*E-M*M;
+	double dp2 = p2*.01;
+	double Eprime = std::sqrt(E*E + dp2);
+	return (qhat(pid, Eprime, M, T) - qhat(pid, E, M, T) ) /dp2;
+}
 
 void Ito_update(int pid, double dt_lab, double M, double T, std::vector<double> v, 
 						const fourvec & pIn, fourvec & pOut){
@@ -84,19 +82,19 @@ void Ito_update(int pid, double dt_lab, double M, double T, std::vector<double> 
 	double E0 = pIn_cell.t();
 	double p0 = std::sqrt(E0*E0 - M*M+1e-9);
 
-	double kt = qhat_pQCD(pid, E0, T)/2.;
-	double kl = kt;
-	double dkl_dp2 = dqhat_pQCD_dp2(pid, E0, T)/2.;
+	double kt = qhat(pid, E0, M, T)/2.;
+	double kl = qhat_L(pid, E0, M, T);
+	double dkl_dp2 = dqhat_L_dp2(pid, E0, M, T);
 	double drag = kl/(2.*E0*T) - (kl - kt)/std::pow(p0, 2) - dkl_dp2;
 		   
 	double Ct = std::sqrt(kt*dt);
 	double Cl = std::sqrt(kl*dt);
 
-    pOut.a[1] = Ct * Srandom::white_noise(Srandom::gen);
-    pOut.a[2] = Ct * Srandom::white_noise(Srandom::gen);
-    pOut.a[3] = p0 * (1. - drag * dt) + Cl * Srandom::white_noise(Srandom::gen);
-    pOut.a[0] = std::sqrt(M*M + std::pow(pOut.x(),2) 
-					+ std::pow(pOut.y(),2) + std::pow(pOut.z(),2) );
+        pOut.a[1] = Ct * Srandom::white_noise(Srandom::gen);
+        pOut.a[2] = Ct * Srandom::white_noise(Srandom::gen);
+        pOut.a[3] = p0 * (1. - drag * dt) + Cl * Srandom::white_noise(Srandom::gen);
+        pOut.a[0] = std::sqrt(M*M + std::pow(pOut.x(),2) 
+		  	+ std::pow(pOut.y(),2) + std::pow(pOut.z(),2) );
 
 	// rotate back to the original frame
 	pOut = pOut.rotate_back(pIn_cell);

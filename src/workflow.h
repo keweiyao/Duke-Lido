@@ -44,7 +44,8 @@ typedef boost::variant<Rate22, Rate23, Rate32, Rate12, Rate21> Process;
 extern std::map<int, std::vector<Process>> AllProcesses;
 
 void init_process(Process& r, std::string mode, std::string table_path);
-void initialize(std::string, std::string setting_path, std::string table_path, double mu, double alpha_s_fixed, double A, double B);
+void initialize(std::string mode, std::string setting_path, std::string table_path, double mu, double afix, 
+		double K, double a, double b, double p, double q, double gamma, double cut, double Rvac);
 
 int gluon_elastic_scattering(double dt, double temp, std::vector<double> v3cell, fourvec incomping_p, fourvec & outgoing_p);
 int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn);

@@ -3,36 +3,6 @@
 #include <cstdlib>
 #include <vector>
 #include "lorentz.h"
-//======Langevin section===============
-extern double A, B;
-double kperp(double E, double M, double T);
-double kpara(double E, double M, double T);
-void initialize_transport_coeff(double A, double B);
-void postpoint_update( double dt, double M, double T, std::vector<double> v, const fourvec & pIn, fourvec & pOut);
-void Ito_update( double dt, double M, double T, std::vector<double> v, const fourvec & pIn, fourvec & pOut);
-
-//======running coupling=======================================================
-double alpha_s(double Q2, double T);
-double f_LPM(double x);
-//======Debye mass class=======================================================
-class Debye_mass{
-private:
-	const double TL, TH;
-	const size_t NT;
-	const double dT;
-	const unsigned int type;
-	double * mD2;
-public:
-	Debye_mass(const unsigned int _type);
-	~Debye_mass(){delete[] mD2;};
-	double get_mD2(double T);
-};
-
-extern Debye_mass * t_channel_mD2;
-extern double renormalization_scale;
-
-//=====For external initialization of debye mass==============================
-void initialize_mD_and_scale(const unsigned int type, double scale, double alpha_s_fixed);
 
 //========resonance?? Q+q-->D-->Q+q============
 double dX_res_dt(const double t, void * params);
