@@ -36,9 +36,10 @@ const double pf_g = 8./M_PI*(Nc + nf); // prefractor for gluon self energy^2
 // For QCD coupling constant
 // alpha_s = alpha_0 = 4\pi/(11Nc/3-2Nf/3)/log(Q^2/LambdaQCD^2)
 const double alpha0 = 4.*M_PI/(11./3.*Nc - 2./3.*nf); // alpha_s(Q2 = e*Lambda2)
+const double alpha_max = 1.0;
 const double Lambda = 0.2; // [GeV] Lambda QCD = 0.2 GeV
 const double Lambda2 = Lambda*Lambda; // [GeV^2] Lambda QCD squared
-const double mu2_left = Lambda2*std::exp(1.0); // minimum cut on Q2, where alpha = alpha_0
+const double mu2_NP = Lambda2*std::exp(alpha0/alpha_max); // minimum cut on Q2, where alpha = alpha_0
 const double Tc = 0.154;
 double cut;
 double scale;
@@ -126,7 +127,7 @@ double alpha_s(double Q2, double T){
                 if (Q2 < 0.) mu2 = std::max(-Q2, screen_scale2);
                 else mu2 = std::max(Q2, screen_scale2);
 
-                if (mu2 <= mu2_left) return alpha0;
+                if (mu2 <= mu2_NP) return 1.0;
                 else return alpha0 / std::log(mu2/Lambda2);
         }
 }

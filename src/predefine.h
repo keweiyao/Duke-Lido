@@ -39,9 +39,10 @@ extern const double pf_g; // prefractor for gluon self energy^2
 // For QCD coupling constant
 // alpha_s = alpha_0 = 4\pi/(11Nc/3-2Nf/3)/log(Q^2/LambdaQCD^2)
 extern const double alpha0; // alpha_s(Q2 = e*Lambda2)
+extern const double alpha_max; // alpha_s maximum cut
 extern const double Lambda; // [GeV] Lambda QCD = 0.2 GeV
 extern const double Lambda2; // [GeV^2] Lambda QCD squared
-extern const double mu2_left; // minimum cut on Q2, where alpha = alpha_0
+extern const double mu2_NP; // minimum cut on Q2, where alpha = alpha_0
 extern const double Tc;
 extern double scale; // mu*pi*T
 extern double afix; // fixed alphas, -1 is running
