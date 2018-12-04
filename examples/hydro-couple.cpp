@@ -140,7 +140,7 @@ int main(int argc, char* argv[]){
     using OptDesc = po::options_description;
     OptDesc options{};
     options.add_options()
-          ("help,h", "show this help message and exit")
+          ("help", "show this help message and exit")
           ("pythia-setting,y",
            po::value<fs::path>()->value_name("PATH")->required(),
            "Pythia setting file")
@@ -153,7 +153,7 @@ int main(int argc, char* argv[]){
           ("eid,j",
            po::value<int>()->value_name("INT")->default_value(0,"0"),
            "trento event id")
-          ("hydro,h",
+          ("hydro",
            po::value<fs::path>()->value_name("PATH")->required(),
            "hydro file")
           ("lido-setting,s", 
@@ -219,7 +219,7 @@ int main(int argc, char* argv[]){
             return 1;
         }
         else{
-            table_mode = (fs::exists(args["lido-setting"].as<fs::path>())) ? 
+            table_mode = (fs::exists(args["lido-table"].as<fs::path>())) ? 
                          "old" : "new";
         }
         // check trento event
@@ -274,14 +274,6 @@ int main(int argc, char* argv[]){
     
         /// Read Hydro
         Medium<2> med1(args["hydro"].as<fs::path>().string());
-        
-        /// Assign each quark a transverse position according to TRENTo Nbin output
-        /// Freestream particle to the start of hydro
-        for (auto & p : plist){
-            double vz2 = p.p.z()*p.p.z()/p.p.t()/p.p.t();
-            double dt_fs = med1.get_tauH()/std::sqrt(1. - vz2);
-            p.freestream(dt_fs);
-        }
 
         /// Lido init
         initialize(table_mode,
@@ -291,13 +283,23 @@ int main(int argc, char* argv[]){
                 args["afix"].as<double>(),
                 args["k-factor"].as<double>(),
                 args["t-scale"].as<double>(),
-                args["p-scale"].as<double>(),
+                args["e-scale"].as<double>(),
                 args["t-power"].as<double>(),
-                args["p-power"].as<double>(),
+                args["e-power"].as<double>(),
                 args["gamma"].as<double>(),
                 args["qcut"].as<double>(),
                 args["rvac"].as<double>()
                 );
+
+        /// Assign each quark a transverse position according to TRENTo Nbin output
+        /// Freestream particle to the start of hydro
+        for (auto & p : plist){
+            double vz2 = p.p.z()*p.p.z()/p.p.t()/p.p.t();
+            double dt_fs = med1.get_tauH()/std::sqrt(1. - vz2);
+            p.freestream(dt_fs);
+        }
+
+
 
         // initial pT
         double pTi = mean_pT(plist);
