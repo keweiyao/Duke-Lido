@@ -47,6 +47,7 @@ extern const double Tc;
 extern double scale; // mu*pi*T
 extern double afix; // fixed alphas, -1 is running
 extern double cut; // separation between diffusion and scattering
+extern double Rvac;
 struct qhat_params_struct {
 	double K, a, b, p, q, gamma; // for qhat parametrization
 };
