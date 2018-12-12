@@ -3,13 +3,15 @@
 #include "predefine.h"
 #include "matrix_elements.h"
 double const tiny = 1e-10;
-// for quarks, upto t=mD^2
 
 double delta_qhat(int pid, double E, double M, double T){
 	double CR = (pid==21) ? CA : CF;
-	double delta_qhat = CR / CF * 2. * qhat_params.K * std::pow(T, 3)
-			   /(1.+std::pow(qhat_params.a*(T+tiny)/Tc, qhat_params.p))
-			   /(1.+std::pow(qhat_params.b*(E+tiny)/(T+tiny), qhat_params.q));
+	if (pid == 21) E = std::sqrt(E*E + t_channel_mD2->get_mD2(T)/2.);
+	double delta_qhat = CR/CF * 2 * qhat_params.K * std::pow(T, 3)
+		*(1. + std::pow(qhat_params.a*2, qhat_params.p)  )
+		/(1. + std::pow(qhat_params.a*(T+tiny)/Tc, qhat_params.p))
+		*(1. + std::pow(qhat_params.b, qhat_params.q)    )
+		/(1. + std::pow(qhat_params.b*(E+tiny)/(T+tiny), qhat_params.q));
 	return delta_qhat;
 }
 
@@ -20,7 +22,7 @@ double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
         double Q2cut = cut*mD2;
         double thermal2 = std::pow(scale*M_PI*T, 2);
         double logs;
-        /*if (Q2cut > thermal2){
+        if (Q2cut > thermal2){
             double log0 = std::log(1.+thermal2/mD2);
             double log1 = std::log(thermal2/Lambda2);
             double log2 = std::log(Q2cut/Lambda2);
@@ -28,8 +30,7 @@ double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
         }
         else{
             logs = std::log(1.+Q2cut/mD2);
-        }*/
-		logs = std::log(1.+Q2cut/mD2);
+        }
 	return alphas_at_T * CR * T * mD2 * ( logs - .5);
 }
 
@@ -41,7 +42,7 @@ double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
 		double minf2 = .5*mD2;
         double thermal2 = std::pow(scale*M_PI*T, 2);
         double logs;
-        /*if (Q2cut > thermal2){
+        if (Q2cut > thermal2){
             double log0 = std::log(1.+thermal2/minf2);
             double log1 = std::log(thermal2/Lambda2);
             double log2 = std::log(Q2cut/Lambda2);
@@ -49,8 +50,7 @@ double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
         }
         else{
             logs = std::log(1.+Q2cut/minf2);
-        }*/
-		logs = std::log(1.+Q2cut/minf2);
+        }
         return alphas_at_T * CR * T * minf2 * (logs - .5);
 }
 

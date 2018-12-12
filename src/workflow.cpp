@@ -189,7 +189,7 @@ double formation_time(fourvec p, fourvec k, double M, double T){
 	return tauf_LL;
 }
 
-std::ofstream f("stat.dat");
+//std::ofstream f("stat.dat");
 int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn){
 	int channel = 0;
 	if (temp < 0.154){
@@ -450,14 +450,12 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
 					pIn.p = pIn.p - it->k1;
-					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);
-
-					
-					f << it->t0 << " "
+					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);					
+					/*f << it->t0 << " "
 					  << it->k1.t() << " "
 					  << measure_perp(it->p0, it->k1).pabs2() << " "
 					  << measure_perp(it->p0, it->kn).pabs2() << " "
- 					  << taun << std::endl;
+ 					  << taun << std::endl;*/
 				}
 
 				it = pIn.radlist.erase(it);
