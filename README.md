@@ -42,10 +42,10 @@ Then run cmake with the ``pythia8`` option turned on and then compile and instal
    make -j$(nproc) install
 ```
 
-Coupled to hydrodynamic output
-------------------------------
+Couple to hydrodynamic output
+-----------------------------
 
-To be explained
+The ``hydro-couple`` example (currently requires Pythia8) run the transport in the medium background provided by the ``hdf5`` format output of the [TRENTo initial condition](https://github.com/keweiyao/trento3d/tree/master) with the ``--ncoll`` option on and the ``hdf5`` format output of [OSU-hydro](https://github.com/chunshen1987/VISHNew).
 
 
 
