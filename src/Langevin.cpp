@@ -6,11 +6,13 @@ double const tiny = 1e-10;
 // for quarks, upto t=mD^2
 
 double delta_qhat(int pid, double E, double M, double T){
-	double p = std::sqrt(E*E-M*M);
 	double CR = (pid==21) ? CA : CF;
-	double delta_qhat = CR * qhat_params.K * std::pow(T, 3)
-			   /(1.+std::pow(qhat_params.a*(T+tiny)/Tc, qhat_params.p))
-			   /(1.+std::pow(qhat_params.b*(p+tiny)/(T+tiny), qhat_params.q));
+	if (pid == 21) E = std::sqrt(E*E + t_channel_mD2->get_mD2(T)/2.);
+	double delta_qhat = CR/CF * 2 * qhat_params.K * std::pow(T, 3)
+		*(1. + std::pow(qhat_params.a*2, qhat_params.p)  )
+		/(1. + std::pow(qhat_params.a*(T+tiny)/Tc, qhat_params.p))
+		*(1. + std::pow(qhat_params.b, qhat_params.q)    )
+		/(1. + std::pow(qhat_params.b*(E+tiny)/(T+tiny), qhat_params.q));
 	return delta_qhat;
 }
 
