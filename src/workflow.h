@@ -54,5 +54,5 @@ double formation_time(fourvec p, fourvec k, double M, double T);
 double calcualte_dt_from_dtau(fourvec x, fourvec p, double tau, double dtau);
 void output_oscar(const std::vector<particle> plist, std::string fname);
 double mean_pT(const std::vector<particle> plist);
-
+double mean_E(const std::vector<particle> plist);
 #endif

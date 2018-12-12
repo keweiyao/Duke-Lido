@@ -456,7 +456,7 @@ fourvec Rate<LO, 2, 2, double(*)(const double, void*)>::
 		return res;
 	};
 	double xmin[2] = {0., -1.};
-	double xmax[2] = {5.*T, 1.};
+	double xmax[2] = {10.*T, 1.};
 	double err;
 	auto val = quad_nd(code, 2, 2, xmin, xmax, err);
 	return fourvec{_degen*val[0], 0.0, 0.0, _degen*val[1]};
@@ -500,7 +500,7 @@ tensor Rate<LO, 2, 2, double(*)(const double, void*)>::
 		return res;
 	};
 	double xmin[3] = {0., -1., -M_PI};
-	double xmax[3] = {5.*T, 1., M_PI};
+	double xmax[3] = {10.*T, 1., M_PI};
 	double err;
 	auto val = quad_nd(code, 3, 4, xmin, xmax, err);
 	return tensor{_degen*val[0], 0., 0., 0.,

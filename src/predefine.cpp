@@ -52,7 +52,7 @@ void initialize_mD_and_scale(int _mD_type, double _scale, double _afix, double _
         cut = _cut;
         scale = _scale;
         afix = _afix;
-	Rvac = Rvac;
+	Rvac = _Rvac;
         t_channel_mD2 = new Debye_mass(_mD_type);
 }
 

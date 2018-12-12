@@ -199,6 +199,10 @@ add_executable(pythia-pp ./examples/pythia-pp.cpp)
 target_link_libraries(pythia-pp ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 install(TARGETS pythia-pp DESTINATION bin)
 
+add_executable(analytic-medium ./examples/analytic-medium.cpp)
+target_link_libraries(analytic-medium ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+install(TARGETS analytic-medium DESTINATION bin)
+
 install(FILES ./examples/pythia-setting.txt DESTINATION share)
 install(FILES ./examples/pythia-pp-setting.txt DESTINATION share)
 install(FILES ./examples/settings.xml DESTINATION share)

@@ -58,7 +58,7 @@
 		</rate>
 	</cg2cg>
 
-	<cq2cqg status="active" moments="off">
+	<cq2cqg status="inactive" moments="off">
 		<mass>1.3</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -71,7 +71,7 @@
 		</rate>
 	</cq2cqg>
 
-	<cg2cgg status="active" moments="off">
+	<cg2cgg status="inactive" moments="off">
 		<mass>1.3</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -114,7 +114,7 @@
 		</rate>
 	</cgg2cg>
 
-	<c2cg status="active" moments="off">
+	<c2cg status="inactive" moments="off">
 		<mass>1.3</mass>
 		<rate slots="energy,temp">
 			<Nenergy>400</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>400.0</Henergy>

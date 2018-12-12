@@ -189,6 +189,7 @@ double formation_time(fourvec p, fourvec k, double M, double T){
 	return tauf_LL;
 }
 
+std::ofstream f("stat.dat");
 int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn){
 	int channel = 0;
 	if (temp < 0.154){
@@ -328,7 +329,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 					case 0:
 						if (boost::get<Rate22>(r).IsActive()){
 							tensor A = boost::get<Rate22>(r).GetSecondM(
-								{std::min(k1_cell, E_cell-k1_cell), temp}
+								{k1_cell, temp}
 							);			
 							local_qhat += A.T[1][1]+A.T[2][2];
 						}
@@ -338,7 +339,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				}
 			}
 			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = 1.5*mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
+			g.local_mfp = 0.707*mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
 			pIn.radlist.push_back(g);
 		}
 		if(channel == 6){
@@ -354,7 +355,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			
 			double local_qhat = qhat(21, E_cell, 0., temp);
 			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = .5*mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
+			g.local_mfp = 0.707*mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
 			pIn.radlist.push_back(g);
 		}
 		if (channel == 4 || channel == 5){
@@ -375,7 +376,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 					case 0:
 						if (boost::get<Rate22>(r).IsActive()){
 							tensor A = boost::get<Rate22>(r).GetSecondM(
-								{std::min(k1_cell, (1-xfrac)*E_cell), temp}
+								{k1_cell, temp}
 							);			
 							local_qhat += A.T[1][1]+A.T[2][2];
 						}
@@ -385,7 +386,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				}
 			}
 			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = 1.5*mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
+			g.local_mfp = 0.707*mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
 			pIn.abslist.push_back(g);
 		}
 		if(channel == 7){
@@ -400,7 +401,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 			// add diffusion part
 			double local_qhat = qhat(21, E_cell, 0., temp);
 			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = .5*mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
+			g.local_mfp = 0.707*mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
 			pIn.abslist.push_back(g);
 		}
 		if(channel>= AllProcesses[absid].size()){
@@ -450,6 +451,13 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
 					pIn.p = pIn.p - it->k1;
 					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);
+
+					
+					f << it->t0 << " "
+					  << it->k1.t() << " "
+					  << measure_perp(it->p0, it->k1).pabs2() << " "
+					  << measure_perp(it->p0, it->kn).pabs2() << " "
+ 					  << taun << std::endl;
 				}
 
 				it = pIn.radlist.erase(it);
@@ -548,6 +556,14 @@ double mean_pT(const std::vector<particle> plist){
 	double W = 0., wsum_pT = 0.;
 	for (auto & p : plist) {
 		wsum_pT += p.weight * std::sqrt(p.p.x()*p.p.x()+p.p.y()*p.p.y());
+		W += p.weight;
+	}
+	return wsum_pT/W;
+}
+double mean_E(const std::vector<particle> plist){
+	double W = 0., wsum_pT = 0.;
+	for (auto & p : plist) {
+		wsum_pT += p.weight * p.p.t();
 		W += p.weight;
 	}
 	return wsum_pT/W;
