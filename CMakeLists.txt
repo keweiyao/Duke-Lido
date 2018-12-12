@@ -1,12 +1,16 @@
 cmake_minimum_required(VERSION 3.1)
 project(lido CXX)
 
+#-----------------#
+# Options         #
+#-----------------#
+option(pythia8 "whether use pythia8 and comiple related examples" off)
+
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++11" CXX11)
 if(NOT CXX11)
   message(FATAL_ERROR "Your compiler does not support C++11")
 endif()
-
 
 # Find and use Boost.
 set(Boost_USE_STATIC_LIBS OFF)
@@ -21,13 +25,14 @@ include_directories(${GSL_INCLUDE_DIRS} ${GSLCBLAS_INCLUDE_DIRS})
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmakemodules")
 
-# Find and use Pythia
-find_package(Pythia8)
-if (${PYTHIA8_FOUND})
-  include_directories(${PYTHIA8_INCLUDE_DIR})
-  Message(STATUS "Pythia8 Include dir : " ${PYTHIA8_INCLUDE_DIR})
-endif()
-
+if(pythia8)
+	# Find and use Pythia
+	find_package(Pythia8)
+	if (${PYTHIA8_FOUND})
+	  include_directories(${PYTHIA8_INCLUDE_DIR})
+	  Message(STATUS "Pythia8 Include dir : " ${PYTHIA8_INCLUDE_DIR})
+	endif()
+endif(pythia8)
 
 # Find the HDF5 C++ library.  The CMake FindHDF5 module does not work reliably,
 # e.g. sometimes it links unnecessary libraries, other times it fails to include
@@ -62,7 +67,6 @@ else()
     endforeach()
   endif()
 endif()
-
 
 # Find all required HDF5 components.
 find_path(HDF5_INCLUDE_DIRS H5Cpp.h HINTS ${HDF5_INCLUDE_HINT})
@@ -134,13 +138,13 @@ if(NATIVE)
   endif()
 endif()
 
-#string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
+string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
 
-#option(MORE_WARNINGS "enable more compiler warnings" ON)
-#if(MORE_WARNINGS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+option(MORE_WARNINGS "enable more compiler warnings" ON)
+if(MORE_WARNINGS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   # adapted from http://stackoverflow.com/a/9862800
-#  string(APPEND CMAKE_CXX_FLAGS " -Wpedantic -Wcast-align -Wcast-qual -Wdisabled-optimization -Wformat=2 -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wsign-conversion -Wsign-promo -Wstrict-overflow=2 -Wundef")
-#endif()
+  string(APPEND CMAKE_CXX_FLAGS " -Wpedantic -Wcast-align -Wcast-qual -Wdisabled-optimization -Wformat=2 -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wsign-conversion -Wsign-promo -Wstrict-overflow=2 -Wundef")
+endif()
 
 # disable silly clang warnings
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -181,7 +185,6 @@ endif()
 
 string(APPEND CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_REQUIRED_FLAGS} --coverage")
 
-
 set(LIBRARY_NAME "lib${PROJECT_NAME}")
 add_subdirectory(src)
 include_directories(src)
@@ -191,18 +194,24 @@ add_executable(Lido-TabGen ./examples/Lido-TabGen.cpp)
 target_link_libraries(Lido-TabGen ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
 install(TARGETS Lido-TabGen DESTINATION bin)
 
-add_executable(hydro-couple ./examples/hydro-couple.cpp)
-target_link_libraries(hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
-install(TARGETS hydro-couple DESTINATION bin)
-
-add_executable(pythia-pp ./examples/pythia-pp.cpp)
-target_link_libraries(pythia-pp ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
-install(TARGETS pythia-pp DESTINATION bin)
-
 add_executable(analytic-medium ./examples/analytic-medium.cpp)
 target_link_libraries(analytic-medium ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 install(TARGETS analytic-medium DESTINATION bin)
 
+if(pythia8)
+	add_executable(hydro-couple ./examples/hydro-couple.cpp)
+	target_link_libraries(hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+	install(TARGETS hydro-couple DESTINATION bin)
+
+	add_executable(pythia-pp ./examples/pythia-pp.cpp)
+	target_link_libraries(pythia-pp ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+	install(TARGETS pythia-pp DESTINATION bin)
+endif(pythia8)
+
+
+install(FILES ./examples/settings.xml DESTINATION share)
+if(pythia8)
 install(FILES ./examples/pythia-setting.txt DESTINATION share)
 install(FILES ./examples/pythia-pp-setting.txt DESTINATION share)
-install(FILES ./examples/settings.xml DESTINATION share)
+endif(pythia8)
+
