@@ -14,8 +14,6 @@ set(_pythia8dirs
     ${PYTHIA8_DIR}
     $ENV{PYTHIA8_DIR}
     $ENV{PYTHIA8DIR}
-    $ENV{HOME}/.local
-    /opt/pythia8
     )
 
 find_path(PYTHIA8_INCLUDE_DIR
