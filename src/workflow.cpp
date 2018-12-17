@@ -443,9 +443,8 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				} else { // vacuum shower
 					double kt20 = measure_perp(it->p0, it->k1).pabs2();
 					double kt2n = measure_perp(it->p0, it->kn).pabs2();
-					if (kt2n > Rvac*kt20) {
-						Acceptance = 0.0;
-					}
+					if (kt2n > Rvac*kt20) Acceptance = 0.0;
+                                        else Acceptance = 1.0;
 				}				
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
