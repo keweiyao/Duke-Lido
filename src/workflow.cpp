@@ -192,7 +192,7 @@ double formation_time(fourvec p, fourvec k, double M, double T){
 //std::ofstream f("stat.dat");
 int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn){
 	int channel = 0;
-	if (temp < 0.154){
+	if (temp < Tc){
 		pIn.freezeout = true;
 		pIn.Tf = temp;
 		pIn.vcell.resize(3);
@@ -443,9 +443,8 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				} else { // vacuum shower
 					double kt20 = measure_perp(it->p0, it->k1).pabs2();
 					double kt2n = measure_perp(it->p0, it->kn).pabs2();
-					double remove = (kt2n > Rvac*kt20) ? 0.0 : 1.0;
-					double Running = alpha_s(kt2n, temp)/alpha_s(kt20, temp);
-					Acceptance = outside? Running : remove*Running;
+					if (kt2n > Rvac*kt20) Acceptance = 0.0;
+                                        else Acceptance = 1.0;
 				}				
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){

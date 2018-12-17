@@ -4,7 +4,7 @@ project(lido CXX)
 #-----------------#
 # Options         #
 #-----------------#
-option(pythia8 "whether use pythia8 and comiple related examples" off)
+option(pythia8 "whether use pythia8 and comiple related examples" on)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++11" CXX11)
