@@ -1,5 +1,45 @@
-The Duke Linearized-Boltzmann-and-Diffusion Partonic Transport Model  
+The Duke Linearized-Boltzmann-and-Diffusion Partonic Transport Model
 ====================================================================
+
+What this branch does
+---------------------
+
+This branch aims for upgrading the LIDO model (original for heavy quark transport) to a model for full jet evolution. Here are our todo list:
+
+1. Add additional elastic channels leading-log: 
+
+q + q --> q + q (t-channel only),
+q + g --> q + g (t-channel only),
+
+and test (thermalization, E-loss, etc).
+
+2. Add non-leading processes, including the s- and u-channel of the previous processes, and 
+
+q + qbar --> g + g,
+g + g -> q + qbar,
+
+and test (thermalization, E-loss, etc).
+
+3. Add all leading log splittings,
+
+q --> q + g
+q + q --> q + q + g
+q + g --> q + g + g
+
+g --> g + g
+g + q --> g + q + g
+g + g --> g + g + g
+
+and test LPM implementation.
+
+4. Add non-leading splitings,
+
+g --> q + qbar
+g --> Q + Qbar
+g + q --> q + q + qbar
+g + g --> g + Q + Qbar
+
+their LPM may need separate inspection.
 
 Basic installation
 ------------------
