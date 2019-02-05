@@ -5,7 +5,9 @@ TableBase.cpp
 StochasticBase.cpp
 Xsection.cpp
 Rate.cpp
-matrix_elements.cpp
+matrix_elements_1-2.cpp
+matrix_elements_2-2.cpp
+matrix_elements_2-3.cpp
 hcubature.cpp
 random.cpp
 simpleLogger.cpp

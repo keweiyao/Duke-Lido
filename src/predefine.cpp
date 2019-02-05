@@ -26,6 +26,7 @@ const int Nc = 3, nf = 3;
 const double CF = 4./3.;
 const double CA = 3.;
 const double CF_over_CA = CF/CA;
+const double TR = 0.5;
 
 // the prefractor for gluon debye mass with Boltzmann statistics
 // mD^2 = 8\pi*(Nc+nf)*alpha_s*T^2 ~ 15*alpha_s*T^2
@@ -46,6 +47,8 @@ double scale;
 double afix;
 double Rvac;
 Debye_mass * t_channel_mD2;
+const double LPM_prefactor = 0.78; // to match analytic calculation, 0.78 by default
+
 qhat_params_struct qhat_params;
 
 void initialize_mD_and_scale(int _mD_type, double _scale, double _afix, double _cut, double _Rvac){
@@ -116,6 +119,21 @@ double Debye_mass::get_mD2(double T){
 }
 
 
+// splitting function
+double P_q2qg(double x){
+	return CF*(1. + std::pow(1-x, 2))/x;
+}
+double P_q2gq(double x){
+	return CF*(1. + x*x)/(1.-x);
+}
+double P_g2gg(double x){
+	return CA*(1+std::pow(x, 4)+std::pow(1.-x,4))/x/(1.-x);
+}
+double P_g2qq(double x){
+	return nf*(x*x + std::pow(1-x, 2));
+}
+
+
 //=============running coupling=================================================
 double alpha_s(double Q2, double T){
         if (afix > 0) {
@@ -130,5 +148,11 @@ double alpha_s(double Q2, double T){
                 if (mu2 <= mu2_NP) return 1.0;
                 else return alpha0 / std::log(mu2/Lambda2);
         }
+}
+
+bool is_file_exist(std::string fileName)
+{
+    std::ifstream infile(fileName);
+    return infile.good();
 }
 

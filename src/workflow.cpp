@@ -77,9 +77,9 @@ void init_process(Process& r, std::string mode, std::string table_path){
 void initialize(std::string mode, std::string setting_path, std::string table_path, double mu, double afix,
                 double K, double a, double b, double p, double q, double gamma, double cut, double Rvac){
 	print_logo();
-    	initialize_mD_and_scale(0, mu, afix, cut, Rvac);
+    initialize_mD_and_scale(0, mu, afix, cut, Rvac);
 	initialize_transport_coeff(K, a, b, p, q, gamma);
-        echo();
+    echo();
 	AllProcesses[4] = std::vector<Process>();
 	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", setting_path, dX_Qq2Qq_dt) ); // 2->2
 	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", setting_path, dX_Qg2Qg_dt) ); // 2->2
@@ -90,186 +90,120 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
   	AllProcesses[4].push_back( Rate12("Boltzmann/c2cg", setting_path, LGV_Q2Qg) );  // 1->2
 	AllProcesses[4].push_back( Rate21("Boltzmann/cg2c", setting_path, LGV_Qg2Q) );  // 2->1
 
-    	AllProcesses[5] = std::vector<Process>();
-    	AllProcesses[5].push_back( Rate22("Boltzmann/bq2bq", setting_path, dX_Qq2Qq_dt) );// 2->2
-    	AllProcesses[5].push_back( Rate22("Boltzmann/bg2bg", setting_path, dX_Qg2Qg_dt) );// 2->2
-    	AllProcesses[5].push_back( Rate23("Boltzmann/bq2bqg", setting_path, M2_Qq2Qqg) );// 2->3
-    	AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", setting_path, M2_Qg2Qgg) );// 2->3
-	AllProcesses[5].push_back( Rate32("Boltzmann/bqg2bq", setting_path, M2_Qqg2Qq) );// 3->2
-	AllProcesses[5].push_back( Rate32("Boltzmann/bgg2bg", setting_path, M2_Qgg2Qg) );// 3->2
-    	AllProcesses[5].push_back( Rate12("Boltzmann/b2bg", setting_path, LGV_Q2Qg) );// 1->2
-    	AllProcesses[5].push_back( Rate21("Boltzmann/bg2b", setting_path, LGV_Qg2Q) );// 2->1
-
-    	AllProcesses[21] = std::vector<Process>();
-    	AllProcesses[21].push_back( Rate22("Boltzmann/gq2gq", setting_path, dX_gq2gq_dt) ); // 2->2
-    	AllProcesses[21].push_back( Rate22("Boltzmann/gg2gg", setting_path, dX_gg2gg_dt) ); // 2->2
+	AllProcesses[21] = std::vector<Process>();
+	AllProcesses[21].push_back( Rate22("Boltzmann/gq2gq", setting_path, dX_gq2gq_dt) ); // 2->2
+	AllProcesses[21].push_back( Rate22("Boltzmann/gg2gg", setting_path, dX_gg2gg_dt) ); // 2->2
+	AllProcesses[21].push_back( Rate23("Boltzmann/gq2gqg", setting_path, M2_gq2gqg) ); // 2->3
+	AllProcesses[21].push_back( Rate23("Boltzmann/gg2ggg", setting_path, M2_gg2ggg) ); // 2->3
+	AllProcesses[21].push_back( Rate32("Boltzmann/gqg2gq", setting_path, M2_gqg2gq) ); // 3->2
+	AllProcesses[21].push_back( Rate32("Boltzmann/ggg2gg", setting_path, M2_ggg2gg) ); // 3->2
+	AllProcesses[21].push_back( Rate12("Boltzmann/g2gg", setting_path, LGV_g2gg) ); // 1->2
+	AllProcesses[21].push_back( Rate21("Boltzmann/gg2g", setting_path, LGV_gg2g) ); // 2->1
 
 	BOOST_FOREACH(Process& r, AllProcesses[4]) init_process(r, mode, table_path);
-	BOOST_FOREACH(Process& r, AllProcesses[5]) init_process(r, mode, table_path);
 	BOOST_FOREACH(Process& r, AllProcesses[21]) init_process(r, mode, table_path);
 }
 
-// Gluon elastic scattering
-int gluon_elastic_scattering(double dt, double temp, std::vector<double> v3cell, fourvec incoming_p, fourvec & outgoing_p){
-	int absid = 21;
-	// A Langevin step, does nothing if A and B very small
-	fourvec pnew;
-	Ito_update(absid, dt, 0.0, temp, v3cell, incoming_p, pnew);
-	incoming_p = pnew;
-	// Elastic Scattering
-	std::vector<fourvec> FS;
-	int channel = 0;
-	auto p_cell = incoming_p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
-	double dt_cell = dt / incoming_p.t() * p_cell.t();
-	double E_cell = p_cell.t();
-    std::vector<double> P_channels(AllProcesses[absid].size());
-	double P_total = 0., dP;
-	BOOST_FOREACH(Process& r, AllProcesses[absid]){
-		switch(r.which()){
-			case 0:
-				if (boost::get<Rate22>(r).IsActive())
-					dP = boost::get<Rate22>(r).GetZeroM({E_cell, temp}).s * dt_cell;
-				else dP = 0.0;
-				P_channels[channel] = P_total + dP;
-				break;
-			default:
-				exit(-1);
-				break;
-		}
-		P_total += dP;
-		channel ++;
-	}
-	for(auto& item : P_channels) {item /= P_total;}
-	if (P_total > 0.15 && !type1_warned) {
-		LOG_WARNING << "P(g) = " << P_total << " may be too large";
-		type1_warned = true;
-	}
-	if ( Srandom::init_dis(Srandom::gen) > P_total) {
-		outgoing_p = incoming_p;
-		return -1;
-	}
-	else{
-		double p = Srandom::init_dis(Srandom::gen);
-		for(int i=0; i<P_channels.size(); ++i){
-			if (P_channels[i] > p) {
-				channel = i;
-				break;
-			}
-		}
-	}
-	// Do scattering
-	switch(AllProcesses[absid][channel].which()){
-		case 0:
-			boost::get<Rate22>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
-			break;
-		default:
-			LOG_FATAL << "g-Channel " << channel << " does not exist";
-			exit(-1);
-			break;
-	}
-	// rotate it back and boost it back
-	for(auto & pmu : FS) {
-		pmu = pmu.rotate_back(p_cell);
-		pmu = pmu.boost_back(v3cell[0], v3cell[1], v3cell[2]);
-	}
-
-	outgoing_p = FS[0];
-	return channel;
-}
-
-double formation_time(fourvec p, fourvec k, double M, double T){
-	double x = k.t()/p.t();
+// split=1: q->q+g, colors = 1 - x + CF/CA * x^2
+// split=2: g->g+g, colors = 1 - x + x^2 
+double formation_time(fourvec p, fourvec k, double T, int split){
+	double E0 = p.t();
+	double x = k.t()/E0;
 	double mD2 = t_channel_mD2->get_mD2(T);
 	double mg2 = mD2/2.;
-	double Q0 = 2*x*(1-x)*p.t();
-	double mass_sqrs = x*x*M*M + (1.-x)*mg2;
+	double Q0 = 2*x*(1-x)*E0;
+	double mass_sqrs = 0.0;
+	double colors = 1.;
+	if (split == 1) {
+		colors = 1. - x + CF/CA*x*x;
+		mass_sqrs = x*x*dot(p, p) + (1.-x)*mg2;
+	}
+	if (split == 2) {
+		colors = 1. - x + x*x;
+		mass_sqrs = (1. - x + x*x)*mg2;
+	}
 
-	double QT2_LL = measure_perp(p,k).pabs2()*(1.-x+4./9.*x*x);
-	double tauf_LL = Q0/(QT2_LL + mass_sqrs);
+	double QT2_LL = measure_perp(p,k).pabs2();
+	double tauf_LL = Q0/(QT2_LL*colors + mass_sqrs);
 	return tauf_LL;
 }
 
 //std::ofstream f("stat.dat");
-int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn){
-	int channel = 0;
-	if (temp < Tc){
-		pIn.freezeout = true;
-		pIn.Tf = temp;
-		pIn.vcell.resize(3);
-		pIn.vcell[0] = v3cell[0];
- 		pIn.vcell[1] = v3cell[1];
- 		pIn.vcell[2] = v3cell[2];
-		channel = -1;
-
-	}else{
+int update_particle_momentum_Lido(
+		double dt, double temp, std::vector<double> v3cell, 
+		particle & pIn, std::vector<particle> & pOut_list){
+	pOut_list.clear();
 	int absid = std::abs(pIn.pid);
-	// A Langevin step, does nothing if A and B very small
+	pIn.freestream(dt);
+
+	// Apply diffusion and update particle momentum
 	fourvec pnew;
 	Ito_update(pIn.pid, dt, pIn.mass, temp, v3cell, pIn.p, pnew);
 	pIn.p = pnew;
 
-	// Maxtrix element scattering
-	std::vector<fourvec> FS; 
+	// Apply large angle scattering, and diffusion induced radiation
 	auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
 	double dt_cell = dt / pIn.p.t() * p_cell.t();
 	double E_cell = p_cell.t();
-    std::vector<double> P_channels(AllProcesses[absid].size());
-	double P_total = 0., dP;
-
-	// Calculate Rate for Heavy Quark
+	// For diffusion induced radiation, qhat_Soft is an input
 	double qhatg = qhat(21, E_cell, 0., temp);
+
+	// Total rate for the 
+	int channel = 0;
+	std::vector<double> P_channels(AllProcesses[absid].size());
+	double P_total = 0., dR;
+
 	BOOST_FOREACH(Process& r, AllProcesses[absid]){
 		switch(r.which()){
 			case 0:
-				if (boost::get<Rate22>(r).IsActive()){
-					dP = boost::get<Rate22>(r).GetZeroM({E_cell, temp}).s * dt_cell;
-				}
-				else {dP = 0.0;}
-				P_channels[channel] = P_total + dP;
+				if (boost::get<Rate22>(r).IsActive())
+					dR = boost::get<Rate22>(r).GetZeroM({E_cell, temp}).s;
+				else dR = 0.0;
+				P_channels[channel] = P_total + dR*dt_cell;
 				break;
 			case 1:
-				if (boost::get<Rate23>(r).IsActive()){
-					dP = boost::get<Rate23>(r).GetZeroM({E_cell, temp}).s * dt_cell;
-				}
-				else {dP = 0.0;}
-				P_channels[channel] = P_total + dP;
+				if (boost::get<Rate23>(r).IsActive() && (!pIn.is_virtual))
+					dR = boost::get<Rate23>(r).GetZeroM({E_cell, temp}).s;
+				else dR = 0.0;
+				P_channels[channel] = P_total + dR*dt_cell;
 				break;
 			case 2:
-				if (boost::get<Rate32>(r).IsActive())
-					dP = boost::get<Rate32>(r).GetZeroM({E_cell, temp}).s * dt_cell;
-				else dP = 0.0;
-				P_channels[channel] = P_total + dP;
+				if (boost::get<Rate32>(r).IsActive() && (!pIn.is_virtual))
+					dR = boost::get<Rate32>(r).GetZeroM({E_cell, temp}).s;
+				else dR = 0.0;
+				P_channels[channel] = P_total + dR*dt_cell;
 				break;
 			case 3:
-				if (boost::get<Rate12>(r).IsActive())
-					dP = qhatg*boost::get<Rate12>(r).GetZeroM({E_cell, temp}).s * dt_cell;
-				else dP = 0.0;
-				P_channels[channel] = P_total + dP;
+				if (boost::get<Rate12>(r).IsActive() && (!pIn.is_virtual))
+					dR = qhatg*boost::get<Rate12>(r).GetZeroM({E_cell, temp}).s;
+				else dR = 0.0;
+				P_channels[channel] = P_total + dR*dt_cell;
 				break;
 			case 4:
-				if (boost::get<Rate21>(r).IsActive())
-					dP = qhatg*boost::get<Rate21>(r).GetZeroM({E_cell, temp}).s * dt_cell;
-				else dP  = 0.0;
-				P_channels[channel] = P_total + dP;
+				if (boost::get<Rate21>(r).IsActive() && (!pIn.is_virtual))
+					dR = qhatg*boost::get<Rate21>(r).GetZeroM({E_cell, temp}).s;
+				else dR  = 0.0;
+				P_channels[channel] = P_total + dR*dt_cell;
 				break;
 			default:
 				LOG_FATAL << "1. ProcessType = " << r.which() << " not exists";
 				exit(-1);
 				break;
 		}
-		P_total += dP;
+		P_total += dR*dt_cell;
 		channel ++;
 	}
-	// Normalize Rate
-	
-	for(auto& item : P_channels) {item /= P_total;}
+	// P_total is the total rate of reation within dt
 	if (P_total > 0.15 && !type2_warned) {
-		LOG_WARNING << "P(Q) = " << P_total << " may be too large";
+		LOG_WARNING << "P(dt) = " << P_total << " may be too large";
 		type2_warned = true;
 	}
-	// Sample channel
-	if ( Srandom::init_dis(Srandom::gen) > P_total ) channel = -1;
+	if ( Srandom::init_dis(Srandom::gen) > P_total ) {
+		channel = -1;
+	}
 	else{
+		// Normalize P_channels using P_total to sample
+		for(auto& item : P_channels) item /= P_total;
 		double p = Srandom::init_dis(Srandom::gen);
 		for(int i=0; i<P_channels.size(); ++i){
 			if (P_channels[i] > p) {
@@ -279,8 +213,15 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 		}
 	}
 
+	// If a scattering happens:
 	if (channel >= 0){
-		// Do scattering
+		if(channel>= AllProcesses[absid].size()){
+			LOG_FATAL << "3. Channel = " << channel << " not exists";
+			exit(-1);
+		}
+		// Final state holder FS
+		std::vector<fourvec> FS;
+		// Sampe its differential final state
 		switch(AllProcesses[absid][channel].which()){
 			case 0:
 				boost::get<Rate22>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
@@ -302,204 +243,148 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 				exit(-1);
 				break;
 		}
-		// rotate it back and boost it back to lab frame
+		// rotate the final state back and boost it back to the lab frame
 		for(auto & pmu : FS) {
 			pmu = pmu.rotate_back(p_cell);
 			pmu = pmu.boost_back(v3cell[0], v3cell[1], v3cell[2]);
 		}
-		// elastic processes change it inmediately
-		if (channel ==0 || channel == 1) pIn.p = FS[0]; 
 
+		// elastic process happens instantaneously
+		if(channel ==0 || channel == 1) {
+			pIn.p = FS[0];
+		} 
+		// inelastic process takes a finite time to happen
 		if(channel == 2 || channel == 3){
-			// If it radiates, add a pre-gluon
-			pregluon g;
 			
-			g.p0 = pIn.p;
-			g.k1 = FS[2]; 
-			g.kn = g.k1;
-			g.t0 = pIn.x.t();
-			g.T0 = temp;
-			g.is_vac = false;
-			
-			double xfrac = g.k1.t()/g.p0.t();
-			double local_qhat = 0.;
-			double k1_cell = g.k1.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
-			BOOST_FOREACH(Process& r, AllProcesses[21]){
-				switch(r.which()){
-					case 0:
-						if (boost::get<Rate22>(r).IsActive()){
-							tensor A = boost::get<Rate22>(r).GetSecondM(
-								{k1_cell, temp}
-							);			
-							local_qhat += A.T[1][1]+A.T[2][2];
-						}
-						break;
-					default:
-						break;
+				// add the radiating daughters as ``virtual" particles 
+				// these are virtual particles, that pops out at a rate
+				// given by the incoherent calculation, which will be 
+				// dropped (suppressed) according to the LPM effect
+				particle vp;
+				
+				vp.pid = 21;
+				vp.mass = 0.0;
+				vp.weight = pIn.weight;
+				vp.p0 = FS[2]; 
+				vp.p = vp.p0;
+				vp.x0 = pIn.x;
+				vp.x = vp.x0;
+				vp.T0 = temp;
+				vp.is_vac = false;
+				vp.is_virtual = true;
+				
+				// The local 2->2 mean-free-path is estimated with
+				// the qhat_hard integrate from the 2->2 rate
+				double xfrac = vp.p.t()/pIn.p.t();
+				double local_qhat = 0.;
+				double vp_cell = vp.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
+				double boost_factor = vp.p.t()/vp_cell;
+				BOOST_FOREACH(Process& r, AllProcesses[21]){
+					switch(r.which()){
+						case 0:
+							if (boost::get<Rate22>(r).IsActive()){
+								tensor A = boost::get<Rate22>(r).GetSecondM(
+									{vp_cell, temp}
+								);			
+								local_qhat += A.T[1][1]+A.T[2][2];
+							}
+							break;
+						default:
+							break;
+					}
 				}
-			}
-			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = 0.707*mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
-			pIn.radlist.push_back(g);
+				double mD2 = t_channel_mD2->get_mD2(temp);
+				// estimate mfp in the lab frame
+				vp.mfp0 = LPM_prefactor*mD2/local_qhat*boost_factor;
+				pIn.radlist.push_back(vp);
 		}
 		if(channel == 6){
-			// If it radiates, add a pre-gluon
-			pregluon g;
+			// add the radiating daughters as ``virtual" particles 
+			// these are virtual particles, that pops out at a rate
+			// given by the incoherent calculation, which will be 
+			// dropped (suppressed) according to the LPM effect
+			particle vp;
 			
-			g.p0 = pIn.p;
-			g.k1 = FS[1]; 
-			g.kn = g.k1;
-			g.t0 = pIn.x.t();
-			g.T0 = temp;
-			g.is_vac = false;
+			vp.pid = 21;
+			vp.mass = 0.0;
+			vp.weight = pIn.weight;
+			vp.p0 = FS[1]; 
+			vp.p = vp.p0;
+			vp.x0 = pIn.x;
+			vp.x = vp.x0;
+			vp.T0 = temp;
+			vp.is_vac = false;
+			vp.is_virtual = true;
 			
-			double local_qhat = qhat(21, E_cell, 0., temp);
 			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = 0.707*mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
-			pIn.radlist.push_back(g);
-		}
-		if (channel == 4 || channel == 5){
-			// If it absorb, add a pre-gluon
-			pregluon g;
-			
-			g.p0 = pIn.p;
-			g.k1 = FS[2]; 
-			g.kn = g.k1;
-			g.t0 = pIn.x.t();
-			g.T0 = temp;
-			
-			double xfrac = g.k1.t()/g.p0.t();
-			double local_qhat = 0.;
-			double k1_cell = g.k1.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
-			BOOST_FOREACH(Process& r, AllProcesses[21]){
-				switch(r.which()){
-					case 0:
-						if (boost::get<Rate22>(r).IsActive()){
-							tensor A = boost::get<Rate22>(r).GetSecondM(
-								{k1_cell, temp}
-							);			
-							local_qhat += A.T[1][1]+A.T[2][2];
-						}
-						break;
-					default:
-						break;
-				}
-			}
-			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = 0.707*mD2/local_qhat*g.k1.t()/k1_cell; // transform back to lab frame
-			pIn.abslist.push_back(g);
-		}
-		if(channel == 7){
-			// If it absorb, add a pre-gluon
-			pregluon g;
-			
-			g.p0 = pIn.p;
-			g.k1 = FS[1]; 
-			g.kn = g.k1;
-			g.t0 = pIn.x.t();
-			g.T0 = temp;
-			// add diffusion part
-			double local_qhat = qhat(21, E_cell, 0., temp);
-			double mD2 = t_channel_mD2->get_mD2(temp);
-			g.local_mfp = 0.707*mD2/local_qhat*pIn.p.t()/E_cell; // transform back to lab frame
-			pIn.abslist.push_back(g);
-		}
-		if(channel>= AllProcesses[absid].size()){
-			LOG_FATAL << "3. Channel = " << channel << " not exists";
-			exit(-1);
+			// estimate mfp in the lab frame
+			vp.mfp0 = LPM_prefactor*mD2/qhatg*pIn.p.t()/E_cell; 
+			pIn.radlist.push_back(vp);
 		}
 	}
-	} // else
-	// Perform pre-gluon scattering if there is one
+ 
+	// Handle the virtual particle
 	if (!pIn.radlist.empty()){
-		// loop over each pre-gluon
-		for(std::vector<pregluon>::iterator it=pIn.radlist.begin(); it!=pIn.radlist.end();){
-			double taun;
-			if (it->is_vac)
-				taun = formation_time(it->p0,it->kn,pIn.mass,temp);
-			else
-				taun = formation_time(it->p0,it->kn,pIn.mass,temp);
-
-			// gluon will form in two cases:
-			// 1) t-t0 > tauf
-			// 2) T < 0.16: means the heavy quark will fly out of medium, where it will form sooner or later
-			bool outside = (temp < Tc);
-			if (outside) temp = Tc;
-			if (pIn.x.t()-it->t0 > taun || outside){ 
+		// loop over each virtual particles
+		for(std::vector<particle>::iterator it=pIn.radlist.begin(); it!=pIn.radlist.end();){
+			int split_type = 0;
+			if (pIn.pid != 21 && it->pid == 21) split_type = 1;
+			if (pIn.pid == 21 && it->pid == 21) split_type = 2;
+			if (pIn.pid == 21 && it->pid != 21) split_type = 3;
+			double taun = formation_time(pIn.p,it->p,temp,split_type);
+			// Virtual particle will form if t-t0 > tauf
+			if (it->x.t() - it->x0.t() > taun){ 
 				double Acceptance = 0.;
-				if (!it->is_vac){ // medium-induced
-					double kt20 = measure_perp(it->p0, it->k1).pabs2();
-					double kt2n = measure_perp(it->p0, it->kn).pabs2();
-					double theta2 = kt2n/std::pow(it->kn.t(),2);
-					double thetaM2 = std::pow(pIn.mass/it->p0.t(),2);
+				double kt20 = measure_perp(pIn.p, it->p0).pabs2();
+				double kt2n = measure_perp(pIn.p, it->p).pabs2();
+				if (!it->is_vac){ 
+					// medium-induced
+					double theta2 = kt2n/std::pow(it->p.t(),2);
+					double thetaM2 = std::pow(pIn.mass/pIn.p.t(),2);
 					double mD2 = t_channel_mD2->get_mD2(temp);
+					double mean_s = 6*it->p.t()*temp;
 
-					double LPM = it->local_mfp/taun
-						* std::sqrt(  std::log(1+taun/it->local_mfp)
-									/std::log(1+6*it->k1.t()*temp/mD2) );
+					double LPM = it->mfp0/taun
+						* std::sqrt(  std::log(1+taun/it->mfp0)
+									/std::log(1+mean_s/mD2) );
 					double DeadCone = std::pow(theta2/(theta2+thetaM2), 2);
 					double Running = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
 					Acceptance = LPM*Running*DeadCone;
-				} else { // vacuum shower
-					double kt20 = measure_perp(it->p0, it->k1).pabs2();
-					double kt2n = measure_perp(it->p0, it->kn).pabs2();
+				} else { 
+					// vacuum process
 					if (kt2n > Rvac*kt20) Acceptance = 0.0;
-                                        else Acceptance = 1.0;
+                    else Acceptance = 1.0;
 				}				
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
-					pIn.p = pIn.p - it->k1;
-					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);					
-					/*f << it->t0 << " "
-					  << it->k1.t() << " "
-					  << measure_perp(it->p0, it->k1).pabs2() << " "
-					  << measure_perp(it->p0, it->kn).pabs2() << " "
- 					  << taun << std::endl;*/
+					// If this fluctuation is accepted:
+					// add it to the pOut list
+					pOut_list.push_back(*it);
+					pIn.p = pIn.p - it->p;	
+					pIn.p.a[0] = std::sqrt(
+							pIn.p.pabs2()+pIn.mass*pIn.mass);	
+					/*f << it->x0.t() << " "
+					  << it->p.t() << " "
+					  << measure_perp(pIn.p, it->p0).pabs2() << " "
+					  << measure_perp(pIn.p, it->p).pabs2() << " "
+ 					  << taun << std::endl;
+					if (pIn.pid==21){
+						f << it->x0.t() << " "
+						  << pIn.p0.t() - it->p.t() << " "
+						  << measure_perp(pIn.p, it->p0).pabs2() << " "
+						  << measure_perp(pIn.p, it->p).pabs2() << " "
+	 					  << taun << std::endl;
+					}*/
 				}
-
 				it = pIn.radlist.erase(it);
 			}else{ // else, evolve it
-				fourvec k_new;
-				gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new);
-				it->kn = k_new * (it->k1.t()/k_new.t());
+				std::vector<particle> pnew_Out;
+				update_particle_momentum_Lido(dt, temp, v3cell, (*it), pnew_Out);
+				it->p = it->p*(it->p0.t()/it->p.t());
 				it++;
 			}
 		}
 	}
-
-	if (!pIn.abslist.empty()){
-		// loop over each pre-gluon
-		for(std::vector<pregluon>::iterator it=pIn.abslist.begin(); it!=pIn.abslist.end();){
-			fourvec ptot = it->p0+it->kn;
-			ptot.a[0] = std::sqrt(ptot.pabs2()+pIn.mass*pIn.mass);
-			double taun = formation_time(ptot,it->kn,pIn.mass,temp);
-			if (pIn.x.t()-it->t0 > taun){
-				double kt20 = measure_perp(it->p0, it->k1).pabs2();
-				double kt2n = measure_perp(it->p0, it->kn).pabs2();
-				double theta2 = kt2n/std::pow(it->kn.t(),2);
-				double thetaM2 = std::pow(pIn.mass/(it->p0.t()+it->kn.t()),2);
-				double mD2 = t_channel_mD2->get_mD2(temp);
-
-				double LPM = it->local_mfp/taun
-					*std::sqrt(  std::log(1+taun/it->local_mfp)
-								/std::log(1+6*it->k1.t()*temp/mD2) );
-				double DeadCone = std::pow(theta2/(theta2+thetaM2), 2);
-				double RuningCoupling = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
-				double Acceptance = std::min(1.0, LPM*RuningCoupling*DeadCone);
-				if (Srandom::rejection(Srandom::gen) < Acceptance){
-					pIn.p = pIn.p + it->k1;
-					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);
-				}
-				it = pIn.abslist.erase(it);
-			}else{ // else, evolve it
-				fourvec k_new;
-				gluon_elastic_scattering(dt, temp, v3cell, it->kn, k_new);
-				it->kn = k_new * (it->k1.t() / k_new.t());
-				it++;
-			}
-		}
-	}
-
 	return channel;
 }
 

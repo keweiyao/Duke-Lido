@@ -15,12 +15,6 @@
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
-bool is_file_exist(std::string fileName)
-{
-    std::ifstream infile(fileName);
-    return infile.good();
-}
-
 int main(int argc, char* argv[]){
     using OptDesc = po::options_description;
     OptDesc options{};
@@ -83,6 +77,9 @@ int main(int argc, char* argv[]){
           ("mass",
             po::value<double>()->value_name("FLOAT")->default_value(1.3,"1.3"), 
             "quark mass")  
+          ("pid",
+            po::value<int>()->value_name("INT")->default_value(4,"4"), 
+            "particle pid, 4 or 21")  
     ;
     po::variables_map args{};
     try{
@@ -113,9 +110,18 @@ int main(int argc, char* argv[]){
             table_mode = (fs::exists(args["lido-table"].as<fs::path>())) ? 
                          "old" : "new";
         }
+        // check pid
+        if (!args.count("pid")){
+            if ( (std::abs(args["pid"].as<int>()) != 4)
+				&& (std::abs(args["pid"].as<int>()) != 21) ){
+		        throw po::error{"pid only suppots 4, 21"};
+		        return 1;
+			}
+        }
 
         // start
         std::vector<particle> plist;
+		int pid = args["pid"].as<int>();
 		double E0 = args["energy"].as<double>();
 		double M = args["mass"].as<double>();
 		fourvec p0{E0, 0, 0, std::sqrt(E0*E0-M*M)},
@@ -125,11 +131,13 @@ int main(int argc, char* argv[]){
 			c_entry.p = p0; // 
 			c_entry.p0 = p0; // 
 			c_entry.mass = M; // mass
-			c_entry.pid = 4; // light quark
+			c_entry.pid = pid; // light quark
+			c_entry.x0 = x0; // initial position
 			c_entry.x = x0; // initial position
 			c_entry.weight = 1.;
-			c_entry.freezeout = false;
 			c_entry.Tf = 0.0;
+			c_entry.is_vac = false;
+			c_entry.is_virtual = false;
 			c_entry.vcell.resize(3);
 			c_entry.vcell[0] = 0.; 
 			c_entry.vcell[1] = 0.; 
@@ -170,19 +178,18 @@ int main(int argc, char* argv[]){
 		std::ofstream f("dE.dat");
 		double dE = 0.;
 		int Np = plist.size();
+		std::vector<particle> pOut_list;
         for (int i=0; i<Nsteps; i++){
-			
 			double t = ti + dt*i;
             double T = T0 * std::pow(ti/t, 2./3.-1./nu/3.);
 			if (i%100==0) LOG_INFO << t/5.026 << " [fm/c]\t" << T << " [GeV]";
             for (auto & p : plist){
 				// reset energy 
 				p.p = p0;
-                // x-update
-                p.freestream(dt);
-                // p-update
+                // x,p-update
                 int channel = 
-                    update_particle_momentum_Lido(dt, T, {0., 0., 0.}, p);
+                    update_particle_momentum_Lido(dt, T, {0., 0., 0.}, 
+							p, pOut_list);
 				dE += (E0 - p.p.t())/Np;
             }
 			f << dE << std::endl;

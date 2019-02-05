@@ -9,88 +9,13 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
 
-#include "Pythia8/Pythia.h"
 #include "simpleLogger.h"
 #include "Medium_Reader.h"
 #include "workflow.h"
+#include "pythia_wrapper.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
-
-using namespace Pythia8;
-
-class HardGen{
-public: 
-    HardGen(std::string f_pythia, std::string f_trento, int iev);
-    void Generate(std::vector<particle> & plist, int N_pythia_events, 
-                int POI, double yabs_cut);
-private:
-    Pythia pythia;
-    const double Mc;
-    TransverPositionSampler TRENToSampler;
-};
-
-HardGen::HardGen(std::string f_pythia, std::string f_trento, int iev):
-Mc(1.3),TRENToSampler(f_trento, iev){    
-    // read pythia settings
-    pythia.readFile(f_pythia);
-    // suppress output
-    pythia.readString("SoftQCD:all = off");
-    pythia.readString("PromptPhoton:all=off");
-      pythia.readString("WeakSingleBoson:all=off");
-      pythia.readString("WeakDoubleBoson:all=off");
-    pythia.readString("Init:showProcesses = off");  
-    pythia.readString("Init:showMultipartonInteractions = off");  
-    pythia.readString("Init:showChangedSettings = off");  
-    pythia.readString("Init:showChangedParticleData = off");  
-    pythia.readString("Next:numberCount = 1000");  
-    pythia.readString("Next:numberShowInfo = 0");  
-    pythia.readString("Next:numberShowProcess = 0");  
-    pythia.readString("Next:numberShowEvent = 0"); 
-    // Init
-    pythia.init();
-    // Read TRENTo Binary collision densisty
-}
-
-void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events, 
-                int POI, double yabs_cut){
-    double x, y;
-    for (int iEvent = 0; iEvent < N_pythia_events; ++iEvent) 
-    {
-        pythia.next();
-        TRENToSampler.SampleXY(x, y);
-        double weight = pythia.info.weight();
-        for (size_t i = 0; i < pythia.event.size(); ++i) 
-        {
-            auto p = pythia.event[i];
-            if (p.isFinal() && p.idAbs() == POI && std::abs(p.y())<yabs_cut) 
-            {
-                // final momenta 
-                fourvec p0{p.e(), p.px(), p.py(), p.pz()};
-                
-                particle c_entry;
-                c_entry.p0 = p0; // 
-                c_entry.mass = Mc; // mass
-                c_entry.pid = POI; // charm quark
-                c_entry.x = fourvec{0,x,y,0}; // initial position
-                c_entry.weight = weight;
-                c_entry.freezeout = true;
-                c_entry.Tf = 0.0;
-                c_entry.vcell.resize(3);
-                c_entry.vcell[0] = 0.; 
-                c_entry.vcell[1] = 0.; 
-                c_entry.vcell[2] = 0.; 
-                c_entry.p = p0; // without FSR energy loss
-                
-                plist.push_back(c_entry); 
-            }
-        }
-      }
-
-    // get the correct normalization for cross-section
-    double normW = 0.5*pythia.info.sigmaGen()/pythia.info.weightSum();
-    for (auto & p : plist) p.weight *= normW;
-}
 
 int main(int argc, char* argv[]){
     using OptDesc = po::options_description;
@@ -153,7 +78,7 @@ int main(int argc, char* argv[]){
         hardgen.Generate(plist,
                             args["pythia-events"].as<int>(),
                             4,
-                            2.5);
+                            2.5, false);
 
 
         

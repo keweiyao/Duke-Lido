@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <fstream>
 
 extern char LO[];
 extern char GB[];
@@ -29,6 +30,7 @@ extern const int Nc, nf;
 extern const double CF;
 extern const double CA;
 extern const double CF_over_CA;
+extern const double TR;
 
 // the prefractor for gluon debye mass with Boltzmann statistics
 // mD^2 = 8\pi*(Nc+nf)*alpha_s*T^2 ~ 15*alpha_s*T^2
@@ -48,6 +50,8 @@ extern double scale; // mu*pi*T
 extern double afix; // fixed alphas, -1 is running
 extern double cut; // separation between diffusion and scattering
 extern double Rvac;
+extern const double LPM_prefactor; // to match analytic calculation, 0.7 -- 0.83.
+
 struct qhat_params_struct {
 	double K, a, b, p, q, gamma; // for qhat parametrization
 };
@@ -72,6 +76,12 @@ public:
 };
 
 extern Debye_mass * t_channel_mD2;
+
+// splitting function
+double P_q2qg(double x);
+double P_q2gq(double x);
+double P_g2gg(double x);
+double P_g2qq(double x);
 
 
 // helper function for read/write hdf5 scalar attributes
@@ -132,5 +142,7 @@ public:
 		return stream;
 	}
 };
+
+bool is_file_exist(std::string fileName);
 
 #endif
