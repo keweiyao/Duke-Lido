@@ -46,8 +46,11 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(logger, src::severity_logger_mt) {
 
     // specify the format of the log message
     logging::formatter formatter = expr::stream
-        << std::setw(7) << std::setfill('0') << line_id << std::setfill(' ') << " | "
-        << expr::format_date_time(timestamp, "%Y-%m-%d, %H:%M:%S.%f") << " "
+        << std::setw(7) 
+		<< std::setfill('0') 
+		<< line_id 
+		<< std::setfill(' ') << " | "
+        //<< expr::format_date_time(timestamp, "%Y-%m-%d, %H:%M:%S.%f") << " "
         << "[" << logging::trivial::severity << "]"
         << " - " << expr::smessage;
     sink->set_formatter(formatter);

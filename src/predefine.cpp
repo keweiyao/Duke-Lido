@@ -47,7 +47,7 @@ double scale;
 double afix;
 double Rvac;
 Debye_mass * t_channel_mD2;
-const double LPM_prefactor = 0.78; // to match analytic calculation, 0.78 by default
+const double LPM_prefactor = 0.75; // to match analytic calculation, 0.75 by default
 
 qhat_params_struct qhat_params;
 
@@ -121,16 +121,16 @@ double Debye_mass::get_mD2(double T){
 
 // splitting function
 double P_q2qg(double x){
-	return CF*(1. + std::pow(1-x, 2))/x;
+	return CF*(1. + std::pow(1.-x, 2))/x;
 }
 double P_q2gq(double x){
 	return CF*(1. + x*x)/(1.-x);
 }
 double P_g2gg(double x){
-	return CA*(1+std::pow(x, 4)+std::pow(1.-x,4))/x/(1.-x);
+	return CA*(1.+std::pow(x, 4)+std::pow(1.-x,4))/x/(1.-x);
 }
 double P_g2qq(double x){
-	return nf*(x*x + std::pow(1-x, 2));
+	return nf*(x*x + std::pow(1.-x, 2));
 }
 
 

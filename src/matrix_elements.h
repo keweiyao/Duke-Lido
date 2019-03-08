@@ -6,10 +6,13 @@
 
 ////////// 1 <--> 2 //////////////////
 // diffusion induced process
-double LGV_Q2Qg(const double * x_, void *params_); 
-double LGV_Qg2Q(const double * x_, void *params_);  
+double LGV_q2qg(const double * x_, void *params_); 
+double LGV_qg2q(const double * x_, void *params_); 
+ 
 double LGV_g2gg(const double * x_, void *params_); 
 double LGV_gg2g(const double * x_, void *params_);  
+
+double LGV_g2qqbar(const double * x_, void *params_); 
 
 ////////// 2 <--> 2 //////////////////
 double M2_gq2gq(const double t, void * params);
@@ -39,4 +42,7 @@ double M2_gg2ggg(const double * x_, void * params_);
 
 double M2_gqg2gq(const double * x_,  void * params_);
 double M2_ggg2gg(const double * x_, void * params_);
+
+double M2_gq2qqqbar(const double * x_, void * params_);
+double M2_gg2qgqbar(const double * x_, void * params_);
 #endif

@@ -179,6 +179,8 @@ int main(int argc, char* argv[]){
 		double dE = 0.;
 		int Np = plist.size();
 		std::vector<particle> pOut_list;
+
+		std::ofstream fff("stat.dat");
         for (int i=0; i<Nsteps; i++){
 			double t = ti + dt*i;
             double T = T0 * std::pow(ti/t, 2./3.-1./nu/3.);
@@ -186,10 +188,28 @@ int main(int argc, char* argv[]){
             for (auto & p : plist){
 				// reset energy 
 				p.p = p0;
+				// reset pid
+				p.pid = pid;
+
+				bool initially_a_gluon = (p.pid==21);
+
                 // x,p-update
-                int channel = 
-                    update_particle_momentum_Lido(dt, T, {0., 0., 0.}, 
-							p, pOut_list);
+                update_particle_momentum_Lido(dt, T, {0., 0., 0.}, p, pOut_list);
+
+				for (int j=1; j<pOut_list.size(); j++){
+					auto k = pOut_list[j];
+					fff   << k.x0.t() << " " << k.p0.t() << " "
+						  << measure_perp(p.p, k.p0).pabs2() << " "
+						  << measure_perp(p.p, k.p).pabs2() << " "
+						  << k.x.t() - k.x0.t() << std::endl;
+					if (initially_a_gluon){
+						fff   << k.x0.t() << " " << p0.t() - k.p0.t() << " "
+							  << measure_perp(p.p, k.p0).pabs2() << " "
+							  << measure_perp(p.p, k.p).pabs2() << " "
+							  << k.x.t() - k.x0.t() << std::endl;
+					}
+				}
+
 				dE += (E0 - p.p.t())/Np;
             }
 			f << dE << std::endl;

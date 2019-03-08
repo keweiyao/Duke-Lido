@@ -10,5 +10,7 @@ extern std::uniform_real_distribution<double> init_dis;
 extern std::uniform_real_distribution<double> dist_phi;
 extern std::uniform_real_distribution<double> dist_costheta;
 extern std::normal_distribution<double> white_noise;
+int sample_flavor(int Nf);
+
 }
 #endif

@@ -74,61 +74,104 @@ void init_process(Process& r, std::string mode, std::string table_path){
 }
 
 
-void initialize(std::string mode, std::string setting_path, std::string table_path, double mu, double afix,
-                double K, double a, double b, double p, double q, double gamma, double cut, double Rvac){
+void initialize(std::string mode, std::string setting_path, std::string table_path,
+				double mu, // alphas(max(Q, mu*pi*T)), active when afix < 0
+				double afix, // fixed coupling, negative value for running coupling
+                double K, double a, double b, double p, double q, double gamma,
+				// K, a, b, p, q, gamma are used in non-pert. qhat parametrization
+				// Its effect is off when K = 0. 
+				double cut, // Separation scale between diffusion
+							// and scattering both at leading order (weak coupled)
+				double Rvac // Vaccum veto region parameter
+				){
 	print_logo();
     initialize_mD_and_scale(0, mu, afix, cut, Rvac);
 	initialize_transport_coeff(K, a, b, p, q, gamma);
     echo();
-	AllProcesses[4] = std::vector<Process>();
-	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", setting_path, dX_Qq2Qq_dt) ); // 2->2
-	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", setting_path, dX_Qg2Qg_dt) ); // 2->2
-	AllProcesses[4].push_back( Rate23("Boltzmann/cq2cqg", setting_path, M2_Qq2Qqg) ); // 2->3
-	AllProcesses[4].push_back( Rate23("Boltzmann/cg2cgg", setting_path, M2_Qg2Qgg) ); // 2->3
-	AllProcesses[4].push_back( Rate32("Boltzmann/cqg2cq", setting_path, M2_Qqg2Qq) );  // 3->2
-	AllProcesses[4].push_back( Rate32("Boltzmann/cgg2cg", setting_path, M2_Qgg2Qg) );  // 3->2
-  	AllProcesses[4].push_back( Rate12("Boltzmann/c2cg", setting_path, LGV_Q2Qg) );  // 1->2
-	AllProcesses[4].push_back( Rate21("Boltzmann/cg2c", setting_path, LGV_Qg2Q) );  // 2->1
 
+	// for gluon
 	AllProcesses[21] = std::vector<Process>();
-	AllProcesses[21].push_back( Rate22("Boltzmann/gq2gq", setting_path, dX_gq2gq_dt) ); // 2->2
-	AllProcesses[21].push_back( Rate22("Boltzmann/gg2gg", setting_path, dX_gg2gg_dt) ); // 2->2
-	AllProcesses[21].push_back( Rate23("Boltzmann/gq2gqg", setting_path, M2_gq2gqg) ); // 2->3
-	AllProcesses[21].push_back( Rate23("Boltzmann/gg2ggg", setting_path, M2_gg2ggg) ); // 2->3
-	AllProcesses[21].push_back( Rate32("Boltzmann/gqg2gq", setting_path, M2_gqg2gq) ); // 3->2
-	AllProcesses[21].push_back( Rate32("Boltzmann/ggg2gg", setting_path, M2_ggg2gg) ); // 3->2
-	AllProcesses[21].push_back( Rate12("Boltzmann/g2gg", setting_path, LGV_g2gg) ); // 1->2
-	AllProcesses[21].push_back( Rate21("Boltzmann/gg2g", setting_path, LGV_gg2g) ); // 2->1
+	AllProcesses[21].push_back( Rate22("Boltzmann/gq2gq", setting_path, dX_gq2gq_dt) ); // 2->2, index = 0
+	AllProcesses[21].push_back( Rate22("Boltzmann/gg2gg", setting_path, dX_gg2gg_dt) ); // 2->2, index = 1
+	AllProcesses[21].push_back( Rate23("Boltzmann/gq2gqg", setting_path, M2_gq2gqg) ); // 2->3, index = 2
+	AllProcesses[21].push_back( Rate23("Boltzmann/gg2ggg", setting_path, M2_gg2ggg) ); // 2->3, index = 3
+	AllProcesses[21].push_back( Rate32("Boltzmann/gqg2gq", setting_path, M2_gqg2gq) ); // 3->2, index = 4
+	AllProcesses[21].push_back( Rate32("Boltzmann/ggg2gg", setting_path, M2_ggg2gg) ); // 3->2, index = 5
+	AllProcesses[21].push_back( Rate12("Boltzmann/g2gg", setting_path, LGV_g2gg) ); // 1->2, index = 6
+	AllProcesses[21].push_back( Rate21("Boltzmann/gg2g", setting_path, LGV_gg2g) ); // 2->1, index = 7
+	AllProcesses[21].push_back( Rate23("Boltzmann/gq2qqqbar", setting_path, M2_gq2qqqbar) ); // 2->3, index = 8
+	AllProcesses[21].push_back( Rate23("Boltzmann/gg2qgqbar", setting_path, M2_gg2qgqbar) ); // 2->3, index = 9
+	AllProcesses[21].push_back( Rate12("Boltzmann/g2qqbar", setting_path, LGV_g2qqbar) ); // 1->2, index = 10
 
+	// for u, d, s flavor
+	AllProcesses[123] = std::vector<Process>();
+	AllProcesses[123].push_back( Rate22("Boltzmann/qq2qq", setting_path, dX_Qq2Qq_dt) ); // 2->2, index = 0
+	AllProcesses[123].push_back( Rate22("Boltzmann/qg2qg", setting_path, dX_Qg2Qg_dt) ); // 2->2, index = 1
+	AllProcesses[123].push_back( Rate23("Boltzmann/qq2qqg", setting_path, M2_Qq2Qqg) ); // 2->3, index = 2
+	AllProcesses[123].push_back( Rate23("Boltzmann/qg2qgg", setting_path, M2_Qg2Qgg) ); // 2->3, index = 3
+	AllProcesses[123].push_back( Rate32("Boltzmann/qqg2qq", setting_path, M2_Qqg2Qq) );  // 3->2, index = 4
+	AllProcesses[123].push_back( Rate32("Boltzmann/qgg2qg", setting_path, M2_Qgg2Qg) );  // 3->2, index = 5
+  	AllProcesses[123].push_back( Rate12("Boltzmann/q2qg", setting_path, LGV_q2qg) );  // 1->2, index = 6
+	AllProcesses[123].push_back( Rate21("Boltzmann/qg2q", setting_path, LGV_qg2q) );  // 2->1, index = 7
+
+	// for charm flavor
+	AllProcesses[4] = std::vector<Process>();
+	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", setting_path, dX_Qq2Qq_dt) ); // 2->2, index = 0
+	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", setting_path, dX_Qg2Qg_dt) ); // 2->2, index = 1
+	AllProcesses[4].push_back( Rate23("Boltzmann/cq2cqg", setting_path, M2_Qq2Qqg) ); // 2->3, index = 2
+	AllProcesses[4].push_back( Rate23("Boltzmann/cg2cgg", setting_path, M2_Qg2Qgg) ); // 2->3, index = 3
+	AllProcesses[4].push_back( Rate32("Boltzmann/cqg2cq", setting_path, M2_Qqg2Qq) );  // 3->2, index = 4
+	AllProcesses[4].push_back( Rate32("Boltzmann/cgg2cg", setting_path, M2_Qgg2Qg) );  // 3->2, index = 5
+  	AllProcesses[4].push_back( Rate12("Boltzmann/c2cg", setting_path, LGV_q2qg) );  // 1->2, index = 6
+	AllProcesses[4].push_back( Rate21("Boltzmann/cg2c", setting_path, LGV_qg2q) );  // 2->1, index = 7
+
+	// for bottom flavor
+	AllProcesses[5] = std::vector<Process>();
+	AllProcesses[5].push_back( Rate22("Boltzmann/bq2bq", setting_path, dX_Qq2Qq_dt) ); // 2->2, index = 0
+	AllProcesses[5].push_back( Rate22("Boltzmann/bg2bg", setting_path, dX_Qg2Qg_dt) ); // 2->2, index = 1
+	AllProcesses[5].push_back( Rate23("Boltzmann/bq2bqg", setting_path, M2_Qq2Qqg) ); // 2->3, index = 2
+	AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", setting_path, M2_Qg2Qgg) ); // 2->3, index = 3
+	AllProcesses[5].push_back( Rate32("Boltzmann/bqg2bq", setting_path, M2_Qqg2Qq) );  // 3->2, index = 4
+	AllProcesses[5].push_back( Rate32("Boltzmann/bgg2bg", setting_path, M2_Qgg2Qg) );  // 3->2, index = 5
+  	AllProcesses[5].push_back( Rate12("Boltzmann/b2bg", setting_path, LGV_q2qg) );  // 1->2, index = 6
+	AllProcesses[5].push_back( Rate21("Boltzmann/bg2b", setting_path, LGV_qg2q) );  // 2->1, index = 7
+
+	// Initialzie all processes
+	BOOST_FOREACH(Process& r, AllProcesses[123]) init_process(r, mode, table_path);
 	BOOST_FOREACH(Process& r, AllProcesses[4]) init_process(r, mode, table_path);
+	BOOST_FOREACH(Process& r, AllProcesses[5]) init_process(r, mode, table_path);
 	BOOST_FOREACH(Process& r, AllProcesses[21]) init_process(r, mode, table_path);
 }
 
 // split=1: q->q+g, colors = 1 - x + CF/CA * x^2
 // split=2: g->g+g, colors = 1 - x + x^2 
+// split=3: g->q+qbar, colors = 1 - x*CA/CF + x^2*CA/CF 
 double formation_time(fourvec p, fourvec k, double T, int split){
 	double E0 = p.t();
 	double x = k.t()/E0;
-	double mD2 = t_channel_mD2->get_mD2(T);
-	double mg2 = mD2/2.;
-	double Q0 = 2*x*(1-x)*E0;
-	double mass_sqrs = 0.0;
-	double colors = 1.;
+	double mg2 = t_channel_mD2->get_mD2(T)/2., 
+		   mass_sqrs = 0.0,  colors = 1.;
 	if (split == 1) {
+		// q --> q + g
 		colors = 1. - x + CF/CA*x*x;
 		mass_sqrs = x*x*dot(p, p) + (1.-x)*mg2;
 	}
 	if (split == 2) {
+		// g --> g + g
 		colors = 1. - x + x*x;
 		mass_sqrs = (1. - x + x*x)*mg2;
 	}
+	if (split == 3) {
+		// g --> q + qbar
+		colors = 1. - x*CA/CF + x*x*CA/CF;
+		mass_sqrs = (1-CA/CF*x+CA/CF*x*x)*mg2;
+	}
 
-	double QT2_LL = measure_perp(p,k).pabs2();
-	double tauf_LL = Q0/(QT2_LL*colors + mass_sqrs);
-	return tauf_LL;
+	double QT2 = measure_perp(p,k).pabs2()*colors;
+	double tauf = 2*x*(1-x)*E0/(QT2 + mass_sqrs);
+	return tauf;
 }
 
-//std::ofstream f("stat.dat");
 int update_particle_momentum_Lido(
 		double dt, double temp, std::vector<double> v3cell, 
 		particle & pIn, std::vector<particle> & pOut_list){
@@ -145,6 +188,7 @@ int update_particle_momentum_Lido(
 	auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
 	double dt_cell = dt / pIn.p.t() * p_cell.t();
 	double E_cell = p_cell.t();
+
 	// For diffusion induced radiation, qhat_Soft is an input
 	double qhatg = qhat(21, E_cell, 0., temp);
 
@@ -249,13 +293,12 @@ int update_particle_momentum_Lido(
 			pmu = pmu.boost_back(v3cell[0], v3cell[1], v3cell[2]);
 		}
 
-		// elastic process happens instantaneously
+		// elastic process changes the momentum immediately
 		if(channel ==0 || channel == 1) {
 			pIn.p = FS[0];
 		} 
 		// inelastic process takes a finite time to happen
 		if(channel == 2 || channel == 3){
-			
 				// add the radiating daughters as ``virtual" particles 
 				// these are virtual particles, that pops out at a rate
 				// given by the incoherent calculation, which will be 
@@ -298,6 +341,10 @@ int update_particle_momentum_Lido(
 				vp.mfp0 = LPM_prefactor*mD2/local_qhat*boost_factor;
 				pIn.radlist.push_back(vp);
 		}
+		if(channel == 4 || channel == 5){
+			// Absorption processes happens mostly for gluon energy ~ 3*T, therefore we negelected the LPM effect
+			pIn.p = FS[0];
+		}
 		if(channel == 6){
 			// add the radiating daughters as ``virtual" particles 
 			// these are virtual particles, that pops out at a rate
@@ -321,63 +368,136 @@ int update_particle_momentum_Lido(
 			vp.mfp0 = LPM_prefactor*mD2/qhatg*pIn.p.t()/E_cell; 
 			pIn.radlist.push_back(vp);
 		}
+		if(channel == 7){
+			// Absorption processes happens mostly for gluon energy ~ 3*T, therefore we negelected the LPM effect
+			pIn.p = FS[0];
+		}
+		// inelastic process takes a finite time to happen
+		if(channel == 8 || channel == 9){
+			// This should only happen for gluon
+			// gluon splits to q+qbar, pid changing!!
+			particle vp;				
+			vp.pid = Srandom::sample_flavor(3);
+			vp.mass = 0.0;
+			vp.weight = pIn.weight;
+			vp.p0 = FS[2]; 
+			vp.p = vp.p0;
+			vp.x0 = pIn.x;
+			vp.x = vp.x0;
+			vp.T0 = temp;
+			vp.is_vac = false;
+			vp.is_virtual = true;
+
+			// The local 2->2 mean-free-path is estimated with
+			// the qhat_hard integrate from the 2->2 rate
+			double xfrac = vp.p.t()/pIn.p.t();
+			double local_qhat = 0.;
+			double vp_cell = vp.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
+			double boost_factor = vp.p.t()/vp_cell;
+			BOOST_FOREACH(Process& r, AllProcesses[21]){
+				switch(r.which()){
+					case 0:
+						if (boost::get<Rate22>(r).IsActive()){
+							tensor A = boost::get<Rate22>(r).GetSecondM(
+								{vp_cell, temp}
+							);			
+							local_qhat += A.T[1][1]+A.T[2][2];
+						}
+						break;
+					default:
+						break;
+				}
+			}
+			double mD2 = t_channel_mD2->get_mD2(temp);
+			// estimate mfp in the lab frame
+			vp.mfp0 = LPM_prefactor*mD2/local_qhat*boost_factor;
+			pIn.radlist.push_back(vp);
+		}
+		if(channel == 10){
+			// This should only happen for gluon
+			// gluon splits to q+qbar, pid changing!! 
+			particle vp;
+			vp.pid = Srandom::sample_flavor(3);
+			vp.mass = 0.0;
+			vp.weight = pIn.weight;
+			vp.p0 = FS[1]; 
+			vp.p = vp.p0;
+			vp.x0 = pIn.x;
+			vp.x = vp.x0;
+			vp.T0 = temp;
+			vp.is_vac = false;
+			vp.is_virtual = true;
+			
+			double mD2 = t_channel_mD2->get_mD2(temp);
+			// estimate mfp in the lab frame
+			vp.mfp0 = LPM_prefactor*mD2/qhatg*pIn.p.t()/E_cell; 
+			pIn.radlist.push_back(vp);
+		}
 	}
- 
-	// Handle the virtual particle
-	if (!pIn.radlist.empty()){
+
+	// Add the mother parton to the output list
+	pOut_list.push_back(pIn);
+
+	// Handle the virtual particle, (only for real mother parton)
+	if ( (!pIn.radlist.empty()) && (!pIn.is_virtual) ){
 		// loop over each virtual particles
 		for(std::vector<particle>::iterator it=pIn.radlist.begin(); it!=pIn.radlist.end();){
 			int split_type = 0;
-			if (pIn.pid != 21 && it->pid == 21) split_type = 1;
-			if (pIn.pid == 21 && it->pid == 21) split_type = 2;
-			if (pIn.pid == 21 && it->pid != 21) split_type = 3;
+			if (pIn.pid != 21 && it->pid == 21) split_type = 1; // q --> q + g
+			if (pIn.pid == 21 && it->pid == 21) split_type = 2; // g --> g + g
+			if (pIn.pid == 21 && it->pid != 21) split_type = 3; // g --> q + qbar
 			double taun = formation_time(pIn.p,it->p,temp,split_type);
-			// Virtual particle will form if t-t0 > tauf
-			if (it->x.t() - it->x0.t() > taun){ 
+
+			// If t-t0 > tauf, or it reaches the boundary of QGP
+			// We check whether it sould be formed
+			if (it->x.t() - it->x0.t() > taun || temp < 0.15){ 
 				double Acceptance = 0.;
-				double kt20 = measure_perp(pIn.p, it->p0).pabs2();
-				double kt2n = measure_perp(pIn.p, it->p).pabs2();
 				if (!it->is_vac){ 
 					// medium-induced
+					double kt20 = measure_perp(pIn.p, it->p0).pabs2();
+					double kt2n = measure_perp(pIn.p, it->p).pabs2();
 					double theta2 = kt2n/std::pow(it->p.t(),2);
 					double thetaM2 = std::pow(pIn.mass/pIn.p.t(),2);
 					double mD2 = t_channel_mD2->get_mD2(temp);
 					double mean_s = 6*it->p.t()*temp;
-
-					double LPM = it->mfp0/taun
-						* std::sqrt(  std::log(1+taun/it->mfp0)
-									/std::log(1+mean_s/mD2) );
+					double log_factor = std::sqrt(std::log(1+taun/it->mfp0)
+												/std::log(1+mean_s/mD2) ) ;
+					double LPM = it->mfp0 / taun * log_factor;
 					double DeadCone = std::pow(theta2/(theta2+thetaM2), 2);
 					double Running = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
-					Acceptance = LPM*Running*DeadCone;
+					Acceptance = LPM * Running * DeadCone;
 				} else { 
-					// vacuum process
-					if (kt2n > Rvac*kt20) Acceptance = 0.0;
-                    else Acceptance = 1.0;
+					// from vac radiation
+					if (temp < 0.15) { 
+						// if outside of QGP, then it forms
+						Acceptance = 1.0;
+					}
+					else {
+						// Inside, reject if kT^2 is larger than its initial Q^2
+						double kt20 = measure_perp(pIn.p0, it->p0).pabs2();
+						double kt2n = measure_perp(pIn.p0, it->p).pabs2();
+						if (kt2n > Rvac*kt20) Acceptance = 0.0;
+    	                else Acceptance = 1.0;
+					}
 				}				
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
 					// If this fluctuation is accepted:
 					// add it to the pOut list
-					pOut_list.push_back(*it);
 					pIn.p = pIn.p - it->p;	
-					pIn.p.a[0] = std::sqrt(
-							pIn.p.pabs2()+pIn.mass*pIn.mass);	
-					/*f << it->x0.t() << " "
-					  << it->p.t() << " "
-					  << measure_perp(pIn.p, it->p0).pabs2() << " "
-					  << measure_perp(pIn.p, it->p).pabs2() << " "
- 					  << taun << std::endl;
-					if (pIn.pid==21){
-						f << it->x0.t() << " "
-						  << pIn.p0.t() - it->p.t() << " "
-						  << measure_perp(pIn.p, it->p0).pabs2() << " "
-						  << measure_perp(pIn.p, it->p).pabs2() << " "
-	 					  << taun << std::endl;
-					}*/
+					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);	
+					
+					if (split_type == 3) {
+						// pid changing!!!
+						pIn.pid = -it->pid;
+					}
+
+					it->is_virtual = false;
+					pOut_list.push_back(*it);
 				}
 				it = pIn.radlist.erase(it);
-			}else{ // else, evolve it
+
+			}else{ // else, evolve it, while rescale its energy ("ekional limit")
 				std::vector<particle> pnew_Out;
 				update_particle_momentum_Lido(dt, temp, v3cell, (*it), pnew_Out);
 				it->p = it->p*(it->p0.t()/it->p.t());
@@ -385,7 +505,32 @@ int update_particle_momentum_Lido(
 			}
 		}
 	}
+
 	return channel;
+}
+
+
+void output(const std::vector<particle> plist, std::string fname){
+	int i=0;
+	std::ofstream f(fname);
+	for (auto & p : plist){
+		f << std::setw(10) << std::setfill(' ') << i << "  " // particle index, i10,2x
+		  << std::setw(10) << std::setfill(' ') << p.pid << "  "; // particle id, i10,2x
+		f << p.p.x() << "  "
+		  << p.p.y() << "  "
+		  << p.p.z() << "  "
+		  << p.p.t() << "  "
+		  << p.mass << "  "
+		  << p.x.x()/fmc_to_GeV_m1 << "  "
+		  << p.x.y()/fmc_to_GeV_m1 << "  "
+		  << p.x.z()/fmc_to_GeV_m1 << "  "
+		  << p.x.t()/fmc_to_GeV_m1 << " "
+		  << p.x0.x()/fmc_to_GeV_m1 << "  "
+		  << p.x0.y()/fmc_to_GeV_m1 << "  "
+		  << p.x0.z()/fmc_to_GeV_m1 << "  "
+		  << p.x0.t()/fmc_to_GeV_m1 << "\n";
+		i++;
+	}
 }
 
 void output_oscar(const std::vector<particle> plist, std::string fname){

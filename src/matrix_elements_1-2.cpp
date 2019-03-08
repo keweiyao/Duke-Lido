@@ -5,8 +5,10 @@
 #include "lorentz.h"
 #include "simpleLogger.h"
 
+/////////////////////// SPLITTING ////////////////////////
+
 // Diffusion-induced gluon radiation process q -> q + g
-double LGV_Q2Qg(const double * x_, void * params_){
+double LGV_q2qg(const double * x_, void * params_){
     double *params = static_cast<double*>(params_);
     double E = params[0];
     double T = params[1];
@@ -56,9 +58,36 @@ double LGV_g2gg(const double * x_, void * params_){
     return dR_dxdy;
 }
 
+// Diffusion-induced gluon splitting process g -> q + qbar
+double LGV_g2qqbar(const double * x_, void * params_){
+    double *params = static_cast<double*>(params_);
+    double E = params[0];
+    double T = params[1];
+    double M = params[2];
+	double pabs = std::sqrt(E*E-M*M);
+    
+	double x = x_[0]; // k/p
+	double y = x_[1]; // kT/k0
+
+    double k0 = x*pabs;
+    double kT = y*k0;
+	double kT2 = kT*kT;
+    
+	double mg2 = t_channel_mD2->get_mD2(T)/2.;
+	double x0 = k0/E;
+	// No dead cone
+	double Jacobian = 2*k0*kT;
+    double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) * P_g2qq(x0) * CF / 4.
+                     * 1./std::pow(kT2+mg2, 2)
+                     * Jacobian;
+    return dR_dxdy;
+}
+
+////////////////// ABSORPTION ////////////////////////
+
 
 // Diffusion-induced gluon absorption process q + g -> q
-double LGV_Qg2Q(const double * x_, void * params_){
+double LGV_qg2q(const double * x_, void * params_){
     double *params = static_cast<double*>(params_);
     double E = params[0];
     double T = params[1];

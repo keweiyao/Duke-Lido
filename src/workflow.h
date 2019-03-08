@@ -46,6 +46,7 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 
 double formation_time(fourvec p, fourvec k, double T, int split);
 double calcualte_dt_from_dtau(fourvec x, fourvec p, double tau, double dtau);
+void output(const std::vector<particle> plist, std::string fname);
 void output_oscar(const std::vector<particle> plist, std::string fname);
 double mean_pT(const std::vector<particle> plist);
 double mean_E(const std::vector<particle> plist);

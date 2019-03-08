@@ -278,7 +278,7 @@ scalar Xsection<GB, 2, double(*)(const double*, void*)>::
 			{{umax*0.4,umax*0.6}, {-0.2, 0.2},
 			 {x2min+Lx2/3., x2max-Lx2/3.}, {-0.5, 0.5}}, 400);
 	// use the best result of MC_maximize and determine the step of the simplex minimization method
-	std::vector<double> step = {umax/20., 0.1, (x2max-x2min)/20., 0.1};
+	std::vector<double> step = {umax/20., 0.2, (x2max-x2min)/20., 0.2};
 	double L[4] = {0, -1, x2min, 0};
 	double H[4] = {umax, 1, x2max, 2*M_PI};
 	for(int i=0; i<4; i++){

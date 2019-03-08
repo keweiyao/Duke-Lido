@@ -1,11 +1,5 @@
 <Boltzmann>
-
-	<!-- (1) Add any 2->2 or 2->3 proceeses you want,
-		     so long as the matrix-elements is provided
-		 (2) The mass of the probe does not have to be heavy,
-		 	 the framework can easily incroperate light parton -->
-
-	<!--###########################Gluons##############################-->
+	<!--  Gluon/elastic/G+q=G+q  -->
 	<gq2gq status="active" moments="on">
 		<mass>.0</mass>
 		<degeneracy>36</degeneracy>
@@ -14,11 +8,12 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>400</Nenergy> <Lenergy>.1</Lenergy> <Henergy>400.0</Henergy>
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</gq2gq>
 
+    <!--  Gluon/elastic/G+g=G+g  -->
 	<gg2gg status="active" moments="on">
 		<mass>.0</mass>
 		<degeneracy>16</degeneracy>
@@ -27,11 +22,12 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>400</Nenergy> <Lenergy>.1</Lenergy> <Henergy>400.0</Henergy>
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</gg2gg>
-
+    
+    <!--  Gluon/inelastic/G+q=G+q+G'  -->
 	<gq2gqg status="inactive" moments="off">
 		<mass>.0</mass>
 		<degeneracy>36</degeneracy>
@@ -40,11 +36,12 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>400</Nenergy> <Lenergy>.1</Lenergy> <Henergy>400.0</Henergy>
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</gq2gqg>
 
+    <!--  Gluon/inelastic/G+g=G+g+G'  -->
 	<gg2ggg status="inactive" moments="off">
 		<mass>.0</mass>
 		<degeneracy>16</degeneracy>
@@ -53,11 +50,40 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>400</Nenergy> <Lenergy>.1</Lenergy> <Henergy>400.0</Henergy>
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</gg2ggg>
 
+	<!--  Gluon/inelastic/G+q=Q+Qbar+q  -->
+	<gq2qqqbar status="inactive" moments="off">
+		<mass>.0</mass>
+		<degeneracy>36</degeneracy>
+		<xsection slots="sqrts,temp">
+			<Nsqrts>100</Nsqrts> <Lsqrts>.1</Lsqrts> <Hsqrts>100.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</gq2qqqbar>
+
+	<!--  Gluon/inelastic/G+g=Q+Qbar+g  -->
+	<gg2qgqbar status="inactive" moments="off">
+		<mass>.0</mass>
+		<degeneracy>16</degeneracy>
+		<xsection slots="sqrts,temp">
+			<Nsqrts>100</Nsqrts> <Lsqrts>.1</Lsqrts> <Hsqrts>100.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</gg2qgqbar>
+
+	<!--  Gluon/inelastic/G+q+g=G+q  -->
 	<gqg2gq status="inactive" moments="off">
 		<mass>.0</mass>
 		<degeneracy>576</degeneracy>
@@ -73,6 +99,7 @@
 		</rate>
 	</gqg2gq>
 
+	<!--  Gluon/inelastic/G+g+g=G+g  -->
 	<ggg2gg status="inactive" moments="off">
 		<mass>.0</mass>
 		<degeneracy>256</degeneracy>
@@ -88,14 +115,25 @@
 		</rate>
 	</ggg2gg>
 
+	<!--  Gluon/inelastic/G+diffusion=G+G'  -->
 	<g2gg status="inactive" moments="off">
 		<mass>.0</mass>
 		<rate slots="energy,temp">
-			<Nenergy>400</Nenergy> <Lenergy>.1</Lenergy> <Henergy>400.0</Henergy>
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</g2gg>
 
+	<!--  Gluon/inelastic/G+diffusion=Q+Qbar  -->
+	<g2qqbar status="inactive" moments="off">
+		<mass>.0</mass>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</g2qqbar>
+
+	<!--   Gluon/inelastic/G+g+diffusion=G  -->
 	<gg2g status="inactive" moments="off">
 		<mass>.0</mass>
 		<rate slots="energy,temp">
@@ -103,8 +141,9 @@
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</gg2g>
-    <!--###########################CHARM QUARKS##############################-->
-	<cq2cq status="active" moments="on">
+
+	<!--   q={u,d,s}/elastic/Q+q=Q+q  -->
+	<qq2qq status="active" moments="on">
 		<mass>.0</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -112,12 +151,13 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>400</Nenergy> <Lenergy>.1</Lenergy> <Henergy>400.0</Henergy>
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
-	</cq2cq>
+	</qq2qq>
 
-	<cg2cg status="active" moments="on">
+	<!--   q={u,d,s}/elastic/Q+f=Q+f  -->
+	<qg2qg status="active" moments="on">
 		<mass>.0</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -125,12 +165,13 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>400</Nenergy> <Lenergy>.1</Lenergy> <Henergy>400.0</Henergy>
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
-	</cg2cg>
+	</qg2qg>
 
-	<cq2cqg status="active" moments="off">
+	<!--   q={u,d,s}/inelastic/Q+q=Q+q+G  -->
+	<qq2qqg status="active" moments="off">
 		<mass>.0</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -138,12 +179,13 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>400</Nenergy> <Lenergy>.1</Lenergy> <Henergy>400.0</Henergy>
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
-	</cq2cqg>
+	</qq2qqg>
 
-	<cg2cgg status="active" moments="off">
+	<!--   q={u,d,s}/inelastic/Q+g=Q+g+G  -->
+	<qg2qgg status="active" moments="off">
 		<mass>.0</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -151,12 +193,13 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>400</Nenergy> <Lenergy>.1</Lenergy> <Henergy>400.0</Henergy>
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
-	</cg2cgg>
+	</qg2qgg>
 
-	<cqg2cq status="inactive" moments="off">
+	<!--   q={u,d,s}/inelastic/Q+q+g=Q+q  -->
+	<qqg2qq status="inactive" moments="off">
 		<mass>.0</mass>
 		<degeneracy>576</degeneracy>
 		<xsection slots="sqrts,temp,xinel,yinel">
@@ -169,9 +212,10 @@
 			<Nenergy>60</Nenergy> <Lenergy>.1</Lenergy> <Henergy>60.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
-	</cqg2cq>
+	</qqg2qq>
 
-	<cgg2cg status="inactive" moments="off">
+	<!--   q={u,d,s}/inelastic/Q+g+g=Q+g  -->
+	<qgg2qg status="inactive" moments="off">
 		<mass>.0</mass>
 		<degeneracy>256</degeneracy>
 		<xsection slots="sqrts,temp,xinel,yinel">
@@ -184,16 +228,126 @@
 			<Nenergy>60</Nenergy> <Lenergy>.1</Lenergy> <Henergy>60.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
+	</qgg2qg>
+
+	<!--   q={u,d,s}/inelastic/Q+diffusion=Q+g  -->
+	<q2qg status="active" moments="off">
+		<mass>.0</mass>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</q2qg>
+
+	<!--   q={u,d,s}/inelastic/Q+g+diffusion=Q  -->
+	<qg2q status="inactive" moments="off">
+		<mass>.0</mass>
+		<rate slots="energy,temp">
+			<Nenergy>60</Nenergy> <Lenergy>.1</Lenergy> <Henergy>60.0</Henergy>
+			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</qg2q>
+
+
+    <!-- Charm quark -->
+	<!--   charm/elastic/Q+q=Q+q  -->
+	<cq2cq status="active" moments="on">
+		<mass>1.3</mass>
+		<degeneracy>36</degeneracy>
+		<xsection slots="sqrts,temp">
+			<Nsqrts>100</Nsqrts> <Lsqrts>1.4</Lsqrts> <Hsqrts>100.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</cq2cq>
+
+	<!--   charm/elastic/Q+g=Q+g  -->
+	<cg2cg status="active" moments="on">
+		<mass>1.3</mass>
+		<degeneracy>16</degeneracy>
+		<xsection slots="sqrts,temp">
+			<Nsqrts>100</Nsqrts> <Lsqrts>1.4</Lsqrts> <Hsqrts>100.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</cg2cg>
+
+	<!--   charm/inelastic/Q+q=Q+q+G  -->
+	<cq2cqg status="active" moments="off">
+		<mass>1.3</mass>
+		<degeneracy>36</degeneracy>
+		<xsection slots="sqrts,temp">
+			<Nsqrts>100</Nsqrts> <Lsqrts>1.4</Lsqrts> <Hsqrts>100.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</cq2cqg>
+
+	<!--   charm/inelastic/Q+g=Q+g+G  -->
+	<cg2cgg status="active" moments="off">
+		<mass>1.3</mass>
+		<degeneracy>16</degeneracy>
+		<xsection slots="sqrts,temp">
+			<Nsqrts>100</Nsqrts> <Lsqrts>1.4</Lsqrts> <Hsqrts>100.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</cg2cgg>
+
+	<!--   charm/inelastic/Q+q+g=Q+q  -->
+	<cqg2cq status="inactive" moments="off">
+		<mass>1.3</mass>
+		<degeneracy>576</degeneracy>
+		<xsection slots="sqrts,temp,xinel,yinel">
+			<Nsqrts>40</Nsqrts> <Lsqrts>1.4</Lsqrts> <Hsqrts>20.0</Hsqrts>
+			<Ntemp>10</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Nxinel>20</Nxinel> <Lxinel>0.01</Lxinel> <Hxinel>0.99</Hxinel>
+			<Nyinel>20</Nyinel> <Lyinel>0.01</Lyinel> <Hyinel>0.99</Hyinel>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>60</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>60.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</cqg2cq>
+
+	<!--   charm/inelastic/Q+g+g=Q+g  -->
+	<cgg2cg status="inactive" moments="off">
+		<mass>1.3</mass>
+		<degeneracy>256</degeneracy>
+		<xsection slots="sqrts,temp,xinel,yinel">
+			<Nsqrts>40</Nsqrts> <Lsqrts>1.4</Lsqrts> <Hsqrts>20.0</Hsqrts>
+			<Ntemp>10</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Nxinel>20</Nxinel> <Lxinel>0.01</Lxinel> <Hxinel>0.99</Hxinel>
+			<Nyinel>20</Nyinel> <Lyinel>0.01</Lyinel> <Hyinel>0.99</Hyinel>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>60</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>60.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
 	</cgg2cg>
 
+	<!--   charm/inelastic/Q+diffusion=Q+g  -->
 	<c2cg status="active" moments="off">
 		<mass>.0</mass>
 		<rate slots="energy,temp">
-			<Nenergy>400</Nenergy> <Lenergy>.1</Lenergy> <Henergy>400.0</Henergy>
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</c2cg>
 
+	<!--   charm/inelastic/Q+g+diffusion=Q  -->
 	<cg2c status="inactive" moments="off">
 		<mass>.0</mass>
 		<rate slots="energy,temp">
@@ -201,4 +355,111 @@
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</cg2c>
+
+ <!-- Bottom quark -->
+	<!--   bottom/elastic/Q+q=Q+q  -->
+	<bq2bq status="active" moments="on">
+		<mass>4.2</mass>
+		<degeneracy>36</degeneracy>
+		<xsection slots="sqrts,temp">
+			<Nsqrts>100</Nsqrts> <Lsqrts>4.3</Lsqrts> <Hsqrts>100.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</bq2bq>
+
+	<!--   charm/elastic/Q+g=Q+g  -->
+	<bg2bg status="active" moments="on">
+		<mass>4.2</mass>
+		<degeneracy>16</degeneracy>
+		<xsection slots="sqrts,temp">
+			<Nsqrts>100</Nsqrts> <Lsqrts>4.3</Lsqrts> <Hsqrts>100.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</bg2bg>
+
+	<!--   charm/inelastic/Q+q=Q+q+G  -->
+	<bq2bqg status="active" moments="off">
+		<mass>4.2</mass>
+		<degeneracy>36</degeneracy>
+		<xsection slots="sqrts,temp">
+			<Nsqrts>100</Nsqrts> <Lsqrts>4.3</Lsqrts> <Hsqrts>100.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</bq2bqg>
+
+	<!--   charm/inelastic/Q+g=Q+g+G  -->
+	<bg2bgg status="active" moments="off">
+		<mass>4.2</mass>
+		<degeneracy>16</degeneracy>
+		<xsection slots="sqrts,temp">
+			<Nsqrts>100</Nsqrts> <Lsqrts>4.3</Lsqrts> <Hsqrts>100.0</Hsqrts>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</bg2bgg>
+
+	<!--   charm/inelastic/Q+q+g=Q+q  -->
+	<bqg2bq status="inactive" moments="off">
+		<mass>4.2</mass>
+		<degeneracy>576</degeneracy>
+		<xsection slots="sqrts,temp,xinel,yinel">
+			<Nsqrts>40</Nsqrts> <Lsqrts>4.3</Lsqrts> <Hsqrts>20.0</Hsqrts>
+			<Ntemp>10</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Nxinel>20</Nxinel> <Lxinel>0.01</Lxinel> <Hxinel>0.99</Hxinel>
+			<Nyinel>20</Nyinel> <Lyinel>0.01</Lyinel> <Hyinel>0.99</Hyinel>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>60</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>60.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</bqg2bq>
+
+	<!--   charm/inelastic/Q+g+g=Q+g  -->
+	<bgg2bg status="inactive" moments="off">
+		<mass>4.2</mass>
+		<degeneracy>256</degeneracy>
+		<xsection slots="sqrts,temp,xinel,yinel">
+			<Nsqrts>40</Nsqrts> <Lsqrts>4.3</Lsqrts> <Hsqrts>20.0</Hsqrts>
+			<Ntemp>10</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+			<Nxinel>20</Nxinel> <Lxinel>0.01</Lxinel> <Hxinel>0.99</Hxinel>
+			<Nyinel>20</Nyinel> <Lyinel>0.01</Lyinel> <Hyinel>0.99</Hyinel>
+		</xsection>
+		<rate slots="energy,temp">
+			<Nenergy>60</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>60.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</bgg2bg>
+
+	<!--   charm/inelastic/Q+diffusion=Q+g  -->
+	<b2bg status="active" moments="off">
+		<mass>.0</mass>
+		<rate slots="energy,temp">
+			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
+			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</b2bg>
+
+	<!--   charm/inelastic/Q+g+diffusion=Q  -->
+	<bg2b status="inactive" moments="off">
+		<mass>.0</mass>
+		<rate slots="energy,temp">
+			<Nenergy>60</Nenergy> <Lenergy>.1</Lenergy> <Henergy>60.0</Henergy>
+			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
+		</rate>
+	</bg2b>
 </Boltzmann>
