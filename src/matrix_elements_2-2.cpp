@@ -128,4 +128,11 @@ double M2_Qg2Qg_full(const double t, void * params){
 	return result*c16pi2;
 }
 
+double dX_Qg2Qg_dt_full(const double t, void * params){
+	double * p = static_cast<double*>(params);
+	double s = p[0], M2 = p[2]*p[2];
+	return M2_Qg2Qg_full(t, params)/c16pi/std::pow(s-M2, 2);
+}
+
+
 

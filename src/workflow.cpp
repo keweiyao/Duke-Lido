@@ -117,7 +117,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 	// for charm flavor
 	AllProcesses[4] = std::vector<Process>();
 	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", setting_path, dX_Qq2Qq_dt) ); // 2->2, index = 0
-	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", setting_path, dX_Qg2Qg_dt) ); // 2->2, index = 1
+	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", setting_path, dX_Qg2Qg_dt_full) ); // 2->2, index = 1
 	AllProcesses[4].push_back( Rate23("Boltzmann/cq2cqg", setting_path, M2_Qq2Qqg) ); // 2->3, index = 2
 	AllProcesses[4].push_back( Rate23("Boltzmann/cg2cgg", setting_path, M2_Qg2Qgg) ); // 2->3, index = 3
 	AllProcesses[4].push_back( Rate32("Boltzmann/cqg2cq", setting_path, M2_Qqg2Qq) );  // 3->2, index = 4
@@ -128,7 +128,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 	// for bottom flavor
 	AllProcesses[5] = std::vector<Process>();
 	AllProcesses[5].push_back( Rate22("Boltzmann/bq2bq", setting_path, dX_Qq2Qq_dt) ); // 2->2, index = 0
-	AllProcesses[5].push_back( Rate22("Boltzmann/bg2bg", setting_path, dX_Qg2Qg_dt) ); // 2->2, index = 1
+	AllProcesses[5].push_back( Rate22("Boltzmann/bg2bg", setting_path, dX_Qg2Qg_dt_full) ); // 2->2, index = 1
 	AllProcesses[5].push_back( Rate23("Boltzmann/bq2bqg", setting_path, M2_Qq2Qqg) ); // 2->3, index = 2
 	AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", setting_path, M2_Qg2Qgg) ); // 2->3, index = 3
 	AllProcesses[5].push_back( Rate32("Boltzmann/bqg2bq", setting_path, M2_Qqg2Qq) );  // 3->2, index = 4

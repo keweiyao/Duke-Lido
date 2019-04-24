@@ -26,6 +26,7 @@ double dX_Qq2Qq_dt(const double t, void * params);
 
 double M2_Qg2Qg(const double t, void * params);
 double dX_Qg2Qg_dt(const double t, void * params);
+double dX_Qg2Qg_dt_full(const double t, void * params);
 
 // *** this one includes s, t, u channels and interferences
 double M2_Qg2Qg_full(const double t, void * params);
