@@ -259,7 +259,7 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>1000</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>1000.0</Henergy>
+			<Nenergy>300</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>300.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</cq2cq>
@@ -273,7 +273,7 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>1000</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>1000.0</Henergy>
+			<Nenergy>300</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>300.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</cg2cg>
@@ -287,7 +287,7 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>1000</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>1000.0</Henergy>
+			<Nenergy>300</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>300.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</cq2cqg>
@@ -301,7 +301,7 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>1000</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>1000.0</Henergy>
+			<Nenergy>300</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>300.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</cg2cgg>
@@ -340,18 +340,18 @@
 
 	<!--   charm/inelastic/Q+diffusion=Q+g  -->
 	<c2cg status="active" moments="off">
-		<mass>.0</mass>
+		<mass>1.3</mass>
 		<rate slots="energy,temp">
-			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
+			<Nenergy>300</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>300.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</c2cg>
 
 	<!--   charm/inelastic/Q+g+diffusion=Q  -->
 	<cg2c status="inactive" moments="off">
-		<mass>.0</mass>
+		<mass>1.3</mass>
 		<rate slots="energy,temp">
-			<Nenergy>60</Nenergy> <Lenergy>.1</Lenergy> <Henergy>60.0</Henergy>
+			<Nenergy>60</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>60.0</Henergy>
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</cg2c>
@@ -366,7 +366,7 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>1000</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>1000.0</Henergy>
+			<Nenergy>300</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>300.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</bq2bq>
@@ -380,7 +380,7 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>1000</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>1000.0</Henergy>
+			<Nenergy>300</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>300.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</bg2bg>
@@ -394,7 +394,7 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>1000</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>1000.0</Henergy>
+			<Nenergy>300</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>300.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</bq2bqg>
@@ -408,7 +408,7 @@
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</xsection>
 		<rate slots="energy,temp">
-			<Nenergy>1000</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>1000.0</Henergy>
+			<Nenergy>300</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>300.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</bg2bgg>
@@ -447,18 +447,18 @@
 
 	<!--   charm/inelastic/Q+diffusion=Q+g  -->
 	<b2bg status="active" moments="off">
-		<mass>.0</mass>
+		<mass>4.2</mass>
 		<rate slots="energy,temp">
-			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
+			<Nenergy>300</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>300.0</Henergy>
 			<Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</b2bg>
 
 	<!--   charm/inelastic/Q+g+diffusion=Q  -->
 	<bg2b status="inactive" moments="off">
-		<mass>.0</mass>
+		<mass>4.2</mass>
 		<rate slots="energy,temp">
-			<Nenergy>60</Nenergy> <Lenergy>.1</Lenergy> <Henergy>60.0</Henergy>
+			<Nenergy>60</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>60.0</Henergy>
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</bg2b>
