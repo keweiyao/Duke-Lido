@@ -461,7 +461,7 @@ int update_particle_momentum_Lido(
 					double mD2 = t_channel_mD2->get_mD2(temp);
 					double mean_s = 6*it->p.t()*temp;
 					double log_factor = std::sqrt(std::log(1+taun/it->mfp0)
-												/std::log(1+mean_s/mD2) ) ;
+												 /std::log(1+mean_s/mD2) ) ;
 					double LPM = it->mfp0 / taun * log_factor;
 					double DeadCone = std::pow(theta2/(theta2+thetaM2), 2);
 					double Running = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);

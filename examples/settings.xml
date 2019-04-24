@@ -143,7 +143,7 @@
 	</gg2g>
 
 	<!--   q={u,d,s}/elastic/Q+q=Q+q  -->
-	<qq2qq status="active" moments="on">
+	<qq2qq status="inactive" moments="on">
 		<mass>.0</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -157,7 +157,7 @@
 	</qq2qq>
 
 	<!--   q={u,d,s}/elastic/Q+f=Q+f  -->
-	<qg2qg status="active" moments="on">
+	<qg2qg status="inactive" moments="on">
 		<mass>.0</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -171,7 +171,7 @@
 	</qg2qg>
 
 	<!--   q={u,d,s}/inelastic/Q+q=Q+q+G  -->
-	<qq2qqg status="active" moments="off">
+	<qq2qqg status="inactive" moments="off">
 		<mass>.0</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -185,7 +185,7 @@
 	</qq2qqg>
 
 	<!--   q={u,d,s}/inelastic/Q+g=Q+g+G  -->
-	<qg2qgg status="active" moments="off">
+	<qg2qgg status="inactive" moments="off">
 		<mass>.0</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -231,7 +231,7 @@
 	</qgg2qg>
 
 	<!--   q={u,d,s}/inelastic/Q+diffusion=Q+g  -->
-	<q2qg status="active" moments="off">
+	<q2qg status="inactive" moments="off">
 		<mass>.0</mass>
 		<rate slots="energy,temp">
 			<Nenergy>1000</Nenergy> <Lenergy>.1</Lenergy> <Henergy>1000.0</Henergy>
