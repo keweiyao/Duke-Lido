@@ -190,14 +190,14 @@ int main(int argc, char* argv[]){
         // run
         int counter = 0;
         int Ns = 10;
-		std::vector<particle> pOut_list;
+        std::vector<particle> pOut_list;
         while(med1.load_next()){
             double current_hydro_clock = med1.get_tauL();
             double hydro_dtau = med1.get_hydro_time_step();
             for (int i=0; i<Ns; ++i){
                 double dtau = hydro_dtau/Ns; // use smaller dt step
                 for (auto & p : plist){
-                    if (p.Tf < 0.154) continue; // do not touch freezeout ones
+                    if ( p.Tf <= 0.154) continue; // do not touch freezeout ones
 
                     // determine dt needed to evolve to the next tau
                     double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
@@ -207,6 +207,7 @@ int main(int argc, char* argv[]){
                     // get hydro information
                     double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.;
                     med1.interpolate(p.x, T, vx, vy, vz);
+
                     double vabs = std::sqrt(vx*vx + vy*vy + vz*vy);
                     // regulate v
                     if (vabs > 1.){
@@ -218,15 +219,17 @@ int main(int argc, char* argv[]){
                             vz *= rescale;    
                         }
                     }
-					p.Tf = T;
-					p.vcell[0] = vx; p.vcell[0] = vy; p.vcell[0] = vz; 
+                    //
+                    if (T < 0.154) T = 0.15;
+		    p.vcell[0] = vx; p.vcell[0] = vy; p.vcell[0] = vz;
+
                     // x,p-update
                     int channel = 
                         update_particle_momentum_Lido(dt_lab, T, {vx, vy, vz}, 
 													p, pOut_list);
                 }
+                counter ++;
             }
-            counter ++;
         }
 
         // final pT

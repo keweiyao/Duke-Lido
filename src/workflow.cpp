@@ -178,7 +178,7 @@ int update_particle_momentum_Lido(
 	pOut_list.clear();
 	int absid = std::abs(pIn.pid);
 	pIn.freestream(dt);
-
+        pIn.Tf = temp;
 	// Apply diffusion and update particle momentum
 	fourvec pnew;
 	Ito_update(pIn.pid, dt, pIn.mass, temp, v3cell, pIn.p, pnew);
@@ -450,7 +450,8 @@ int update_particle_momentum_Lido(
 
 			// If t-t0 > tauf, or it reaches the boundary of QGP
 			// We check whether it sould be formed
-			if (it->x.t() - it->x0.t() > taun || temp < 0.15){ 
+                        bool outside = temp < 0.16;
+			if (it->x.t() - it->x0.t() > taun || outside){ 
 				double Acceptance = 0.;
 				if (!it->is_vac){ 
 					// medium-induced
@@ -462,29 +463,28 @@ int update_particle_momentum_Lido(
 					double mean_s = 6*it->p.t()*temp;
 					double log_factor = std::sqrt(std::log(1+taun/it->mfp0)
 												 /std::log(1+mean_s/mD2) ) ;
-					double LPM = it->mfp0 / taun * log_factor;
+					double LPM;
+                                        if (outside) LPM = it->mfp0 / taun * log_factor;
+                                        else LPM = it->mfp0 / (it->x.t() - it->x0.t()) * log_factor;
 					double DeadCone = std::pow(theta2/(theta2+thetaM2), 2);
 					double Running = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
 					Acceptance = LPM * Running * DeadCone;
 				} else { 
 					// from vac radiation
-					if (temp < 0.15) { 
-						// if outside of QGP, then it forms
-						Acceptance = 1.0;
-					}
+					if (outside) Acceptance = 1.0;
 					else {
 						// Inside, reject if kT^2 is larger than its initial Q^2
 						double kt20 = measure_perp(pIn.p0, it->p0).pabs2();
-						double kt2n = measure_perp(pIn.p0, it->p).pabs2();
+						double kt2n = measure_perp(pIn.p, it->p).pabs2();
 						if (kt2n > Rvac*kt20) Acceptance = 0.0;
-    	                else Acceptance = 1.0;
+    	                                        else Acceptance = 1.0;
 					}
 				}				
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
 					// If this fluctuation is accepted:
 					// add it to the pOut list
-					pIn.p = pIn.p - it->p;	
+					pIn.p = pIn.p - it->p0;	
 					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);	
 					
 					if (split_type == 3) {

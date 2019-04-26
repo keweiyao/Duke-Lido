@@ -58,17 +58,17 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events,
                 particle c_entry;
                 c_entry.mass = Mc; // mass
                 c_entry.pid = POI; // charm quark
-				c_entry.x0 = fourvec{0,x,y,0}; // initial position
-				c_entry.x = c_entry.x0; // initial position
+		c_entry.x0 = fourvec{0,x,y,0}; // initial position
+		c_entry.x = c_entry.x0; // initial position
                 c_entry.weight = weight;
                 c_entry.is_vac = false;
-				c_entry.is_virtual = false;
-                c_entry.Tf = 0.0;
+		c_entry.is_virtual = false;
+                c_entry.Tf = 1.0; // will be reset in the transport
                 c_entry.vcell.resize(3);
                 c_entry.vcell[0] = 0.; 
                 c_entry.vcell[1] = 0.; 
                 c_entry.vcell[2] = 0.; 
-				if (FSR_in_Medium){
+		if (FSR_in_Medium){
 		            // trace back to its first production to 
 		            // find out final state gluon radiation					
 		            while(true){
@@ -76,45 +76,60 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events,
 		                auto m2 = p.mother2();
 		                auto d1 = p.daughter1();
 		                auto d2 = p.daughter2();
-		                // trace the fermion line back, else break
-		                if (pythia.event[m1].id() == p.id()) 
+                                auto this_id = p.id();
+		                // trace the fermion line back through the final state radiation
+		                if (pythia.event[m1].status() == 51) {
 		                    p = pythia.event[m1];
-		                else if (pythia.event[m2].id() == p.id()) 
+                                    c_entry.pid = p.idAbs();
+                                }
+		                else if (pythia.event[m2].status() == 51) {
 		                    p = pythia.event[m2];
+                                    c_entry.pid = p.idAbs();
+                                }
 		                else break;
-		                int gluon_eid = -1;
-		                if (pythia.event[p.daughter1()].idAbs() == 21 
-		                && std::abs(pythia.event[p.daughter1()].status()) == 51)
-		                    gluon_eid = p.daughter1();    
-		                else if (pythia.event[p.daughter2()].idAbs() == 21 
-		                && std::abs(pythia.event[p.daughter2()].status()) == 51) 
-		                    gluon_eid = p.daughter2();
-		                if (gluon_eid >0) { // a radiated gluon:
-		                    // make it pre-formed gluon
-		                    auto g = pythia.event[gluon_eid];
+                                
+		                int parton_eid = -1;
+                                if (p.idAbs() == POI) {
+		                    if ( pythia.event[p.daughter1()].idAbs() == 21
+		                         && std::abs(pythia.event[p.daughter1()].status()) == 51 )
+		                        parton_eid = p.daughter1();    
+		                    else if (pythia.event[p.daughter2()].idAbs() == 21
+		                         && std::abs(pythia.event[p.daughter2()].status()) == 51) 
+		                        parton_eid = p.daughter2();
+                                }
+                                else {
+                                    if ( pythia.event[p.daughter1()].id() == this_id 
+                                         && std::abs(pythia.event[p.daughter2()].status()) == 51 )
+                                        parton_eid = p.daughter2();
+                                    else if (pythia.event[p.daughter2()].id() == this_id
+                                         && std::abs(pythia.event[p.daughter1()].status()) == 51)
+                                        parton_eid = p.daughter1();
+                                }
+		                if (parton_eid >0) { // a radiated parton
+		                    // make it pre-formed parton
+		                    auto g = pythia.event[parton_eid];
 		                    fourvec k{g.e(), g.px(), g.py(), g.pz()};
-		                    p0 = p0 + k; // add back the pre-gluon, put on shell
-		                    p0.a[0] = std::sqrt(p0.pabs2() + Mc*Mc);
-
+		                    p0 = p0 + k; // add back the pre-parton, put on shell
+		                    p0.a[0] = std::sqrt(p0.pabs2() + p.m()*p.m());
 		                    particle vp;
-							vp.pid = 21;
-							vp.mass = 0.0;
-							vp.weight = weight;
-							vp.p0 = k; 
-							vp.p = vp.p0;
-							vp.x0 = c_entry.x;
-							vp.x = vp.x0;
-							vp.T0 = 0.0; // not used
-							vp.mfp0 = 0.0; // not used
-							vp.is_vac = true;
-							vp.is_virtual = true;
+				    vp.pid = g.id();
+	            		    vp.mass = 0.0;
+				    vp.weight = weight;
+				    vp.p0 = k; 
+				    vp.p = vp.p0;
+				    vp.x0 = c_entry.x;
+				    vp.x = vp.x0;
+				    vp.T0 = 0.0; // not used
+				    vp.mfp0 = 0.0; // not used
+			            vp.is_vac = true;
+				    vp.is_virtual = true;
 
 		                    c_entry.radlist.push_back(vp);
 		                }
 		            }
-				}
+	        }
                 c_entry.p0 = p0; 
-				c_entry.p = c_entry.p0; 
+		c_entry.p = c_entry.p0; 
                 plist.push_back(c_entry); 
             }
         }

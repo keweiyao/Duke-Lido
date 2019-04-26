@@ -20,7 +20,7 @@ double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
         double Q2cut = cut*mD2;
         double thermal2 = std::pow(scale*M_PI*T, 2);
         double logs;
-        if (Q2cut > thermal2){
+        if (Q2cut > thermal2 && afix < 0.){
             double log0 = std::log(1.+thermal2/mD2);
             double log1 = std::log(thermal2/Lambda2);
             double log2 = std::log(Q2cut/Lambda2);
@@ -40,7 +40,7 @@ double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
 		double minf2 = .5*mD2;
         double thermal2 = std::pow(scale*M_PI*T, 2);
         double logs;
-        if (Q2cut > thermal2){
+        if (Q2cut > thermal2 && afix < 0.){
             double log0 = std::log(1.+thermal2/minf2);
             double log1 = std::log(thermal2/Lambda2);
             double log2 = std::log(Q2cut/Lambda2);
