@@ -177,9 +177,16 @@ int main(int argc, char* argv[]){
         /// Assign each quark a transverse position according to TRENTo Nbin output
         /// Freestream particle to the start of hydro
         for (auto & p : plist){
-            double vz2 = p.p.z()*p.p.z()/p.p.t()/p.p.t();
-            double dt_fs = med1.get_tauH()/std::sqrt(1. - vz2);
-            p.freestream(dt_fs);
+            double tau_fs = med1.get_tauH();
+	    double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
+
+	    if (tau < tau_fs) {
+                double dt_fs = calcualte_dt_from_dtau(p.x, p.p, tau, tau_fs-tau);
+                p.freestream(dt_fs);
+                for (auto & ip : p.radlist){
+	        	ip.x = p.x;
+	        }
+            }
         }
 
 
@@ -198,9 +205,9 @@ int main(int argc, char* argv[]){
                 double dtau = hydro_dtau/Ns; // use smaller dt step
                 for (auto & p : plist){
                     if ( p.Tf <= 0.154) continue; // do not touch freezeout ones
-
                     // determine dt needed to evolve to the next tau
                     double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
+                    if ( tau > current_hydro_clock + (i+1)*dtau ) continue; // not yet formed to the medium
                     double dt_lab = calcualte_dt_from_dtau(p.x, p.p, tau, dtau);
 
 
@@ -219,8 +226,7 @@ int main(int argc, char* argv[]){
                             vz *= rescale;    
                         }
                     }
-                    //
-                    if (T < 0.154) T = 0.15;
+                    if (T < 0.1) T = 0.1;
 		    p.vcell[0] = vx; p.vcell[0] = vy; p.vcell[0] = vz;
 
                     // x,p-update
@@ -231,6 +237,14 @@ int main(int argc, char* argv[]){
                 counter ++;
             }
         }
+        // do any vac radiation that is left
+        for (auto & p : plist){
+            for (auto & ip : p.radlist){
+                 p.p = p.p - ip.p0;
+		 p.p.a[0] = std::sqrt(p.p.pabs2()+p.mass*p.mass);
+            }
+        }
+
 
         // final pT
         double pTf = mean_pT(plist);
