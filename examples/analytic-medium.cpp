@@ -198,6 +198,7 @@ int main(int argc, char* argv[]){
 
 				for (int j=1; j<pOut_list.size(); j++){
 					auto k = pOut_list[j];
+					dE += k.p0.t()/Np;
 					fff   << k.x0.t() << " " << k.p0.t() << " "
 						  << measure_perp(p.p, k.p0).pabs2() << " "
 						  << measure_perp(p.p, k.p).pabs2() << " "
@@ -209,10 +210,8 @@ int main(int argc, char* argv[]){
 							  << k.x.t() - k.x0.t() << std::endl;
 					}
 				}
-
-				dE += (E0 - p.p.t())/Np;
             }
-			f << dE << std::endl;
+			f << t << " " << dE << std::endl;
         }
 		
 		// final E
