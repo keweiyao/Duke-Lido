@@ -501,6 +501,7 @@ int update_particle_momentum_Lido(
 				std::vector<particle> pnew_Out;
 				update_particle_momentum_Lido(dt, temp, v3cell, (*it), pnew_Out);
 				it->p = it->p*(it->p0.t()/it->p.t());
+                                it->p.a[0] = std::sqrt(it->p.pabs2()+it->mass*it->mass);
 				it++;
 			}
 		}

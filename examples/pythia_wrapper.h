@@ -3,7 +3,7 @@
 
 #include "simpleLogger.h"
 #include "Pythia8/Pythia.h"
-
+#include "workflow.h"
 using namespace Pythia8;
 
 class HardGen{
@@ -13,12 +13,11 @@ public:
                 int POI, double yabs_cut, bool FSR_in_Medium);
 private:
     Pythia pythia;
-    const double Mc;
     TransverPositionSampler TRENToSampler;
 };
 
 HardGen::HardGen(std::string f_pythia, std::string f_trento, int iev):
-Mc(1.3),TRENToSampler(f_trento, iev){    
+TRENToSampler(f_trento, iev){    
     // read pythia settings
     pythia.readFile(f_pythia);
     // suppress output
@@ -56,80 +55,87 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events,
                 fourvec p0{p.e(), p.px(), p.py(), p.pz()};
                 
                 particle c_entry;
-                c_entry.mass = Mc; // mass
+                c_entry.mass = std::abs(p.m()); // mass
                 c_entry.pid = POI; // charm quark
 		c_entry.x0 = fourvec{0,x,y,0}; // initial position
 		c_entry.x = c_entry.x0; // initial position
                 c_entry.weight = weight;
                 c_entry.is_vac = false;
 		c_entry.is_virtual = false;
-                c_entry.Tf = 1.0; // will be reset in the transport
+                c_entry.Tf = 1.0;
                 c_entry.vcell.resize(3);
                 c_entry.vcell[0] = 0.; 
                 c_entry.vcell[1] = 0.; 
                 c_entry.vcell[2] = 0.; 
+                //double t0 = 0.0;
 		if (FSR_in_Medium){
 		            // trace back to its first production to 
 		            // find out final state gluon radiation					
 		            while(true){
 		                auto m1 = p.mother1();
 		                auto m2 = p.mother2();
-		                auto d1 = p.daughter1();
-		                auto d2 = p.daughter2();
-                                auto this_id = p.id();
-		                // trace the fermion line back through the final state radiation
-		                if (pythia.event[m1].status() == 51) {
+		                // trace the fermion line back, else calc the formation time and break
+		                if (pythia.event[m1].id() == p.id()) 
 		                    p = pythia.event[m1];
-                                    c_entry.pid = p.idAbs();
-                                }
-		                else if (pythia.event[m2].status() == 51) {
+		                else if (pythia.event[m2].id() == p.id()) 
 		                    p = pythia.event[m2];
-                                    c_entry.pid = p.idAbs();
+		                else {
+                                    /*if (m1 > 0 && m2 == 0) {// shower production
+                                        auto pm = pythia.event[m1];
+                                        auto d1 = pythia.event[pm.daughter1()];
+                                        auto d2 = pythia.event[pm.daughter2()];
+                                        fourvec a{pm.e(), pm.px(), pm.py(), pm.pz()};
+                                        fourvec b{d1.e(), d1.px(), d1.py(), d1.pz()};
+                                        fourvec c{d2.e(), d2.px(), d2.py(), d2.pz()};
+					double kperp2 = measure_perp(a, b).pabs2();
+                                        double qperp2 = measure_perp(a, c).pabs2();
+                                        t0 = 2*b.t()*c.t()/a.t()/kperp2;
+
+                                        LOG_INFO << kperp2 << " " << qperp2;
+                                        LOG_INFO << a;
+                                        LOG_INFO << b+c;
+                                        LOG_INFO << "tau0 = " << t0;
+                                    }
+                                    else t0 = 0.0;*/
+                                    break;
                                 }
-		                else break;
-                                
-		                int parton_eid = -1;
-                                if (p.idAbs() == POI) {
-		                    if ( pythia.event[p.daughter1()].idAbs() == 21
-		                         && std::abs(pythia.event[p.daughter1()].status()) == 51 )
-		                        parton_eid = p.daughter1();    
-		                    else if (pythia.event[p.daughter2()].idAbs() == 21
-		                         && std::abs(pythia.event[p.daughter2()].status()) == 51) 
-		                        parton_eid = p.daughter2();
-                                }
-                                else {
-                                    if ( pythia.event[p.daughter1()].id() == this_id 
-                                         && std::abs(pythia.event[p.daughter2()].status()) == 51 )
-                                        parton_eid = p.daughter2();
-                                    else if (pythia.event[p.daughter2()].id() == this_id
-                                         && std::abs(pythia.event[p.daughter1()].status()) == 51)
-                                        parton_eid = p.daughter1();
-                                }
-		                if (parton_eid >0) { // a radiated parton
-		                    // make it pre-formed parton
-		                    auto g = pythia.event[parton_eid];
+		                int gluon_eid = -1;
+		                if (pythia.event[p.daughter1()].idAbs() == 21 
+		                && std::abs(pythia.event[p.daughter1()].status()) == 51)
+		                    gluon_eid = p.daughter1();    
+		                else if (pythia.event[p.daughter2()].idAbs() == 21 
+		                && std::abs(pythia.event[p.daughter2()].status()) == 51) 
+		                    gluon_eid = p.daughter2();
+		                if (gluon_eid >0) { // a radiated gluon:
+		                    // make it pre-formed gluon
+		                    auto g = pythia.event[gluon_eid];
 		                    fourvec k{g.e(), g.px(), g.py(), g.pz()};
-		                    p0 = p0 + k; // add back the pre-parton, put on shell
+		                    p0 = p0 + k; // add back the pre-gluon, put on shell
 		                    p0.a[0] = std::sqrt(p0.pabs2() + p.m()*p.m());
+
 		                    particle vp;
-				    vp.pid = g.id();
-	            		    vp.mass = 0.0;
-				    vp.weight = weight;
-				    vp.p0 = k; 
-				    vp.p = vp.p0;
-				    vp.x0 = c_entry.x;
-				    vp.x = vp.x0;
-				    vp.T0 = 0.0; // not used
-				    vp.mfp0 = 0.0; // not used
-			            vp.is_vac = true;
-				    vp.is_virtual = true;
+					vp.pid = 21;
+					vp.mass = 0.0;
+					vp.weight = weight;
+					vp.p0 = k; 
+					vp.p = vp.p0;
+					vp.x0 = c_entry.x;
+					vp.x = vp.x0;
+					vp.T0 = 0.0; // not used
+					vp.mfp0 = 0.0; // not used
+					vp.is_vac = true;
+					vp.is_virtual = true;
 
 		                    c_entry.radlist.push_back(vp);
 		                }
 		            }
-	        }
+			}
                 c_entry.p0 = p0; 
 		c_entry.p = c_entry.p0; 
+                /*c_entry.freestream(t0);
+		for (auto & ip : c_entry.radlist){
+			ip.x = c_entry.x0;
+		}*/
                 plist.push_back(c_entry); 
             }
         }
