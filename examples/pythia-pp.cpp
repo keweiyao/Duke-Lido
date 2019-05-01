@@ -77,7 +77,6 @@ int main(int argc, char* argv[]){
                             );
         hardgen.Generate(plist,
                             args["pythia-events"].as<int>(),
-                            4,
                             2.5, false);
 
 
@@ -86,7 +85,8 @@ int main(int argc, char* argv[]){
         LOG_INFO << "Nparticles: " << plist.size();
         LOG_INFO << "Mean pT: " << pTf << " GeV";
 
-        output_oscar(plist, "c-quark-frzout.dat");
+        output_oscar(plist, 4, "c-quark-frzout.dat");
+        output_oscar(plist, 5, "b-quark-frzout.dat");
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

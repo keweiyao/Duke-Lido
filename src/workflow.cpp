@@ -450,8 +450,11 @@ int update_particle_momentum_Lido(
 
 			// If t-t0 > tauf, or it reaches the boundary of QGP
 			// We check whether it sould be formed
-            bool outside = temp < 0.16;
-			if (it->x.t() - it->x0.t() > taun || outside){ 
+                        //bool outside = temp < 0.16;
+			if (it->x.t() - it->x0.t() > taun 
+                           //   || outside
+                           )
+                           { 
 				double Acceptance = 0.;
 				if (!it->is_vac){ 
 					// medium-induced
@@ -462,23 +465,24 @@ int update_particle_momentum_Lido(
 					double mD2 = t_channel_mD2->get_mD2(temp);
 					double mean_s = 6*it->p.t()*temp;
 					double log_factor = std::sqrt(std::log(1+taun/it->mfp0)
-												 /std::log(1+mean_s/mD2) ) ;
+								/std::log(1+mean_s/mD2) ) ;
 					double LPM;
-                    if (outside) LPM = it->mfp0 / (it->x.t() - it->x0.t()) * log_factor;
-                    else LPM = it->mfp0 / taun * log_factor;
+                                        //if (outside) LPM = it->mfp0 / (it->x.t() - it->x0.t()) * log_factor;
+                                        //else 
+                                        LPM = it->mfp0 / taun * log_factor;
 					double DeadCone = std::pow(theta2/(theta2+thetaM2), 2);
 					double Running = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
 					Acceptance = LPM * Running * DeadCone;
 				} else { 
 					// from vac radiation
-					if (outside) Acceptance = 1.0;
-					else {
+					//if (outside) Acceptance = 1.0;
+					//else {
 						// Inside, reject if kT^2 is larger than its initial Q^2
 						double kt20 = measure_perp(pIn.p0, it->p0).pabs2();
 						double kt2n = measure_perp(pIn.p, it->p).pabs2();
 						if (kt2n > Rvac*kt20) Acceptance = 0.0;
-    	                else Acceptance = 1.0;
-					}
+    	                                        else Acceptance = 1.0;
+					//}
 				}				
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
@@ -534,7 +538,7 @@ void output(const std::vector<particle> plist, std::string fname){
 	}
 }
 
-void output_oscar(const std::vector<particle> plist, std::string fname){
+void output_oscar(const std::vector<particle> plist, int abspid, std::string fname){
 	// output OSCAR Format
 	int Nparticles=plist.size();
 	std::ofstream f(fname);
@@ -546,6 +550,7 @@ void output_oscar(const std::vector<particle> plist, std::string fname){
 
 	int i=0;
 	for (auto & p : plist){
+                if (std::abs(p.pid) == abspid) {
 		f << std::setw(10) << std::setfill(' ') << i << "  " // particle index, i10,2x
 		  << std::setw(10) << std::setfill(' ') << p.pid << "  "; // particle id, i10,2x
 		f << ff(p.p.x()) << "  "
@@ -557,16 +562,17 @@ void output_oscar(const std::vector<particle> plist, std::string fname){
 		  << ff(p.x.y()/fmc_to_GeV_m1) << "  "
 		  << ff(p.x.z()/fmc_to_GeV_m1) << "  "
 		  << ff(p.x.t()/fmc_to_GeV_m1) << "  "
-	      << ff(p.Tf) << "  "
-	      << ff(p.vcell[0]) << "  "		  
-	      << ff(p.vcell[1]) << "  "		
-	      << ff(p.vcell[2]) << "  "	
+	          << ff(p.Tf) << "  "
+	          << ff(p.vcell[0]) << "  "		  
+	          << ff(p.vcell[1]) << "  "		
+	          << ff(p.vcell[2]) << "  "	
 		  << ff(p.p0.x()) << "  "
 		  << ff(p.p0.y()) << "  "
 		  << ff(p.p0.z()) << "  "
 		  << ff(p.p0.t()) << "  "	
 		  << ff(p.weight) << "  "
 		  << ff(0.0) << "\n";
+                }
 		i++;
 	}
 }

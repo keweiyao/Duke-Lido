@@ -150,7 +150,6 @@ int main(int argc, char* argv[]){
         hardgen.Generate(
                 plist, 
                 args["pythia-events"].as<int>(),
-                4,
                 2.5,
 				true
         );
@@ -240,8 +239,10 @@ int main(int argc, char* argv[]){
         // do any vac radiation that is left
         for (auto & p : plist){
             for (auto & ip : p.radlist){
-                 p.p = p.p - ip.p0;
-		 p.p.a[0] = std::sqrt(p.p.pabs2()+p.mass*p.mass);
+                 if (ip.is_vac){
+                     p.p = p.p - ip.p0;
+		     p.p.a[0] = std::sqrt(p.p.pabs2()+p.mass*p.mass);
+                 }
             }
         }
 
@@ -252,7 +253,8 @@ int main(int argc, char* argv[]){
         LOG_INFO << "Initial pT: " << pTi << " GeV";
         LOG_INFO << "Final pT: " << pTf << " GeV";
 
-        output_oscar(plist, "c-quark-frzout.dat");
+        output_oscar(plist, 4, "c-quark-frzout.dat");
+        output_oscar(plist, 5, "b-quark-frzout.dat");
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

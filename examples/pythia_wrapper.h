@@ -9,8 +9,7 @@ using namespace Pythia8;
 class HardGen{
 public: 
     HardGen(std::string f_pythia, std::string f_trento, int iev);
-    void Generate(std::vector<particle> & plist, int N_pythia_events, 
-                int POI, double yabs_cut, bool FSR_in_Medium);
+    void Generate(std::vector<particle> & plist, int N_pythia_events, double yabs_cut, bool FSR_in_Medium);
 private:
     Pythia pythia;
     TransverPositionSampler TRENToSampler;
@@ -38,8 +37,7 @@ TRENToSampler(f_trento, iev){
     // Read TRENTo Binary collision densisty
 }
 
-void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events, 
-                int POI, double yabs_cut, bool FSR_in_Medium){
+void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events, double yabs_cut, bool FSR_in_Medium){
     double x, y;
     for (int iEvent = 0; iEvent < N_pythia_events; ++iEvent) 
     {
@@ -49,14 +47,15 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events,
         for (size_t i = 0; i < pythia.event.size(); ++i) 
         {
             auto p = pythia.event[i];
-            if (p.isFinal() && p.idAbs() == POI && std::abs(p.y())<yabs_cut) 
+            bool Interest = (p.idAbs() == 4) || (p.idAbs() == 5);
+            if (p.isFinal() && Interest && std::abs(p.y())<yabs_cut) 
             {
                 // final momenta 
                 fourvec p0{p.e(), p.px(), p.py(), p.pz()};
                 
                 particle c_entry;
                 c_entry.mass = std::abs(p.m()); // mass
-                c_entry.pid = POI; // charm quark
+                c_entry.pid = p.idAbs(); // heavy quark
 		c_entry.x0 = fourvec{0,x,y,0}; // initial position
 		c_entry.x = c_entry.x0; // initial position
                 c_entry.weight = weight;
@@ -79,26 +78,9 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events,
 		                    p = pythia.event[m1];
 		                else if (pythia.event[m2].id() == p.id()) 
 		                    p = pythia.event[m2];
-		                else {
-                                    /*if (m1 > 0 && m2 == 0) {// shower production
-                                        auto pm = pythia.event[m1];
-                                        auto d1 = pythia.event[pm.daughter1()];
-                                        auto d2 = pythia.event[pm.daughter2()];
-                                        fourvec a{pm.e(), pm.px(), pm.py(), pm.pz()};
-                                        fourvec b{d1.e(), d1.px(), d1.py(), d1.pz()};
-                                        fourvec c{d2.e(), d2.px(), d2.py(), d2.pz()};
-					double kperp2 = measure_perp(a, b).pabs2();
-                                        double qperp2 = measure_perp(a, c).pabs2();
-                                        t0 = 2*b.t()*c.t()/a.t()/kperp2;
-
-                                        LOG_INFO << kperp2 << " " << qperp2;
-                                        LOG_INFO << a;
-                                        LOG_INFO << b+c;
-                                        LOG_INFO << "tau0 = " << t0;
-                                    }
-                                    else t0 = 0.0;*/
+		                else 
                                     break;
-                                }
+                               
 		                int gluon_eid = -1;
 		                if (pythia.event[p.daughter1()].idAbs() == 21 
 		                && std::abs(pythia.event[p.daughter1()].status()) == 51)
@@ -132,10 +114,6 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events,
 			}
                 c_entry.p0 = p0; 
 		c_entry.p = c_entry.p0; 
-                /*c_entry.freestream(t0);
-		for (auto & ip : c_entry.radlist){
-			ip.x = c_entry.x0;
-		}*/
                 plist.push_back(c_entry); 
             }
         }
