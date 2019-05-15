@@ -7,7 +7,7 @@ double const tiny = 1e-10;
 double delta_qhat(int pid, double E, double M, double T){
 	double CR = (pid==21) ? CA : CF;
 	if (pid == 21) E = std::sqrt(E*E + t_channel_mD2->get_mD2(T)/2.);
-	double delta_qhat = CR/CF * qhat_params.K * std::pow(T, 3)
+	double delta_qhat = CR/CF * 0.5* qhat_params.K * std::pow(T, 3)
 		/(1. + std::pow(qhat_params.a*(T+tiny)/Tc, qhat_params.p))
 		/(1. + std::pow(qhat_params.b*(E+tiny)/(T+tiny), qhat_params.q));
 	return delta_qhat;
@@ -71,7 +71,7 @@ double dqhat_L_dp2(int pid, double E, double M, double T){
 	double p2 = E*E - M*M + tiny;
 	double dp2 = p2*.05;
 	double Eprime = std::sqrt(E*E + dp2);
-	return (qhat(pid, Eprime, M, T) - qhat(pid, E, M, T) ) /dp2;
+	return (qhat_L(pid, Eprime, M, T) - qhat_L(pid, E, M, T) ) /dp2;
 }
 
 void Ito_update(int pid, double dt_lab, double M, double T, std::vector<double> v, 

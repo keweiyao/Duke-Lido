@@ -175,6 +175,7 @@ int main(int argc, char* argv[]){
 
         /// Assign each quark a transverse position according to TRENTo Nbin output
         /// Freestream particle to the start of hydro
+	LOG_INFO << "freestream particles to tau = " <<  med1.get_tauH();
         for (auto & p : plist){
             double tau_fs = med1.get_tauH();
 	    double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
@@ -206,10 +207,7 @@ int main(int argc, char* argv[]){
                     if ( p.Tf <= 0.154) continue; // do not touch freezeout ones
                     // determine dt needed to evolve to the next tau
                     double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
-                    if ( tau > current_hydro_clock + (i+1)*dtau ) continue; // not yet formed to the medium
                     double dt_lab = calcualte_dt_from_dtau(p.x, p.p, tau, dtau);
-
-
                     // get hydro information
                     double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.;
                     med1.interpolate(p.x, T, vx, vy, vz);
@@ -230,8 +228,7 @@ int main(int argc, char* argv[]){
 
                     // x,p-update
                     int channel = 
-                        update_particle_momentum_Lido(dt_lab, T, {vx, vy, vz}, 
-													p, pOut_list);
+                        update_particle_momentum_Lido(dt_lab, T, {vx, vy, vz}, p, pOut_list);
                 }
                 counter ++;
             }

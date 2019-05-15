@@ -117,7 +117,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 	// for charm flavor
 	AllProcesses[4] = std::vector<Process>();
 	AllProcesses[4].push_back( Rate22("Boltzmann/cq2cq", setting_path, dX_Qq2Qq_dt) ); // 2->2, index = 0
-	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", setting_path, dX_Qg2Qg_dt_full) ); // 2->2, index = 1
+	AllProcesses[4].push_back( Rate22("Boltzmann/cg2cg", setting_path, dX_Qg2Qg_dt) ); // 2->2, index = 1
 	AllProcesses[4].push_back( Rate23("Boltzmann/cq2cqg", setting_path, M2_Qq2Qqg) ); // 2->3, index = 2
 	AllProcesses[4].push_back( Rate23("Boltzmann/cg2cgg", setting_path, M2_Qg2Qgg) ); // 2->3, index = 3
 	AllProcesses[4].push_back( Rate32("Boltzmann/cqg2cq", setting_path, M2_Qqg2Qq) );  // 3->2, index = 4
@@ -128,7 +128,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 	// for bottom flavor
 	AllProcesses[5] = std::vector<Process>();
 	AllProcesses[5].push_back( Rate22("Boltzmann/bq2bq", setting_path, dX_Qq2Qq_dt) ); // 2->2, index = 0
-	AllProcesses[5].push_back( Rate22("Boltzmann/bg2bg", setting_path, dX_Qg2Qg_dt_full) ); // 2->2, index = 1
+	AllProcesses[5].push_back( Rate22("Boltzmann/bg2bg", setting_path, dX_Qg2Qg_dt) ); // 2->2, index = 1
 	AllProcesses[5].push_back( Rate23("Boltzmann/bq2bqg", setting_path, M2_Qq2Qqg) ); // 2->3, index = 2
 	AllProcesses[5].push_back( Rate23("Boltzmann/bg2bgg", setting_path, M2_Qg2Qgg) ); // 2->3, index = 3
 	AllProcesses[5].push_back( Rate32("Boltzmann/bqg2bq", setting_path, M2_Qqg2Qq) );  // 3->2, index = 4
@@ -450,10 +450,7 @@ int update_particle_momentum_Lido(
 
 			// If t-t0 > tauf, or it reaches the boundary of QGP
 			// We check whether it sould be formed
-                        //bool outside = temp < 0.16;
-			if (it->x.t() - it->x0.t() > taun 
-                           //   || outside
-                           )
+			if (it->x.t() - it->x0.t() > taun)
                            { 
 				double Acceptance = 0.;
 				if (!it->is_vac){ 
@@ -466,23 +463,15 @@ int update_particle_momentum_Lido(
 					double mean_s = 6*it->p.t()*temp;
 					double log_factor = std::sqrt(std::log(1+taun/it->mfp0)
 								/std::log(1+mean_s/mD2) ) ;
-					double LPM;
-                                        //if (outside) LPM = it->mfp0 / (it->x.t() - it->x0.t()) * log_factor;
-                                        //else 
-                                        LPM = it->mfp0 / taun * log_factor;
+					double LPM = it->mfp0 / taun * log_factor;
 					double DeadCone = std::pow(theta2/(theta2+thetaM2), 2);
 					double Running = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
 					Acceptance = LPM * Running * DeadCone;
 				} else { 
-					// from vac radiation
-					//if (outside) Acceptance = 1.0;
-					//else {
-						// Inside, reject if kT^2 is larger than its initial Q^2
-						double kt20 = measure_perp(pIn.p0, it->p0).pabs2();
-						double kt2n = measure_perp(pIn.p, it->p).pabs2();
-						if (kt2n > Rvac*kt20) Acceptance = 0.0;
-    	                                        else Acceptance = 1.0;
-					//}
+					double kt20 = measure_perp(pIn.p0, it->p0).pabs2();
+					double kt2n = measure_perp(pIn.p0, it->p - it->p0).pabs2();
+					if (kt2n > Rvac*kt20) Acceptance = 0.0;
+    	                                else Acceptance = 1.0;
 				}				
 
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
@@ -540,7 +529,11 @@ void output(const std::vector<particle> plist, std::string fname){
 
 void output_oscar(const std::vector<particle> plist, int abspid, std::string fname){
 	// output OSCAR Format
-	int Nparticles=plist.size();
+	int Nparticles=0;
+	for (auto & p : plist){
+		if (std::abs(p.pid) == abspid) Nparticles ++;
+	}
+
 	std::ofstream f(fname);
 	f << "OSC1997A\n";
 	f << "final_id_p_x\n";
