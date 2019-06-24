@@ -211,7 +211,9 @@ endif(pythia8)
 
 install(FILES ./examples/settings.xml DESTINATION share)
 if(pythia8)
-install(FILES ./examples/pythia-setting.txt DESTINATION share)
-install(FILES ./examples/pythia-pp-setting.txt DESTINATION share)
+install(FILES ./examples/pythia-pp-200-setting.txt DESTINATION share)
+install(FILES ./examples/pythia-pp-5020-setting.txt DESTINATION share)
+install(FILES ./examples/pythia-PbPb-5020-setting.txt DESTINATION share)
+install(FILES ./examples/pythia-AuAu-200-setting.txt DESTINATION share)
 endif(pythia8)
 

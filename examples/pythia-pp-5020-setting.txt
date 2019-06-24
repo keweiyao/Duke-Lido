@@ -1,0 +1,50 @@
+! 1) Set random seed
+Random:setSeed = on
+Random:seed = 0
+
+! 2) Beam
+Beams:idA = 2212            ! first beam, p = 2212, 
+Beams:idB = 2212            ! second beam, p = 2212, pbar = -2212
+Beams:eCM = 5020.                 ! CM energy of collision
+
+! 3) Hard process
+HardQCD:all = on
+HardQCD:hardccbar = on
+HardQCD:hardbbbar = on
+
+! 4) Parton shower / MPI / Remnants
+PartonLevel:all = on
+PartonLevel:MPI = off
+PartonLevel:ISR = on
+PartonLevel:FSR = on
+PartonLevel:Remnants = off
+Check:event = off
+
+! 5) Hadron level
+HadronLevel:all = off
+
+! 6) Phase space selection and bias
+PhaseSpace:pTHatMin = 2
+PhaseSpace:pTHatMax = 200
+PhaseSpace:bias2Selection = on
+PhaseSpace:bias2SelectionPow = 3.
+
+! 7) Decay
+4:m0 = 1.3
+4:mayDecay = off
+5:m0 = 4.2
+5:mayDecay = off
+#411:mayDecay = off
+#421:mayDecay = off
+#413:mayDecay = off
+#423:mayDecay = off
+
+! 8) PDF
+#PDF:useHard = on
+#PDF:useHardNPDFA = on
+#PDF:nPDFSetA = 1
+#PDF:nPDFBeamA = 100822080 # nuclei = 10LZZZAAAI
+#PDF:useHardNPDFB = on
+#PDF:nPDFSetB = 1
+#PDF:nPDFBeamB = 100822080 # nuclei = 10LZZZAAAI
+

@@ -315,6 +315,10 @@ int update_particle_momentum_Lido(
 				vp.T0 = temp;
 				vp.is_vac = false;
 				vp.is_virtual = true;
+                        vp.vcell.resize(3);        
+                        vp.vcell[0] = v3cell[0];
+                        vp.vcell[1] = v3cell[1];
+                        vp.vcell[2] = v3cell[2];
 				
 				// The local 2->2 mean-free-path is estimated with
 				// the qhat_hard integrate from the 2->2 rate
@@ -362,7 +366,11 @@ int update_particle_momentum_Lido(
 			vp.T0 = temp;
 			vp.is_vac = false;
 			vp.is_virtual = true;
-			
+	                vp.vcell.resize(3); 
+                        vp.vcell[0] = v3cell[0];
+                        vp.vcell[1] = v3cell[1];
+                        vp.vcell[2] = v3cell[2];
+	
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
 			vp.mfp0 = LPM_prefactor*mD2/qhatg*pIn.p.t()/E_cell; 
@@ -387,6 +395,10 @@ int update_particle_momentum_Lido(
 			vp.T0 = temp;
 			vp.is_vac = false;
 			vp.is_virtual = true;
+                        vp.vcell.resize(3);        
+                        vp.vcell[0] = v3cell[0];
+                        vp.vcell[1] = v3cell[1];
+                        vp.vcell[2] = v3cell[2];
 
 			// The local 2->2 mean-free-path is estimated with
 			// the qhat_hard integrate from the 2->2 rate
@@ -427,6 +439,10 @@ int update_particle_momentum_Lido(
 			vp.T0 = temp;
 			vp.is_vac = false;
 			vp.is_virtual = true;
+                        vp.vcell.resize(3);        
+                        vp.vcell[0] = v3cell[0];
+                        vp.vcell[1] = v3cell[1];
+                        vp.vcell[2] = v3cell[2];
 			
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
@@ -492,7 +508,11 @@ int update_particle_momentum_Lido(
 
 			}else{ // else, evolve it, while rescale its energy ("ekional limit")
 				std::vector<particle> pnew_Out;
+				//if (it->is_vac)
 				update_particle_momentum_Lido(dt, temp, v3cell, (*it), pnew_Out);
+				//else
+                                //update_particle_momentum_Lido(dt, it->T0, it->vcell, (*it), pnew_Out);
+
 				it->p = it->p*(it->p0.t()/it->p.t());
                                 it->p.a[0] = std::sqrt(it->p.pabs2()+it->mass*it->mass);
 				it++;
