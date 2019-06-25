@@ -1,6 +1,6 @@
 <Boltzmann>
 	<!--  Gluon/elastic/G+q=G+q  -->
-	<gq2gq status="active" moments="on">
+	<gq2gq status="inactive" moments="on">
 		<mass>.0</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -14,7 +14,7 @@
 	</gq2gq>
 
     <!--  Gluon/elastic/G+g=G+g  -->
-	<gg2gg status="active" moments="on">
+	<gg2gg status="inactive" moments="on">
 		<mass>.0</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -251,7 +251,7 @@
 
     <!-- Charm quark -->
 	<!--   charm/elastic/Q+q=Q+q  -->
-	<cq2cq status="active" moments="on">
+	<cq2cq status="inactive" moments="on">
 		<mass>1.3</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -265,7 +265,7 @@
 	</cq2cq>
 
 	<!--   charm/elastic/Q+g=Q+g  -->
-	<cg2cg status="active" moments="on">
+	<cg2cg status="inactive" moments="on">
 		<mass>1.3</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -279,7 +279,7 @@
 	</cg2cg>
 
 	<!--   charm/inelastic/Q+q=Q+q+G  -->
-	<cq2cqg status="active" moments="off">
+	<cq2cqg status="inactive" moments="off">
 		<mass>1.3</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -293,7 +293,7 @@
 	</cq2cqg>
 
 	<!--   charm/inelastic/Q+g=Q+g+G  -->
-	<cg2cgg status="active" moments="off">
+	<cg2cgg status="inactive" moments="off">
 		<mass>1.3</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -307,7 +307,7 @@
 	</cg2cgg>
 
 	<!--   charm/inelastic/Q+q+g=Q+q  -->
-	<cqg2cq status="active" moments="off">
+	<cqg2cq status="inactive" moments="off">
 		<mass>1.3</mass>
 		<degeneracy>576</degeneracy>
 		<xsection slots="sqrts,temp,xinel,yinel">
@@ -323,7 +323,7 @@
 	</cqg2cq>
 
 	<!--   charm/inelastic/Q+g+g=Q+g  -->
-	<cgg2cg status="active" moments="off">
+	<cgg2cg status="inactive" moments="off">
 		<mass>1.3</mass>
 		<degeneracy>256</degeneracy>
 		<xsection slots="sqrts,temp,xinel,yinel">
@@ -339,7 +339,7 @@
 	</cgg2cg>
 
 	<!--   charm/inelastic/Q+diffusion=Q+g  -->
-	<c2cg status="active" moments="off">
+	<c2cg status="inactive" moments="off">
 		<mass>1.3</mass>
 		<rate slots="energy,temp">
 			<Nenergy>300</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>300.0</Henergy>
@@ -348,7 +348,7 @@
 	</c2cg>
 
 	<!--   charm/inelastic/Q+g+diffusion=Q  -->
-	<cg2c status="active" moments="off">
+	<cg2c status="inactive" moments="off">
 		<mass>1.3</mass>
 		<rate slots="energy,temp">
 			<Nenergy>20</Nenergy> <Lenergy>1.4</Lenergy> <Henergy>20.0</Henergy>
@@ -358,7 +358,7 @@
 
  <!-- Bottom quark -->
 	<!--   bottom/elastic/Q+q=Q+q  -->
-	<bq2bq status="active" moments="on">
+	<bq2bq status="inactive" moments="on">
 		<mass>4.2</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -372,7 +372,7 @@
 	</bq2bq>
 
 	<!--   charm/elastic/Q+g=Q+g  -->
-	<bg2bg status="active" moments="on">
+	<bg2bg status="inactive" moments="on">
 		<mass>4.2</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -386,7 +386,7 @@
 	</bg2bg>
 
 	<!--   charm/inelastic/Q+q=Q+q+G  -->
-	<bq2bqg status="active" moments="off">
+	<bq2bqg status="inactive" moments="off">
 		<mass>4.2</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -400,7 +400,7 @@
 	</bq2bqg>
 
 	<!--   charm/inelastic/Q+g=Q+g+G  -->
-	<bg2bgg status="active" moments="off">
+	<bg2bgg status="inactive" moments="off">
 		<mass>4.2</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -414,7 +414,7 @@
 	</bg2bgg>
 
 	<!--   charm/inelastic/Q+q+g=Q+q  -->
-	<bqg2bq status="active" moments="off">
+	<bqg2bq status="inactive" moments="off">
 		<mass>4.2</mass>
 		<degeneracy>576</degeneracy>
 		<xsection slots="sqrts,temp,xinel,yinel">
@@ -430,7 +430,7 @@
 	</bqg2bq>
 
 	<!--   charm/inelastic/Q+g+g=Q+g  -->
-	<bgg2bg status="active" moments="off">
+	<bgg2bg status="inactive" moments="off">
 		<mass>4.2</mass>
 		<degeneracy>256</degeneracy>
 		<xsection slots="sqrts,temp,xinel,yinel">
@@ -446,7 +446,7 @@
 	</bgg2bg>
 
 	<!--   charm/inelastic/Q+diffusion=Q+g  -->
-	<b2bg status="active" moments="off">
+	<b2bg status="inactive" moments="off">
 		<mass>4.2</mass>
 		<rate slots="energy,temp">
 			<Nenergy>300</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>300.0</Henergy>
@@ -455,11 +455,20 @@
 	</b2bg>
 
 	<!--   charm/inelastic/Q+g+diffusion=Q  -->
-	<bg2b status="active" moments="off">
+	<bg2b status="inactive" moments="off">
 		<mass>4.2</mass>
 		<rate slots="energy,temp">
 			<Nenergy>20</Nenergy> <Lenergy>4.3</Lenergy> <Henergy>60.0</Henergy>
 			<Ntemp>8</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>1.0</Htemp>
 		</rate>
 	</bg2b>
+
+    <!-- onium/disso/QQbar[nl]+g=Q+Qbar -->
+	<Hg2QQbar status="active" moments="off">
+		<mass>4.65</mass>
+		<rate slots="energy,temp">
+			<Nv>100</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
+			<Ntemp>32</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
+		</rate>
+	</Hg2QQbar>
 </Boltzmann>

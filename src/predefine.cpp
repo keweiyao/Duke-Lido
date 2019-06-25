@@ -20,6 +20,7 @@ const double c16pi2 = 16.*M_PI*M_PI;
 const double c64d9pi2 = 64./9.*M_PI*M_PI;
 const double c256pi4 = 256.*std::pow(M_PI, 4);
 const double fmc_to_GeV_m1 = 5.026;
+const double InverseFermiToGeV = 0.197327;
 
 // number of color=3 (3*3-1 = 8 gluons), number of flavor=3, (u,d,s quark)
 const int Nc = 3, nf = 3;
@@ -27,6 +28,8 @@ const double CF = 4./3.;
 const double CA = 3.;
 const double CF_over_CA = CF/CA;
 const double TR = 0.5;
+const double TF = 0.5;
+const double rho_c = 1./(Nc*Nc - 1.);
 
 // the prefractor for gluon debye mass with Boltzmann statistics
 // mD^2 = 8\pi*(Nc+nf)*alpha_s*T^2 ~ 15*alpha_s*T^2

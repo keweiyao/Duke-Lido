@@ -3,6 +3,7 @@
 #include <fstream>
 #include "random.h"
 #include "matrix_elements.h"
+#include "Onium_Disso_dR.h"
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/variant/get.hpp>
@@ -64,6 +65,15 @@ void init_process(Process& r, std::string mode, std::string table_path){
 						boost::get<Rate21>(r).init(table_path);
 					} else {
 						boost::get<Rate21>(r).load(table_path);
+					}
+				else return;
+				break;
+             case 5:
+				if (boost::get<Onium22>(r).IsActive())
+					if (mode == "new") {
+						boost::get<Onium22>(r).init(table_path);
+					} else {
+						boost::get<Onium22>(r).load(table_path);
 					}
 				else return;
 				break;
@@ -136,11 +146,16 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
   	AllProcesses[5].push_back( Rate12("Boltzmann/b2bg", setting_path, LGV_q2qg) );  // 1->2, index = 6
 	AllProcesses[5].push_back( Rate21("Boltzmann/bg2b", setting_path, LGV_qg2q) );  // 2->1, index = 7
 
+    // for Onium
+    AllProcesses[553] = std::vector<Process>();
+    AllProcesses[553].push_back( Onium22("Boltzmann/Hg2QQbar", setting_path, 1, 0, dRdq_1S_gluon) ); // 2->2, index = 0
+
 	// Initialzie all processes
 	BOOST_FOREACH(Process& r, AllProcesses[123]) init_process(r, mode, table_path);
 	BOOST_FOREACH(Process& r, AllProcesses[4]) init_process(r, mode, table_path);
 	BOOST_FOREACH(Process& r, AllProcesses[5]) init_process(r, mode, table_path);
 	BOOST_FOREACH(Process& r, AllProcesses[21]) init_process(r, mode, table_path);
+	BOOST_FOREACH(Process& r, AllProcesses[553]) init_process(r, mode, table_path);
 }
 
 // split=1: q->q+g, colors = 1 - x + CF/CA * x^2

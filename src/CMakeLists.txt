@@ -18,6 +18,10 @@ Langevin.cpp
 predefine.cpp
 lorentz.cpp
 Medium_Reader.cpp
+Onium_Disso_dR.cpp
+Onium_predefine.cpp
+Onium_Rate.cpp
+Onium_Reco_dR.cpp
 	)
 
 set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "")

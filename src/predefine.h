@@ -25,12 +25,15 @@ extern const double c16pi2;
 extern const double c64d9pi2;
 extern const double c256pi4;
 extern const double fmc_to_GeV_m1;
+extern const double InverseFermiToGeV;
 // number of color=3 (3*3-1 = 8 gluons), number of flavor=3, (u,d,s quark)
 extern const int Nc, nf;
 extern const double CF;
 extern const double CA;
 extern const double CF_over_CA;
 extern const double TR;
+extern const double TF;
+extern const double rho_c;
 
 // the prefractor for gluon debye mass with Boltzmann statistics
 // mD^2 = 8\pi*(Nc+nf)*alpha_s*T^2 ~ 15*alpha_s*T^2
