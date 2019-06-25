@@ -37,14 +37,44 @@ _f(f)
 // Sample Final states using dR/dq
 template<>
 void OniumRate22<2, double(*)(double, void *)>::
-    sample(std::vector<double> parameters, std::vector< fourvec > & final_states){
+    sample(std::vector<double> parameters, std::vector< fourvec > & FS){
+	double v = parameters[0];
+	double T = parameters[1];
+	auto dRdq = [v, T, this](double q){
+        double params[5] = {v, T, this->_mass, this->_Enl, this->_aB};
+        double result = this->_f(q, params);
+        return result;
+	};
+	double qmin = _Enl;
+	double qmax = 100*_Enl;
+    double q = sample_1d(dRdq, {qmin, qmax},
+                         StochasticBase<2>::GetFmax(parameters).s);
+    // sample phi
+	double phi = Srandom::dist_phi(Srandom::gen);
+    FS.clear();
+	FS.resize(2); // HQ + light parton
+    // In Rest frame: UNDER CONSTRUCTION
+    FS[0] = 
+    FS[1] =
+    FS[0] = FS[0].boost_back(0,0,v)
+
 }
 
 // Find the max of dR/dq
 template <>
 scalar OniumRate22<2, double(*)(double, void*)>::
 		find_max(std::vector<double> parameters){
-	return scalar::unity();
+	double v = parameters[0];
+	double T = parameters[1];
+	auto dRdq = [v, T, this](double q){
+        double params[5] = {v, T, this->_mass, this->_Enl, this->_aB};
+        double result = this->_f(q, params);
+        return -result;
+	};
+	double qmin = _Enl;
+	double qmax = 100*_Enl;
+	double res = -minimize_1d(dRdq, {qmin, qmax}, 1e-3, 100, 100);
+	return scalar{res*1.5};
 }
 
 
@@ -55,7 +85,7 @@ scalar OniumRate22<2, double(*)(double, void*)>::
 	double v = parameters[0];
 	double T = parameters[1];
 
-	// dR/dx/dy to be intergated
+	// dR/dq to be intergated
 	auto dRdq = [v, T, this](double q){
         double params[5] = {v, T, this->_mass, this->_Enl, this->_aB};
         double result = this->_f(q, params);
