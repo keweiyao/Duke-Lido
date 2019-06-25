@@ -148,7 +148,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 // split=3: g->q+qbar, colors = 1 - x*CA/CF + x^2*CA/CF 
 double formation_time(fourvec p, fourvec k, double T, int split){
 	double E0 = p.t();
-	double x = k.t()/E0;
+	double x = k.t()/(E0+k.t());
 	double mg2 = t_channel_mD2->get_mD2(T)/2., 
 		   mass_sqrs = 0.0,  colors = 1.;
 	if (split == 1) {
@@ -502,17 +502,14 @@ int update_particle_momentum_Lido(
 					}
 
 					it->is_virtual = false;
+                    //if (it->p0.t() > 1)
 					pOut_list.push_back(*it);
 				}
 				it = pIn.radlist.erase(it);
 
 			}else{ // else, evolve it, while rescale its energy ("ekional limit")
 				std::vector<particle> pnew_Out;
-				//if (it->is_vac)
 				update_particle_momentum_Lido(dt, temp, v3cell, (*it), pnew_Out);
-				//else
-                                //update_particle_momentum_Lido(dt, it->T0, it->vcell, (*it), pnew_Out);
-
 				it->p = it->p*(it->p0.t()/it->p.t());
                                 it->p.a[0] = std::sqrt(it->p.pabs2()+it->mass*it->mass);
 				it++;
