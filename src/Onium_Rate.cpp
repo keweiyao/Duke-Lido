@@ -159,7 +159,7 @@ _f(f)
 
 // 2->2 reco rate
 template <>
-scalar OniumRecoRate22<2, double(*)(double, std::size_t, void*)>::
+scalar OniumRecoRate22<3, double(*)(double, std::size_t, void*)>::
 calculate_scalar(std::vector<double> parameters){
     //double v = parameters[0];
     //double T = parameters[1];
@@ -182,3 +182,5 @@ tensor OniumRecoRate22<N, F>::calculate_tensor(std::vector<double> parameters){
 
 
 template class OniumDissoRate22<2,double(*)(double, void*)>;
+
+//template class OniumRecoRate22<3, double(*)(double, std::size_t, void*)>;
