@@ -40,4 +40,12 @@ double get_aB(double M);
 double get_onium_Enl_Coulomb(double M, int n, int l);
 double get_onium_Enl_Confining(double M, int n, int l, double confine_asymp_pot);
 double get_onium_Mass(double MQ, int n, int l);
+
+// Transformations
+double momentum_to_energy(double px, double py, double pz, double mass_);
+std::vector<double> polar_to_cartisian1(double length, double cos, double phi);
+std::vector<double> add_real_gluon(std::vector<double> momentum_add, std::vector<double> momentum_rel);
+std::vector<double> add_virtual_gluon(std::vector<double> momentum_1, std::vector<double> momentum_2, std::vector<double> momentum_rel);
+std::vector<double> subtract_real_gluon(std::vector<double> momentum_subtract);
+std::vector<double> subtract_virtual_gluon(std::vector<double> momentum_1, std::vector<double> momentum_2);
 #endif

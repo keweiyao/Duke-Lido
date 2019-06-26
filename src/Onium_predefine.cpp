@@ -115,3 +115,68 @@ double p2Matrix1P(double prel, double a_B){
     return prel*prel*Matrix1P(prel, a_B);
 }
 
+// Transformations
+// given three momentum and mass, calculate energy
+double momentum_to_energy(double px, double py, double pz, double mass_){
+    return std::sqrt(px*px+py*py+pz*pz+mass_*mass_);
+}
+
+// polar to cartesian
+std::vector<double> polar_to_cartisian1(double length, double cos, double phi){
+    std::vector<double> result(3);
+    double sin = std::sqrt(1.-cos*cos);
+    double c_phi = std::cos(phi);
+    double s_phi = std::sin(phi);
+    result[0] = length * sin * c_phi;
+    result[1] = length * sin * s_phi;
+    result[2] = length * cos;
+    return result;
+}
+
+// add real gluon momentum to the decay products: QQbar
+std::vector<double> add_real_gluon(std::vector<double> momentum_add, std::vector<double> momentum_rel){
+    double q_x = 0.5*momentum_add[0];
+    double q_y = 0.5*momentum_add[1];
+    double q_z = 0.5*momentum_add[2];
+    std::vector<double> pQpQbar(6);
+    pQpQbar[0] = q_x + momentum_rel[0];
+    pQpQbar[1] = q_y + momentum_rel[1];
+    pQpQbar[2] = q_z + momentum_rel[2];
+    pQpQbar[3] = q_x - momentum_rel[0];
+    pQpQbar[4] = q_y - momentum_rel[1];
+    pQpQbar[5] = q_z - momentum_rel[2];
+    return pQpQbar;
+}
+
+// add virtual gluon momentum to the decay products: QQbar
+std::vector<double> add_virtual_gluon(std::vector<double> momentum_1, std::vector<double> momentum_2, std::vector<double> momentum_rel){
+    double q_x = 0.5*(momentum_1[0]-momentum_2[0]);
+    double q_y = 0.5*(momentum_1[1]-momentum_2[1]);
+    double q_z = 0.5*(momentum_1[2]-momentum_2[2]);
+    std::vector<double> pQpQbar(6);
+    pQpQbar[0] = q_x + momentum_rel[0];
+    pQpQbar[1] = q_y + momentum_rel[1];
+    pQpQbar[2] = q_z + momentum_rel[2];
+    pQpQbar[3] = q_x - momentum_rel[0];
+    pQpQbar[4] = q_y - momentum_rel[1];
+    pQpQbar[5] = q_z - momentum_rel[2];
+    return pQpQbar;
+}
+
+// subtract real gluon momentum to the reco produce: |nlm>
+std::vector<double> subtract_real_gluon(std::vector<double> momentum_subtract){
+    std::vector<double> p_nl(3);    // nl here represents quarkonia
+    p_nl[0] = -momentum_subtract[0];
+    p_nl[1] = -momentum_subtract[1];
+    p_nl[2] = -momentum_subtract[2];
+    return p_nl;
+}
+
+// subtract virtual gluon momentum to the reco produce: |nlm>
+std::vector<double> subtract_virtual_gluon(std::vector<double> momentum_1, std::vector<double> momentum_2){
+    std::vector<double> p_nl(3);
+    p_nl[0] = momentum_1[0]-momentum_2[0];
+    p_nl[1] = momentum_1[1]-momentum_2[1];
+    p_nl[2] = momentum_1[2]-momentum_2[2];
+    return p_nl;
+}

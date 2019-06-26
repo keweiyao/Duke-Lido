@@ -16,7 +16,7 @@
 // F: diff rate function type
 // What it does: given v, T, determine rate, and sample final state
 template <size_t N, typename F>
-class OniumRate22: public virtual StochasticBase<N>{
+class OniumDissoRate22: public virtual StochasticBase<N>{
 private:
     scalar find_max(std::vector<double> parameters);
 	scalar calculate_scalar(std::vector<double> parameters);
@@ -27,7 +27,7 @@ private:
     int _n, _l;
 	bool _active;
 public:
-	OniumRate22(std::string Name, std::string configfile, int n, int l, F f);
+	OniumDissoRate22(std::string Name, std::string configfile, int n, int l, F f);
 	void sample(std::vector<double> arg, 
 				std::vector< fourvec > & FS);
 	bool IsActive(void) {return _active;}

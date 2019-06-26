@@ -287,3 +287,13 @@ double dRdq1dq2_1P_decay_ineg(double x[5], std::size_t dim, void * params_){
     }
 }
 
+// -------------------------- Sampling --------------------------
+// disso_real_gluon
+double disso_gluon_costheta(double q, double v, double T, double random){
+    v = std::max(v, 1e-4);
+    double coeff = q/T/std::sqrt(1. - v*v);     // parameter B = coeff
+    double low = fac1(coeff*(1.-v));
+    double norm = fac1(coeff*(1.+v))-low;
+    double y_fac1 = random*norm + low;
+    return -(1. + std::log(1. - std::exp(y_fac1))/coeff )/v;
+}
