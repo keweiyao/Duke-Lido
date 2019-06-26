@@ -1,6 +1,8 @@
 #ifndef ONIUM_PREDEFINE_H
 #define ONIUM_PREDEFINE_H
 
+#include <vector>
+
 extern const double accuracy;
 extern const double li2_minus1;
 extern const double fix_alpha_s;

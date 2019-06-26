@@ -159,3 +159,14 @@ bool is_file_exist(std::string fileName)
     return infile.good();
 }
 
+double get_MSbar_mass(int abspid){
+    if (abspid==21) return 0.0;
+    if (abspid==1) return 0.002;
+    if (abspid==2) return 0.005;
+    if (abspid==3) return 0.090;
+    if (abspid==4) return 1.3;
+    if (abspid==5) return 4.2;
+    LOG_WARNING << "Abs PID = " << abspid << ", you are simply wrong!";
+    exit(-1);
+}
+

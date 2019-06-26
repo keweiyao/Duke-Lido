@@ -36,8 +36,8 @@ typedef Rate<GB, 2, 2, double(*)(const double*, void*)> Rate23;
 typedef Rate<GB, 2, 4, double(*)(const double*, void*)> Rate32;
 typedef EffRate12<2, double(*)(const double*, void*)> Rate12;
 typedef EffRate21<2, double(*)(const double*, void*)> Rate21;
-typedef OniumRate22<2, double(*)(double, void *)> Onium22;
-typedef boost::variant<Rate22, Rate23, Rate32, Rate12, Rate21, Onium22> Process;
+typedef OniumDissoRate22<2, double(*)(double, void *)> OniumD22;
+typedef boost::variant<Rate22, Rate23, Rate32, Rate12, Rate21, OniumD22> Process;
 extern std::map<int, std::vector<Process>> AllProcesses;
 
 void init_process(Process& r, std::string mode, std::string table_path);
@@ -45,6 +45,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 		double K, double a, double b, double p, double q, double gamma, double cut, double Rvac);
 
 int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn, std::vector<particle> & pOut_list);
+int update_Onium_Disso(double dt, double temp, std::vector<double> v3cell, particle & pIn, std::vector<particle> & pOut_list);
 
 double formation_time(fourvec p, fourvec k, double T, int split);
 double calcualte_dt_from_dtau(fourvec x, fourvec p, double tau, double dtau);

@@ -63,7 +63,7 @@ void OniumDissoRate22<2, double(*)(double, void *)>::
         double phi = Srandom::dist_phi(Srandom::gen);
     // sample costheta and phi of p_rel
         double cos_rel = Srandom::dist_costheta(Srandom::gen);
-        double sin_rel = Srandom::dist_phi(Srandom::gen);
+        double phi_rel = Srandom::dist_phi(Srandom::gen);
     
         std::vector<double> momentum_gluon(3);
         std::vector<double> momentum_rel(3);
@@ -131,14 +131,12 @@ tensor OniumDissoRate22<N, F>::calculate_tensor(std::vector<double> parameters){
 	return tensor::unity();
 }
 
-template class OniumDissoRate22<2,double(*)(double, void*)>;
-
-
+/*
 // Quarkonium 2->2 reco rate: Q + Qbar --> QQbar[nl] + g
 template<>
-OniumRecoRate22<3, double(*)(double, std::size_t, void *)>::
-OniumDissoRate22(std::string Name, std::string configfile, int n, int l, double(*f)(double, std::size_t, void *)):
-StochasticBase<2>(Name+"/rate", configfile),
+OniumRecoRate22<3, double(*)(double *, std::size_t, void *)>::
+OniumRecoRate22(std::string Name, std::string configfile, int n, int l, double(*f)(double, std::size_t, void *)):
+StochasticBase<3>(Name+"/rate", configfile),
 _f(f)
 {
     // read configfile
@@ -161,13 +159,13 @@ _f(f)
 
 // 2->2 reco rate
 template <>
-scalar OniumDissoRate22<2, double(*)(double, std::size_t, void*)>::
+scalar OniumRecoRate22<2, double(*)(double, std::size_t, void*)>::
 calculate_scalar(std::vector<double> parameters){
     //double v = parameters[0];
     //double T = parameters[1];
     //double p = parameters[2];
     double params[3] = {this->_mass, this->_Enl, this->_aB};
-    double result = this->_f(parameters, params);
+    double result = this->_f(parameters, 3, params);
     return scalar{result};
 }
 
@@ -178,4 +176,9 @@ fourvec OniumRecoRate22<N, F>::calculate_fourvec(std::vector<double> parameters)
 template <size_t N, typename F>
 tensor OniumRecoRate22<N, F>::calculate_tensor(std::vector<double> parameters){
     return tensor::unity();
-}
+}*/
+
+
+
+
+template class OniumDissoRate22<2,double(*)(double, void*)>;

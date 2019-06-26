@@ -69,11 +69,11 @@ void init_process(Process& r, std::string mode, std::string table_path){
 				else return;
 				break;
              case 5:
-				if (boost::get<Onium22>(r).IsActive())
+				if (boost::get<OniumD22>(r).IsActive())
 					if (mode == "new") {
-						boost::get<Onium22>(r).init(table_path);
+						boost::get<OniumD22>(r).init(table_path);
 					} else {
-						boost::get<Onium22>(r).load(table_path);
+						boost::get<OniumD22>(r).load(table_path);
 					}
 				else return;
 				break;
@@ -148,7 +148,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 
     // for Onium
     AllProcesses[553] = std::vector<Process>();
-    AllProcesses[553].push_back( Onium22("Boltzmann/Hg2QQbar", setting_path, 1, 0, dRdq_1S_gluon) ); // 2->2, index = 0
+    AllProcesses[553].push_back( OniumD22("Boltzmann/Hg2QQbar", setting_path, 1, 0, dRdq_1S_gluon) ); // 2->2, index = 0 1S
 
 	// Initialzie all processes
 	BOOST_FOREACH(Process& r, AllProcesses[123]) init_process(r, mode, table_path);
@@ -193,7 +193,7 @@ int update_particle_momentum_Lido(
 	pOut_list.clear();
 	int absid = std::abs(pIn.pid);
 	pIn.freestream(dt);
-        pIn.Tf = temp;
+    pIn.Tf = temp;
 	// Apply diffusion and update particle momentum
 	fourvec pnew;
 	Ito_update(pIn.pid, dt, pIn.mass, temp, v3cell, pIn.p, pnew);
@@ -381,10 +381,10 @@ int update_particle_momentum_Lido(
 			vp.T0 = temp;
 			vp.is_vac = false;
 			vp.is_virtual = true;
-	                vp.vcell.resize(3); 
-                        vp.vcell[0] = v3cell[0];
-                        vp.vcell[1] = v3cell[1];
-                        vp.vcell[2] = v3cell[2];
+	        vp.vcell.resize(3); 
+		    vp.vcell[0] = v3cell[0];
+		    vp.vcell[1] = v3cell[1];
+		    vp.vcell[2] = v3cell[2];
 	
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
@@ -466,8 +466,6 @@ int update_particle_momentum_Lido(
 		}
 	}
 
-	// Add the mother parton to the output list
-	pOut_list.push_back(pIn);
 
 	// Handle the virtual particle, (only for real mother parton)
 	if ( (!pIn.radlist.empty()) && (!pIn.is_virtual) ){
@@ -478,11 +476,10 @@ int update_particle_momentum_Lido(
 			if (pIn.pid == 21 && it->pid == 21) split_type = 2; // g --> g + g
 			if (pIn.pid == 21 && it->pid != 21) split_type = 3; // g --> q + qbar
 			double taun = formation_time(pIn.p,it->p,temp,split_type);
-
 			// If t-t0 > tauf, or it reaches the boundary of QGP
 			// We check whether it sould be formed
-			if (it->x.t() - it->x0.t() > taun)
-                           { 
+            //LOG_INFO << "Inside HF " << it->x.t() << " " << it->x0.t() << " "<< taun;
+			if (it->x.t() - it->x0.t() > taun){ 
 				double Acceptance = 0.;
 				if (!it->is_vac){ 
 					// medium-induced
@@ -517,23 +514,135 @@ int update_particle_momentum_Lido(
 					}
 
 					it->is_virtual = false;
-                    //if (it->p0.t() > 1)
 					pOut_list.push_back(*it);
+                    
 				}
 				it = pIn.radlist.erase(it);
 
 			}else{ // else, evolve it, while rescale its energy ("ekional limit")
 				std::vector<particle> pnew_Out;
+                //LOG_INFO << "beofre" << it->x.t() << " " << it->x0.t();
 				update_particle_momentum_Lido(dt, temp, v3cell, (*it), pnew_Out);
+                //LOG_INFO << "after" << it->x.t() << " " << it->x0.t();
 				it->p = it->p*(it->p0.t()/it->p.t());
-                                it->p.a[0] = std::sqrt(it->p.pabs2()+it->mass*it->mass);
+                it->p.a[0] = std::sqrt(it->p.pabs2()+it->mass*it->mass);
 				it++;
 			}
 		}
 	}
-
+	// Add the mother parton to the output list
+    pOut_list.push_back(pIn);
 	return channel;
 }
+
+
+int update_Onium_Disso(
+		double dt, double temp, std::vector<double> v3cell, 
+		particle & pIn, std::vector<particle> & pOut_list){
+	pOut_list.clear();
+	int absid = std::abs(pIn.pid);
+	pIn.freestream(dt);
+    pIn.Tf = temp;
+
+	// boost to cell frame (z-direction)
+	auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
+	double dt_cell = dt / pIn.p.t() * p_cell.t();
+	double v_cell = p_cell.pabs()/p_cell.t();
+
+	// Total rate for Dissociation
+	int channel = 0;
+	std::vector<double> P_channels(AllProcesses[absid].size());
+	double P_total = 0., dR;
+
+	BOOST_FOREACH(Process& r, AllProcesses[absid]){
+		switch(r.which()){
+			case 5:
+				if (boost::get<OniumD22>(r).IsActive())
+					dR = boost::get<OniumD22>(r).GetZeroM({v_cell, temp}).s;
+				else dR = 0.0;
+				P_channels[channel] = P_total + dR*dt_cell;
+				break;
+			default:
+				LOG_FATAL << "1. ProcessType = " << r.which() << " not exists";
+				exit(-1);
+				break;
+		}
+		P_total += dR*dt_cell;
+		channel ++;
+	}
+	// P_total is the total rate of reation within dt
+	if (P_total > 0.15 && !type2_warned) {
+		LOG_WARNING << "P(dt) = " << P_total << " may be too large";
+		type2_warned = true;
+	}
+	if ( Srandom::init_dis(Srandom::gen) > P_total ) {
+		channel = -1;
+	}
+	else{
+		// Normalize P_channels using P_total to sample
+		for(auto& item : P_channels) item /= P_total;
+		double p = Srandom::init_dis(Srandom::gen);
+		for(int i=0; i<P_channels.size(); ++i){
+			if (P_channels[i] > p) {
+				channel = i;
+				break;
+			}
+		}
+	}
+
+	// If a scattering happens:
+	if (channel >= 0){
+        int fQ, fQbar;
+		if(channel>= AllProcesses[absid].size()){
+			LOG_FATAL << "3. Channel = " << channel << " not exists";
+			exit(-1);
+		}
+		// Final state holder FS
+		std::vector<fourvec> FS;
+		// Sampe its differential final state
+		switch(AllProcesses[absid][channel].which()){
+			case 5:
+				boost::get<OniumD22>(AllProcesses[absid][channel]).sample({v_cell, temp}, FS);
+				boost::get<OniumD22>(AllProcesses[absid][channel]).FlavorContent(fQ, fQbar);
+				break;
+			default:
+				LOG_FATAL << "2. Channel = " << channel << " not exists";
+				exit(-1);
+				break;
+		}
+		// rotate the final state back and boost it back to the lab frame
+		for(auto & pmu : FS) {
+			pmu = pmu.rotate_back(p_cell);
+			pmu = pmu.boost_back(v3cell[0], v3cell[1], v3cell[2]);
+		}
+        
+        // Q
+        int flavor[2] = {fQ, fQbar};
+        for(int i=0; i<2; i++) {
+			particle vp;		
+			vp.pid = flavor[i];
+			vp.mass = get_MSbar_mass(std::abs(vp.pid));
+			vp.weight = pIn.weight;
+			vp.p0 = FS[i]; 
+			vp.p = vp.p0;
+			vp.x0 = pIn.x;
+			vp.x = vp.x0;
+			vp.T0 = temp;
+			vp.is_vac = false;
+			vp.is_virtual = false;
+		    vp.vcell.resize(3);        
+		    vp.vcell[0] = v3cell[0];
+		    vp.vcell[1] = v3cell[1];
+		    vp.vcell[2] = v3cell[2];
+		    pOut_list.push_back(vp);
+        }
+	}
+    else{
+        pOut_list.push_back(pIn);
+    }
+	return channel;
+}
+
 
 
 void output(const std::vector<particle> plist, std::string fname){

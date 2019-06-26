@@ -9,6 +9,7 @@
 #include <sstream>
 #include <fstream>
 
+
 extern char LO[];
 extern char GB[];
 
@@ -147,5 +148,5 @@ public:
 };
 
 bool is_file_exist(std::string fileName);
-
+double get_MSbar_mass(int abspid);
 #endif

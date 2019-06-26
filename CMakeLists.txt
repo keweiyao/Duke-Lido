@@ -138,9 +138,9 @@ if(NATIVE)
   endif()
 endif()
 
-string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
+#string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
 
-option(MORE_WARNINGS "enable more compiler warnings" ON)
+option(MORE_WARNINGS "enable more compiler warnings" OFF)
 if(MORE_WARNINGS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   # adapted from http://stackoverflow.com/a/9862800
   string(APPEND CMAKE_CXX_FLAGS " -Wpedantic -Wcast-align -Wcast-qual -Wdisabled-optimization -Wformat=2 -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wsign-conversion -Wsign-promo -Wstrict-overflow=2 -Wundef")
@@ -193,6 +193,10 @@ include_directories(src)
 add_executable(Lido-TabGen ./examples/Lido-TabGen.cpp)
 target_link_libraries(Lido-TabGen ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
 install(TARGETS Lido-TabGen DESTINATION bin)
+
+add_executable(Onium-test ./examples/Onium-test.cpp)
+target_link_libraries(Onium-test ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+install(TARGETS Onium-test DESTINATION bin)
 
 add_executable(analytic-medium ./examples/analytic-medium.cpp)
 target_link_libraries(analytic-medium ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
