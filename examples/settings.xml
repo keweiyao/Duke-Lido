@@ -466,9 +466,19 @@
     <!-- onium/disso/QQbar[nl]+g=Q+Qbar -->
 	<Hg2QQbar status="active" moments="off">
 		<mass>4.65</mass>
-		<rate slots="energy,temp">
+		<rate slots="v,temp">
 			<Nv>100</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
 			<Ntemp>32</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
 		</rate>
 	</Hg2QQbar>
+    
+    <!-- onium/reco/Q+Qbar=QQbar[nl]+g -->
+    <QQbar2Hg status="active" moments="off">
+        <mass>4.65</mass>
+        <rate slots="v,temp,log_prel">
+            <Nv>100</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
+            <Ntemp>32</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
+            <Nlog_prel>100</Nlog_prel> <Llog_prel>-3.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
+        </rate>
+    </QQbar2Hg>
 </Boltzmann>
