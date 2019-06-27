@@ -33,6 +33,8 @@ public:
 	bool IsActive(void) {return _active;}
     int n(){return _n;}
     int l(){return _l;}
+    double aB(){return _aB;}
+    double Enl(){return _Enl;}
     void FlavorContent(int & Q, int & Qbar){
        if (_mass<1.8) {
            Q = 4;
@@ -55,6 +57,7 @@ public:
 template <size_t N, typename F>
 class OniumRecoRate22: public virtual StochasticBase<N>{
 private:
+    scalar find_max(std::vector<double> parameters);
 	scalar calculate_scalar(std::vector<double> parameters);
 	fourvec calculate_fourvec(std::vector<double> parameters);
 	tensor calculate_tensor(std::vector<double> parameters);
@@ -69,6 +72,8 @@ public:
 	bool IsActive(void) {return _active;}
     int n(){return _n;}
     int l(){return _l;}
+    double aB(){return _aB;}
+    double Enl(){return _Enl;}
 };
 
 /*

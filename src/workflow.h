@@ -37,15 +37,25 @@ typedef Rate<GB, 2, 4, double(*)(const double*, void*)> Rate32;
 typedef EffRate12<2, double(*)(const double*, void*)> Rate12;
 typedef EffRate21<2, double(*)(const double*, void*)> Rate21;
 typedef OniumDissoRate22<2, double(*)(double, void *)> OniumD22;
-typedef boost::variant<Rate22, Rate23, Rate32, Rate12, Rate21, OniumD22> Process;
+typedef OniumRecoRate22<3, double(*)(double *, std::size_t, void*)> OniumR22;
+typedef boost::variant<Rate22,   // case 0
+                       Rate23,   // case 1
+                       Rate32,   // case 2
+                       Rate12,   // case 3 
+                       Rate21,   // case 4
+                       OniumD22, // case 5 
+                       OniumR22  // case 6
+               > Process;
 extern std::map<int, std::vector<Process>> AllProcesses;
 
 void init_process(Process& r, std::string mode, std::string table_path);
 void initialize(std::string mode, std::string setting_path, std::string table_path, double mu, double afix, 
 		double K, double a, double b, double p, double q, double gamma, double cut, double Rvac);
 
-int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn, std::vector<particle> & pOut_list);
-int update_Onium_Disso(double dt, double temp, std::vector<double> v3cell, particle & pIn, std::vector<particle> & pOut_list);
+int OneBodyUpdate_Parton(double dt, double temp, std::vector<double> v3cell, particle & pIn, std::vector<particle> & pOut_list);
+int OneBodyUpdate_Onium(double dt, double temp, std::vector<double> v3cell, particle & pIn, std::vector<particle> & pOut_list);
+int TwoBodyUpdate_QQbar(double dt_lab, double temp, std::vector<double> v3cell, 
+		particle & P1, particle & P2, std::vector<particle> & pOut_list);
 
 double formation_time(fourvec p, fourvec k, double T, int split);
 double calcualte_dt_from_dtau(fourvec x, fourvec p, double tau, double dtau);

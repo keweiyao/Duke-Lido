@@ -88,6 +88,7 @@ double get_prel_up(double a_B, int n){
     double prel_up;
     if (n == 1){ prel_up = 4.0/a_B;}
     if (n == 2){ prel_up = 2.0/a_B;}
+}
 
 // Matrix-elements
 double Matrix1S(double prel, double a_B){

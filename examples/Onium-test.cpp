@@ -121,7 +121,7 @@ int main(int argc, char* argv[]){
         }
 
         // start
-        double L = 10*5.026; // box size
+        double L = 3*5.026; // box size
         std::vector<particle> plist, new_plist, pOut_list;
 		int pid = args["pid"].as<int>();
 		double E0 = args["energy"].as<double>();
@@ -133,14 +133,18 @@ int main(int argc, char* argv[]){
 		    double ctheta = Srandom::dist_costheta(Srandom::gen);
 		    double stheta = std::sqrt(1.-ctheta*ctheta);
 			fourvec p0{E0, pabs*stheta*std::cos(phi), pabs*stheta*std::sin(phi),pabs*ctheta };
-            fourvec x0{0, L*Srandom::init_dis(Srandom::gen),L*Srandom::init_dis(Srandom::gen),L*Srandom::init_dis(Srandom::gen)};
+            fourvec x0{0, 
+                       L*Srandom::init_dis(Srandom::gen),
+                       L*Srandom::init_dis(Srandom::gen),
+                       L*Srandom::init_dis(Srandom::gen)
+                      };
 			particle entry;
 			entry.p = p0; // 
 			entry.p0 = p0; // 
 			entry.mass = M; // mass
-			entry.pid = pid; // light quark
-			entry.x0 = x0; // initial position
-			entry.x = x0; // initial position
+			entry.pid = Srandom::init_dis(Srandom::gen)>.5?pid:-pid; 
+			entry.x0 = x0;
+			entry.x = x0;
 			entry.weight = 1.;
 			entry.Tf = 0.0;
 			entry.is_vac = false;
@@ -190,50 +194,83 @@ int main(int argc, char* argv[]){
             double T = T0 * std::pow(ti/t, 2./3.-1./nu/3.);
 			if (i%100==0) LOG_INFO << t/5.026 << " [fm/c]\t" << T << " [GeV]" << " #=" << plist.size();
 
-            // One particle evolution
+            //////// Free transport plus one (hard) particle evolution
             new_plist.clear();
             for (auto & p : plist){
                 // for Open heavy flavor
                 if (std::abs(p.pid) < 22)
-                    update_particle_momentum_Lido(dt, T, {0., 0., 0.}, p, pOut_list);  
+                    OneBodyUpdate_Parton(dt, T, {0., 0., 0.}, p, pOut_list);  
 
                 // for Hidden heavy flavor
                 if (p.pid == 553)
-                    update_Onium_Disso(dt, T, {0., 0., 0.}, p, pOut_list);
+                    OneBodyUpdate_Onium(dt, T, {0., 0., 0.}, p, pOut_list);
 
                 for (auto & pp : pOut_list) new_plist.push_back(pp);
             }
+            // update particle list, due to one (hard) particle evolution
+            plist.clear();
+            for (auto & p : new_plist) plist.push_back(p);
+            for (auto & p : plist) {
+                // apply perodic boundary condition (due to free transport out of boundary)
+                for (int k=1; k<4; k++){ 
+                    if (p.x.a[k] > L) p.x.a[k] = p.x.a[k] - L;
+                    if (p.x.a[k] < 0) p.x.a[k] = p.x.a[k] + L;
+                }
+                
+            }
 
-            // Two particle evolution
-            int Npair = 0;
+            /////// Two (hard) particle evolution
+            new_plist.clear();
             for (auto & p1 : plist){
                 if (p1.pid == 5) {
                     auto xQ = p1.x;
                     for (auto & p2 : plist){
-                        if (p2.pid == -5) {
+                        if (p2.pid == -5 && p2.is_virtual == false) {
                             auto xQbar = p2.x;
                             double dist2 = 0.;
                             for (int k=1; k<4; k++){ 
                                 double dx = xQ.a[k]-xQbar.a[k];
                                 dist2 += std::pow(std::min(dx,L-dx), 2);
                             }
-                            if (dist2 < std::pow(1.*5.026, 2)) Npair ++;
-                            // check if spatially close
-                            // apply recombinate prob
+                            // for sufficiently close pair
+                            if (dist2 < std::pow(.3*5.026, 2)) {
+                                auto x1 = p1.x;
+                                auto x2 = p2.x;
+                                for (int k=1; k<4; k++){
+                                    if (std::abs(p1.x.a[k]-p2.x.a[k]) > L/2.){
+                                        if (p1.x.a[k]>p2.x.a[k]) p2.x.a[k] += L;
+                                        else p1.x.a[k] += L;
+                                    }
+                                }
+                                int channel = TwoBodyUpdate_QQbar(dt, T, {0., 0., 0.}, p1, p2, pOut_list);
+                                if (channel != -1) {
+                                    p1.is_virtual = true;
+                                    p2.is_virtual = true;
+                                    for (auto & pp : pOut_list) new_plist.push_back(pp);
+                                    //LOG_INFO << "Recombined!";
+                                }
+                                else {
+                                    p1.x = x1;
+                                    p2.x = x2;
+                                }
+                            }
                         }
                     }
                 }
             }
-            if (i%100==0) LOG_INFO << "Npair = " << Npair;
+            // update particle list, due to one (hard) particle evolution
+            for(std::vector<particle>::iterator it=plist.begin();it!=plist.end();) {
+                if (it->is_virtual) it = plist.erase(it);
+                else it++;
+            }
+            for (auto & p : new_plist) plist.push_back(p);
+            // apply perodic boundary condition (due to free transport out of boundary)            
+            for (auto & p : plist){
 
-            plist.clear();
-            for (auto & p : new_plist){
-                // apply perodic boundary condition
                 for (int k=1; k<4; k++){ 
                     if (p.x.a[k] > L) p.x.a[k] = p.x.a[k] - L;
                     if (p.x.a[k] < 0) p.x.a[k] = p.x.a[k] + L;
                 }
-                plist.push_back(p);
             }
 
             int No=0;

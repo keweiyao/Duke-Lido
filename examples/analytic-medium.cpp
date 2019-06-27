@@ -190,7 +190,7 @@ int main(int argc, char* argv[]){
 				//p.pid = pid;
 
                 // x,p-update
-                update_particle_momentum_Lido(dt, T, {0., 0., 0.}, p, pOut_list);
+                OneBodyUpdate_Parton(dt, T, {0., 0., 0.}, p, pOut_list);
 
 				for (int j=1; j<pOut_list.size(); j++){
 					auto k = pOut_list[j];

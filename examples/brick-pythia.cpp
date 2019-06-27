@@ -218,7 +218,7 @@ int main(int argc, char* argv[]){
                     }
                     // x,p-update
                     int channel = 
-                        update_particle_momentum_Lido(dt_lab, T, {vx, vy, vz}, p);
+                        OneBodyUpdate_Parton(dt_lab, T, {vx, vy, vz}, p);
                 }
             }
             counter ++;

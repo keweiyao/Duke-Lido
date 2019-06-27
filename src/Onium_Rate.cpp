@@ -81,7 +81,11 @@ void OniumDissoRate22<2, double(*)(double, void *)>::
 sample(std::vector<double> parameters, std::vector< fourvec > & FS){
     double v = parameters[0];
     double T = parameters[1];
-        
+    auto dRdq = [v, T, this](double q){
+        double params[5] = {v, T, this->_mass, this->_Enl, this->_aB};
+        double result = this->_f(q, params);
+        return result;
+    };
     double qmin = _Enl;
     double qmax = 100*_Enl;
     // sample gluon energy
@@ -126,7 +130,7 @@ tensor OniumDissoRate22<N, F>::calculate_tensor(std::vector<double> parameters){
 }
 
 
-// ------------------------------ Quarkonium 2->2 reco rate: Q + Qbar --> QQbar[nl] + g
+// ------------- Quarkonium 2->2 reco rate: Q + Qbar --> QQbar[nl] + g
 template<>
 OniumRecoRate22<3, double(*)(double *, std::size_t, void *)>::
 OniumRecoRate22(std::string Name, std::string configfile, int n, int l, double(*f)(double *, std::size_t, void *)):
@@ -154,18 +158,24 @@ _f(f)
 // 2->2 reco rate
 template <>
 scalar OniumRecoRate22<3, double(*)(double *, std::size_t, void *)>::
+find_max(std::vector<double> parameters){
+    return scalar::unity();
+}
+
+
+// 2->2 reco rate
+template <>
+scalar OniumRecoRate22<3, double(*)(double *, std::size_t, void *)>::
 calculate_scalar(std::vector<double> parameters){
-    //double v = parameters[0];
-    //double T = parameters[1];
-    //double p = parameters[2];
     double x[3];
-    x[0] = parameters[0];
-    x[1] = parameters[1];
-    x[2] = std::exp(parameters[2]);
+    x[0] = parameters[0]; // v
+    x[1] = parameters[1]; // T
+    x[2] = std::exp(parameters[2]); // exp(ln_p_rel)
     double params[3] = {this->_mass, this->_Enl, this->_aB};
     double result = prefactor_reco_gluon * this->_f(x, 3, params);
     return scalar{result};
 }
+
 
 // sample reco_real_gluon
 template<>
