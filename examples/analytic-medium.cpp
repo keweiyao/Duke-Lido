@@ -120,7 +120,7 @@ int main(int argc, char* argv[]){
         }
 
         // start
-        std::vector<particle> plist;
+        std::vector<particle> plist, new_plist;
 		int pid = args["pid"].as<int>();
 		double E0 = args["energy"].as<double>();
 		double M = args["mass"].as<double>();
@@ -175,32 +175,24 @@ int main(int argc, char* argv[]){
 
         // initial E
         double Ei = mean_E(plist);
-		std::vector<particle> pOut_list, add;
+		std::vector<particle> pOut_list;
 
 		std::ofstream fff("stat.dat");
         for (int i=0; i<Nsteps; i++){
-            add.clear();
+            new_plist.clear();
 			double t = ti + dt*i;
             double T = T0 * std::pow(ti/t, 2./3.-1./nu/3.);
 			if (i%100==0) LOG_INFO << t/5.026 << " [fm/c]\t" << T << " [GeV]" << " #="<<plist.size();
             for (auto & p : plist){
-				// reset energy 
-				//p.p = p0;
-				// reset pid
-				//p.pid = pid;
-
-                // x,p-update
-                update_particle_momentum_Lido(dt, T, {0., 0., 0.}, p, pOut_list);
-
-				for (int j=1; j<pOut_list.size(); j++){
-					auto k = pOut_list[j];
+                int channel = update_particle_momentum_Lido(dt, T, {0., 0., 0.}, p, pOut_list);
+				for (auto & k : pOut_list){
 					fff   << k.x.t() << " " << k.p0.t() << " "
 						  << measure_perp(p.p, k.p).pabs2() << " "
 						  << k.x.t() - k.x0.t() << std::endl;
-                    add.push_back(k);
+                    new_plist.push_back(k);
 				}
             }
-            for(auto & it : add) plist.push_back(it);
+            plist = new_plist;
         }
 		
 		// final E

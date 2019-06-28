@@ -451,9 +451,6 @@ int update_particle_momentum_Lido(
 		}
 	}
 
-	// Add the mother parton to the output list
-	pOut_list.push_back(pIn);
-
 	// Handle the virtual particle, (only for real mother parton)
 	if ( (!pIn.radlist.empty()) && (!pIn.is_virtual) ){
 		// loop over each virtual particles
@@ -517,6 +514,8 @@ int update_particle_momentum_Lido(
 		}
 	}
 
+	// Add the mother parton to the end of the output list
+	pOut_list.push_back(pIn);
 	return channel;
 }
 
