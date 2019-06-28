@@ -432,5 +432,5 @@ tensor OniumRecoRate32q<N, F>::calculate_tensor(std::vector<double> parameters){
 template class OniumDissoRate22<2,double(*)(double, void*)>;
 template class OniumRecoRate22<3, double(*)(double *, std::size_t, void*)>;
 template class OniumDissoRate23q<2, double(*)(double *, std::size_t, void *), double(*)(double, void *)>;
-Otemplate class niumRecoRate32q<3, double(*)(double *, std::size_t, void *), double(*)(double, void *)>
+template class OniumRecoRate32q<3, double(*)(double *, std::size_t, void *), double(*)(double, void *)>;
 //template class OniumDissoRate23q<2, double(*)(double *, std::size_t, void *)>;

@@ -88,6 +88,24 @@ void init_process(Process& r, std::string mode, std::string table_path){
 					}
 				else return;
 				break;
+            case 7:
+				if (boost::get<OniumD23q>(r).IsActive())
+					if (mode == "new") {
+						boost::get<OniumD23q>(r).init(table_path);
+					} else {
+						boost::get<OniumD23q>(r).load(table_path);
+					}
+				else return;
+				break;
+            case 8:
+				if (boost::get<OniumR32q>(r).IsActive())
+					if (mode == "new") {
+						boost::get<OniumR32q>(r).init(table_path);
+					} else {
+						boost::get<OniumR32q>(r).load(table_path);
+					}
+				else return;
+				break;
 			default:
 				exit(-1);
 				break;
@@ -160,10 +178,12 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
     // for Onium decay
     OneBody[553] = std::vector<Process>();
     OneBody[553].push_back( OniumD22("Boltzmann/Hg2QQbar", setting_path, 1, 0, dRdq_1S_gluon) ); // index = 0 1S
+    OneBody[553].push_back( OniumD23q("Boltzmann/Hq2QQbarq", setting_path, 1, 0, dRdp1dp2_1S_decay_ineq, f_p1_disso_important) ); // index = 1 1S
 
     // for Q Qbar recombine
     TwoBody[std::make_pair(5,-5)] = std::vector<Process>();
     TwoBody[std::make_pair(5,-5)].push_back(OniumR22("Boltzmann/QQbar2Hg", setting_path, 1, 0, RV1S_reco_gluon) ); // index = 0 1S
+    TwoBody[std::make_pair(5,-5)].push_back(OniumR32q("Boltzmann/QQbarq2Hq", setting_path, 1, 0, dRdp1dp2_1S_reco_ineq, f_p1_reco_important) ); // index = 1 1S
 
 	// Initialzie all processes
     // One Body
