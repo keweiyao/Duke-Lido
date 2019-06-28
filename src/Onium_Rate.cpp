@@ -72,7 +72,7 @@ find_max(std::vector<double> parameters){
     double qmin = _Enl;
     double qmax = 100*_Enl;
     double res = -minimize_1d(dRdq, {qmin, qmax}, 1e-3, 100, 100);
-    return scalar{res*1.5};
+    return scalar{res*1.2};
 }
 
 // Sample Final states using dR/dq
@@ -211,13 +211,14 @@ tensor OniumRecoRate22<N, F>::calculate_tensor(std::vector<double> parameters){
     return tensor::unity();
 }
 
-/*
+
 // ------------------------------- Quarkonium 2->3 disso rate: QQbar[nl] + q --> Q + Qbar + q
 template<>
-OniumDissoRate23q<2, double(*)(double *, std::size_t, void *)>::
-OniumDissoRate23q(std::string Name, std::string configfile, int n, int l, double(*)(double *, std::size_t, void *)):
+OniumDissoRate23q<2, double(*)(double *, std::size_t, void *), double(*)(double, void*)>::
+OniumDissoRate23q(std::string Name, std::string configfile, int n, int l, double(*)(double *, std::size_t, void *), double(*)(double, void*)):
 StochasticBase<2>(Name+"/rate", configfile),
-_f(f)
+_f1(f1)
+_f2(f2)
 {
     // read configfile
     boost::property_tree::ptree config;
@@ -235,20 +236,21 @@ _f(f)
     _Enl = get_onium_Enl_Coulomb(_mass, _n, _l);
     _aB = get_aB(_mass);
     _prel_up = get_prel_up(_aB, _n);
+    _max_p2Matrix = get_max_p2Matrix(_prel_up, _n, _l);
     _active = (tree.get<std::string>("<xmlattr>.status")=="active")?true:false;
 }
 
 // Calculate R = int dp1 dp2 dR/dp1/dp2
 template <>
-scalar OniumDissoRate23q<2, double(*)(double *, std::size_t, void *)>::
+scalar OniumDissoRate23q<2, double(*)(double *, std::size_t, void *), double(*)(double, void*)>::
 calculate_scalar(std::vector<double> parameters){
     double v = parameters[0];
     double T = parameters[1];
     
-    // dR/dq to be intergated
+    // dR/dp1/dp2 to be intergated
     auto dRdp1dp2 = [v, T, this](double * x){
         double params[5] = {v, T, this->_mass, this->_Enl, this->_aB};
-        double result = this->_f(x, 5, params);
+        double result = this->_f1(x, 5, params);
         return result;
     };
     double p1up = 15.*T/std::sqrt(1.-v);
@@ -260,44 +262,39 @@ calculate_scalar(std::vector<double> parameters){
     return scalar{res};
 }
 
+// find max of f_p1
+template <>
+scalar OniumDissoRate23q<2, double(*)(double*, std::size_t, void*), double(*)(double, void*)>:: //vector function: v, T, mQ, Enl, aB, prel_up, I_p1_max, max_p2Matrix, p2Matrix(prel, aB)
+find_max(std::vector<double> parameters){
+    double v = parameters[0];
+    double T = parameters[1];
+    auto f_p1 = [v, T, this](double p1){
+        double params[3] = {v, T, this->_Enl};
+        double result = this->_f2(p1, params);
+        return -result;
+    };
+    double p1_min = 0.0;
+    double p1_max = 15.*T/std::sqrt(1.-v);
+    double res = -minimize_1d(f_p1, {p1_min, p1_max}, 1e-3, 100, 100);
+    return scalar{res*1.2};
+}
+
 // Sample final states using dR/dp1/dp2
 template<>
-void OniumDissoRate23q<2, double(*)(double *, std::size_t, void *)>::
+void OniumDissoRate23q<2, double(*)(double *, std::size_t, void *), double(*)(double, void*)>::
 sample(std::vector<double> parameters, std::vector< fourvec > & FS){
     double v = parameters[0];
     double T = parameters[1];
-    
-    
-    
-    
-    
-    
-    auto dRdq = [v, T, this](double q){
-        double params[5] = {v, T, this->_mass, this->_Enl, this->_aB};
-        double result = this->_f(q, params);
-        return result;
-    };
-    double qmin = _Enl;
-    double qmax = 100*_Enl;
-    // sample gluon energy
-    double q = sample_1d(dRdq, {qmin, qmax},StochasticBase<2>::GetFmax(parameters).s);
-    // sample relative momentum of Q and Qbar
-    double p_rel = std::sqrt((q-_Enl)*_mass);
-    // sample costheta of q
-    double r = Srandom::rejection(Srandom::gen);
-    double cos = disso_gluon_costheta(q, v, T, r);
-    // sample phi of q
-    double phi = Srandom::dist_phi(Srandom::gen);
-    // sample costheta and phi of p_rel
-    double cos_rel = Srandom::dist_costheta(Srandom::gen);
-    double phi_rel = Srandom::dist_phi(Srandom::gen);
-    
-    std::vector<double> momentum_gluon(3);
-    std::vector<double> momentum_rel(3);
     std::vector<double> pQpQbar_final(6);
-    momentum_gluon = polar_to_cartisian1(q, cos, phi);
-    momentum_rel = polar_to_cartisian1(p_rel, cos_rel, phi_rel);
-    pQpQbar_final = add_real_gluon(momentum_gluon, momentum_rel);
+    if (_n==1){
+        pQpQbar_final = std::vector<double> Sample_disso_ineq(v, T, _mass, _Enl, _aB, _prel_up, StochasticBase<2>::GetFmax(parameters).s, _max_p2Matrix, &p2Matrix1S);
+    }
+    else if (_n==2&&_l==0){
+        pQpQbar_final = std::vector<double> Sample_disso_ineq(v, T, _mass, _Enl, _aB, _prel_up, StochasticBase<2>::GetFmax(parameters).s, _max_p2Matrix, &p2Matrix2S);
+    }
+    else{
+        pQpQbar_final = std::vector<double> Sample_disso_ineq(v, T, _mass, _Enl, _aB, _prel_up, StochasticBase<2>::GetFmax(parameters).s, _max_p2Matrix, &p2Matrix1P);
+    }
     double E_Q = momentum_to_energy(_mass, pQpQbar_final[0], pQpQbar_final[1], pQpQbar_final[2]);
     double E_Qbar = momentum_to_energy(_mass, pQpQbar_final[3], pQpQbar_final[4], pQpQbar_final[5]);
     FS.clear();
@@ -318,8 +315,122 @@ template <size_t N, typename F>
 tensor OniumDissoRate23q<N, F>::calculate_tensor(std::vector<double> parameters){
     return tensor::unity();
 }
-*/
+
+// ------------------------------- Quarkonium 3->2 reco rate: Q + Qbar + q --> QQbar[nl] + q
+template<>
+OniumRecoRate32q<3, double(*)(double *, std::size_t, void *), double(*)(double, void *)>::
+OniumRecoRate32q(std::string Name, std::string configfile, int n, int l, double(*)(double *, std::size_t, void *), double(*)(double, void *)):
+StochasticBase<3>(Name+"/rate", configfile),
+_f1(f1)
+_f2(f2)
+{
+    // read configfile
+    boost::property_tree::ptree config;
+    std::ifstream input(configfile);
+    read_xml(input, config);
+    
+    std::vector<std::string> strs;
+    boost::split(strs, Name, boost::is_any_of("/"));
+    std::string model_name = strs[0];
+    std::string process_name = strs[1];
+    auto tree = config.get_child(model_name + "." + process_name);
+    _mass = tree.get<double>("mass");
+    _n = n;
+    _l = l;
+    _Enl = get_onium_Enl_Coulomb(_mass, _n, _l);
+    _aB = get_aB(_mass);
+    _active = (tree.get<std::string>("<xmlattr>.status")=="active")?true:false;
+}
+
+// Calculate R = int dp1 dp2 dR/dp1/dp2
+template <>
+scalar OniumRecoRate32q<3, double(*)(double *, std::size_t, void *), double(*)(double, void *)>::
+calculate_scalar(std::vector<double> parameters){
+    double v = parameters[0];
+    double T = parameters[1];
+    double p = std::exp(parameters[2]);      // relative momentum in QQbar rest frame
+    
+    // dR/dp1/dp2 to be intergated
+    auto dRdp1dp2 = [v, T, p, this](double * x){
+        double params[4] = {v, T, p, this->_mass, this->_Enl};
+        double result = this->_f1(x, 4, params);
+        return result;
+    };
+    double p1up = 15.*T/std::sqrt(1.-v);
+    
+    double xl[4] = { _Enl, -1., -1., 0. };
+    double xu[4] = { p1up, 1., 1., TwoPi };
+    double error;
+    double res = prefactor_reco_ineq*vegas(dRdp1dp2, 5, xl, xu, error, 5000);
+    if (_n==1){
+        res = res * Matrix1S(p, _aB);
+    }
+    else if (_n==2 && _l==0){
+        res = res * Matrix2S(p, _aB);
+    }
+    else{
+        res = res * Matrix1P(p, _aB);
+    }
+    return scalar{res};
+}
+
+// find max of f_p1
+template <>
+scalar OniumRecoRate32q<3, double(*)(double, void*), double(*)(double, void *)>::
+find_max(std::vector<double> parameters){
+    double v = parameters[0];
+    double T = parameters[1];
+    double p = std::exp(parameters[2]);      // relative momentum in QQbar rest frame
+    auto f_p1 = [v, T, p, this](double p1){
+        double params[4] = {v, T, this->_Enl, p*p/this->_mass};
+        double result = this->_f2(p1, params);
+        return -result;
+    };
+    double p1_min = 0.0;
+    double p1_max = 15.*T/std::sqrt(1.-v);
+    double res = -minimize_1d(f_p1, {p1_min, p1_max}, 1e-3, 100, 100);
+    return scalar{res*1.2};
+}
+
+// Sample final states using dR/dp1/dp2
+template<>
+void OniumRecoRate32q<3, double(*)(double *, std::size_t, void *), double(*)(double, void *)>::
+sample(std::vector<double> parameters, std::vector< fourvec > & FS){
+    double v = parameters[0];
+    double T = parameters[1];
+    std::vector<double> pQpQbar_final(6);
+    if (_n==1){
+        pQpQbar_final = this->_f2(v, T, _mass, _Enl, _aB, _prel_up, StochasticBase<2>::GetFmax(parameters).s, _max_p2Matrix, &p2Matrix1S);
+    }
+    else if (_n==2&&_l==0){
+        pQpQbar_final = this->_f2(v, T, _mass, _Enl, _aB, _prel_up, StochasticBase<2>::GetFmax(parameters).s, _max_p2Matrix, &p2Matrix2S);
+    }
+    else{
+        pQpQbar_final = this->_f2(v, T, _mass, _Enl, _aB, _prel_up, StochasticBase<2>::GetFmax(parameters).s, _max_p2Matrix, &p2Matrix1P);
+    }
+    double E_Q = momentum_to_energy(_mass, pQpQbar_final[0], pQpQbar_final[1], pQpQbar_final[2]);
+    double E_Qbar = momentum_to_energy(_mass, pQpQbar_final[3], pQpQbar_final[4], pQpQbar_final[5]);
+    FS.clear();
+    FS.resize(2);
+    // In Rest frame
+    FS[0] = fourvec{E_Q, pQpQbar_final[0], pQpQbar_final[1], pQpQbar_final[2]};
+    FS[1] = fourvec{E_Qbar, pQpQbar_final[3], pQpQbar_final[4], pQpQbar_final[5]};
+    // boost to hydrocell frame
+    FS[0] = FS[0].boost_back(0,0,v);
+    FS[1] = FS[1].boost_back(0,0,v);
+}
+
+template <size_t N, typename F>
+fourvec OniumRecoRate32q<N, F>::calculate_fourvec(std::vector<double> parameters){
+    return fourvec::unity();
+}
+template <size_t N, typename F>
+tensor OniumRecoRate32q<N, F>::calculate_tensor(std::vector<double> parameters){
+    return tensor::unity();
+}
 
 template class OniumDissoRate22<2,double(*)(double, void*)>;
 template class OniumRecoRate22<3, double(*)(double *, std::size_t, void*)>;
+template class OniumDissoRate23q<2, double(*)(double *, std::size_t, void *), double(*)(double, void *)>;
+Otemplate class niumRecoRate32q<3, double(*)(double *, std::size_t, void *), double(*)(double, void *)>
 //template class OniumDissoRate23q<2, double(*)(double *, std::size_t, void *)>;

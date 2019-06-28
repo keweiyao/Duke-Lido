@@ -37,6 +37,7 @@ double Matrix1P(double prel, double a_B);
 double p2Matrix1S(double prel, double a_B);
 double p2Matrix2S(double prel, double a_B);
 double p2Matrix1P(double prel, double a_B);
+double get_max_p2Matrix(double prel_up, int n, int l);
 
 double get_aB(double M);
 double get_onium_Enl_Coulomb(double M, int n, int l);
@@ -52,6 +53,4 @@ std::vector<double> add_virtual_gluon(std::vector<double> momentum_1, std::vecto
 std::vector<double> subtract_real_gluon(std::vector<double> momentum_subtract);
 std::vector<double> subtract_virtual_gluon(std::vector<double> momentum_1, std::vector<double> momentum_2);
 
-// sampling
-double Sample_reco_gluon_costheta(double v, double T, double q);
 #endif

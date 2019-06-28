@@ -3,6 +3,7 @@
 #include "predefine.h"
 #include <cmath>
 #include <gsl/gsl_math.h>
+#include "random.h"
 
 //-----------Quarkonium gluon absorption-------------------
 // QQbar + g --> Q + Qbar
@@ -297,3 +298,110 @@ double disso_gluon_costheta(double q, double v, double T, double random){
     double y_fac1 = random*norm + low;
     return -(1. + std::log(1. - std::exp(y_fac1))/coeff )/v;
 }
+
+// reco_real_gluon
+double Sample_reco_gluon_costheta(double v, double T, double q){
+    double gamma = 1./std::sqrt(1.-v*v);
+    double y1 = q*gamma*(1.-v)/T;
+    double max_value = nBplus1(y1);
+    double x_try, y_try, result;
+    do {
+        x_try = Srandom::dist_costheta(Srandom::gen);
+        y_try = q*gamma*(1.+ x_try*v)/T;
+        result = nBplus1(y_try);
+    } while (Srandom::rejection(Srandom::gen)*max_value > result);
+    return x_try;
+}
+
+ // inelastic scattering disso
+ // function used in importance sampling of p1
+ double f_p1_disso_important(double p1, void * params_){
+     double * params = static_cast<double *>(params_);
+     double v = params[0];
+     double T = params[1];
+     double Enl = params[2];
+     double gamma = 1./std::sqrt(1.-v*v);
+     double k1 = gamma*(1-v)/T;        // k1 = gamma*(1-v)/T
+     double k2 = gamma*(1+v)/T;        // k2 = gamma*(1+v)/T
+     double p2 = p1-Enl;     // p2 = p1 - Enl
+     if (p2 <= 0){
+         return 0.0;
+     }
+     else{
+         double p1p2 = p1/p2;
+         return ( fac2(k1*p1) - fac2(k2*p1) ) * p1 /(p1p2 + 1./p1p2 -2.0);
+     }
+ }
+ 
+ double Sample_disso_ineq_p1_important(double p1low, double p1up, double result_max, void * params_){ // result_max is an input
+     double * params = static_cast<double *>(params_);
+     double result_try, p1_try;
+     do{
+         p1_try = Srandom::rejection(Srandom::gen)*(p1up-p1low) + p1low;
+         result_try = f_p1_disso_important(p1_try, params);
+     } while(Srandom::rejection(Srandom::gen)*result_max > result_try);
+     return p1_try;
+    }
+ 
+double Sample_disso_ineq_cos1(double p1, void * params_){
+    double * params = static_cast<double *>(params_);
+    double y_try = Srandom::y_cdf(Srandom::gen);
+    double v = std::max(params[0], 1e-4);
+    double B = params[1]*p1;    // B = gamma * p1/T
+    double C = y_try * fac2(B*(1.+v)) + (1.-y_try) * fac2(B*(1.-v));
+    return -(1. + std::log(std::exp(C) - 1.)/B )/v;
+ }
+ 
+ std::vector<double> Sample_disso_ineq(double v, double T, double mass, double Enl, double a_B, double prel_up, double maximum_f_p1, double max_p2Matrix, double(*f)(double _prel, double _aB)){    // maximum is the input for Sample_disso_ineq_p1_important
+     v = std::max(v, 1e-4);
+     double gamma = 1./std::sqrt(1.-v*v);
+     double p1_try, c1_try, s1_try, p2_try, c2_try, s2_try, phi_try, c_phi, s_phi, p_rel, p1p2, part_angle, result_try, p1p2_try;
+     double p1low = Enl;
+     double p1up = 15.*T/std::sqrt(1.-v);
+ 
+     double * params_p1 = new double[3];
+     params_p1[0] = v; //k1 = gamma*(1-v)/T
+     params_p1[1] = T; //k2 = gamma*(1+v)/T
+     params_p1[2] = Enl
+ 
+     double * params_c1 = new double[2];
+     params_c1[0] = v;
+     params_c1[1] = gamma/T;
+ 
+     do{
+         do{
+             p_rel = Srandom::sample_inel(Srandom::gen)*prel_up;
+         } while(Srandom::rejection(Srandom::gen)*max_p2Matrix > f(p_rel, a_B));
+ 
+         p1_try = Sample_disso_ineq_p1_important(p1low, p1up, maximum_f_p1, params_p1);  // give the maximum as result_max to Sample_disso_ineq_p1_important
+         p2_try = p1_try - Enl - p_rel*p_rel/mass;
+         if (p2_try <= 0.0){
+             result_try = 0.0;
+         }
+         else{
+             c1_try = Sample_disso_ineq_cos1(p1_try, params_c1);
+             c2_try = Srandom::dist_costheta(Srandom::gen);
+             s1_try = std::sqrt(1.-c1_try*c1_try);
+             s2_try = std::sqrt(1.-c2_try*c2_try);
+             phi_try = Srandom::dist_phi(Srandom::gen);
+             p1p2_try = p1_try/p2_try;   // p1_try/p2_try
+             p1p2 = (p1_try-E1S)/p1_try;
+             c_phi = std::cos(phi_try);
+             s_phi = std::sin(phi_try);
+             part_angle = s1_try*s2_try*c_phi + c1_try*c2_try;
+             result_try = (1.+part_angle)/(p1p2_try + 1./p1p2_try - 2.*part_angle)/2.0*(p1p2 + 1./p1p2 - 2.0) * nFminus1(gamma*(1.+v*c2_try)*p2_try/T)/p1p2_try;
+         }
+     } while(Srandom::rejection(Srandom::gen) >= result_try);
+     std::vector<double> p1_final(3);
+     std::vector<double> p2_final(3);
+     std::vector<double> p_rel_final(3);
+     std::vector<double> pQpQbar_final(6);
+     double cos_rel, phi_rel;
+     cos_rel = sample_cos(gen);
+     phi_rel = sample_inel(gen)*TwoPi;
+     p1_final = polar_to_cartisian2(p1_try, c1_try, s1_try, 1.0, 0.0);
+     p2_final = polar_to_cartisian2(p2_try, c2_try, s2_try, c_phi, s_phi);
+     p_rel_final = polar_to_cartisian1(p_rel, cos_rel, phi_rel);
+     pQpQbar_final = add_virtual_gluon(p1_final, p2_final, p_rel_final);
+     return pQpQbar_final;
+ }

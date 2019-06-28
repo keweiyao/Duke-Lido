@@ -481,4 +481,22 @@
             <Nlog_prel>100</Nlog_prel> <Llog_prel>-3.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
         </rate>
     </QQbar2Hg>
+    
+    <!-- onium/disso/QQbar[nl]+q=Q+Qbar+q -->
+    <Hq2QQbarq status="active" moments="off">
+        <mass>4.65</mass>
+        <rate slots="v,temp">
+            <Nv>100</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
+            <Ntemp>32</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
+        </rate>
+    </Hq2QQbarq>
+    
+    <!-- onium/reco/Q+Qbar+q=QQbar[nl]+q -->
+    <QQbarq2Hq status="active" moments="off">
+        <mass>4.65</mass>
+        <rate slots="v,temp">
+            <Nv>100</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
+            <Ntemp>32</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
+            <Nlog_prel>100</Nlog_prel> <Llog_prel>-3.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
+    </QQbarq2Hq>
 </Boltzmann>
