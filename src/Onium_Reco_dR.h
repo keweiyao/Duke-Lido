@@ -1,6 +1,7 @@
 #ifndef ONIUM_RECO_DR_H
 #define ONIUM_RECO_DR_H
 #include <cmath>
+#include <vector>
 // Q + Qbar --> QQbar[1S] + g
 double RV1S_reco_gluon(double x[3], std::size_t dim, void * params_);
 // Q + Qbar --> QQbar[2S] + g
@@ -28,5 +29,8 @@ double dRdq1dq2_1P_reco_ineg(double x[4], std::size_t dim, void * params_);
 // Sampling
 double f_p1_reco_important(double p1, void * params_);
 double Sample_reco_ineq_p1_important(double p1low, double p1up, double result_max, void * params_);
-std::vector<double> S1S_reco_ineq(double v, double T, double mass, double Enl, double a_B, double prel_up, double maximum_f_p1, double max_p2Matrix, double(*f)(double _prel, double _aB);
+std::vector<double> S1S_reco_ineq(
+           double v, double T, double p, 
+           double mass, double Enl, double maximum_f_p1
+      );
 #endif

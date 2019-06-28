@@ -8,20 +8,20 @@ const double li2_minus1 = -0.822467;
 
 // find maximum of a function
 // only works for positive-function with one local maximum within [xL, xH]
-double find_max_noparams(double(*f)(double x), double xL_, double xR_){
+double find_max_noparams(double(*f)(double, double), double xL_, double xR_, double aB){
     double dfL, dfR, dfM, xM, xL = xL_, xR = xR_, dx, fM, fL, fR;
     int count = 1;
     dx = (xR-xL)/100.;
-    fL = f(xL);
-    fR = f(xR);
-    dfL = f(xL+dx) - fL;
-    dfR = fR - f(xR-dx);
+    fL = f(xL, aB);
+    fR = f(xR, aB);
+    dfL = f(xL+dx, aB) - fL;
+    dfR = fR - f(xR-dx, aB);
     if (dfL*dfR <= 0.0){
         do{
             count += 1;
             xM = (xL+xR)/2.;
-            dfM = f(xM+dx) - f(xM);
-            fM = f(xM);
+            dfM = f(xM+dx, aB) - f(xM, aB);
+            fM = f(xM, aB);
             if (dfL*dfM < 0 or dfM*dfR > 0) {xR = xM; dfR = dfM;}
             else {xL = xM; dfL = dfM;}
             dx = (xR-xL)/100.;
@@ -115,6 +115,7 @@ double get_prel_up(double a_B, int n){
     double prel_up;
     if (n == 1){ prel_up = 4.0/a_B;}
     if (n == 2){ prel_up = 2.0/a_B;}
+    return prel_up;
 }
 
 // Matrix-elements
@@ -145,15 +146,15 @@ double p2Matrix1P(double prel, double a_B){
     return prel*prel*Matrix1P(prel, a_B);
 }
 
-double get_max_p2Matrix(double prel_up, int n, int l){
+double get_max_p2Matrix(double prel_up, int n, int l, double aB){
     if (n==1){
-        return find_max_noparams(&p2Matrix1S, 1e-4, prel_up);
+        return find_max_noparams(&p2Matrix1S, 1e-4, prel_up, aB);
     }
     else if (n==2 && l==0){
-        return find_max_noparams(&p2Matrix2S, 1e-4, prel_up);
+        return find_max_noparams(&p2Matrix2S, 1e-4, prel_up, aB);
     }
     else{
-        return find_max_noparams(&p2Matrix1P, 1e-4, prel_up);
+        return find_max_noparams(&p2Matrix1P, 1e-4, prel_up, aB);
     }
 }
 

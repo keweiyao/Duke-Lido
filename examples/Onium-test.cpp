@@ -202,8 +202,9 @@ int main(int argc, char* argv[]){
                     OneBodyUpdate_Parton(dt, T, {0., 0., 0.}, p, pOut_list);  
 
                 // for Hidden heavy flavor
-                if (p.pid == 553)
+                if (p.pid > 500)
                     OneBodyUpdate_Onium(dt, T, {0., 0., 0.}, p, pOut_list);
+
 
                 for (auto & pp : pOut_list) new_plist.push_back(pp);
             }
@@ -273,11 +274,13 @@ int main(int argc, char* argv[]){
                 }
             }
 
-            int No=0;
+            int N553=0, N100553=0, N5 = 0;
             for (auto & p : plist) {
-                if (p.pid == 553) No++;
+                if (p.pid == 553) N553++;
+                if (p.pid == 100553) N100553++;
+                if (std::abs(p.pid) == 5) N5 ++;
             }
-            fff << t/5.026 << " " << No << std::endl;
+            fff << t/5.026 << "\t" <<N5 << "\t"<< N553 << "\t" << N100553 << std::endl;
         }
 		
 		// final E

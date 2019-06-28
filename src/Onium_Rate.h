@@ -80,25 +80,28 @@ public:
 // Quarkonium 2->3 quark disso rate: QQbar[nl] + q --> Q + Qbar + q
 // N: dimension of rate table: 2: velocity(v), tempature(T)
 // F: diff rate function type
-template <size_t N, typename F>
+template <size_t N, typename F1, typename F2, typename F3>
 class OniumDissoRate23q: public virtual StochasticBase<N>{
 private:
     scalar find_max(std::vector<double> parameters);
     scalar calculate_scalar(std::vector<double> parameters);
     fourvec calculate_fourvec(std::vector<double> parameters);
     tensor calculate_tensor(std::vector<double> parameters);
-    F _f1; // the kernel
-    F _f2; // the kernel
-    double _mass, _Enl, _aB; // by convention _Enl>0, mass is 2*M*Mbar/(M+Mbar)
+    F1 _f1; // the kernel
+    F2 _f2; // the kernel
+    F3 _f3; // the kernel
+    double _mass, _Enl, _aB, _prel_up, _max_p2Matrix; // by convention _Enl>0, mass is 2*M*Mbar/(M+Mbar)
     int _n, _l;
     bool _active;
 public:
-    OniumDissoRate23q(std::string Name, std::string configfile, int n, int l, F f1, F f2);
+    OniumDissoRate23q(std::string Name, std::string configfile, int n, int l, F1 f1, F2 f2, F3 f3);
     void sample(std::vector<double> arg,
                 std::vector< fourvec > & FS);
     bool IsActive(void) {return _active;}
     int n(){return _n;}
     int l(){return _l;}
+    double aB(){return _aB;}
+    double Enl(){return _Enl;}
     void FlavorContent(int & Q, int & Qbar){
         if (_mass<1.8) {
             Q = 4;
@@ -118,25 +121,28 @@ public:
 // Quarkonium 3->2 quark reco rate: Q + Qbar + q --> QQbar[nl] + q
 // N: dimension of rate table: 3: velocity(v), tempature(T), relative momentum(p)
 // F: diff rate function type
-template <size_t N, typename F>
+template <size_t N, typename F1, typename F2, typename F3>
 class OniumRecoRate32q: public virtual StochasticBase<N>{
 private:
     scalar find_max(std::vector<double> parameters);
     scalar calculate_scalar(std::vector<double> parameters);
     fourvec calculate_fourvec(std::vector<double> parameters);
     tensor calculate_tensor(std::vector<double> parameters);
-    F _f1; // the kernel
-    F _f2; // the kernel
+    F1 _f1; // the kernel
+    F2 _f2; // the kernel
+    F3 _f3; // the kernel
     double _mass, _Enl, _aB; // by convention _Enl>0, mass is 2*M*Mbar/(M+Mbar)
     int _n, _l;
     bool _active;
 public:
-    OniumRecoRate32q(std::string Name, std::string configfile, int n, int l, F f1, F f2);
+    OniumRecoRate32q(std::string Name, std::string configfile, int n, int l, F1 f1, F2 f2, F3 f3);
     void sample(std::vector<double> arg,
                 std::vector< fourvec > & FS);
     bool IsActive(void) {return _active;}
     int n(){return _n;}
     int l(){return _l;}
+    double aB(){return _aB;}
+    double Enl(){return _Enl;}
 };
 
 #endif

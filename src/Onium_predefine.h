@@ -8,6 +8,7 @@ extern const double li2_minus1;
 extern const double fix_alpha_s;
 extern const double pot_alpha_s;
 extern const double alpha_s_sqd;
+extern const double TwoPi;
 
 extern const double prefactor_Matrix1S;
 extern const double prefactor_Matrix2S;
@@ -37,12 +38,14 @@ double Matrix1P(double prel, double a_B);
 double p2Matrix1S(double prel, double a_B);
 double p2Matrix2S(double prel, double a_B);
 double p2Matrix1P(double prel, double a_B);
-double get_max_p2Matrix(double prel_up, int n, int l);
+double get_max_p2Matrix(double prel_up, int n, int l, double aB);
 
 double get_aB(double M);
 double get_onium_Enl_Coulomb(double M, int n, int l);
 double get_onium_Enl_Confining(double M, int n, int l, double confine_asymp_pot);
 double get_onium_Mass(double MQ, int n, int l);
+
+double get_prel_up(double a_B, int n);
 
 // Transformations
 double momentum_to_energy(double px, double py, double pz, double mass_);

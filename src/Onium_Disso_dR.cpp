@@ -362,7 +362,7 @@ double Sample_disso_ineq_cos1(double p1, void * params_){
      double * params_p1 = new double[3];
      params_p1[0] = v; //k1 = gamma*(1-v)/T
      params_p1[1] = T; //k2 = gamma*(1+v)/T
-     params_p1[2] = Enl
+     params_p1[2] = Enl;
  
      double * params_c1 = new double[2];
      params_c1[0] = v;
@@ -385,7 +385,7 @@ double Sample_disso_ineq_cos1(double p1, void * params_){
              s2_try = std::sqrt(1.-c2_try*c2_try);
              phi_try = Srandom::dist_phi(Srandom::gen);
              p1p2_try = p1_try/p2_try;   // p1_try/p2_try
-             p1p2 = (p1_try-E1S)/p1_try;
+             p1p2 = (p1_try-Enl)/p1_try;
              c_phi = std::cos(phi_try);
              s_phi = std::sin(phi_try);
              part_angle = s1_try*s2_try*c_phi + c1_try*c2_try;
@@ -397,8 +397,8 @@ double Sample_disso_ineq_cos1(double p1, void * params_){
      std::vector<double> p_rel_final(3);
      std::vector<double> pQpQbar_final(6);
      double cos_rel, phi_rel;
-     cos_rel = sample_cos(gen);
-     phi_rel = sample_inel(gen)*TwoPi;
+     cos_rel = Srandom::dist_costheta(Srandom::gen);
+     phi_rel = Srandom::sample_inel(Srandom::gen)*TwoPi;
      p1_final = polar_to_cartisian2(p1_try, c1_try, s1_try, 1.0, 0.0);
      p2_final = polar_to_cartisian2(p2_try, c2_try, s2_try, c_phi, s_phi);
      p_rel_final = polar_to_cartisian1(p_rel, cos_rel, phi_rel);

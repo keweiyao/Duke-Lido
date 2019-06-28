@@ -6,6 +6,8 @@ namespace Srandom{
 extern std::mt19937 gen;
 extern std::uniform_real_distribution<double> sqrtZ;
 extern std::uniform_real_distribution<double> rejection;
+extern std::uniform_real_distribution<double> y_cdf;
+extern std::uniform_real_distribution<double> sample_inel;
 extern std::uniform_real_distribution<double> init_dis;
 extern std::uniform_real_distribution<double> dist_phi;
 extern std::uniform_real_distribution<double> dist_costheta;

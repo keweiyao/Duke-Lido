@@ -1,8 +1,11 @@
 #include "Onium_Reco_dR.h"
+#include "Onium_Disso_dR.h"
 #include "Onium_predefine.h"
 #include "predefine.h"
+#include "random.h"
 #include <cmath>
 #include <gsl/gsl_math.h>
+
 
 // Q + Qbar --> QQbar[1S] + g
 double RV1S_reco_gluon(double x[3], std::size_t dim, void * params_){
@@ -251,8 +254,8 @@ double Sample_reco_ineq_p1_important(double p1low, double p1up, double result_ma
     return p1_try;
 }
 
-std::vector<double> S1S_reco_ineq(double v, double T, double mass, double Enl, double a_B, double prel_up, double maximum_f_p1, double max_p2Matrix, double(*f)(double _prel, double _aB){
-    v = std::max(v, small_number);
+std::vector<double> S1S_reco_ineq(double v, double T, double p, double mass, double Enl, double maximum_f_p1){
+    v = std::max(v, 1e-4);
     double gamma = 1./std::sqrt(1.-v*v);
     double p1_try, c1_try, s1_try, p2_try, c2_try, s2_try, phi_try, c_phi, s_phi, p1p2_try, part_angle, result_try;
     double p1low = 0.0;
