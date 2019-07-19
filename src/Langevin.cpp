@@ -29,7 +29,7 @@ double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
         else{
             logs = std::log(1.+Q2cut/mD2);
         }
-	return alphas_at_T * CR * T * mD2 * ( logs);
+	return alphas_at_T * CR * T * mD2 * ( logs -.5 );
 }
 
 double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
@@ -49,7 +49,7 @@ double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
         else{
             logs = std::log(1.+Q2cut/minf2);
         }
-        return alphas_at_T * CR * T * minf2 * (logs);
+        return alphas_at_T * CR * T * minf2 * (logs-.5);
 }
 
 

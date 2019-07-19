@@ -17,6 +17,7 @@ struct particle{
 	fourvec x; // current location
 	fourvec p0; // production momentum
 	fourvec p; // current momentum
+    fourvec mother_p;
 
 	std::vector<particle> radlist;
 	std::vector<double> vcell;

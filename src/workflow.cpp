@@ -148,7 +148,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 // split=3: g->q+qbar, colors = 1 - x*CA/CF + x^2*CA/CF 
 double formation_time(fourvec p, fourvec k, double T, int split){
 	double E0 = p.t();
-	double x = k.t()/(E0+k.t());
+	double x = k.t()/E0;
 	double mg2 = t_channel_mD2->get_mD2(T)/2., 
 		   mass_sqrs = 0.0,  colors = 1.;
 	if (split == 1) {
@@ -176,9 +176,11 @@ int update_particle_momentum_Lido(
 		double dt, double temp, std::vector<double> v3cell, 
 		particle & pIn, std::vector<particle> & pOut_list){
 	pOut_list.clear();
+    auto x0 = pIn.x;
 	int absid = std::abs(pIn.pid);
-	pIn.freestream(dt);
-        pIn.Tf = temp;
+    pIn.Tf = temp;
+    pIn.freestream(dt);
+
 	// Apply diffusion and update particle momentum
 	fourvec pnew;
 	Ito_update(pIn.pid, dt, pIn.mass, temp, v3cell, pIn.p, pnew);
@@ -295,7 +297,7 @@ int update_particle_momentum_Lido(
 
 		// elastic process changes the momentum immediately
 		if(channel ==0 || channel == 1) {
-			pIn.p = FS[0];
+			    pIn.p = FS[0];
 		} 
 		// inelastic process takes a finite time to happen
 		if(channel == 2 || channel == 3){
@@ -310,15 +312,16 @@ int update_particle_momentum_Lido(
 				vp.weight = pIn.weight;
 				vp.p0 = FS[2]; 
 				vp.p = vp.p0;
-				vp.x0 = pIn.x;
+				vp.x0 = x0;
 				vp.x = vp.x0;
+                vp.mother_p = pIn.p;
 				vp.T0 = temp;
 				vp.is_vac = false;
 				vp.is_virtual = true;
-                        vp.vcell.resize(3);        
-                        vp.vcell[0] = v3cell[0];
-                        vp.vcell[1] = v3cell[1];
-                        vp.vcell[2] = v3cell[2];
+                vp.vcell.resize(3);        
+                vp.vcell[0] = v3cell[0];
+                vp.vcell[1] = v3cell[1];
+                vp.vcell[2] = v3cell[2];
 				
 				// The local 2->2 mean-free-path is estimated with
 				// the qhat_hard integrate from the 2->2 rate
@@ -361,16 +364,17 @@ int update_particle_momentum_Lido(
 			vp.weight = pIn.weight;
 			vp.p0 = FS[1]; 
 			vp.p = vp.p0;
-			vp.x0 = pIn.x;
+			vp.x0 = x0;
 			vp.x = vp.x0;
+            vp.mother_p = pIn.p;
 			vp.T0 = temp;
 			vp.is_vac = false;
 			vp.is_virtual = true;
-	                vp.vcell.resize(3); 
-                        vp.vcell[0] = v3cell[0];
-                        vp.vcell[1] = v3cell[1];
-                        vp.vcell[2] = v3cell[2];
-	
+            vp.vcell.resize(3); 
+            vp.vcell[0] = v3cell[0];
+            vp.vcell[1] = v3cell[1];
+            vp.vcell[2] = v3cell[2];
+
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
 			vp.mfp0 = LPM_prefactor*mD2/qhatg*pIn.p.t()/E_cell; 
@@ -390,15 +394,16 @@ int update_particle_momentum_Lido(
 			vp.weight = pIn.weight;
 			vp.p0 = FS[2]; 
 			vp.p = vp.p0;
-			vp.x0 = pIn.x;
+			vp.x0 = x0;
 			vp.x = vp.x0;
+            vp.mother_p = pIn.p;
 			vp.T0 = temp;
 			vp.is_vac = false;
 			vp.is_virtual = true;
-                        vp.vcell.resize(3);        
-                        vp.vcell[0] = v3cell[0];
-                        vp.vcell[1] = v3cell[1];
-                        vp.vcell[2] = v3cell[2];
+            vp.vcell.resize(3);        
+            vp.vcell[0] = v3cell[0];
+            vp.vcell[1] = v3cell[1];
+            vp.vcell[2] = v3cell[2];
 
 			// The local 2->2 mean-free-path is estimated with
 			// the qhat_hard integrate from the 2->2 rate
@@ -434,15 +439,17 @@ int update_particle_momentum_Lido(
 			vp.weight = pIn.weight;
 			vp.p0 = FS[1]; 
 			vp.p = vp.p0;
-			vp.x0 = pIn.x;
+			vp.x0 = x0;
 			vp.x = vp.x0;
+            vp.mother_p = pIn.p;
+            vp.mother_p = pIn.p;
 			vp.T0 = temp;
 			vp.is_vac = false;
 			vp.is_virtual = true;
-                        vp.vcell.resize(3);        
-                        vp.vcell[0] = v3cell[0];
-                        vp.vcell[1] = v3cell[1];
-                        vp.vcell[2] = v3cell[2];
+            vp.vcell.resize(3);        
+            vp.vcell[0] = v3cell[0];
+            vp.vcell[1] = v3cell[1];
+            vp.vcell[2] = v3cell[2];
 			
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
@@ -459,64 +466,71 @@ int update_particle_momentum_Lido(
 			if (pIn.pid != 21 && it->pid == 21) split_type = 1; // q --> q + g
 			if (pIn.pid == 21 && it->pid == 21) split_type = 2; // g --> g + g
 			if (pIn.pid == 21 && it->pid != 21) split_type = 3; // g --> q + qbar
-			double taun = formation_time(pIn.p,it->p,temp,split_type);
-
+			double taun = formation_time(it->mother_p,it->p,temp,split_type);
 			// If t-t0 > tauf, or it reaches the boundary of QGP
 			// We check whether it sould be formed
-			if (it->x.t() - it->x0.t() > taun)
-                           { 
+			if (it->x.t() - it->x0.t() <= taun) { 
+                // if not yet formed, evolve it to t+dt
+				std::vector<particle> pnew_Out;
+				update_particle_momentum_Lido(dt, temp, v3cell, *it, pnew_Out);
+				it++;
+			} 
+            else { 
+                // if formed, apply LPM suppression
 				double Acceptance = 0.;
 				if (!it->is_vac){ 
-					// medium-induced
-					double kt20 = measure_perp(pIn.p, it->p0).pabs2();
-					double kt2n = measure_perp(pIn.p, it->p).pabs2();
+					// for medium-induced radiation
+                    // 1): a change of running-coupling from elastic broadening 
+					double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
+					double kt2n = measure_perp(it->mother_p, it->p).pabs2();
+                    double Running = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
+                    // 2): a dead-cone approximation for massive particles
 					double theta2 = kt2n/std::pow(it->p.t(),2);
-					double thetaM2 = std::pow(pIn.mass/pIn.p.t(),2);
+					double thetaM2 = std::pow(pIn.mass/it->mother_p.t(),2);
+                    double DeadCone = std::pow(theta2/(theta2+thetaM2), 2);
+                    // 3): an NLL-inspired suppression factor for the LPM effect
 					double mD2 = t_channel_mD2->get_mD2(temp);
-					double mean_s = 6*it->p.t()*temp;
-					double log_factor = std::sqrt(std::log(1+taun/it->mfp0)
-								/std::log(1+mean_s/mD2) ) ;
-					double LPM = it->mfp0 / taun * log_factor;
-					double DeadCone = std::pow(theta2/(theta2+thetaM2), 2);
-					double Running = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
+                    double lnQ2_1 = std::log(1.+taun/it->mfp0);
+                    double lnQ2_0 = std::log(1.+6*it->p.t()*temp/mD2);
+					double log_factor = std::sqrt(lnQ2_1/lnQ2_0);
+					double LPM = std::min(it->mfp0/taun*log_factor, 1.);
+					// The final rejection factor
 					Acceptance = LPM * Running * DeadCone;
 				} else { 
-					double kt20 = measure_perp(pIn.p0, it->p0).pabs2();
-					double kt2n = measure_perp(pIn.p0, it->p - it->p0).pabs2();
-					if (kt2n > Rvac*kt20) Acceptance = 0.0;
-    	                                else Acceptance = 1.0;
+                    // for vacuum-like radiaiton formed inside the medium
+					double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
+					double Deltakt2 = measure_perp(it->mother_p, it->p-it->p0).pabs2();
+					if (Deltakt2 > Rvac*kt20) Acceptance = 0.0;
+    	            else Acceptance = 1.0;
 				}				
-
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
-					// If this fluctuation is accepted:
-					// add it to the pOut list
+					// accepted branching causes physical effects
+                    // momentum change, and put back on shell
 					pIn.p = pIn.p - it->p0;	
 					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);	
-					
+                    // for g -> q + qbar, pid change
+                    // also discard all other pre-splitting: causes higher-order difference
 					if (split_type == 3) {
-						// pid changing!!!
 						pIn.pid = -it->pid;
+                        pIn.radlist.clear();
 					}
-
+                    // label it as real and put it in output particle list
 					it->is_virtual = false;
-                    //if (it->p0.t() > 1)
-					pOut_list.push_back(*it);
+                    pOut_list.push_back(*it);
 				}
+                // remove it from the radlist
 				it = pIn.radlist.erase(it);
-
-			}else{ // else, evolve it, while rescale its energy ("ekional limit")
-				std::vector<particle> pnew_Out;
-				update_particle_momentum_Lido(dt, temp, v3cell, (*it), pnew_Out);
-				it->p = it->p*(it->p0.t()/it->p.t());
-                                it->p.a[0] = std::sqrt(it->p.pabs2()+it->mass*it->mass);
-				it++;
 			}
 		}
 	}
 
-	// Add the mother parton to the end of the output list
+	// For virtual particle, we rescale the energy back to the initial value
+    // so that we only focus on the elastic broadening effect.
+    if (pIn.is_virtual) pIn.p = pIn.p*(pIn.p0.t()/pIn.p.t());
+    
+    // Add the mother parton to the end of the output list
 	pOut_list.push_back(pIn);
-	return channel;
+	return pOut_list.size();
 }
 
 
