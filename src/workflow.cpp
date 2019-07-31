@@ -504,10 +504,12 @@ int update_particle_momentum_Lido(
     	            else Acceptance = 1.0;
 				}				
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
+
 					// accepted branching causes physical effects
                     // momentum change, and put back on shell
-					pIn.p = pIn.p - it->p0;	
-					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);	
+					pIn.p = pIn.p*(1.-it->p0.t()/it->mother_p.t());
+					//pIn.p = pIn.p - pIn.p*(it->p.t()/pIn.p.t());	
+					//pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);	
                     // for g -> q + qbar, pid change
                     // also discard all other pre-splitting: causes higher-order difference
 					if (split_type == 3) {
@@ -516,7 +518,13 @@ int update_particle_momentum_Lido(
 					}
                     // label it as real and put it in output particle list
 					it->is_virtual = false;
-                    pOut_list.push_back(*it);
+
+					if (it->p0.t() > 1){
+						double e0 = pIn.p.t()*(it->p0.t()/it->mother_p.t());
+ 						it->p = it->p*(e0/it->p.t());
+                        pOut_list.push_back(*it);
+					}
+					   
 				}
                 // remove it from the radlist
 				it = pIn.radlist.erase(it);
@@ -526,7 +534,7 @@ int update_particle_momentum_Lido(
 
 	// For virtual particle, we rescale the energy back to the initial value
     // so that we only focus on the elastic broadening effect.
-    if (pIn.is_virtual) pIn.p = pIn.p*(pIn.p0.t()/pIn.p.t());
+    //if (pIn.is_virtual) pIn.p = pIn.p*(pIn.p0.t()/pIn.p.t());
     
     // Add the mother parton to the end of the output list
 	pOut_list.push_back(pIn);
