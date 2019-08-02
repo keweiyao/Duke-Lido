@@ -56,11 +56,11 @@ void HardGen::Generate(std::vector<particle> & plist, int N_pythia_events, doubl
                 particle c_entry;
                 c_entry.mass = std::abs(p.m()); // mass
                 c_entry.pid = p.idAbs(); // heavy quark
-		c_entry.x0 = fourvec{0,x,y,0}; // initial position
-		c_entry.x = c_entry.x0; // initial position
+		        c_entry.x0 = fourvec{0,x,y,0}; // initial position
+		        c_entry.x = c_entry.x0; // initial position
                 c_entry.weight = weight;
                 c_entry.is_vac = false;
-		c_entry.is_virtual = false;
+		        c_entry.is_virtual = false;
                 c_entry.Tf = 1.0;
                 c_entry.vcell.resize(3);
                 c_entry.vcell[0] = 0.; 
