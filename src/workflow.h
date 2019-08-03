@@ -51,4 +51,5 @@ void output(const std::vector<particle> plist, std::string fname);
 void output_oscar(const std::vector<particle> plist, int abspid, std::string fname);
 double mean_pT(const std::vector<particle> plist);
 double mean_E(const std::vector<particle> plist);
+particle produce_virtual_parton(int pid, particle & mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> & v3cell);
 #endif
