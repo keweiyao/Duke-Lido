@@ -18,6 +18,8 @@ PartonLevel:FSR = on
 PartonLevel:Remnants = off
 Check:event = off
 
+TimeShower:pTmin = 1
+
 ! 5) Hadron level
 HadronLevel:all = off
 

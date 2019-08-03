@@ -2,3 +2,6 @@ build/
 test/
 *~
 Tables/
+jet_analysis/results/
+jet_analysis/jet_results/
+table.h5

@@ -22,20 +22,21 @@ std::string to_string_with_precision(const T a_value, const int n = 2)
 	return out.str();
 }
 
-void simu(double eCM, double jetR, double ymin, double ymax)
+
+void simu(double eCM, double jetR, double ymin, double ymax, int nEvent)
 {
 	std::fstream fs;
-	fs.open("jet_" + to_string(eCM) + "_" + to_string(jetR) + "_" + to_string(ymin) + "_" + to_string(ymax) + ".dat", std::fstream::out);
+	fs.open("./jet_results/jet_" + to_string(eCM) + "_" + to_string(jetR) + "_" + to_string(ymin) + "_" + to_string(ymax) + ".dat", std::fstream::out);
 	std::fstream fs2;
-	fs2.open("bjet_" + to_string(eCM) + "_" + to_string(jetR) + "_" + to_string(ymin) + "_" + to_string(ymax) + ".dat", std::fstream::out);
+	fs2.open("./jet_results/bjet_" + to_string(eCM) + "_" + to_string(jetR) + "_" + to_string(ymin) + "_" + to_string(ymax) + ".dat", std::fstream::out);
 	std::fstream fs3;
-	fs3.open("cjet_" + to_string(eCM) + "_" + to_string(jetR) + "_" + to_string(ymin) + "_" + to_string(ymax) + ".dat", std::fstream::out);
+	fs3.open("./jet_results/cjet_" + to_string(eCM) + "_" + to_string(jetR) + "_" + to_string(ymin) + "_" + to_string(ymax) + ".dat", std::fstream::out);
 
-	int nEvent = 1000, power = -1; // power=-1: anti-kT
+    int power = -1; // power=-1: anti-kT
 	double jetRadius = jetR, jetpTMin = 10.;
 	double jetyMin = ymin, jetyMax = ymax;
 
-	std::vector<double> pTBin({10, 20, 30, 40, 50, 56, 63, 70, 79, 89, 100, 112, 125, 141, 158, 177, 199, 251, 398});
+	std::vector<double> pTBin({30, 50, 70, 100, 158, 251, 398});
 	std::vector<double> jet_cs(pTBin.size(), 0.);
 	std::vector<double> err(pTBin.size(), 0.);
 	std::vector<double> sqSum(pTBin.size(), 0.);
@@ -67,7 +68,9 @@ void simu(double eCM, double jetR, double ymin, double ymax)
 
 			fjInputs.resize(0);
 
-			std::string file_name = "results/" + to_string_with_precision(pTHatBin[iBin], 3) + "-" + to_string_with_precision(pTHatBin[iBin + 1], 3) + "-" + to_string_with_precision(nEvent, 3);
+			std::string file_name = "./results/" + to_string_with_precision(pTHatBin[iBin], 3) + "-" + to_string_with_precision(pTHatBin[iBin + 1], 3) + "-" + to_string_with_precision(iEvent, 3);
+
+			std::cout<< file_name<<std::endl;
 
 			std::ifstream infile(file_name);
 			if (infile.is_open())
@@ -188,7 +191,7 @@ void simu(double eCM, double jetR, double ymin, double ymax)
 
 int main(int argc, char **argv)
 {
-	simu(std::stoi(argv[1]), std::stod(argv[2]), std::stod(argv[3]), std::stod(argv[4]));
+	simu(std::stod(argv[1]), std::stod(argv[2]), std::stod(argv[3]), std::stod(argv[4]),std::stoi(argv[5]));
 	//simu(5020,0.4,0,2.8);
 
 	return 0;

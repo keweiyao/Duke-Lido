@@ -13,12 +13,9 @@ from subprocess import Popen
 
 ##################################################################################
 
-#os.makedirs("group_input", exist_ok=True)
+os.makedirs("./jet_results", exist_ok=True)
 
-pTbins=[10, 20, 30, 50, 70, 90, 110, 150, 200, 300, 500, 700]
-#for i in range(len(pTbins)-1):
-#    subprocess.call("cp jetscape_init.xml ./group_input/jetscape_init_{:d}.xml".format(i), shell=True)
-
-procs = [ Popen(["./LidoJetTest", "./group_input/jetscape_init_{:d}.xml".format(i) , str(pTbins[i]), str(pTbins[i+1]), str(1000)]) for i in range(len(pTbins)-1) ]
+Rlist=[0.2,1.0,2.]
+procs = [ Popen(["./jet_finding", str(5020), str(Rlist[i]), str(0), str(1), str(1000)]) for i in range(len(Rlist)) ]
 for p in procs:
-    p.wait()
+   p.wait()

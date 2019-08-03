@@ -154,24 +154,38 @@ int main(int argc, char* argv[]){
                 args["rvac"].as<double>()
                 );
 
-        
-        double dt = args["dt"].as<double>() * 5.026; // convert to GeV^-1
-        double tf = args["tf"].as<double>() * 5.026; // convert to GeV^-1
+        // proper times
+        double tau0 = 0.6 * 5.026;
+        double dtau = args["dt"].as<double>() * 5.026; // convert to GeV^-1
+        double tauf = args["tf"].as<double>() * 5.026; // convert to GeV^-1
+
         double T0 = args["temp"].as<double>(); 
-        int Nsteps = int(tf/dt);
+        int Nsteps = int(tauf/dtau);
+
+        // freestream form t=0 to tau=tau0
+        for (auto & p : plist) {
+           double dt = calcualte_dt_from_dtau(p.x, p.p, 0, tau0);
+           p.freestream(dt);
+        }
+
 
         for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
             pythiagen.Generate(plist);
             for (int i=0; i<Nsteps; i++){
                 new_plist.clear();
-			    double t = i*dt;
-                double T = T0;
-			    if (i%10==0) LOG_INFO << t/5.026 << " [fm/c]\t" 
+			          double tau =tau0+ i*dtau;
+                double T = T0*std::pow(tau0/tau, 0.4);
+			          if (i%10==0) LOG_INFO << tau/5.026 << " [fm/c]\t" 
                                     << T << " [GeV]" << " #=" << plist.size();
-		        for (auto & p : plist){
-		            int n = update_particle_momentum_Lido(
-		                          dt, T, {0., 0., 0.}, p, pOut_list);
-					for (auto & k : pOut_list) {
+                
+		            for (auto & p : plist){
+                    double dt = calcualte_dt_from_dtau(p.x, p.p, tau, dtau);
+                    double vz = p.x.z()/( p.x.t() + 1e-5 );
+                    double eta = 0.5*std::log((1.+vz)/(1.-vz));
+                    if ( std::fabs(eta)>3) continue;
+		                int n = update_particle_momentum_Lido(
+		                           dt, T, {0., 0., vz}, p, pOut_list);
+					          for (auto & k : pOut_list) {
 		                new_plist.push_back(k);
 		            }
 		        }

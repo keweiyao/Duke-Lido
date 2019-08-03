@@ -175,6 +175,12 @@ double formation_time(fourvec p, fourvec k, double T, int split){
 int update_particle_momentum_Lido(
 		double dt, double temp, std::vector<double> v3cell, 
 		particle & pIn, std::vector<particle> & pOut_list){
+    if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < 1){
+		pOut_list.clear();
+        pOut_list.push_back(pIn);
+	    return pOut_list.size();
+	}
+	
 	pOut_list.clear();
     auto x0 = pIn.x;
 	int absid = std::abs(pIn.pid);
@@ -298,6 +304,28 @@ int update_particle_momentum_Lido(
 		// elastic process changes the momentum immediately
 		if(channel ==0 || channel == 1) {
 			    pIn.p = FS[0];
+				
+                particle vp;
+				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3.){
+					if (channel == 1) vp.pid = 21;
+					else vp.pid = 123;
+					vp.mass = 0.0;
+					vp.weight = pIn.weight;
+					vp.p0 = FS[1];
+					vp.p = vp.p0;
+					vp.x0 = x0;
+					vp.x = vp.x0;
+					vp.T0 = temp;
+					vp.is_vac = false;
+					vp.is_virtual = false;
+					vp.radlist.clear(); 
+					vp.vcell.resize(3);        
+					vp.vcell[0] = v3cell[0];
+					vp.vcell[1] = v3cell[1];
+					vp.vcell[2] = v3cell[2];
+					pOut_list.push_back(vp);
+				}
+
 		} 
 		// inelastic process takes a finite time to happen
 		if(channel == 2 || channel == 3){
@@ -347,6 +375,28 @@ int update_particle_momentum_Lido(
 				// estimate mfp in the lab frame
 				vp.mfp0 = LPM_prefactor*mD2/local_qhat*boost_factor;
 				pIn.radlist.push_back(vp);
+
+
+				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3.){	
+					particle ep;
+					if (channel == 3) ep.pid = 21;
+					else ep.pid == 123;
+					ep.mass = 0.0;
+					ep.weight = pIn.weight;
+					ep.p0 = FS[1]; 
+					ep.p = ep.p0;
+					ep.x0 = x0;
+					ep.x = vp.x0;
+					ep.T0 = temp;
+					ep.is_vac = false;
+					ep.is_virtual = false;
+					ep.vcell.resize(3);       
+					ep.radlist.clear(); 
+					ep.vcell[0] = v3cell[0];
+					ep.vcell[1] = v3cell[1];
+					ep.vcell[2] = v3cell[2];
+					pOut_list.push_back(ep);
+				}
 		}
 		if(channel == 4 || channel == 5){
 			// Absorption processes happens mostly for gluon energy ~ 3*T, therefore we negelected the LPM effect
@@ -507,9 +557,10 @@ int update_particle_momentum_Lido(
 
 					// accepted branching causes physical effects
                     // momentum change, and put back on shell
-					pIn.p = pIn.p*(1.-it->p0.t()/it->mother_p.t());
-					//pIn.p = pIn.p - pIn.p*(it->p.t()/pIn.p.t());	
-					//pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);	
+					//double xx = it->p0.t()/it->mother_p.t();
+					//pIn.p = pIn.p * (1. - xx);	
+					pIn.p = pIn.p - it->p;
+					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);	
                     // for g -> q + qbar, pid change
                     // also discard all other pre-splitting: causes higher-order difference
 					if (split_type == 3) {
@@ -518,12 +569,8 @@ int update_particle_momentum_Lido(
 					}
                     // label it as real and put it in output particle list
 					it->is_virtual = false;
-
-					if (it->p0.t() > 1){
-						double e0 = pIn.p.t()*(it->p0.t()/it->mother_p.t());
- 						it->p = it->p*(e0/it->p.t());
-                        pOut_list.push_back(*it);
-					}
+					//it->p = pIn.p * xx;
+                	pOut_list.push_back(*it);
 					   
 				}
                 // remove it from the radlist
