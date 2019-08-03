@@ -56,8 +56,9 @@ void PythiaGen::Generate(std::vector<particle> & plist){
             // final momenta 
             fourvec p0{p.e(), p.px(), p.py(), p.pz()};
             particle _p;
-            if ( std::abs(p.id()) <= 3)  _p.pid = 123;
-            else _p.pid = p.id(); 
+            // if ( std::abs(p.id()) <= 3)  _p.pid = 123;
+            //else _p.pid = p.id(); 
+            _p.pid = p.id();
             _p.mass = std::abs(p.m());
 	        _p.x0 = fourvec{0,0,0,0}; 
 	        _p.x = _p.x0; 

@@ -208,12 +208,17 @@ int update_particle_momentum_Lido(
 {
 
 	//ignore soft partons with a constant momentum cut
-	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < 2)
+	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < 1)
 	{
 		pOut_list.clear();
-		pOut_list.push_back(pIn);
+		//pOut_list.push_back(pIn);
 		return pOut_list.size();
 	}
+
+
+	//LOG_INFO << "pid: " << pIn.pid;
+	//LOG_INFO << pIn.p;
+	//LOG_INFO << pIn.x;
 
 	//transform light quark pid to 123
 	//transform back at the end
@@ -395,7 +400,7 @@ int update_particle_momentum_Lido(
 			// these are virtual particles, that pops out at a rate
 			// given by the incoherent calculation, which will be
 			// dropped (suppressed) according to the LPM effect
-			particle vp=produce_virtual_parton(21, pIn, FS[2], x0, temp, v3cell);
+			particle vp = produce_virtual_parton(21, pIn, FS[2], x0, temp, v3cell);
 
 			// The local 2->2 mean-free-path is estimated with
 			// the qhat_hard integrate from the 2->2 rate
@@ -458,7 +463,7 @@ int update_particle_momentum_Lido(
 			// these are virtual particles, that pops out at a rate
 			// given by the incoherent calculation, which will be
 			// dropped (suppressed) according to the LPM effect
-			particle vp=produce_virtual_parton(21, pIn, FS[2], x0, temp, v3cell);
+			particle vp = produce_virtual_parton(21, pIn, FS[1], x0, temp, v3cell);
 
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
@@ -475,7 +480,7 @@ int update_particle_momentum_Lido(
 		{
 			// This should only happen for gluon
 			// gluon splits to q+qbar, pid changing!!
-			particle vp=produce_virtual_parton(Srandom::sample_flavor(3), pIn, FS[2], x0, temp, v3cell);
+			particle vp = produce_virtual_parton(Srandom::sample_flavor(3), pIn, FS[2], x0, temp, v3cell);
 
 			// The local 2->2 mean-free-path is estimated with
 			// the qhat_hard integrate from the 2->2 rate
@@ -508,7 +513,7 @@ int update_particle_momentum_Lido(
 		{
 			// This should only happen for gluon
 			// gluon splits to q+qbar, pid changing!!
-			particle vp=produce_virtual_parton(Srandom::sample_flavor(3), pIn, FS[2], x0, temp, v3cell);
+			particle vp = produce_virtual_parton(Srandom::sample_flavor(3), pIn, FS[1], x0, temp, v3cell);
 
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
@@ -607,12 +612,12 @@ int update_particle_momentum_Lido(
 
 	// Add the mother parton to the end of the output list
 	//also transform back its pid
-	pIn.pid=temp_pid;
+	pIn.pid = temp_pid;
 	pOut_list.push_back(pIn);
 	return pOut_list.size();
 }
 
-particle produce_virtual_parton(int pid, particle & mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> & v3cell)
+particle produce_virtual_parton(int pid, particle &mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> &v3cell)
 {
 	particle vp;
 	vp.pid = pid;
@@ -622,7 +627,6 @@ particle produce_virtual_parton(int pid, particle & mother_parton, fourvec vp0, 
 	vp.p = vp.p0;
 	vp.x0 = vx0;
 	vp.x = vp.x0;
-	vp.mother_p = mother_parton.p;
 	vp.mother_p = mother_parton.p;
 	vp.T0 = T;
 	vp.is_vac = false;

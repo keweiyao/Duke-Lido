@@ -26,7 +26,7 @@ def getarg(ptl, pth):
        "-s", "../examples/settings.xml", 
        "-t", "../table.h5",
        "--tf", "5.0",
-       "--temp", "0.35",
+       "--temp", "0.3",
        "--afix", "0.3",
        "--pthat-low", "{:d}".format(ptl),
        "--pthat-high", "{:d}".format(pth),
