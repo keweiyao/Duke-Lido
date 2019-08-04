@@ -208,13 +208,13 @@ int update_particle_momentum_Lido(
 {
 
 	//ignore soft partons with a constant momentum cut
-	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < 1)
+	
+	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < 2)
 	{
 		pOut_list.clear();
 		//pOut_list.push_back(pIn);
 		return pOut_list.size();
 	}
-
 
 	//LOG_INFO << "pid: " << pIn.pid;
 	//LOG_INFO << pIn.p;
@@ -325,6 +325,8 @@ int update_particle_momentum_Lido(
 		}
 	}
 
+	//LOG_INFO<<"Lido channel: "<<channel;
+
 	// If a scattering happens:
 	if (channel >= 0)
 	{
@@ -370,28 +372,16 @@ int update_particle_momentum_Lido(
 		{
 			pIn.p = FS[0];
 
-			/*
+			
                 particle ep;
-				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3.){
-					if (channel == 1) ep.pid = 21;
-					else ep.pid = 123;
-					ep.mass = 0.0;
-					ep.weight = pIn.weight;
-					ep.p0 = FS[1];
-					ep.p = vp.p0;
-					ep.x0 = x0;
-					ep.x = vp.x0;
-					ep.T0 = temp;
-					ep.is_vac = false;
-					ep.is_virtual = false;
-					ep.radlist.clear(); 
-					ep.vcell.resize(3);        
-					ep.vcell[0] = v3cell[0];
-					ep.vcell[1] = v3cell[1];
-					ep.vcell[2] = v3cell[2];
+				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 2.){
+					double tempid;
+					if (channel == 1) tempid = 21;
+					else tempid = Srandom::sample_flavor(3);
+					particle ep = produce_real_parton(tempid, pIn, FS[1], x0, temp, v3cell);
 					pOut_list.push_back(ep);
 				}
-				*/
+				
 		}
 		// inelastic process takes a finite time to happen
 		if (channel == 2 || channel == 3)
@@ -429,28 +419,15 @@ int update_particle_momentum_Lido(
 			vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
 			pIn.radlist.push_back(vp);
 
-			/* 
-				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3.){	
-					particle ep;
-					if (channel == 3) ep.pid = 21;
-					else ep.pid == 123;
-					ep.mass = 0.0;
-					ep.weight = pIn.weight;
-					ep.p0 = FS[1]; 
-					ep.p = ep.p0;
-					ep.x0 = x0;
-					ep.x = vp.x0;
-					ep.T0 = temp;
-					ep.is_vac = false;
-					ep.is_virtual = false;
-					ep.vcell.resize(3);       
-					ep.radlist.clear(); 
-					ep.vcell[0] = v3cell[0];
-					ep.vcell[1] = v3cell[1];
-					ep.vcell[2] = v3cell[2];
+			
+				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 2.){	
+					double tempid;
+					if (channel == 3) tempid = 21;
+					else tempid = Srandom::sample_flavor(3);
+					particle ep = produce_real_parton(tempid, pIn, FS[1], x0, temp, v3cell);
 					pOut_list.push_back(ep);
 				}
-				*/
+				
 		}
 		if (channel == 4 || channel == 5)
 		{
@@ -598,6 +575,7 @@ int update_particle_momentum_Lido(
 					// label it as real and put it in output particle list
 					it->is_virtual = false;
 					//it->p = pIn.p * xx;
+					//LOG_INFO<<"Create new parton" << it->pid;
 					pOut_list.push_back(*it);
 				}
 				// remove it from the radlist
@@ -614,6 +592,7 @@ int update_particle_momentum_Lido(
 	//also transform back its pid
 	pIn.pid = temp_pid;
 	pOut_list.push_back(pIn);
+	
 	return pOut_list.size();
 }
 
@@ -631,6 +610,28 @@ particle produce_virtual_parton(int pid, particle &mother_parton, fourvec vp0, f
 	vp.T0 = T;
 	vp.is_vac = false;
 	vp.is_virtual = true;
+	vp.vcell.resize(3);
+	vp.vcell[0] = v3cell[0];
+	vp.vcell[1] = v3cell[1];
+	vp.vcell[2] = v3cell[2];
+
+	return vp;
+}
+
+particle produce_real_parton(int pid, particle &mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> &v3cell)
+{
+	particle vp;
+	vp.pid = pid;
+	vp.mass = 0.0;
+	vp.weight = mother_parton.weight;
+	vp.p0 = vp0;
+	vp.p = vp.p0;
+	vp.x0 = vx0;
+	vp.x = vp.x0;
+	vp.mother_p = mother_parton.p;
+	vp.T0 = T;
+	vp.is_vac = false;
+	vp.is_virtual = false;
 	vp.vcell.resize(3);
 	vp.vcell[0] = v3cell[0];
 	vp.vcell[1] = v3cell[1];
