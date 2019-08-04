@@ -12,6 +12,7 @@
 #include "Langevin.h"
 #include "predefine.h"
 
+const double Lido_pcut=2.;
 std::map<int, std::vector<Process>> AllProcesses;
 
 void init_process(Process &r, std::string mode, std::string table_path)
@@ -209,7 +210,7 @@ int update_particle_momentum_Lido(
 
 	//ignore soft partons with a constant momentum cut
 	
-	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < 2)
+	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_pcut)
 	{
 		pOut_list.clear();
 		//pOut_list.push_back(pIn);
@@ -374,11 +375,11 @@ int update_particle_momentum_Lido(
 
 			
                 particle ep;
-				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 2.){
+				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_pcut){
 					double tempid;
 					if (channel == 1) tempid = 21;
 					else tempid = Srandom::sample_flavor(3);
-					particle ep = produce_real_parton(tempid, pIn, FS[1], x0, temp, v3cell);
+					particle ep = produce_parton(tempid, pIn, FS[1], x0, temp, v3cell, false);
 					pOut_list.push_back(ep);
 				}
 				
@@ -390,7 +391,7 @@ int update_particle_momentum_Lido(
 			// these are virtual particles, that pops out at a rate
 			// given by the incoherent calculation, which will be
 			// dropped (suppressed) according to the LPM effect
-			particle vp = produce_virtual_parton(21, pIn, FS[2], x0, temp, v3cell);
+			particle vp = produce_parton(21, pIn, FS[2], x0, temp, v3cell);
 
 			// The local 2->2 mean-free-path is estimated with
 			// the qhat_hard integrate from the 2->2 rate
@@ -420,11 +421,11 @@ int update_particle_momentum_Lido(
 			pIn.radlist.push_back(vp);
 
 			
-				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 2.){	
+				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_pcut){	
 					double tempid;
 					if (channel == 3) tempid = 21;
 					else tempid = Srandom::sample_flavor(3);
-					particle ep = produce_real_parton(tempid, pIn, FS[1], x0, temp, v3cell);
+					particle ep = produce_parton(tempid, pIn, FS[1], x0, temp, v3cell, false);
 					pOut_list.push_back(ep);
 				}
 				
@@ -440,7 +441,7 @@ int update_particle_momentum_Lido(
 			// these are virtual particles, that pops out at a rate
 			// given by the incoherent calculation, which will be
 			// dropped (suppressed) according to the LPM effect
-			particle vp = produce_virtual_parton(21, pIn, FS[1], x0, temp, v3cell);
+			particle vp = produce_parton(21, pIn, FS[1], x0, temp, v3cell);
 
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
@@ -457,7 +458,7 @@ int update_particle_momentum_Lido(
 		{
 			// This should only happen for gluon
 			// gluon splits to q+qbar, pid changing!!
-			particle vp = produce_virtual_parton(Srandom::sample_flavor(3), pIn, FS[2], x0, temp, v3cell);
+			particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[2], x0, temp, v3cell);
 
 			// The local 2->2 mean-free-path is estimated with
 			// the qhat_hard integrate from the 2->2 rate
@@ -490,7 +491,7 @@ int update_particle_momentum_Lido(
 		{
 			// This should only happen for gluon
 			// gluon splits to q+qbar, pid changing!!
-			particle vp = produce_virtual_parton(Srandom::sample_flavor(3), pIn, FS[1], x0, temp, v3cell);
+			particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[1], x0, temp, v3cell);
 
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
@@ -596,7 +597,7 @@ int update_particle_momentum_Lido(
 	return pOut_list.size();
 }
 
-particle produce_virtual_parton(int pid, particle &mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> &v3cell)
+particle produce_parton(int pid, particle &mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> &v3cell, bool is_virtual)
 {
 	particle vp;
 	vp.pid = pid;
@@ -609,29 +610,7 @@ particle produce_virtual_parton(int pid, particle &mother_parton, fourvec vp0, f
 	vp.mother_p = mother_parton.p;
 	vp.T0 = T;
 	vp.is_vac = false;
-	vp.is_virtual = true;
-	vp.vcell.resize(3);
-	vp.vcell[0] = v3cell[0];
-	vp.vcell[1] = v3cell[1];
-	vp.vcell[2] = v3cell[2];
-
-	return vp;
-}
-
-particle produce_real_parton(int pid, particle &mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> &v3cell)
-{
-	particle vp;
-	vp.pid = pid;
-	vp.mass = 0.0;
-	vp.weight = mother_parton.weight;
-	vp.p0 = vp0;
-	vp.p = vp.p0;
-	vp.x0 = vx0;
-	vp.x = vp.x0;
-	vp.mother_p = mother_parton.p;
-	vp.T0 = T;
-	vp.is_vac = false;
-	vp.is_virtual = false;
+	vp.is_virtual = is_virtual;
 	vp.vcell.resize(3);
 	vp.vcell[0] = v3cell[0];
 	vp.vcell[1] = v3cell[1];
