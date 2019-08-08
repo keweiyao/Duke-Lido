@@ -27,10 +27,6 @@ def getarg(ptl, pth):
            "-n", "10000"]
     return arg
 
-procs = [Popen([cmd,
-                *getarg(pTbins[i], pTbins[i+1])
-                ]
-               )
-         for i in range(len(pTbins)-1)]
+procs = [Popen([cmd, *getarg(pTbins[i], pTbins[i+1])]) for i in range(len(pTbins)-1)]
 for p in procs:
     p.wait()
