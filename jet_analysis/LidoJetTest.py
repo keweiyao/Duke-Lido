@@ -20,17 +20,21 @@ pTbins=[10, 20, 30, 50, 70, 90, 110, 150, 200, 300, 500, 700]
 #    subprocess.call("cp jetscape_init.xml ./group_input/jetscape_init_{:d}.xml".format(i), shell=True)
 # jet-pythia -y ../examples/pythia-jet-setting -s settings.xml -t ../table.h5 --pthat-low 150 --pthat-high 200
 
-cmd = "../build/jet-pythia" 
+cmd = "../build/jet-hydro-couple" 
 def getarg(ptl, pth):
     arg = ["-y", "../examples/pythia-jet-setting",
        "-s", "../examples/settings.xml", 
        "-t", "../table.h5",
-       "--tf", "5.0",
-       "--temp", "0.3",
-       "--afix", "0.3",
+       "--hydro", "../build/JetData.h5",
+       "--ic", "../build/ic.hdf5",
+       "--eid", "0",
+       #"--tf", "5.0",
+       #"--temp", "0.3",
+       "--afix", "-1.0",
+       "--mu", "2.0",
        "--pthat-low", "{:d}".format(ptl),
        "--pthat-high", "{:d}".format(pth),
-       "-n", "1000"]
+       "-n", "10000"]
     return arg
 procs = [ Popen( [ cmd, 
                    *getarg(pTbins[i], pTbins[i+1]) 

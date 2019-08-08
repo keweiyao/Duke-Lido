@@ -12,7 +12,6 @@
 #include "Langevin.h"
 #include "predefine.h"
 
-const double Lido_pcut=2.;
 std::map<int, std::vector<Process>> AllProcesses;
 
 void init_process(Process &r, std::string mode, std::string table_path)
@@ -206,14 +205,26 @@ double formation_time(fourvec p, fourvec k, double T, int split)
 int update_particle_momentum_Lido(
 	double dt, double temp, std::vector<double> v3cell,
 	particle &pIn, std::vector<particle> &pOut_list)
-{
+{  
+	const double Lido_pcut=3.;
+
+	pOut_list.clear();
+	pIn.Tf = temp;
+	pIn.vcell[0] = v3cell[0]; 
+	pIn.vcell[0] = v3cell[1]; 
+	pIn.vcell[0] = v3cell[3];
+	auto x0 = pIn.x;
+
+	double tau0 = std::sqrt(std::pow(pIn.x.t(),2) - std::pow(pIn.x.z(),2));
+	pIn.freestream(dt);
+	double tau1 = std::sqrt(std::pow(pIn.x.t(),2) - std::pow(pIn.x.z(),2));
+    double dtau = tau1 - tau0;
 
 	//ignore soft partons with a constant momentum cut
-	
-	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_pcut)
+	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_pcut 
+	    || temp < 0.154)
 	{
-		pOut_list.clear();
-		//pOut_list.push_back(pIn);
+		pOut_list.push_back(pIn);
 		return pOut_list.size();
 	}
 
@@ -224,16 +235,10 @@ int update_particle_momentum_Lido(
 	//transform light quark pid to 123
 	//transform back at the end
 	int temp_pid = pIn.pid;
-	if (std::abs(pIn.pid) <= 3)
-	{
-		pIn.pid = 123;
-	}
+	if (std::abs(pIn.pid) <= 3) pIn.pid = 123;
 
-	pOut_list.clear();
-	auto x0 = pIn.x;
+
 	int absid = std::abs(pIn.pid);
-	pIn.Tf = temp;
-	pIn.freestream(dt);
 
 	// Apply diffusion and update particle momentum
 	fourvec pnew;
@@ -379,7 +384,7 @@ int update_particle_momentum_Lido(
 					double tempid;
 					if (channel == 1) tempid = 21;
 					else tempid = Srandom::sample_flavor(3);
-					particle ep = produce_parton(tempid, pIn, FS[1], x0, temp, v3cell, false);
+					particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
 					pOut_list.push_back(ep);
 				}
 				
@@ -425,7 +430,7 @@ int update_particle_momentum_Lido(
 					double tempid;
 					if (channel == 3) tempid = 21;
 					else tempid = Srandom::sample_flavor(3);
-					particle ep = produce_parton(tempid, pIn, FS[1], x0, temp, v3cell, false);
+					particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
 					pOut_list.push_back(ep);
 				}
 				
@@ -516,15 +521,18 @@ int update_particle_momentum_Lido(
 			double taun = formation_time(it->mother_p, it->p, temp, split_type);
 			// If t-t0 > tauf, or it reaches the boundary of QGP
 			// We check whether it sould be formed
-			if (it->x.t() - it->x0.t() <= taun)
-			{
-				// if not yet formed, evolve it to t+dt
-				std::vector<particle> pnew_Out;
-				update_particle_momentum_Lido(dt, temp, v3cell, *it, pnew_Out);
+
+			// if not yet formed, evolve it to t+dt
+			std::vector<particle> pnew_Out;
+			double tau = std::sqrt(it->x.t()*it->x.t()-it->x.z()*it->x.z());
+			double dt_daughter = calcualte_dt_from_dtau(it->x, it->p, 
+					tau, dtau);
+			update_particle_momentum_Lido(dt_daughter, temp, 
+											v3cell, *it, pnew_Out);
+			if (it->x.t() - it->x0.t() <= taun){
 				it++;
 			}
-			else
-			{
+			else{
 				// if formed, apply LPM suppression
 				double Acceptance = 0.;
 				if (!it->is_vac)
@@ -575,8 +583,6 @@ int update_particle_momentum_Lido(
 					}
 					// label it as real and put it in output particle list
 					it->is_virtual = false;
-					//it->p = pIn.p * xx;
-					//LOG_INFO<<"Create new parton" << it->pid;
 					pOut_list.push_back(*it);
 				}
 				// remove it from the radlist
@@ -597,7 +603,7 @@ int update_particle_momentum_Lido(
 	return pOut_list.size();
 }
 
-particle produce_parton(int pid, particle &mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> &v3cell, bool is_virtual)
+particle produce_parton(int pid, particle &mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> &v3cell, bool is_virtual, bool is_recoil)
 {
 	particle vp;
 	vp.pid = pid;
@@ -611,6 +617,7 @@ particle produce_parton(int pid, particle &mother_parton, fourvec vp0, fourvec v
 	vp.T0 = T;
 	vp.is_vac = false;
 	vp.is_virtual = is_virtual;
+	vp.is_recoil = is_recoil;
 	vp.vcell.resize(3);
 	vp.vcell[0] = v3cell[0];
 	vp.vcell[1] = v3cell[1];

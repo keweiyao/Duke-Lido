@@ -1,9 +1,11 @@
-import subprocess, sys, os
+import subprocess
+import sys
+import os
 from multiprocessing import Pool, cpu_count
 from subprocess import Popen
 
-#def call_JS(pTmin, pTmax):
-#    subprocess.call('./LidoJetTest {:d} {:d} {:d}'.format(pTmin, pTmax, 1000), shell=True)	
+# def call_JS(pTmin, pTmax):
+#    subprocess.call('./LidoJetTest {:d} {:d} {:d}'.format(pTmin, pTmax, 1000), shell=True)
 #Nproc = cpu_count()
 #print("CPU COUNT: "+ str(Nproc))
 #pTbins = [{30, 50, 70, 90, 110, 130, 150, 200, 300, 400, 600}]
@@ -15,7 +17,8 @@ from subprocess import Popen
 
 os.makedirs("./jet_results", exist_ok=True)
 
-Rlist=[0.2,1.0,2.]
-procs = [ Popen(["./jet_finding", str(5020), str(Rlist[i]), str(0), str(1), str(1000)]) for i in range(len(Rlist)) ]
+Rlist = [0.2, 0.4, 0.6, 0.8, 1.0]
+procs = [Popen(["./jet_finding", str(5020), str(Rlist[i]),
+                str(0), str(2.8), str(10000)]) for i in range(len(Rlist))]
 for p in procs:
-   p.wait()
+    p.wait()

@@ -29,18 +29,27 @@ int main(int argc, char* argv[]){
     OptDesc options{};
     options.add_options()
           ("help", "show this help message and exit")
-          ("pythia-setting,y",
-           po::value<fs::path>()->value_name("PATH")->required(),
-           "Pythia setting file")
-          ("pythia-events,n",
-            po::value<int>()->value_name("INT")->default_value(100,"100"),
-           "number of Pythia events")
           ("pthat-low,l",
             po::value<int>()->value_name("INT")->default_value(100,"100"),
            "pThatMin")
           ("pthat-high,h",
             po::value<int>()->value_name("INT")->default_value(120,"120"),
            "pThatMax")
+          ("pythia-setting,y",
+           po::value<fs::path>()->value_name("PATH")->required(),
+           "Pythia setting file")
+          ("pythia-events,n",
+            po::value<int>()->value_name("INT")->default_value(100,"100"),
+           "number of Pythia events")
+          ("ic,i",
+            po::value<fs::path>()->value_name("PATH")->required(),
+           "trento initial condition file")
+          ("eid,j",
+           po::value<int>()->value_name("INT")->default_value(0,"0"),
+           "trento event id")
+          ("hydro",
+           po::value<fs::path>()->value_name("PATH")->required(),
+           "hydro file")
           ("lido-setting,s", 
             po::value<fs::path>()->value_name("PATH")->required(),
            "Lido table setting file")
@@ -77,15 +86,6 @@ int main(int argc, char* argv[]){
           ("rvac,r", 
             po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"), 
             "vacuum-like radiation remove factor")    
-          ("tf",
-           po::value<double>()->value_name("FLOAT")->default_value(5.0,"5.0"),
-           "medium stopping time [fm/c]")
-          ("dt",
-           po::value<double>()->value_name("FLOAT")->default_value(0.02,"0.02"),
-           "hydro time step dtau [fm/c]")
-          ("temp",
-           po::value<double>()->value_name("FLOAT")->default_value(0.3,"0.3"),
-           "medium temperature [GeV]")
     ;
     po::variables_map args{};
     try{
@@ -116,6 +116,17 @@ int main(int argc, char* argv[]){
             table_mode = (fs::exists(args["lido-table"].as<fs::path>())) ? 
                          "old" : "new";
         }
+        // check trento event
+        if (!args.count("ic")){
+            throw po::required_option{"<ic>"};
+            return 1;
+        }
+        else{
+            if (!fs::exists(args["ic"].as<fs::path>())) {
+                throw po::error{"<ic> path does not exist"};
+                return 1;
+            }
+        }
         // check pythia setting
         if (!args.count("pythia-setting")){
             throw po::required_option{"<pythia-setting>"};
@@ -127,19 +138,27 @@ int main(int argc, char* argv[]){
                 return 1;
             }
         }
-
-        // start
-        std::vector<particle> plist, new_plist, pOut_list;
+        // check hydro setting
+        if (!args.count("hydro")){
+            throw po::required_option{"<hydro>"};
+            return 1;
+        }
+        else{
+            if (!fs::exists(args["hydro"].as<fs::path>())) {
+                throw po::error{"<hydro> path does not exist"};
+                return 1;
+            }
+        }
 
         /// HardGen
         PythiaGen pythiagen(
                 args["pythia-setting"].as<fs::path>().string(),
-                " ",
+                args["ic"].as<fs::path>().string(),
                 args["pthat-low"].as<int>(),
                 args["pthat-high"].as<int>(),
-                0
+                args["eid"].as<int>()
         );
-    
+
         /// Lido init
         initialize(table_mode,
                 args["lido-setting"].as<fs::path>().string(),
@@ -156,42 +175,53 @@ int main(int argc, char* argv[]){
                 args["rvac"].as<double>()
                 );
 
-        // proper times
-        double tau0 = 0.6 * 5.026;
-        double dtau = args["dt"].as<double>() * 5.026; // convert to GeV^-1
-        double tauf = args["tf"].as<double>() * 5.026; // convert to GeV^-1
-
-        double T0 = args["temp"].as<double>(); 
-        int Nsteps = int(tauf/dtau);
-
+        int Ns = 10;
         for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
+            std::vector<particle> plist, new_plist, pOut_list;
             pythiagen.Generate(plist);
+            /// Read Hydro
+            Medium<2> med1(args["hydro"].as<fs::path>().string());
             // freestream form t=0 to tau=tau0
             for (auto & p : plist) {
-              double dt = calcualte_dt_from_dtau(p.x, p.p, 0, tau0);
-              p.freestream(dt); 
+              double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
+              double dt = calcualte_dt_from_dtau(p.x, p.p, tau, med1.get_tauH());
+              p.freestream(dt);
+              p.Tf = 0.151;
             }
-            for (int i=0; i<Nsteps; i++){
-                new_plist.clear();
-			          double tau =tau0+ i*dtau;
-                double T = T0*std::pow(tau0/tau, 0.4);
-			          if (i%10==0) LOG_INFO << tau/5.026 << " [fm/c]\t" 
-                                    << T << " [GeV]" << " #=" << plist.size();
-                
-		            for (auto & p : plist){
-                   
-                    double dt = calcualte_dt_from_dtau(p.x, p.p, tau, dtau);
-                    double vz = p.x.z()/( p.x.t() + 1e-5 );
-                    double eta = 0.5*std::log((1.+vz)/(1.-vz));
-                    if ( std::fabs(eta)>3) continue;
-		                int n = update_particle_momentum_Lido(
-		                           dt, T, {0., 0., vz}, p, pOut_list);
-					          for (auto & k : pOut_list) {
-		                new_plist.push_back(k);
-		            }
-		        }
-		        plist = new_plist;
-		    }
+            while(med1.load_next()){
+                double current_hydro_clock = med1.get_tauL();
+                double hydro_dtau = med1.get_hydro_time_step();
+                double dtau = hydro_dtau/Ns;
+                LOG_INFO << current_hydro_clock/5.026 << " [fm/c]\t" 
+                         << " #=" << plist.size();
+                for (int i=0; i<Ns; ++i){
+                    new_plist.clear();
+                    for (auto & p : plist){
+                        // determine dt needed to evolve to the next tau
+                        double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
+                        double dt_lab = calcualte_dt_from_dtau(p.x, p.p, tau, dtau);
+                        // get hydro information
+                        double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.0;
+                        med1.interpolate(p.x, T, vx, vy, vz);
+                        double vabs = std::sqrt(vx*vx + vy*vy + vz*vy);
+                        // regulate v
+                        if (vabs > 1.-1e-6){
+                            LOG_WARNING << "regulate |v| = " 
+                                        << vabs << " > 1. and "
+                                        << "y = " 
+                        << 0.5*std::log((p.x.t()+p.x.z())/(p.x.t()-p.x.z()));
+                            double rescale = (1.-1e-6)/vabs;
+                            vx *= rescale;
+                            vy *= rescale;    
+                            vz *= rescale;                            
+                        }
+                        int fs_size = update_particle_momentum_Lido(
+                                  dt_lab, T, {vx, vy, vz}, p, pOut_list);
+                        for (auto & k : pOut_list) new_plist.push_back(k);
+                    }
+                    plist = new_plist;
+                }
+            }
             std::ostringstream s;
             s << "results/" << args["pthat-low"].as<int>() << "-"
               << args["pthat-high"].as<int>() << "-" << ie;

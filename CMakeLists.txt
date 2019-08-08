@@ -207,6 +207,10 @@ if(pythia8)
 	target_link_libraries(hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS hydro-couple DESTINATION bin)
 
+	add_executable(jet-hydro-couple ./examples/jet-hydro-couple.cpp)
+	target_link_libraries(jet-hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+	install(TARGETS jet-hydro-couple DESTINATION bin)
+
 	add_executable(pythia-pp ./examples/pythia-pp.cpp)
 	target_link_libraries(pythia-pp ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS pythia-pp DESTINATION bin)

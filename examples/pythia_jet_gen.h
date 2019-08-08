@@ -10,16 +10,21 @@ using namespace Pythia8;
 
 class PythiaGen{
 public: 
-    PythiaGen(std::string f_pythia, int pTHL, int pTHH);
+    PythiaGen(std::string f_pythia, std::string f_trento, 
+              int pTHL, int pTHH, int iev);
     void Generate(std::vector<particle> & plist);
     double sigma_gen(void){
         return pythia.info.sigmaGen();
     }
 private:
     Pythia pythia;
+    TransverPositionSampler TRENToSampler;
 };
 
-PythiaGen::PythiaGen(std::string f_pythia, int pTHL, int pTHH) {    
+PythiaGen::PythiaGen(std::string f_pythia, std::string f_trento,
+                     int pTHL, int pTHH, int iev):
+TRENToSampler(f_trento, iev)
+{    
     // read pythia settings
     pythia.readFile(f_pythia);
     // suppress output
@@ -48,6 +53,8 @@ PythiaGen::PythiaGen(std::string f_pythia, int pTHL, int pTHH) {
 void PythiaGen::Generate(std::vector<particle> & plist){
     plist.clear();
     pythia.next();
+    double x, y;
+    TRENToSampler.SampleXY(x, y);
     double weight = pythia.info.sigmaGen();
     for (size_t i = 0; i < pythia.event.size(); ++i) 
     {
@@ -60,7 +67,7 @@ void PythiaGen::Generate(std::vector<particle> & plist){
             //else _p.pid = p.id(); 
             _p.pid = p.id();
             _p.mass = std::abs(p.m());
-	        _p.x0 = fourvec{0,0,0,0}; 
+	        _p.x0 = fourvec{0,x,y,0}; 
 	        _p.x = _p.x0; 
 	        _p.p0 = p0; 
             if (std::abs(_p.pid) != 4 && std::abs(_p.pid) != 5) {
@@ -71,6 +78,7 @@ void PythiaGen::Generate(std::vector<particle> & plist){
             _p.weight = weight;
             _p.is_vac = false;
 	        _p.is_virtual = false;
+            _p.is_recoil = false;
             _p.T0 = 0.;
             _p.Tf = 0.;
             _p.mfp0 = 0.;

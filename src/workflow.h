@@ -10,7 +10,7 @@ struct particle{
 	// mass, x, p, t, all in units of [GeV^a]
 	int pid;
 	double mass, weight;
-	bool is_vac, is_virtual;
+	bool is_vac, is_virtual, is_recoil;
 	
 	double T0, mfp0, Tf; // production temperature, local mfp
 	fourvec x0; // production location
@@ -51,5 +51,5 @@ void output(const std::vector<particle> plist, std::string fname);
 void output_oscar(const std::vector<particle> plist, int abspid, std::string fname);
 double mean_pT(const std::vector<particle> plist);
 double mean_E(const std::vector<particle> plist);
-particle produce_parton(int pid, particle & mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> & v3cell, bool is_virtual = true);
+particle produce_parton(int pid, particle & mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> & v3cell, bool is_virtual = true, bool is_recoil = false);
 #endif
