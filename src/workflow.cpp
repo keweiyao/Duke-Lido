@@ -103,16 +103,16 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 	std::ifstream input(setting_path);
 	read_xml(input, config);
 
-	double mu=config.get("mu", 1.0); //alphas(max(Q, mu*pi*T)), active when afix < 0
+	double mu=config.get("mu", 2.0); //alphas(max(Q, mu*pi*T)), active when afix < 0
 	double afix=config.get("afix", -1.0);  // fixed coupling, negative value for running coupling
 	double K=config.get("K", 0.0);
 	double a=config.get("a", 1.0);
 	double b=config.get("b", 1.0);
 	double p=config.get("p", 1.0);
 	double q=config.get("q", 1.0);
-	double gamma=config.get("gamma", 0.0); // K, a, b, p, q, gamma are used in non-pert. qhat parametrization
+	double gamma=config.get("gamma", 1.0); // K, a, b, p, q, gamma are used in non-pert. qhat parametrization
 										   // Its effect is off when K = 0.
-	double qcut=config.get("qcut", 1.0); // Separation scale between diffusion
+	double cut=config.get("cut", 1.0); // Separation scale between diffusion
 										 // and scattering both at leading order (weak coupled)
 	double Rvac=config.get("Rvac", 1.0); // Vaccum veto region parameter
 
