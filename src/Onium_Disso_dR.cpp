@@ -299,21 +299,7 @@ double disso_gluon_costheta(double q, double v, double T, double random){
     return -(1. + std::log(1. - std::exp(y_fac1))/coeff )/v;
 }
 
-// reco_real_gluon
-double Sample_reco_gluon_costheta(double v, double T, double q){
-    double gamma = 1./std::sqrt(1.-v*v);
-    double y1 = q*gamma*(1.-v)/T;
-    double max_value = nBplus1(y1);
-    double x_try, y_try, result;
-    do {
-        x_try = Srandom::dist_costheta(Srandom::gen);
-        y_try = q*gamma*(1.+ x_try*v)/T;
-        result = nBplus1(y_try);
-    } while (Srandom::rejection(Srandom::gen)*max_value > result);
-    return x_try;
-}
-
- // inelastic scattering disso
+// inelastic quark scattering disso
  // function used in importance sampling of p1
  double f_p1_disso_important(double p1, void * params_){
      double * params = static_cast<double *>(params_);
@@ -332,8 +318,8 @@ double Sample_reco_gluon_costheta(double v, double T, double q){
          return ( fac2(k1*p1) - fac2(k2*p1) ) * p1 /(p1p2 + 1./p1p2 -2.0);
      }
  }
- 
- double Sample_disso_ineq_p1_important(double p1low, double p1up, double result_max, void * params_){ // result_max is an input
+
+double Sample_disso_ineq_p1_important(double p1low, double p1up, double result_max, void * params_){ // result_max is an input
      double * params = static_cast<double *>(params_);
      double result_try, p1_try;
      do{
@@ -341,7 +327,7 @@ double Sample_reco_gluon_costheta(double v, double T, double q){
          result_try = f_p1_disso_important(p1_try, params);
      } while(Srandom::rejection(Srandom::gen)*result_max > result_try);
      return p1_try;
-    }
+}
  
 double Sample_disso_ineq_cos1(double p1, void * params_){
     double * params = static_cast<double *>(params_);
@@ -405,3 +391,96 @@ double Sample_disso_ineq_cos1(double p1, void * params_){
      pQpQbar_final = add_virtual_gluon(p1_final, p2_final, p_rel_final);
      return pQpQbar_final;
  }
+
+// inelastic gluon scattering disso
+    // function used in importance sampling of q1
+double f_q1_disso_important(double q1, void * params_){
+    double * params = static_cast<double *>(params_);
+    double v = params[0];
+    double T = params[1];
+    double Enl = params[2];
+    double gamma = 1./std::sqrt(1.-v*v);
+    double k1 = gamma*(1-v)/T;        // k1 = gamma*(1-v)/T
+    double k2 = gamma*(1+v)/T;        // k2 = gamma*(1+v)/T
+    double q2 = q1-Enl;     // p2 = p1 - Enl
+    if (q2 <= 0){
+        return 0.0;
+    }
+    else{
+        double q1q2 = q1/q2;
+        return ( fac1(k2*q1) - fac1(k1*q1) ) * q1 * ( 1.0 + 4./(q1q2 + 1./q1q2 -2.0) );
+    }
+}
+
+double Sample_disso_ineg_q1_important(double q1low, double q1up, double result_max, void * params_){ // result_max is an input
+    double * params = static_cast<double *>(params_);
+    double result_try, q1_try;
+    do{
+        q1_try = Srandom::rejection(Srandom::gen)*(q1up-q1low) + q1low;
+        result_try = f_q1_disso_important(q1_try, params);
+    } while(Srandom::rejection(Srandom::gen)*result_max > result_try);
+    return q1_try;
+}
+
+double Sample_disso_ineg_cos1(double q1, void * params_){
+    double * params = static_cast<double *>(params_);
+    double y_try = Srandom::y_cdf(Srandom::gen);
+    double v = std::max(params[0], 1e-4);
+    double B = params[1]*q1;    // B = gamma * q1/T
+    double C = y_try * fac1(B*(1.+v)) + (1.-y_try) * fac1(B*(1.-v));
+    return -(1. + std::log( 1.-std::exp(C) )/B )/v;
+}
+
+std::vector<double> Sample_disso_ineg(double v, double T, double mass, double Enl, double a_B, double prel_up, double maximum_f_q1, double max_p2Matrix, double(*f)(double _prel, double _aB)){    // maximum is the input for Sample_disso_ineq_q1_important
+    v = std::max(v, 1e-4);
+    double gamma = 1./std::sqrt(1.-v*v);
+    double q1_try, c1_try, s1_try, q2_try, c2_try, s2_try, phi_try, c_phi, s_phi, p_rel, q1q2, q1q2_try, part_angle, result_try;
+    double q1low = Enl;
+    double q1up = 15.*T/std::sqrt(1.-v);
+    
+    double * params_q1 = new double[3];
+    params_q1[0] = v; //k1 = gamma*(1-v)/T
+    params_q1[1] = T; //k2 = gamma*(1+v)/T
+    params_q1[2] = Enl;
+    
+    double * params_c1 = new double[2];
+    params_c1[0] = v;
+    params_c1[1] = gamma/T;
+    
+    do{
+        do{
+            p_rel = Srandom::sample_inel(Srandom::gen)*prel_up;
+        } while(Srandom::rejection(Srandom::gen)*max_p2Matrix > f(p_rel, a_B));
+        
+        q1_try = Sample_disso_ineg_q1_important(q1low, q1up, maximum_f_q1, params_q1);  // give the maximum as result_max to Sample_disso_ineg_q1_important
+        q2_try = q1_try - Enl - p_rel*p_rel/mass;
+        if (q2_try <= 0.0){
+            result_try = 0.0;
+        }
+        else{
+            c1_try = Sample_disso_ineg_cos1(q1_try, params_c1);
+            c2_try = Srandom::dist_costheta(Srandom::gen);
+            s1_try = std::sqrt(1.-c1_try*c1_try);
+            s2_try = std::sqrt(1.-c2_try*c2_try);
+            phi_try = Srandom::dist_phi(Srandom::gen);
+            q1q2_try = q1_try/q2_try;   // q1_try/q2_try
+            q1q2 = (q1_try-Enl)/q1_try;
+            c_phi = std::cos(phi_try);
+            s_phi = std::sin(phi_try);
+            part_angle = s1_try*s2_try*c_phi + c1_try*c2_try;
+            result_try = nBplus1(gamma*(1.+v*c2_try)*q2_try/T)/q1q2_try * (q1q2_try  + 1./q1q2_try + 2.0)/(q1q2_try + 1./q1q2_try - 2.0*part_angle) * (1.+part_angle)/2.0 / (1.0 + 4./(q1q2 + 1./q1q2 - 2.0) );
+        }
+    } while(Srandom::rejection(Srandom::gen) >= result_try);
+    std::vector<double> q1_final(3);
+    std::vector<double> q2_final(3);
+    std::vector<double> p_rel_final(3);
+    std::vector<double> pQpQbar_final(6);
+    double cos_rel, phi_rel;
+    cos_rel = Srandom::dist_costheta(Srandom::gen);
+    phi_rel = Srandom::sample_inel(Srandom::gen)*TwoPi;
+    q1_final = polar_to_cartisian2(q1_try, c1_try, s1_try, 1.0, 0.0);
+    q2_final = polar_to_cartisian2(q2_try, c2_try, s2_try, c_phi, s_phi);
+    p_rel_final = polar_to_cartisian1(p_rel, cos_rel, phi_rel);
+    pQpQbar_final = add_virtual_gluon(q1_final, q2_final, p_rel_final);
+    return pQpQbar_final;
+}

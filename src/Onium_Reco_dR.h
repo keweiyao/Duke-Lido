@@ -27,10 +27,22 @@ double dRdq1dq2_1P_reco_ineg(double x[4], std::size_t dim, void * params_);
 
 
 // Sampling
+// real_gluon
+double Sample_reco_gluon_costheta(double v, double T, double q);
+
+// ineq
 double f_p1_reco_important(double p1, void * params_);
 double Sample_reco_ineq_p1_important(double p1low, double p1up, double result_max, void * params_);
-std::vector<double> S1S_reco_ineq(
+std::vector<double> Sample_reco_ineq(
            double v, double T, double p, 
            double mass, double Enl, double maximum_f_p1
-      );
+                                     );
+
+//ineg
+double f_q1_reco_important(double q1, void * params_);
+double Sample_reco_ineg_q1_important(double q1low, double q1up, double result_max, void * params_);
+std::vector<double> Sample_reco_ineg(
+            double v, double T, double p,
+            double mass, double Enl, double maximum_f_q1
+                                     );
 #endif

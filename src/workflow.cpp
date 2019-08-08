@@ -106,6 +106,24 @@ void init_process(Process& r, std::string mode, std::string table_path){
 					}
 				else return;
 				break;
+            case 9:
+                if (boost::get<OniumD23g>(r).IsActive())
+                    if (mode == "new") {
+                        boost::get<OniumD23g>(r).init(table_path);
+                    } else {
+                        boost::get<OniumD23g>(r).load(table_path);
+                    }
+                else return;
+                break;
+            case 10:
+                if (boost::get<OniumR32g>(r).IsActive())
+                    if (mode == "new") {
+                        boost::get<OniumR32g>(r).init(table_path);
+                    } else {
+                        boost::get<OniumR32g>(r).load(table_path);
+                    }
+                 else return;
+                break;
 			default:
 				exit(-1);
 				break;
@@ -176,23 +194,38 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 	OneBody[5].push_back( Rate21("Boltzmann/bg2b", setting_path, LGV_qg2q) );  // 2->1, index = 7
  
     // for Onium decay
-    // Upsilon(1S)
+    // Upsilon(1S): 553; can also represent eta_b(1S): 551;
     OneBody[553] = std::vector<Process>();
     OneBody[553].push_back( OniumD22("Boltzmann/U1Sg2QQbar", setting_path, 1, 0, dRdq_1S_gluon) ); // index = 0 1S
     OneBody[553].push_back( OniumD23q("Boltzmann/U1Sq2QQbarq", setting_path, 1, 0, dRdp1dp2_1S_decay_ineq, f_p1_disso_important, p2Matrix1S) ); // index = 1 1S
+    OneBody[553].push_back( OniumD23g("Boltzmann/U1Sg2QQbarg", setting_path, 1, 0, dRdq1dq2_1S_decay_ineg, f_q1_disso_important, p2Matrix1S) ); // index = 2 1S
                     
-    // Upsilon(2S)
+    // Upsilon(2S): 100553; can also represent eta_b(2S): 100551;
     OneBody[100553] = std::vector<Process>();
     OneBody[100553].push_back( OniumD22("Boltzmann/U2Sg2QQbar", setting_path, 2, 0, dRdq_2S_gluon) ); // index = 0 2S
     OneBody[100553].push_back( OniumD23q("Boltzmann/U2Sq2QQbarq", setting_path, 2, 0, dRdp1dp2_2S_decay_ineq, f_p1_disso_important, p2Matrix2S) ); // index = 1 2S
+    OneBody[100553].push_back( OniumD23g("Boltzmann/U2Sg2QQbarg", setting_path, 2, 0, dRdq1dq2_2S_decay_ineg, f_q1_disso_important, p2Matrix2S) ); // index = 2 2S
     
-
+    // Chi_b(1P): Chi_b0 10551, Chi_b1 20553, Chi_b2 555
+    OneBody[555] = std::vector<Process>();
+    OneBody[555].push_back( OniumD22("Boltzmann/U1Pg2QQbar", setting_path, 2, 1, dRdq_1P_gluon) ); // index = 0 1P
+    OneBody[555].push_back( OniumD23q("Boltzmann/U1Pq2QQbarq", setting_path, 2, 1, dRdp1dp2_1P_decay_ineq, f_p1_disso_important, p2Matrix1P) ); // index = 1 1P
+    OneBody[555].push_back( OniumD23g("Boltzmann/U1Pg2QQbarg", setting_path, 2, 1, dRdq1dq2_1P_decay_ineg, f_q1_disso_important, p2Matrix1P) ); // index = 2 1P
+                    
     // for Q Qbar recombine
+    // 1S
     TwoBody[std::make_pair(5,-5)] = std::vector<Process>();
     TwoBody[std::make_pair(5,-5)].push_back(OniumR22("Boltzmann/QQbar2U1Sg", setting_path, 1, 0, RV1S_reco_gluon) ); // index = 0 1S
     TwoBody[std::make_pair(5,-5)].push_back(OniumR32q("Boltzmann/QQbarq2U1Sq", setting_path, 1, 0, dRdp1dp2_1S_reco_ineq, f_p1_reco_important, Matrix1S) ); // index = 1 1S
-    TwoBody[std::make_pair(5,-5)].push_back(OniumR22("Boltzmann/QQbar2U2Sg", setting_path, 2, 0, RV2S_reco_gluon) ); // index = 2 2S
-    TwoBody[std::make_pair(5,-5)].push_back(OniumR32q("Boltzmann/QQbarq2U2Sq", setting_path, 2, 0, dRdp1dp2_2S_reco_ineq, f_p1_reco_important, Matrix2S) ); // index = 3 2S
+    TwoBody[std::make_pair(5,-5)].push_back(OniumR32g("Boltzmann/QQbarg2U1Sg", setting_path, 1, 0, dRdq1dq2_1S_reco_ineg, f_q1_reco_important, Matrix1S) ); // index = 2 1S
+    // 2S
+    TwoBody[std::make_pair(5,-5)].push_back(OniumR22("Boltzmann/QQbar2U2Sg", setting_path, 2, 0, RV2S_reco_gluon) ); // index = 3 2S
+    TwoBody[std::make_pair(5,-5)].push_back(OniumR32q("Boltzmann/QQbarq2U2Sq", setting_path, 2, 0, dRdp1dp2_2S_reco_ineq, f_p1_reco_important, Matrix2S) ); // index = 4 2S
+    TwoBody[std::make_pair(5,-5)].push_back(OniumR32g("Boltzmann/QQbarg2U2Sg", setting_path, 2, 0, dRdq1dq2_2S_reco_ineg, f_q1_reco_important, Matrix2S) ); // index = 5 2S
+    // 1P
+    TwoBody[std::make_pair(5,-5)].push_back(OniumR22("Boltzmann/QQbar2U1Pg", setting_path, 2, 1, RV1P_reco_gluon) ); // index = 6 1P
+    TwoBody[std::make_pair(5,-5)].push_back(OniumR32q("Boltzmann/QQbarq2U1Pq", setting_path, 2, 1, dRdp1dp2_1P_reco_ineq, f_p1_reco_important, Matrix1P) ); // index = 7 1P
+    TwoBody[std::make_pair(5,-5)].push_back(OniumR32g("Boltzmann/QQbarg2U1Pg", setting_path, 2, 1, dRdq1dq2_1P_reco_ineg, f_q1_reco_important, Matrix1P) ); // index = 8 1P
                     
 	// Initialzie all processes
     // One Body
@@ -202,6 +235,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 	BOOST_FOREACH(Process& r, OneBody[21]) init_process(r, mode, table_path);
 	BOOST_FOREACH(Process& r, OneBody[553]) init_process(r, mode, table_path);
 	BOOST_FOREACH(Process& r, OneBody[100553]) init_process(r, mode, table_path);
+    BOOST_FOREACH(Process& r, OneBody[555]) init_process(r, mode, table_path);
     // Two Body
 	BOOST_FOREACH(Process& r, TwoBody[std::make_pair(5,-5)]) init_process(r, mode, table_path);
 }
@@ -616,8 +650,15 @@ int OneBodyUpdate_Onium(
 					dR = boost::get<OniumD23q>(r).GetZeroM({v_cell, temp}).s;
 				else dR = 0.0;
 				P_channels[channel] = P_total + dR*dt_cell;
-                //LOG_INFO << absid << "-inel " << dR << " " << dt_cell;
+                //LOG_INFO << absid << "-ineq " << dR << " " << dt_cell;
 				break;
+            case 9:
+                if (boost::get<OniumD23g>(r).IsActive())
+                    dR = boost::get<OniumD23g>(r).GetZeroM({v_cell, temp}).s;
+                else dR = 0.0;
+                P_channels[channel] = P_total + dR*dt_cell;
+                //LOG_INFO << absid << "-ineg " << dR << " " << dt_cell;
+                break;
 			default:
 				LOG_FATAL << "1. ProcessType = " << r.which() << " not exists";
 				exit(-1);
@@ -650,7 +691,7 @@ int OneBodyUpdate_Onium(
 	// If a scattering happens:
 	if (channel >= 0){
         int fQ, fQbar;
-		if(channel>= OneBody[absid].size()){
+		if(channel >= OneBody[absid].size()){
 			LOG_FATAL << "3. Channel = " << channel << " not exists";
 			exit(-1);
 		}
@@ -666,7 +707,11 @@ int OneBodyUpdate_Onium(
 				boost::get<OniumD23q>(OneBody[absid][channel]).sample({v_cell, temp}, FS);
 				boost::get<OniumD23q>(OneBody[absid][channel]).FlavorContent(fQ, fQbar);
 				break;
-			default:
+            case 9:
+                boost::get<OniumD23g>(OneBody[absid][channel]).sample({v_cell, temp}, FS);
+                boost::get<OniumD23g>(OneBody[absid][channel]).FlavorContent(fQ, fQbar);
+                break;
+            default:
 				LOG_FATAL << "2. Channel = " << channel << " not exists";
 				exit(-1);
 				break;
@@ -731,16 +776,14 @@ pOut_list.clear();
     auto p2_rest = p2_cell.boost_to(vcom_cell[0], vcom_cell[1], vcom_cell[2]);
     //auto x2_rest = x2_cell.boost_to(vcom_cell[0], vcom_cell[1], vcom_cell[2]);
 
-    // relative x and p
-    double p_rel_rest = (p1_rest - p2_rest).pabs();
+    // relative p
+    double p_rel_rest = 1./4.*(p1_rest - p2_rest).pabs();
     
-
-	// Total rate for Dissociation
+	// Total rate for Recombination
 	int channel = 0;
 	std::vector<double> P_channels(TwoBody[pair_id].size());
 	double P_total = 0., dR, aB, VB;
     
-
 	BOOST_FOREACH(Process& r, TwoBody[pair_id]){
 		switch(r.which()){
 			case 6:
@@ -765,7 +808,18 @@ pOut_list.clear();
 				else dR = 0.0;
 				P_channels[channel] = P_total + dR*dt_cell;
 				break;
-			default:
+            case 10:
+                if (boost::get<OniumR32g>(r).IsActive()) {
+                    aB = boost::get<OniumR32g>(r).aB();
+                    VB = std::pow(2*M_PI*aB*aB, -1.5)*
+                    std::exp(-.5*std::pow(x_rel_cell/aB,2));
+                    dR = VB*boost::get<OniumR32g>(r).GetZeroM(
+                            {vcom_cell_abs, temp, p_rel_rest}).s;
+                }
+                else dR = 0.0;
+                P_channels[channel] = P_total + dR*dt_cell;
+                break;
+            default:
 				LOG_FATAL << "1. ProcessType = " << r.which() << " not exists";
 				exit(-1);
 				break;
@@ -796,7 +850,7 @@ pOut_list.clear();
 
 	// If a scattering happens:
 	if (channel >= 0){
-		if(channel>= TwoBody[pair_id].size()){
+		if(channel >= TwoBody[pair_id].size()){
 			LOG_FATAL << "3. Channel = " << channel << " not exists";
 			exit(-1);
 		}
@@ -822,7 +876,15 @@ pOut_list.clear();
                 new_mass = P1.mass + P2.mass - 
                            boost::get<OniumR32q>(TwoBody[pair_id][channel]).Enl();
 				break;
-			default:
+            case 10:
+                boost::get<OniumR32g>(TwoBody[pair_id][channel]).sample(
+                                     {vcom_cell_abs, temp, p_rel_rest}, FS);
+                WF_n = boost::get<OniumR32g>(TwoBody[pair_id][channel]).n();
+                WF_l = boost::get<OniumR32g>(TwoBody[pair_id][channel]).l();
+                new_mass = P1.mass + P2.mass -
+                           boost::get<OniumR32g>(TwoBody[pair_id][channel]).Enl();
+                break;
+            default:
 				LOG_FATAL << "2. Channel = " << channel << " not exists";
 				exit(-1);
 				break;
@@ -836,9 +898,9 @@ pOut_list.clear();
 		particle vp;
         if (WF_n == 1 && WF_l == 0) vp.pid = 553;
 		else if (WF_n == 2 && WF_l == 0) vp.pid = 100553;
+        else if (WF_n == 2 && WF_l == 1) vp.pid = 555;
         else LOG_FATAL << "Something not exist is recombined";
-        //else if (WF_n == 2 && WF_l == 1) 
-        //vp.pid random choose in 10551 20553 555 (note different degenerancy;
+        //in future we can make vp.pid to random choose in 10551 20553 555 (note different degenerancy);
 		vp.mass = new_mass;
 		vp.weight = P1.weight * P2.weight;
 		vp.p0 = FS[0]; 

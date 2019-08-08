@@ -46,6 +46,14 @@ typedef OniumRecoRate32q<3,
   double(*)(double *, std::size_t, void *), 
   double(*)(double, void *), 
   double(*)(double, double)> OniumR32q;
+typedef OniumDissoRate23g<2,
+double(*)(double *, std::size_t, void *),
+double(*)(double, void *),
+double(*)(double, double)> OniumD23g;
+typedef OniumRecoRate32g<3,
+double(*)(double *, std::size_t, void *),
+double(*)(double, void *),
+double(*)(double, double)> OniumR32g;
 typedef boost::variant<Rate22,   // case 0
                        Rate23,   // case 1
                        Rate32,   // case 2
@@ -54,7 +62,9 @@ typedef boost::variant<Rate22,   // case 0
                        OniumD22, // case 5 
                        OniumR22,  // case 6
                        OniumD23q, // case 7
-                       OniumR32q // case 8
+                       OniumR32q, // case 8
+                       OniumD23g, // case 9
+                       OniumR32g  // case 10
                > Process;
 extern std::map<int, std::vector<Process>> AllProcesses;
 
