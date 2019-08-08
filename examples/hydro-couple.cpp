@@ -43,37 +43,7 @@ int main(int argc, char* argv[]){
            "Lido table setting file")
           ("lido-table,t", 
             po::value<fs::path>()->value_name("PATH")->required(),
-           "Lido table path to file")
-          ("mu,m", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "medium scale paramtmer")
-          ("afix,f", 
-            po::value<double>()->value_name("FLOAT")->default_value(-1.0,"-1.0"),
-            "fixed alphas value, -1 is running")
-          ("k-factor,k", 
-            po::value<double>()->value_name("FLOAT")->default_value(0.0,"0.0"),
-            "K-factor for the delta-qhat")
-          ("t-scale,a", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "rescale the T-dependence")
-          ("e-scale,b", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "rescale the p-dependence")
-          ("t-power,p", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "T-dependence power")
-          ("e-power,q", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "p-dependence power")
-          ("gamma,g", 
-            po::value<double>()->value_name("FLOAT")->default_value(0.0,"0.0"),
-            "kpara / kperp anisotropy parameter")
-          ("qcut,c",
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"), 
-            "separation scale Q2 = qcut * mD2")
-          ("rvac,r", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"), 
-            "vacuum-like radiation remove factor")    
+           "Lido table path to file")   
     ;
     po::variables_map args{};
     try{
@@ -160,17 +130,7 @@ int main(int argc, char* argv[]){
         /// Lido init
         initialize(table_mode,
                 args["lido-setting"].as<fs::path>().string(),
-                args["lido-table"].as<fs::path>().string(),
-                args["mu"].as<double>(),
-                args["afix"].as<double>(),
-                args["k-factor"].as<double>(),
-                args["t-scale"].as<double>(),
-                args["e-scale"].as<double>(),
-                args["t-power"].as<double>(),
-                args["e-power"].as<double>(),
-                args["gamma"].as<double>(),
-                args["qcut"].as<double>(),
-                args["rvac"].as<double>()
+                args["lido-table"].as<fs::path>().string()
                 );
 
         /// Assign each quark a transverse position according to TRENTo Nbin output

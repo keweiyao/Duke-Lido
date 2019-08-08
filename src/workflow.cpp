@@ -95,18 +95,28 @@ void init_process(Process &r, std::string mode, std::string table_path)
 	}
 }
 
-void initialize(std::string mode, std::string setting_path, std::string table_path,
-				double mu,   // alphas(max(Q, mu*pi*T)), active when afix < 0
-				double afix, // fixed coupling, negative value for running coupling
-				double K, double a, double b, double p, double q, double gamma,
-				// K, a, b, p, q, gamma are used in non-pert. qhat parametrization
-				// Its effect is off when K = 0.
-				double cut, // Separation scale between diffusion
-							// and scattering both at leading order (weak coupled)
-				double Rvac // Vaccum veto region parameter
-)
+void initialize(std::string mode, std::string setting_path, std::string table_path)
 {
 	print_logo();
+
+	boost::property_tree::ptree config;
+	std::ifstream input(setting_path);
+	read_xml(input, config);
+
+	double mu=config.get("mu", 1.0); //alphas(max(Q, mu*pi*T)), active when afix < 0
+	double afix=config.get("afix", -1.0);  // fixed coupling, negative value for running coupling
+	double K=config.get("K", 0.0);
+	double a=config.get("a", 1.0);
+	double b=config.get("b", 1.0);
+	double p=config.get("p", 1.0);
+	double q=config.get("q", 1.0);
+	double gamma=config.get("gamma", 0.0); // K, a, b, p, q, gamma are used in non-pert. qhat parametrization
+										   // Its effect is off when K = 0.
+	double qcut=config.get("qcut", 1.0); // Separation scale between diffusion
+										 // and scattering both at leading order (weak coupled)
+	double Rvac=config.get("Rvac", 1.0); // Vaccum veto region parameter
+
+
 	initialize_mD_and_scale(0, mu, afix, cut, Rvac);
 	initialize_transport_coeff(K, a, b, p, q, gamma);
 	echo();
