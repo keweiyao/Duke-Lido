@@ -14,6 +14,6 @@ copyfile("../examples/pythia-jet-setting", "./jet_results/pythia-jet-setting")
 
 Rlist = [0.2, 0.4, 0.6, 0.8, 1.0]
 procs = [Popen(["./jet_finding", str(5020), str(Rlist[i]),
-                str(0), str(2.8), str(10000)]) for i in range(len(Rlist))]
+                str(0), str(2.8), str(2000)]) for i in range(len(Rlist))]
 for p in procs:
     p.wait()

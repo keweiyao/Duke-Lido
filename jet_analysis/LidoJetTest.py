@@ -24,7 +24,7 @@ def getarg(ptl, pth):
            "--eid", "0",
            "--pthat-low", "{:d}".format(ptl),
            "--pthat-high", "{:d}".format(pth),
-           "-n", "10000"]
+           "-n", "2000"]
     return arg
 
 procs = [Popen([cmd, *getarg(pTbins[i], pTbins[i+1])]) for i in range(len(pTbins)-1)]

@@ -216,7 +216,8 @@ int update_particle_momentum_Lido(
 	double dt, double temp, std::vector<double> v3cell,
 	particle &pIn, std::vector<particle> &pOut_list)
 {  
-	const double Lido_pcut=3.;
+	auto p00 = pIn.p;
+	const double Lido_pcut=5.*std::max(temp, 0.154);
 
 	pOut_list.clear();
 	pIn.Tf = temp;
@@ -231,8 +232,7 @@ int update_particle_momentum_Lido(
     double dtau = tau1 - tau0;
 
 	//ignore soft partons with a constant momentum cut
-	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_pcut 
-	    || temp < 0.154)
+	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_pcut || temp < 0.154)
 	{
 		pOut_list.push_back(pIn);
 		return pOut_list.size();
@@ -348,6 +348,7 @@ int update_particle_momentum_Lido(
 	{
 		if (channel >= AllProcesses[absid].size())
 		{
+			LOG_INFO << p00 <<"//"<< pIn.p << "//" << temp;
 			LOG_FATAL << "3. Channel = " << channel << " not exists";
 			exit(-1);
 		}
@@ -387,16 +388,14 @@ int update_particle_momentum_Lido(
 		if (channel == 0 || channel == 1)
 		{
 			pIn.p = FS[0];
-
-			
-                particle ep;
-				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_pcut){
-					double tempid;
-					if (channel == 1) tempid = 21;
-					else tempid = Srandom::sample_flavor(3);
-					particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
-					pOut_list.push_back(ep);
-				}
+			particle ep;
+			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_pcut){
+				double tempid;
+				if (channel == 1) tempid = 21;
+				else tempid = Srandom::sample_flavor(3);
+				particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
+				pOut_list.push_back(ep);
+			}
 				
 		}
 		// inelastic process takes a finite time to happen
@@ -434,15 +433,13 @@ int update_particle_momentum_Lido(
 			// estimate mfp in the lab frame
 			vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
 			pIn.radlist.push_back(vp);
-
-			
-				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_pcut){	
-					double tempid;
-					if (channel == 3) tempid = 21;
-					else tempid = Srandom::sample_flavor(3);
-					particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
-					pOut_list.push_back(ep);
-				}
+			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_pcut){	
+				double tempid;
+				if (channel == 3) tempid = 21;
+				else tempid = Srandom::sample_flavor(3);
+				particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
+				pOut_list.push_back(ep);
+			}
 				
 		}
 		if (channel == 4 || channel == 5)
