@@ -174,7 +174,7 @@ void Medium<N>::interpolate(fourvec x, double & T, double & vx, double & vy, dou
 ////////////////////////// Trento ////////////////////////////////////
 TransverPositionSampler::TransverPositionSampler(std::string filename, int iev):
 _file(filename, H5F_ACC_RDONLY),
-_datasetname("/event_"+std::to_string(iev))
+_datasetname("/event_"+std::to_string(iev)),
 _event(_file.openGroup(_datasetname))
 {
 	hdf5_read_scalar_attr(_event, "Nx", _Nx);
