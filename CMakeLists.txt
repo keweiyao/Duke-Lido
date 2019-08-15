@@ -217,7 +217,7 @@ if(pythia8)
 endif(pythia8)
 
 
-install(FILES ./examples/lido-settings.xml DESTINATION share)
+install(FILES ./examples/lido_settings.xml DESTINATION share)
 if(pythia8)
 install(FILES ./examples/pythia-pp-200-setting.txt DESTINATION share)
 install(FILES ./examples/pythia-pp-5020-setting.txt DESTINATION share)
