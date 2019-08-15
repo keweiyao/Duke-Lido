@@ -34,7 +34,7 @@ int main(int argc, char* argv[]){
            "Pythia setting file")
           ("pythia-events,n",
             po::value<int>()->value_name("INT")->default_value(100,"100"),
-           "number of Pythia events")
+           "number of Pythia events")        
           ("pthat-low,l",
             po::value<int>()->value_name("INT")->default_value(100,"100"),
            "pThatMin")
@@ -47,6 +47,9 @@ int main(int argc, char* argv[]){
           ("lido-table,t", 
             po::value<fs::path>()->value_name("PATH")->required(),
            "Lido table path to file")
+           ("trento-event,i",
+           po::value<fs::path>()->value_name("PATH")->required(),
+           "trento event file")  
     ;
     po::variables_map args{};
     try{
@@ -95,7 +98,7 @@ int main(int argc, char* argv[]){
         /// HardGen
         PythiaGen pythiagen(
                 args["pythia-setting"].as<fs::path>().string(),
-                " ",
+                args["trento-event"].as<fs::path>().string(),
                 args["pthat-low"].as<int>(),
                 args["pthat-high"].as<int>(),
                 0
