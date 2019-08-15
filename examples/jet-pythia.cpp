@@ -50,6 +50,15 @@ int main(int argc, char* argv[]){
            ("trento-event,i",
            po::value<fs::path>()->value_name("PATH")->required(),
            "trento event file")  
+           ("dt",
+           po::value<double>()->value_name("FLOAT")->default_value(0.05,"0.05"),
+           "time step [fm/c]")
+          ("tf",
+           po::value<double>()->value_name("FLOAT")->default_value(5.0,"5.0"),
+           "stopping time [fm/c]")
+          ("temp",
+           po::value<double>()->value_name("FLOAT")->default_value(0.3,"0.3"),
+           "medium temperature [GeV]")
     ;
     po::variables_map args{};
     try{
