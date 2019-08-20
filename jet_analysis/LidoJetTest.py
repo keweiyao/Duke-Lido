@@ -16,7 +16,7 @@ subprocess.run("../build/Lido-TabGen -s ../examples/lido_settings.xml -t ../buil
 cmd = "../build/jet-hydro-couple"
 
 def getarg(ptl, pth):
-    arg = ["-y", "../examples/pythia-jet-setting",
+    arg = ["-y", "../examples/pythia-jet-setting.txt",
            "-s", "../examples/lido_settings.xml",
            "-t", "../build/table.h5",
            "--hydro", "../build/JetData.h5",
