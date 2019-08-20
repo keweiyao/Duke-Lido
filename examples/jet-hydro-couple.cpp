@@ -121,6 +121,7 @@ int main(int argc, char* argv[]){
         }
 
         /// HardGen
+        LOG_INFO<<"hard gen";
         PythiaGen pythiagen(
                 args["pythia-setting"].as<fs::path>().string(),
                 args["ic"].as<fs::path>().string(),
@@ -130,6 +131,7 @@ int main(int argc, char* argv[]){
         );
 
         /// Lido init
+        LOG_INFO<<"init lido";
         initialize(table_mode,
                 args["lido-setting"].as<fs::path>().string(),
                 args["lido-table"].as<fs::path>().string()

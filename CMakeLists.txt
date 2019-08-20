@@ -223,5 +223,6 @@ install(FILES ./examples/pythia-pp-200-setting.txt DESTINATION share)
 install(FILES ./examples/pythia-pp-5020-setting.txt DESTINATION share)
 install(FILES ./examples/pythia-PbPb-5020-setting.txt DESTINATION share)
 install(FILES ./examples/pythia-AuAu-200-setting.txt DESTINATION share)
+install(FILES ./examples/pythia-jet-setting.txt DESTINATION share)
 endif(pythia8)
 
