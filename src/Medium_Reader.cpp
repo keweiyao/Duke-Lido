@@ -71,7 +71,7 @@ bool Medium<N>::load_next(){
 		std::stringstream FrameNumber;
 		FrameNumber << std::setw(4) << std::setfill('0') << _frame_count+iTau;
 		std::string FrameName = "/Event/Frame_"+FrameNumber.str();
-		LOG_INFO << "loading " << FrameName;
+		//LOG_INFO << "loading " << FrameName;
 		
 		// Temp
 		dataset = _file.openDataSet(FrameName+"/Temp");

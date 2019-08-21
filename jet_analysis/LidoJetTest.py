@@ -11,7 +11,7 @@ os.makedirs("./results", exist_ok=True)
 pTbins = [10, 20, 30, 50, 70, 90, 110, 150, 200, 300, 500, 700]
 
 #generate the table first
-subprocess.run("../build/Lido-TabGen -s ../examples/lido_settings.xml -t ../build/table.h5", shell=True, check=True)
+#subprocess.run("../build/Lido-TabGen -s ../examples/lido_settings.xml -t ../build/table.h5", shell=True, check=True)
 
 cmd = "../build/jet-hydro-couple"
 
@@ -20,7 +20,7 @@ def getarg(ptl, pth):
            "-s", "../examples/lido_settings.xml",
            "-t", "../build/table.h5",
            "--hydro", "../build/JetData.h5",
-           "--ic", "../build/ic.hdf5",
+           "--ic", "../build/ic.h5",
            "--eid", "0",
            "--pthat-low", "{:d}".format(ptl),
            "--pthat-high", "{:d}".format(pth),

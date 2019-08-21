@@ -154,8 +154,8 @@ int main(int argc, char* argv[]){
                 double current_hydro_clock = med1.get_tauL();
                 double hydro_dtau = med1.get_hydro_time_step();
                 double dtau = hydro_dtau/Ns;
-                LOG_INFO << current_hydro_clock/5.026 << " [fm/c]\t" 
-                         << " #=" << plist.size();
+               // LOG_INFO << current_hydro_clock/5.026 << " [fm/c]\t" 
+                //         << " #=" << plist.size();
                 for (int i=0; i<Ns; ++i){
                     new_plist.clear();
                     for (auto & p : plist){
@@ -168,10 +168,10 @@ int main(int argc, char* argv[]){
                         double vabs = std::sqrt(vx*vx + vy*vy + vz*vy);
                         // regulate v
                         if (vabs > 1.-1e-6){
-                            LOG_WARNING << "regulate |v| = " 
-                                        << vabs << " > 1. and "
-                                        << "y = " 
-                        << 0.5*std::log((p.x.t()+p.x.z())/(p.x.t()-p.x.z()));
+                           // LOG_WARNING << "regulate |v| = " 
+                             //           << vabs << " > 1. and "
+                              //          << "y = " 
+                        //<< 0.5*std::log((p.x.t()+p.x.z())/(p.x.t()-p.x.z()));
                             double rescale = (1.-1e-6)/vabs;
                             vx *= rescale;
                             vy *= rescale;    

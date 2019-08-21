@@ -237,6 +237,7 @@ int update_particle_momentum_Lido(
 	//ignore soft partons with a constant momentum cut
 	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut || temp < 0.154)
 	{
+		pIn.radlist.clear();
 		pOut_list.push_back(pIn);
 		return pOut_list.size();
 	}
@@ -392,7 +393,7 @@ int update_particle_momentum_Lido(
 		{
 			pIn.p = FS[0];
 			particle ep;
-			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_Ecut){
+			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3.*temp){
 				double tempid;
 				if (channel == 1) tempid = 21;
 				else tempid = Srandom::sample_flavor(3);
@@ -436,7 +437,7 @@ int update_particle_momentum_Lido(
 			// estimate mfp in the lab frame
 			vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
 			pIn.radlist.push_back(vp);
-			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_Ecut){	
+			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() >  3.*temp){	
 				double tempid;
 				if (channel == 3) tempid = 21;
 				else tempid = Srandom::sample_flavor(3);
