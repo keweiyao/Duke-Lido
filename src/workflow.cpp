@@ -217,7 +217,9 @@ int update_particle_momentum_Lido(
 	particle &pIn, std::vector<particle> &pOut_list)
 {  
 	auto p00 = pIn.p;
-	const double Lido_pcut=5.*std::max(temp, 0.154);
+	//const double Lido_pcut=5.*std::max(temp, 0.154);
+	const double Lido_pcut = 3.0;
+
 
 	pOut_list.clear();
 	pIn.Tf = temp;

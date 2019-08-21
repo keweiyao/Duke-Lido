@@ -36,7 +36,8 @@ void simu(double eCM, double jetR, double ymin, double ymax, int nEvent)
 	double jetRadius = jetR, jetpTMin = 10.;
 	double jetyMin = ymin, jetyMax = ymax;
 
-	std::vector<double> pTBin({30, 40, 50, 56, 63, 70, 79, 89, 100, 112, 125, 141, 158, 177, 199, 251, 398});
+	//std::vector<double> pTBin({30, 40, 50, 56, 63, 70, 79, 89, 100, 112, 125, 141, 158, 177, 199, 251, 398});
+	std::vector<double> pTBin({50,100,200,300,400});
 	std::vector<double> jet_cs(pTBin.size(), 0.);
 	std::vector<double> err(pTBin.size(), 0.);
 	std::vector<double> sqSum(pTBin.size(), 0.);
