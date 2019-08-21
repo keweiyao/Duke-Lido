@@ -52,6 +52,8 @@ extern double cut; // separation between diffusion and scattering
 extern double Rvac;
 extern const double LPM_prefactor; // to match analytic calculation, 0.7 -- 0.83.
 
+extern double Lido_Ecut;
+
 struct qhat_params_struct {
 	double K, a, b, p, q, gamma; // for qhat parametrization
 };

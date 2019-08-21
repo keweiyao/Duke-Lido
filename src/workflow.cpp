@@ -116,6 +116,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 										 // and scattering both at leading order (weak coupled)
 	double Rvac=config.get("Rvac", 1.0); // Vaccum veto region parameter
 
+	Lido_Ecut = config.get("Ecut", 2.0);
 
 	initialize_mD_and_scale(0, mu, afix, cut, Rvac);
 	initialize_transport_coeff(K, a, b, p, q, gamma);
@@ -217,8 +218,8 @@ int update_particle_momentum_Lido(
 	particle &pIn, std::vector<particle> &pOut_list)
 {  
 	auto p00 = pIn.p;
-	//const double Lido_pcut=5.*std::max(temp, 0.154);
-	const double Lido_pcut = 3.0;
+	//const double Lido_Ecut=5.*std::max(temp, 0.154);
+	//const double Lido_Ecut = 2.0;
 
 
 	pOut_list.clear();
@@ -234,7 +235,7 @@ int update_particle_momentum_Lido(
     double dtau = tau1 - tau0;
 
 	//ignore soft partons with a constant momentum cut
-	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_pcut || temp < 0.154)
+	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut || temp < 0.154)
 	{
 		pOut_list.push_back(pIn);
 		return pOut_list.size();
@@ -391,7 +392,7 @@ int update_particle_momentum_Lido(
 		{
 			pIn.p = FS[0];
 			particle ep;
-			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_pcut){
+			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_Ecut){
 				double tempid;
 				if (channel == 1) tempid = 21;
 				else tempid = Srandom::sample_flavor(3);
@@ -435,7 +436,7 @@ int update_particle_momentum_Lido(
 			// estimate mfp in the lab frame
 			vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
 			pIn.radlist.push_back(vp);
-			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_pcut){	
+			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_Ecut){	
 				double tempid;
 				if (channel == 3) tempid = 21;
 				else tempid = Srandom::sample_flavor(3);
