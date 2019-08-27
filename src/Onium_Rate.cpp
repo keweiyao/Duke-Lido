@@ -401,7 +401,7 @@ sample(std::vector<double> parameters, std::vector< fourvec > & FS){
     double p = std::exp(parameters[2]); // relative momentum in QQbar rest frame
     std::vector<double> ponium_final = Sample_reco_ineq(v, T, p, _mass, _Enl, StochasticBase<3>::GetFmax(parameters).s);
 
-    double E_onium = momentum_to_energy(_mass, ponium_final[0], ponium_final[1], ponium_final[2]);
+    double E_onium = momentum_to_energy(2*_mass-_Enl, ponium_final[0], ponium_final[1], ponium_final[2]);
     FS.clear();
     FS.resize(1);
     // In Rest frame
@@ -610,7 +610,7 @@ sample(std::vector<double> parameters, std::vector< fourvec > & FS){
     double p = std::exp(parameters[2]); // relative momentum in QQbar rest frame
     std::vector<double> ponium_final = Sample_reco_ineg(v, T, p, _mass, _Enl, StochasticBase<3>::GetFmax(parameters).s);
     
-    double E_onium = momentum_to_energy(_mass, ponium_final[0], ponium_final[1], ponium_final[2]);
+    double E_onium = momentum_to_energy(2*_mass-_Enl, ponium_final[0], ponium_final[1], ponium_final[2]);
     FS.clear();
     FS.resize(1);
     // In Rest frame

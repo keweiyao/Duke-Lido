@@ -121,7 +121,7 @@ int main(int argc, char* argv[]){
         }
 
         // start
-        double L = 3*5.026; // box size
+        double L = 5*5.026; // box size
         std::vector<particle> plist, new_plist, pOut_list;
 		int pid = args["pid"].as<int>();
 		double E0 = args["energy"].as<double>();
@@ -180,16 +180,14 @@ int main(int argc, char* argv[]){
 		double T0 = args["temp"].as<double>();
 		double nu = args["nu"].as<double>();
 		int Nsteps = int((tf-ti)/dt)+1;
-        for (auto & p : plist){
-            p.freestream(ti);
-        }
+        for (auto & p : plist) p.freestream(ti);
 
         // initial E
         double Ei = mean_E(plist);
 
-		std::ofstream fff("stat.dat");
-        for (int i=0; i<Nsteps; i++){
-           
+		std::ofstream f1("yield.dat");
+		std::ofstream f2("tfinal_fdist.dat");
+        for (int i=0; i<Nsteps; i++){ 
 			double t = ti + dt*i;
             double T = T0 * std::pow(ti/t, 2./3.-1./nu/3.);
 			if (i%100==0) LOG_INFO << t/5.026 << " [fm/c]\t" << T << " [GeV]" << " #=" << plist.size();
@@ -197,7 +195,7 @@ int main(int argc, char* argv[]){
             //////// Free transport plus one (hard) particle evolution
             new_plist.clear();
             for (auto & p : plist){
-                // for Open heavy flavor
+                // for parton
                 if (std::abs(p.pid) < 22)
                     OneBodyUpdate_Parton(dt, T, {0., 0., 0.}, p, pOut_list);  
 
@@ -211,13 +209,13 @@ int main(int argc, char* argv[]){
             // update particle list, due to one (hard) particle evolution
             plist.clear();
             for (auto & p : new_plist) plist.push_back(p);
-            for (auto & p : plist) {
-                // apply perodic boundary condition (due to free transport out of boundary)
+
+            // apply perodic boundary condition (due to free transport out of boundary)
+            for (auto & p : plist) {       
                 for (int k=1; k<4; k++){ 
                     if (p.x.a[k] > L) p.x.a[k] = p.x.a[k] - L;
                     if (p.x.a[k] < 0) p.x.a[k] = p.x.a[k] + L;
-                }
-                
+                }            
             }
 
             /////// Two (hard) particle evolution
@@ -234,16 +232,15 @@ int main(int argc, char* argv[]){
                                 dist2 += std::pow(std::min(dx,L-dx), 2);
                             }
                             // for sufficiently close pair
-                            if (dist2 < std::pow(.3*5.026, 2)) {
-                                auto x1 = p1.x;
-                                auto x2 = p2.x;
+                            if (dist2 < std::pow(1*5.026, 2)) {
                                 for (int k=1; k<4; k++){
                                     if (std::abs(p1.x.a[k]-p2.x.a[k]) > L/2.){
                                         if (p1.x.a[k]>p2.x.a[k]) p2.x.a[k] += L;
                                         else p1.x.a[k] += L;
                                     }
                                 }
-                                int channel = TwoBodyUpdate_QQbar(dt, T, {0., 0., 0.}, p1, p2, pOut_list);
+                                int channel = TwoBodyUpdate_QQbar(dt, T, 
+                                              {0., 0., 0.}, p1, p2, pOut_list);
                                 if (channel != -1) {
                                     p1.is_virtual = true;
                                     p2.is_virtual = true;
@@ -251,43 +248,47 @@ int main(int argc, char* argv[]){
                                     //LOG_INFO << "Recombined!";
                                 }
                                 else {
-                                    p1.x = x1;
-                                    p2.x = x2;
+                                    p1.x = xQ;
+                                    p2.x = xQbar;
                                 }
                             }
                         }
                     }
                 }
             }
-            // update particle list, due to one (hard) particle evolution
+            // update particle list, due to two (hard) particle evolution
             for(std::vector<particle>::iterator it=plist.begin();it!=plist.end();) {
                 if (it->is_virtual) it = plist.erase(it);
                 else it++;
             }
             for (auto & p : new_plist) plist.push_back(p);
-            // apply perodic boundary condition (due to free transport out of boundary)            
-            for (auto & p : plist){
 
+            // apply perodic boundary condition (due to possible recombine)            
+            for (auto & p : plist){
                 for (int k=1; k<4; k++){ 
                     if (p.x.a[k] > L) p.x.a[k] = p.x.a[k] - L;
                     if (p.x.a[k] < 0) p.x.a[k] = p.x.a[k] + L;
                 }
             }
 
-            int N553=0, N100553=0, N5 = 0;
+            // output some statistics
+            int N5 = 0,
+                N553 = 0, 
+                N100553 = 0, 
+                N555 = 0;
+                
             for (auto & p : plist) {
+                if (p.pid == 555) N555++;
                 if (p.pid == 553) N553++;
                 if (p.pid == 100553) N100553++;
                 if (std::abs(p.pid) == 5) N5 ++;
             }
-            fff << t/5.026 << "\t" <<N5 << "\t"<< N553 << "\t" << N100553 << std::endl;
+            f1 << t/5.026 << "\t" << N5 << "\t"<< N553 
+                           << "\t" << N100553 << "\t" << N555 << std::endl;
         }
-		
-		// final E
-        double Ef = mean_E(plist);
-		LOG_INFO << "N-particles\t" << plist.size();
-		LOG_INFO << "Initial energy\t" << Ei << " [GeV]";
-		LOG_INFO << "Final energy\t" << Ef << " [GeV]";
+
+        for (auto & p : plist)
+           f2 << p.pid << " " << p.x << " " << p.p << std::endl;
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

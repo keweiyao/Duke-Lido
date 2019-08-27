@@ -412,10 +412,10 @@ int OneBodyUpdate_Parton(
 				vp.T0 = temp;
 				vp.is_vac = false;
 				vp.is_virtual = true;
-                        vp.vcell.resize(3);        
-                        vp.vcell[0] = v3cell[0];
-                        vp.vcell[1] = v3cell[1];
-                        vp.vcell[2] = v3cell[2];
+                vp.vcell.resize(3);        
+                vp.vcell[0] = v3cell[0];
+                vp.vcell[1] = v3cell[1];
+                vp.vcell[2] = v3cell[2];
 				
 				// The local 2->2 mean-free-path is estimated with
 				// the qhat_hard integrate from the 2->2 rate

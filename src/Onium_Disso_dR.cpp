@@ -4,6 +4,7 @@
 #include <cmath>
 #include <gsl/gsl_math.h>
 #include "random.h"
+#include "simpleLogger.h"
 
 //-----------Quarkonium gluon absorption-------------------
 // QQbar + g --> Q + Qbar
@@ -322,10 +323,13 @@ double disso_gluon_costheta(double q, double v, double T, double random){
 double Sample_disso_ineq_p1_important(double p1low, double p1up, double result_max, void * params_){ // result_max is an input
      double * params = static_cast<double *>(params_);
      double result_try, p1_try;
+     int limiter = 0;
      do{
+         limiter ++;
          p1_try = Srandom::rejection(Srandom::gen)*(p1up-p1low) + p1low;
          result_try = f_p1_disso_important(p1_try, params);
-     } while(Srandom::rejection(Srandom::gen)*result_max > result_try);
+     } while(Srandom::rejection(Srandom::gen)*result_max > result_try && limiter < 5000);
+     if (limiter >= 5000) LOG_WARNING << "Sample_disso_ineq_p1_important sampling exceed limit";
      return p1_try;
 }
  
@@ -354,10 +358,15 @@ double Sample_disso_ineq_cos1(double p1, void * params_){
      params_c1[0] = v;
      params_c1[1] = gamma/T;
  
+     int limiter1 = 0;
      do{
+         limiter1 ++;
+         int limiter2 = 0;
          do{
+             limiter2 ++;
              p_rel = Srandom::sample_inel(Srandom::gen)*prel_up;
-         } while(Srandom::rejection(Srandom::gen)*max_p2Matrix > f(p_rel, a_B));
+         } while(Srandom::rejection(Srandom::gen)*max_p2Matrix > f(p_rel, a_B) && limiter2 < 5000);
+         if (limiter2 >= 5000) LOG_WARNING << "Sample_disso_ineq(2) sampling exceed limit";
  
          p1_try = Sample_disso_ineq_p1_important(p1low, p1up, maximum_f_p1, params_p1);  // give the maximum as result_max to Sample_disso_ineq_p1_important
          p2_try = p1_try - Enl - p_rel*p_rel/mass;
@@ -377,7 +386,8 @@ double Sample_disso_ineq_cos1(double p1, void * params_){
              part_angle = s1_try*s2_try*c_phi + c1_try*c2_try;
              result_try = (1.+part_angle)/(p1p2_try + 1./p1p2_try - 2.*part_angle)/2.0*(p1p2 + 1./p1p2 - 2.0) * nFminus1(gamma*(1.+v*c2_try)*p2_try/T)/p1p2_try;
          }
-     } while(Srandom::rejection(Srandom::gen) >= result_try);
+     } while(Srandom::rejection(Srandom::gen) >= result_try && limiter1 < 5000);
+     if (limiter1 >= 5000) LOG_WARNING << "Sample_disso_ineq(1) sampling exceed limit";
      std::vector<double> p1_final(3);
      std::vector<double> p2_final(3);
      std::vector<double> p_rel_final(3);
@@ -415,10 +425,13 @@ double f_q1_disso_important(double q1, void * params_){
 double Sample_disso_ineg_q1_important(double q1low, double q1up, double result_max, void * params_){ // result_max is an input
     double * params = static_cast<double *>(params_);
     double result_try, q1_try;
+    int limiter = 0;
     do{
+        limiter++;
         q1_try = Srandom::rejection(Srandom::gen)*(q1up-q1low) + q1low;
         result_try = f_q1_disso_important(q1_try, params);
-    } while(Srandom::rejection(Srandom::gen)*result_max > result_try);
+    } while(Srandom::rejection(Srandom::gen)*result_max > result_try && limiter < 5000);
+    if (limiter >= 5000) LOG_WARNING << "Sample_disso_ineg_q1_important sampling exceed limit";
     return q1_try;
 }
 
@@ -447,10 +460,15 @@ std::vector<double> Sample_disso_ineg(double v, double T, double mass, double En
     params_c1[0] = v;
     params_c1[1] = gamma/T;
     
+    int limiter1 = 0;
     do{
+        limiter1 ++;
+	    int limiter2 = 0;
         do{
+            limiter2 ++;
             p_rel = Srandom::sample_inel(Srandom::gen)*prel_up;
-        } while(Srandom::rejection(Srandom::gen)*max_p2Matrix > f(p_rel, a_B));
+        } while(Srandom::rejection(Srandom::gen)*max_p2Matrix > f(p_rel, a_B) && limiter2 < 5000);
+        if (limiter2 >= 5000) LOG_WARNING << "Sample_disso_ineg(2) sampling exceed limit";
         
         q1_try = Sample_disso_ineg_q1_important(q1low, q1up, maximum_f_q1, params_q1);  // give the maximum as result_max to Sample_disso_ineg_q1_important
         q2_try = q1_try - Enl - p_rel*p_rel/mass;
@@ -470,7 +488,8 @@ std::vector<double> Sample_disso_ineg(double v, double T, double mass, double En
             part_angle = s1_try*s2_try*c_phi + c1_try*c2_try;
             result_try = nBplus1(gamma*(1.+v*c2_try)*q2_try/T)/q1q2_try * (q1q2_try  + 1./q1q2_try + 2.0)/(q1q2_try + 1./q1q2_try - 2.0*part_angle) * (1.+part_angle)/2.0 / (1.0 + 4./(q1q2 + 1./q1q2 - 2.0) );
         }
-    } while(Srandom::rejection(Srandom::gen) >= result_try);
+    } while(Srandom::rejection(Srandom::gen) >= result_try && limiter1 < 5000);
+    if (limiter1 >= 5000) LOG_WARNING << "Sample_disso_ineg(1) sampling exceed limit";
     std::vector<double> q1_final(3);
     std::vector<double> q2_final(3);
     std::vector<double> p_rel_final(3);

@@ -165,7 +165,7 @@ double get_MSbar_mass(int abspid){
     if (abspid==2) return 0.005;
     if (abspid==3) return 0.090;
     if (abspid==4) return 1.3;
-    if (abspid==5) return 4.2;
+    if (abspid==5) return 4.65;
     LOG_WARNING << "Abs PID = " << abspid << ", you are simply wrong!";
     exit(-1);
 }

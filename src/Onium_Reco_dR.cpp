@@ -5,6 +5,7 @@
 #include "random.h"
 #include <cmath>
 #include <gsl/gsl_math.h>
+#include "simpleLogger.h"
 
 
 // Q + Qbar --> QQbar[1S] + g
@@ -260,10 +261,13 @@ double f_p1_reco_important(double p1, void * params_){
 double Sample_reco_ineq_p1_important(double p1low, double p1up, double result_max, void * params_){
     double * params = static_cast<double *>(params_);
     double result_try, p1_try;
+    int limiter = 0;
     do{
+        limiter ++;
         p1_try = Srandom::rejection(Srandom::gen)*(p1up-p1low) + p1low;
         result_try = f_p1_reco_important(p1_try, params);
-    } while(Srandom::rejection(Srandom::gen)*result_max > result_try);
+    } while(Srandom::rejection(Srandom::gen)*result_max > result_try && limiter < 5000);
+    if (limiter >= 5000) LOG_WARNING << "Sample_reco_ineq_p1_important sampling exceed limits";
     return p1_try;
 }
 
@@ -284,7 +288,8 @@ std::vector<double> Sample_reco_ineq(double v, double T, double p, double mass, 
     double * params_c1 = new double[2];
     params_c1[0] = v;
     params_c1[1] = gamma/T;
-    
+
+    int limiter = 0;    
     do{
         p1_try = Sample_reco_ineq_p1_important(p1low, p1up, maximum_f_p1, params_p1);
         c1_try = Sample_disso_ineq_cos1(p1_try, params_c1);
@@ -298,7 +303,9 @@ std::vector<double> Sample_reco_ineq(double v, double T, double p, double mass, 
         s_phi = std::sin(phi_try);
         part_angle = s1_try*s2_try*c_phi + c1_try*c2_try;
         result_try = (1.+part_angle)/(p1p2_try + 1./p1p2_try - 2.*part_angle)/2.0 * (p1p2_try + 1./p1p2_try - 2.0) * nFminus1(gamma*(1.+v*c2_try)*p2_try/T);
-    } while(Srandom::rejection(Srandom::gen) >= result_try);
+        limiter ++;
+    } while(Srandom::rejection(Srandom::gen) >= result_try && limiter < 5000);
+    if (limiter >= 5000) LOG_WARNING << "Q+Qbar+q --> QQbar + q, sampling exceed limits";
     std::vector<double> p1_final(3);
     std::vector<double> p2_final(3);
     std::vector<double> p_nl_final(3);
@@ -325,11 +332,14 @@ double f_q1_reco_important(double q1, void * params_){
 
 double Sample_reco_ineg_q1_important(double q1low, double q1up, double result_max, void * params_){
     double * params = static_cast<double *>(params_);
-    double result_try, p1_try;
+    double result_try, q1_try;
+    int limiter = 0;
     do{
+        limiter ++ ;
         q1_try = Srandom::rejection(Srandom::gen)*(q1up-q1low) + q1low;
         result_try = f_q1_reco_important(q1_try, params);
-    } while(Srandom::rejection(Srandom::gen)*result_max > result_try);
+    } while(Srandom::rejection(Srandom::gen)*result_max > result_try && limiter < 5000);
+    if (limiter >= 5000) LOG_WARNING << "Sample_reco_ineg_q1_important sampling exceed limits";
     return q1_try;
 }
 
@@ -351,6 +361,7 @@ std::vector<double> Sample_reco_ineg(double v, double T, double p, double mass, 
     params_c1[0] = v;
     params_c1[1] = gamma/T;
     
+    int limiter = 0;
     do{
         q1_try = Sample_reco_ineg_q1_important(q1low, q1up, maximum_f_q1, params_q1);
         c1_try = Sample_disso_ineg_cos1(q1_try, params_c1);
@@ -364,7 +375,9 @@ std::vector<double> Sample_reco_ineg(double v, double T, double p, double mass, 
         s_phi = std::sin(phi_try);
         part_angle = s1_try*s2_try*c_phi + c1_try*c2_try;
         result_try = nBplus1(gamma*(1.+v*c2_try)*q2_try/T) * (1.+part_angle)/2.0 * (q1q2_try + 1./q1q2_try - 2.0) / (q1q2_try + 1./q1q2_try - 2.0*part_angle);
-    } while(Srandom::rejection(Srandom::gen) >= result_try);
+        limiter ++;
+    } while(Srandom::rejection(Srandom::gen) >= result_try && limiter < 5000);
+    if (limiter >= 5000) LOG_WARNING << "Q+Qbar+g --> QQbar + g, sampling exceed limits";
     std::vector<double> q1_final(3);
     std::vector<double> q2_final(3);
     std::vector<double> p_nl_final(3);
