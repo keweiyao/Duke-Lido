@@ -81,6 +81,9 @@ int main(int argc, char* argv[]){
           ("pid",
             po::value<int>()->value_name("INT")->default_value(4,"4"), 
             "particle pid, 4 or 21")  
+          ("runid",
+            po::value<int>()->value_name("INT")->default_value(0,"0"), 
+            "running id")  
     ;
     po::variables_map args{};
     try{
@@ -124,6 +127,7 @@ int main(int argc, char* argv[]){
         double L = 5*5.026; // box size
         std::vector<particle> plist, new_plist, pOut_list;
 		int pid = args["pid"].as<int>();
+		int runid = args["runid"].as<int>();
 		double E0 = args["energy"].as<double>();
 		double M = args["mass"].as<double>();
         double pabs = std::sqrt(E0*E0-M*M);
@@ -185,8 +189,8 @@ int main(int argc, char* argv[]){
         // initial E
         double Ei = mean_E(plist);
 
-		std::ofstream f1("yield.dat");
-		std::ofstream f2("tfinal_fdist.dat");
+		std::ofstream f1("yield"+std::to_string(runid)+".dat");
+		std::ofstream f2("tfinal_fdist"+std::to_string(runid)+".dat");
         for (int i=0; i<Nsteps; i++){ 
 			double t = ti + dt*i;
             double T = T0 * std::pow(ti/t, 2./3.-1./nu/3.);
