@@ -478,7 +478,7 @@
         <rate slots="v,temp,log_prel">
             <Nv>50</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
             <Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
-            <Nlog_prel>30</Nlog_prel> <Llog_prel>-3.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
+            <Nlog_prel>50</Nlog_prel> <Llog_prel>-5.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
         </rate>
     </QQbar2U1Sg>
     
@@ -497,7 +497,7 @@
         <rate slots="v,temp,log_prel">
             <Nv>50</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
             <Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
-            <Nlog_prel>30</Nlog_prel> <Llog_prel>-3.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
+            <Nlog_prel>50</Nlog_prel> <Llog_prel>-5.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
         </rate>
     </QQbarq2U1Sq>
 
@@ -516,12 +516,12 @@
         <rate slots="v,temp,log_prel">
             <Nv>50</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
             <Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
-            <Nlog_prel>30</Nlog_prel> <Llog_prel>-3.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
+            <Nlog_prel>50</Nlog_prel> <Llog_prel>-5.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
         </rate>
     </QQbarg2U1Sg>
     
     <!-- onium/disso/U[2S]+g=Q+Qbar -->
-	<U2Sg2QQbar status="active" moments="off">
+	<U2Sg2QQbar status="inactive" moments="off">
 		<mass>4.65</mass>
 		<rate slots="v,temp">
 			<Nv>100</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
@@ -530,17 +530,17 @@
 	</U2Sg2QQbar>
     
     <!-- onium/reco/Q+Qbar=U[2S]+g -->
-    <QQbar2U2Sg status="active" moments="off">
+    <QQbar2U2Sg status="inactive" moments="off">
         <mass>4.65</mass>
         <rate slots="v,temp,log_prel">
             <Nv>50</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
             <Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
-            <Nlog_prel>30</Nlog_prel> <Llog_prel>-3.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
+            <Nlog_prel>50</Nlog_prel> <Llog_prel>-5.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
         </rate>
     </QQbar2U2Sg>
     
     <!-- onium/disso/U[2S]+q=Q+Qbar+q -->
-    <U2Sq2QQbarq status="active" moments="off">
+    <U2Sq2QQbarq status="inactive" moments="off">
         <mass>4.65</mass>
         <rate slots="v,temp">
             <Nv>100</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
@@ -549,17 +549,17 @@
     </U2Sq2QQbarq>
     
     <!-- onium/reco/Q+Qbar+q=U[2S]+q -->
-    <QQbarq2U2Sq status="active" moments="off">
+    <QQbarq2U2Sq status="inactive" moments="off">
         <mass>4.65</mass>
         <rate slots="v,temp,log_prel">
             <Nv>50</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
             <Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
-            <Nlog_prel>30</Nlog_prel> <Llog_prel>-3.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
+            <Nlog_prel>50</Nlog_prel> <Llog_prel>-5.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
         </rate>
     </QQbarq2U2Sq>
     
     <!-- onium/disso/U[2S]+g=Q+Qbar+g -->
-    <U2Sg2QQbarg status="active" moments="off">
+    <U2Sg2QQbarg status="inactive" moments="off">
         <mass>4.65</mass>
         <rate slots="v,temp">
             <Nv>100</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
@@ -568,17 +568,17 @@
     </U2Sg2QQbarg>
     
     <!-- onium/reco/Q+Qbar+g=U[2S]+g -->
-    <QQbarg2U2Sg status="active" moments="off">
+    <QQbarg2U2Sg status="inactive" moments="off">
         <mass>4.65</mass>
         <rate slots="v,temp,log_prel">
             <Nv>50</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
             <Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
-            <Nlog_prel>30</Nlog_prel> <Llog_prel>-3.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
+            <Nlog_prel>50</Nlog_prel> <Llog_prel>-5.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
         </rate>
     </QQbarg2U2Sg>
 
     <!-- onium/disso/U[1P]+g=Q+Qbar -->
-    <U1Pg2QQbar status="active" moments="off">
+    <U1Pg2QQbar status="inactive" moments="off">
         <mass>4.65</mass>
         <rate slots="v,temp">
             <Nv>100</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
@@ -587,17 +587,17 @@
     </U1Pg2QQbar>
     
     <!-- onium/reco/Q+Qbar=U[1P]+g -->
-    <QQbar2U1Pg status="active" moments="off">
+    <QQbar2U1Pg status="inactive" moments="off">
         <mass>4.65</mass>
         <rate slots="v,temp,log_prel">
             <Nv>50</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
             <Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
-            <Nlog_prel>30</Nlog_prel> <Llog_prel>-3.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
+            <Nlog_prel>50</Nlog_prel> <Llog_prel>-5.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
         </rate>
     </QQbar2U1Pg>
     
     <!-- onium/disso/U[1P]+q=Q+Qbar+q -->
-    <U1Pq2QQbarq status="active" moments="off">
+    <U1Pq2QQbarq status="inactive" moments="off">
         <mass>4.65</mass>
         <rate slots="v,temp">
             <Nv>100</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
@@ -606,17 +606,17 @@
     </U1Pq2QQbarq>
     
     <!-- onium/reco/Q+Qbar+q=U[1P]+q -->
-    <QQbarq2U1Pq status="active" moments="off">
+    <QQbarq2U1Pq status="inactive" moments="off">
         <mass>4.65</mass>
         <rate slots="v,temp,log_prel">
             <Nv>50</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
             <Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
-            <Nlog_prel>30</Nlog_prel> <Llog_prel>-3.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
+            <Nlog_prel>50</Nlog_prel> <Llog_prel>-5.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
         </rate>
     </QQbarq2U1Pq>
     
     <!-- onium/disso/U[1P]+g=Q+Qbar+g -->
-    <U1Pg2QQbarg status="active" moments="off">
+    <U1Pg2QQbarg status="inactive" moments="off">
         <mass>4.65</mass>
         <rate slots="v,temp">
             <Nv>100</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
@@ -625,12 +625,12 @@
     </U1Pg2QQbarg>
     
     <!-- onium/reco/Q+Qbar+g=U[1P]+g -->
-    <QQbarg2U1Pg status="active" moments="off">
+    <QQbarg2U1Pg status="inactive" moments="off">
         <mass>4.65</mass>
         <rate slots="v,temp,log_prel">
             <Nv>50</Nv> <Lv>.0</Lv> <Hv>.999</Hv>
             <Ntemp>16</Ntemp> <Ltemp>0.15</Ltemp> <Htemp>0.6</Htemp>
-            <Nlog_prel>30</Nlog_prel> <Llog_prel>-3.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
+            <Nlog_prel>50</Nlog_prel> <Llog_prel>-5.0</Llog_prel> <Hlog_prel>2.0</Hlog_prel>
         </rate>
     </QQbarg2U1Pg>
 </Boltzmann>
