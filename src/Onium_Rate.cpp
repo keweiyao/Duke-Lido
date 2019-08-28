@@ -172,7 +172,7 @@ calculate_scalar(std::vector<double> parameters){
     x[1] = parameters[1]; // T
     x[2] = std::exp(parameters[2]); // exp(ln_p_rel)
     double params[3] = {this->_mass, this->_Enl, this->_aB};
-    double result = prefactor_reco_gluon * this->_f(x, 3, params);
+    double result = this->_f(x, 3, params);  // prefactor has been multiplied in Onium_Reco_dR.cpp
     return scalar{result};
 }
 

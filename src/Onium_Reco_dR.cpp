@@ -18,10 +18,8 @@ double RV1S_reco_gluon(double x[3], std::size_t dim, void * params_){
    double E1S = params[1];
    double a_B = params[2];
    double q = p*p/M + E1S;
-   double reco = prefactor_reco_gluon * pow(q,3) 
-               * Matrix1S(p, a_B);
+   double reco = prefactor_reco_gluon * pow(q,3) * Matrix1S(p, a_B);
 
-   // convert GeV^-2 to GeV * fm^3
    if (v < 1e-4){
        double enhencement = nBplus1(q/T);
        return 2.* reco * enhencement;
@@ -44,10 +42,8 @@ double RV2S_reco_gluon(double x[3], std::size_t dim, void * params_){
    double E2S = params[1];
    double a_B = params[2];
    double q = p*p/M + E2S;
-   double reco = prefactor_reco_gluon * pow(q,3) 
-                * Matrix2S(p, a_B);
+   double reco = prefactor_reco_gluon * pow(q,3) * Matrix2S(p, a_B);
 
-   // convert GeV^-2 to GeV * fm^3
    if (v < 1e-4){
        double enhencement = nBplus1(q/T);
        return 2.* reco * enhencement;
@@ -70,10 +66,8 @@ double RV1P_reco_gluon(double x[3], std::size_t dim, void * params_){
    double E1P = params[1];
    double a_B = params[2];
    double q = p*p/M + E1P;
-   double reco = prefactor_reco_gluon * pow(q,3) 
-                 * Matrix1P(p, a_B);
+   double reco = prefactor_reco_gluon * pow(q,3) * Matrix1P(p, a_B);
 
-   // convert GeV^-2 to GeV * fm^3
    if (v < 1e-4){
        double enhencement = nBplus1(q/T);
        return 2.* reco * enhencement;
