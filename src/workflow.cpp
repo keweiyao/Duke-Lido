@@ -777,7 +777,7 @@ pOut_list.clear();
     //auto x2_rest = x2_cell.boost_to(vcom_cell[0], vcom_cell[1], vcom_cell[2]);
 
     // relative p
-    double p_rel_rest = 1./4.*(p1_rest - p2_rest).pabs();
+    double p_rel_rest = 1./2.*(p1_rest - p2_rest).pabs();
     
 	// Total rate for Recombination
 	int channel = 0;

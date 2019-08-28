@@ -232,7 +232,7 @@ int main(int argc, char* argv[]){
                             auto xQbar = p2.x;
                             double dist2 = 0.;
                             for (int k=1; k<4; k++){ 
-                                double dx = xQ.a[k]-xQbar.a[k];
+                                double dx = std::abs(xQ.a[k]-xQbar.a[k]);
                                 dist2 += std::pow(std::min(dx,L-dx), 2);
                             }
                             // for sufficiently close pair
