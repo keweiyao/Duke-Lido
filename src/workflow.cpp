@@ -779,6 +779,7 @@ pOut_list.clear();
 
     // relative p
     double p_rel_rest = 1./2.*(p1_rest - p2_rest).pabs();
+    double log_prel = std::log(p_rel_rest);
     
 	// Total rate for Recombination
 	int channel = 0;
@@ -793,7 +794,7 @@ pOut_list.clear();
                     VB = std::pow(2*M_PI*aB*aB, -1.5)*
                          std::exp(-.5*std::pow(x_rel_cell/aB,2));
 					dR = VB*boost::get<OniumR22>(r).GetZeroM(
-                           {vcom_cell_abs, temp, p_rel_rest}).s;
+                           {vcom_cell_abs, temp, log_prel}).s;
                 }
 				else dR = 0.0;
 				P_channels[channel] = P_total + factor_color_spin * dR*dt_cell;
@@ -804,7 +805,7 @@ pOut_list.clear();
                     VB = std::pow(2*M_PI*aB*aB, -1.5)*
                          std::exp(-.5*std::pow(x_rel_cell/aB,2));
 					dR = VB*boost::get<OniumR32q>(r).GetZeroM(
-                           {vcom_cell_abs, temp, p_rel_rest}).s;
+                           {vcom_cell_abs, temp, log_prel}).s;
                 }
 				else dR = 0.0;
 				P_channels[channel] = P_total + factor_color_spin * dR*dt_cell;
@@ -815,7 +816,7 @@ pOut_list.clear();
                     VB = std::pow(2*M_PI*aB*aB, -1.5)*
                     std::exp(-.5*std::pow(x_rel_cell/aB,2));
                     dR = VB*boost::get<OniumR32g>(r).GetZeroM(
-                            {vcom_cell_abs, temp, p_rel_rest}).s;
+                            {vcom_cell_abs, temp, log_prel}).s;
                 }
                 else dR = 0.0;
                 P_channels[channel] = P_total + factor_color_spin * dR*dt_cell;
