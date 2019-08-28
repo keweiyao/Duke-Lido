@@ -5,6 +5,7 @@
 #include "matrix_elements.h"
 #include "Onium_Disso_dR.h"
 #include "Onium_Reco_dR.h"
+#include "Onium_predefine.h"
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/variant/get.hpp>
@@ -795,7 +796,7 @@ pOut_list.clear();
                            {vcom_cell_abs, temp, p_rel_rest}).s;
                 }
 				else dR = 0.0;
-				P_channels[channel] = P_total + dR*dt_cell;
+				P_channels[channel] = P_total + factor_color_spin * dR*dt_cell;
 				break;
 			case 8:
 				if (boost::get<OniumR32q>(r).IsActive()) {
@@ -806,7 +807,7 @@ pOut_list.clear();
                            {vcom_cell_abs, temp, p_rel_rest}).s;
                 }
 				else dR = 0.0;
-				P_channels[channel] = P_total + dR*dt_cell;
+				P_channels[channel] = P_total + factor_color_spin * dR*dt_cell;
 				break;
             case 10:
                 if (boost::get<OniumR32g>(r).IsActive()) {
@@ -817,14 +818,14 @@ pOut_list.clear();
                             {vcom_cell_abs, temp, p_rel_rest}).s;
                 }
                 else dR = 0.0;
-                P_channels[channel] = P_total + dR*dt_cell;
+                P_channels[channel] = P_total + factor_color_spin * dR*dt_cell;
                 break;
             default:
 				LOG_FATAL << "1. ProcessType = " << r.which() << " not exists";
 				exit(-1);
 				break;
 		}
-		P_total += dR*dt_cell;
+		P_total += factor_color_spin * dR*dt_cell;
 		channel ++;
 	}
     //LOG_INFO << P_total << " " << VB << " " << x_rel_cell << " " << aB;

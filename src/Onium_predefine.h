@@ -21,7 +21,7 @@ extern const double prefactor_disso_ineq;
 extern const double prefactor_reco_ineq;
 extern const double prefactor_disso_ineg;
 extern const double prefactor_reco_ineg;
-
+extern const double factor_color_spin;
 
 double nB(double x);
 double nBplus1(double x);

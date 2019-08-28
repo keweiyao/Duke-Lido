@@ -95,6 +95,8 @@ const double prefactor_disso_ineg = alpha_s_sqd/6./pow(M_PI,4);
 // above line: gluon inelastic decay, sum over gluon color and polarizations
 const double prefactor_reco_ineg = alpha_s_sqd/24./M_PI/M_PI;
 // above line: gluon inelastic reco
+const double factor_color_spin = 2./3.;
+// used in recombination
 
 double get_aB(double M){
     return 2./pot_alpha_s/CF/M;
