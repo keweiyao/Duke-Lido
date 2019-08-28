@@ -661,7 +661,7 @@ int OneBodyUpdate_Onium(
                 //LOG_INFO << absid << "-ineg " << dR << " " << dt_cell;
                 break;
 			default:
-				LOG_FATAL << "1. ProcessType = " << r.which() << " not exists";
+				LOG_FATAL << "4. ProcessType = " << r.which() << " not exists";
 				exit(-1);
 				break;
 		}
@@ -693,7 +693,7 @@ int OneBodyUpdate_Onium(
 	if (channel >= 0){
         int fQ, fQbar;
 		if(channel >= OneBody[absid].size()){
-			LOG_FATAL << "3. Channel = " << channel << " not exists";
+			LOG_FATAL << "5. Channel = " << channel << " not exists";
 			exit(-1);
 		}
 		// Final state holder FS
@@ -713,7 +713,7 @@ int OneBodyUpdate_Onium(
                 boost::get<OniumD23g>(OneBody[absid][channel]).FlavorContent(fQ, fQbar);
                 break;
             default:
-				LOG_FATAL << "2. Channel = " << channel << " not exists";
+				LOG_FATAL << "6. Channel = " << channel << " not exists";
 				exit(-1);
 				break;
 		}
@@ -822,7 +822,7 @@ pOut_list.clear();
                 P_channels[channel] = P_total + factor_color_spin * dR*dt_cell;
                 break;
             default:
-				LOG_FATAL << "1. ProcessType = " << r.which() << " not exists";
+				LOG_FATAL << "7. ProcessType = " << r.which() << " not exists";
 				exit(-1);
 				break;
 		}
@@ -853,7 +853,7 @@ pOut_list.clear();
 	// If a scattering happens:
 	if (channel >= 0){
 		if(channel >= TwoBody[pair_id].size()){
-			LOG_FATAL << "3. Channel = " << channel << " not exists";
+			LOG_FATAL << "8. Channel = " << channel << " not exists";
 			exit(-1);
 		}
 		// Final state holder FS
@@ -887,7 +887,7 @@ pOut_list.clear();
                            boost::get<OniumR32g>(TwoBody[pair_id][channel]).Enl();
                 break;
             default:
-				LOG_FATAL << "2. Channel = " << channel << " not exists";
+				LOG_FATAL << "9. Channel = " << channel << " not exists";
 				exit(-1);
 				break;
 		}
