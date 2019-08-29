@@ -864,7 +864,7 @@ pOut_list.clear();
 		switch(TwoBody[pair_id][channel].which()){
 			case 6:
 				boost::get<OniumR22>(TwoBody[pair_id][channel]).sample(
-                                     {vcom_cell_abs, temp, p_rel_rest}, FS);
+                                     {vcom_cell_abs, temp, log_prel}, FS);
                 WF_n = boost::get<OniumR22>(TwoBody[pair_id][channel]).n();
                 WF_l = boost::get<OniumR22>(TwoBody[pair_id][channel]).l();
                 new_mass = P1.mass + P2.mass - 
@@ -872,7 +872,7 @@ pOut_list.clear();
 				break;
 			case 8:
 				boost::get<OniumR32q>(TwoBody[pair_id][channel]).sample(
-                                     {vcom_cell_abs, temp, p_rel_rest}, FS);
+                                     {vcom_cell_abs, temp, log_prel}, FS);
                 WF_n = boost::get<OniumR32q>(TwoBody[pair_id][channel]).n();
                 WF_l = boost::get<OniumR32q>(TwoBody[pair_id][channel]).l();
                 new_mass = P1.mass + P2.mass - 
@@ -880,7 +880,7 @@ pOut_list.clear();
 				break;
             case 10:
                 boost::get<OniumR32g>(TwoBody[pair_id][channel]).sample(
-                                     {vcom_cell_abs, temp, p_rel_rest}, FS);
+                                     {vcom_cell_abs, temp, log_prel}, FS);
                 WF_n = boost::get<OniumR32g>(TwoBody[pair_id][channel]).n();
                 WF_l = boost::get<OniumR32g>(TwoBody[pair_id][channel]).l();
                 new_mass = P1.mass + P2.mass -
