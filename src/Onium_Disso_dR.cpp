@@ -341,8 +341,8 @@ double Sample_disso_ineq_cos1(double p1, void * params_){
     double C = y_try * fac2(B*(1.+v)) + (1.-y_try) * fac2(B*(1.-v));
     return -(1. + std::log(std::exp(C) - 1.)/B )/v;
  }
- 
- std::vector<double> Sample_disso_ineq(double v, double T, double mass, double Enl, double a_B, double prel_up, double maximum_f_p1, double max_p2Matrix, double(*f)(double _prel, double _aB)){    // maximum is the input for Sample_disso_ineq_p1_important
+
+std::vector<double> Sample_disso_ineq(double v, double T, double mass, double Enl, double a_B, double prel_up, double maximum_f_p1, double max_p2Matrix, double(*f)(double _prel, double _aB)){    // maximum is the input for Sample_disso_ineq_p1_important
      v = std::max(v, 1e-4);
      double gamma = 1./std::sqrt(1.-v*v);
      double p1_try, c1_try, s1_try, p2_try, c2_try, s2_try, phi_try, c_phi, s_phi, p_rel, p1p2, part_angle, result_try, p1p2_try;

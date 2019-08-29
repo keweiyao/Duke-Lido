@@ -274,7 +274,7 @@ find_max(std::vector<double> parameters){
         double result = this->_f2(p1, params);
         return -result;
     };
-    double p1_min = 0.0;
+    double p1_min = _Enl;
     double p1_max = 15.*T/std::sqrt(1.-v);
     double res = -minimize_1d(f_p1, {p1_min, p1_max}, 1e-3, 100, 100);
     return scalar{res*1.2};
@@ -384,7 +384,7 @@ find_max(std::vector<double> parameters){
         double result = this->_f2(p1, params);
         return -result;
     };
-    double p1_min = 0.0;
+    double p1_min = 0.0001;
     double p1_max = 15.*T/std::sqrt(1.-v);
     double res = -minimize_1d(f_p1, {p1_min, p1_max}, 1e-3, 100, 100);
     return scalar{res*1.2};
@@ -482,7 +482,7 @@ find_max(std::vector<double> parameters){
         double result = this->_f2(q1, params);
         return -result;
     };
-    double q1_min = 0.0;
+    double q1_min = _Enl;
     double q1_max = 15.*T/std::sqrt(1.-v);
     double res = -minimize_1d(f_q1, {q1_min, q1_max}, 1e-3, 100, 100);
     return scalar{res*1.2};
@@ -593,7 +593,7 @@ find_max(std::vector<double> parameters){
         double result = this->_f2(q1, params);
         return -result;
     };
-    double q1_min = 0.0;
+    double q1_min = 0.0001;
     double q1_max = 15.*T/std::sqrt(1.-v);
     double res = -minimize_1d(f_q1, {q1_min, q1_max}, 1e-3, 100, 100);
     return scalar{res*1.2};
