@@ -204,11 +204,12 @@ int main(int argc, char* argv[]){
                     OneBodyUpdate_Parton(dt, T, {0., 0., 0.}, p, pOut_list);  
 
                 // for Hidden heavy flavor
-                if (p.pid > 500)
+                if (p.pid > 500){
                     int channel = OneBodyUpdate_Onium(dt, T, {0., 0., 0.}, p, pOut_list);
                     if (channel != -1){
                         p.is_virtual = true;
                     }
+                }
 
                 for (auto & pp : pOut_list) new_plist.push_back(pp);
             }
