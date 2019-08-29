@@ -205,8 +205,10 @@ int main(int argc, char* argv[]){
 
                 // for Hidden heavy flavor
                 if (p.pid > 500)
-                    OneBodyUpdate_Onium(dt, T, {0., 0., 0.}, p, pOut_list);
-
+                    int channel = OneBodyUpdate_Onium(dt, T, {0., 0., 0.}, p, pOut_list);
+                    if (channel != -1){
+                        p.is_virtual = true;
+                    }
 
                 for (auto & pp : pOut_list) new_plist.push_back(pp);
             }
@@ -228,7 +230,7 @@ int main(int argc, char* argv[]){
                 if (p1.pid == 5) {
                     auto xQ = p1.x;
                     for (auto & p2 : plist){
-                        if (p2.pid == -5 && p2.is_virtual == false) {
+                        if (p2.pid == -5 && p2.is_virtual == false && p1.is_virtual == false) {
                             auto xQbar = p2.x;
                             double dist2 = 0.;
                             for (int k=1; k<4; k++){ 
