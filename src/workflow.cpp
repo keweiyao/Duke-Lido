@@ -670,7 +670,7 @@ int OneBodyUpdate_Onium(
 	}
 	// P_total is the total rate of reation within dt
 	if (P_total > 0.15 && !type2_warned) {
-		LOG_WARNING << "P(dt) = " << P_total << " may be too large";
+		LOG_WARNING << "disso P(dt) = " << P_total << " may be too large";
 		type2_warned = true;
 	}
 	if ( Srandom::init_dis(Srandom::gen) > P_total ) {
@@ -832,7 +832,7 @@ pOut_list.clear();
     //LOG_INFO << P_total << " " << VB << " " << x_rel_cell << " " << aB;
 	// P_total is the total rate of reation within dt
 	if (P_total > 0.15 && !type2_warned) {
-		LOG_WARNING << "P(dt) = " << P_total << " may be too large";
+		LOG_WARNING << "reco P(dt) = " << P_total << " may be too large";
 		type2_warned = true;
 	}
 	if ( Srandom::init_dis(Srandom::gen) > P_total ) {
