@@ -205,7 +205,7 @@ int main(int argc, char* argv[]){
 
                 // for Hidden heavy flavor
                 if (p.pid > 500)
-                    int channel = OneBodyUpdate_Onium(dt, T, {0., 0., 0.}, p, pOut_list);
+                    int nsize = OneBodyUpdate_Onium(dt, T, {0., 0., 0.}, p, pOut_list);
 
                 for (auto & pp : pOut_list) new_plist.push_back(pp);
             }
@@ -242,9 +242,9 @@ int main(int argc, char* argv[]){
                                         else p1.x.a[k] += L;
                                     }
                                 }
-                                int channel = TwoBodyUpdate_QQbar(dt, T, 
+                                int nsize = TwoBodyUpdate_QQbar(dt, T, 
                                               {0., 0., 0.}, p1, p2, pOut_list);
-                                if (channel != -1) {
+                                if (nsize == 1) {
                                     p1.is_virtual = true;
                                     p2.is_virtual = true;
                                     for (auto & pp : pOut_list) new_plist.push_back(pp);

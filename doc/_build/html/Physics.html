@@ -1,0 +1,272 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Phyiscs &mdash; Duke Heavy Quark Transport Project 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tests" href="Tests.html" />
+    <link rel="prev" title="Usage" href="Usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Duke Heavy Quark Transport Project
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Phyiscs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-linearized-boltzmann-equation">The linearized Boltzmann equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#langevin-equation">Langevin equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lpm-effect-and-implementation">LPM effect and implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Tests.html">Tests</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Duke Heavy Quark Transport Project</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Phyiscs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Physics.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="phyiscs">
+<h1>Phyiscs<a class="headerlink" href="#phyiscs" title="Permalink to this headline">¶</a></h1>
+<p>This programs solves the linear evolution equation of heavy quarks in a quark-gluon plasma.
+Heavy quarks scatter with medium particle via pertrubative matrix-elements.
+Between scatterings, heavy quarks undergo diffusive motion with empricical transport coefficient parametring the missing interaction in the above scattering picture.</p>
+<div class="section" id="the-linearized-boltzmann-equation">
+<h2>The linearized Boltzmann equation<a class="headerlink" href="#the-linearized-boltzmann-equation" title="Permalink to this headline">¶</a></h2>
+<p>The scattering dynamics is governed by the linearized Boltzmann equation,</p>
+<div class="math notranslate nohighlight">
+\[\partial_t f_Q - \vec{v}\cdot\nabla f_Q  = C_i^{2\leftrightarrow 2}[f_Q] + C_i^{2\leftrightarrow 3}[f_Q]\]</div>
+<p>The collison terms includes both elastic processes and inelastic processes.
+The inelastic processes contains not only the induced gluon radiation but also its reverse process, namely meidum gluon absorption.
+Therefore the model respect detailed balance and reaches the correct thermal equilibrium.
+The corresponding collision integrals are,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}C_i^{2 \leftrightarrow 2}[f] &amp;=&amp; \frac{d_i/\nu_i}{2E_1} \int d \Gamma_2 d \Gamma_3 d \Gamma_4
+\\&amp;&amp; \{f_Q(p_3)f_i(p_4)-f_Q(p_1)f_i(p_2)\}
+\\&amp;&amp; {(2\pi)}^4\delta^{(4)}(p_{12}-p_{34})  |M_{22,i}|^2
+\\
+C_i^{2 \leftrightarrow 3}[f] &amp;=&amp; \frac{d_i/\nu_i}{2E_1} \int d \Gamma_2 d \Gamma_3 d \Gamma_4 d \Gamma_k
+\\&amp;&amp; \{f_Q(p_3)f_i(p_4)f_g(k)-f_Q(p_1)f_i(p_2)\}
+\\&amp;&amp; {(2\pi)}^4\delta^{(4)}(p_{123} - p_{4k})|M_{23,i}|^2.\end{split}\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(d\Gamma = dp^3/(2\pi)^3/2E\)</span> is the Lorentz-invariant momentum phase-space element.
+<span class="math notranslate nohighlight">\(d, \nu\)</span> counts the degeneracy of the incoming medium parton and the symmetry factor of the process repectively.
+The distribution function of light partons <span class="math notranslate nohighlight">\(f_i, i=q, \bar{q}, g\)</span> are obtained from hydrodynamic calculation.
+Neglecting off-equilibrium correction, there are,</p>
+<div class="math notranslate nohighlight">
+\[f_{i} = e^{-p\cdot u/T},\]</div>
+<p>where <span class="math notranslate nohighlight">\(T(t, \vec{x})\)</span> and <span class="math notranslate nohighlight">\(u^\mu(t, \vec{x})\)</span> are temperatures and four-velocity of the local fluid cell.
+To solve the equation in a Monte Carlo approach, we approximate the distribution function of the heavy quark by an enumble of particles.
+Then, evolve each particle in a split-step manner, first determine the collision probablity <span class="math notranslate nohighlight">\(P=R\Delta t\)</span> within a given time step <span class="math notranslate nohighlight">\(\Delta t\)</span>, provided the collision rate <span class="math notranslate nohighlight">\(R\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[R = (2\pi)^3\frac{\delta \int C[f_Q]d\Gamma_Q}{\delta f_Q(p)}\]</div>
+<p>If a collision happens according to the probablity <cite>P</cite>, then the details of initial and final states are obtained by sampling the phase space <span class="math notranslate nohighlight">\(d\Gamma\)</span> s accoding to the differential rate.</p>
+</div>
+<div class="section" id="langevin-equation">
+<h2>Langevin equation<a class="headerlink" href="#langevin-equation" title="Permalink to this headline">¶</a></h2>
+<p>The diffusive motion is solved by the Langevin equation,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\Delta\vec{x} &amp;=&amp; = \vec{p}/E\Delta t\\
+\Delta\vec{p} &amp;=&amp; -\eta_D\vec{p}\Delta t + \vec{\xi}(t)\sqrt{\Delta t}        \\
+\langle \xi_i \xi_j \rangle &amp;=&amp; \hat{p}_i\hat{p}_j\kappa_L + \left(\delta_{ij}-\hat{p}_i\hat{p}_j\right)\kappa_T\end{split}\]</div>
+<p>The heavy quark receives a drag force with drag coefficient <span class="math notranslate nohighlight">\(\eta_D\)</span> and a random force with equal-time correlator given by the longitudinal and transverse momentum diffusion coefficient.
+In the isotropic case <span class="math notranslate nohighlight">\(\kappa_L=\kappa_T=\kappa\)</span>, the drag coefficient and the momtentum diffusion coefficient has to satisfy the Einstein relation (in the Ito scheme) to reach the correct thermal equilibrium,</p>
+<div class="math notranslate nohighlight">
+\[\eta_D = \frac{\kappa}{2ET} - \frac{d\kappa}{dp^2}\]</div>
+</div>
+<div class="section" id="lpm-effect-and-implementation">
+<h2>LPM effect and implementation<a class="headerlink" href="#lpm-effect-and-implementation" title="Permalink to this headline">¶</a></h2>
+<p>Heavy quark experience a single or multiple scatterings may radiate gluons.
+The radiated gluon has a finite formation time <span class="math notranslate nohighlight">\(\tau_k \sim 2(1-x)k/({k^2}_\perp+x^2 M^2+(1-x)m_g^2)\)</span>.
+During the formation time of the gluon, multiple scatterings lead to destructive intereference that suppresses the gluon radiation spectrum, know as the Landau-Pomeranchuk-Migdal (LPM) effect.</p>
+<p>An rigrous treatment of the interference effect is difficult in a Boltzmann equation.
+In this work, we do this effecitvely by modifying the phase space of the radiated gluon by,</p>
+<div class="math notranslate nohighlight">
+\[\int \frac{d k^3}{(2\pi)^3 2k} \rightarrow \int \frac{d k^3}{(2\pi)^3 2k} 2(1-\cos(\Delta t/\tau_f)),\]</div>
+<p>where <span class="math notranslate nohighlight">\(\Delta t\)</span> is the time elaspe from the last radiation/absorption.
+In the limit of <span class="math notranslate nohighlight">\(k_\perp \gg q_\perp\)</span> , this perscription goes to the higher-twist formula for meidum induced gluon radiation.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Tests.html" class="btn btn-neutral float-right" title="Tests" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Usage.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Weiyao Ke, Yingru Xu, Steffen A. Bass
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

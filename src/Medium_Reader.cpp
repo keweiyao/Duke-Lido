@@ -174,13 +174,17 @@ void Medium<N>::interpolate(fourvec x, double & T, double & vx, double & vy, dou
 ////////////////////////// Trento ////////////////////////////////////
 TransverPositionSampler::TransverPositionSampler(std::string filename, int iev):
 _file(filename, H5F_ACC_RDONLY),
-_datasetname("/event_"+std::to_string(iev)),
-_event(_file.openGroup(_datasetname))
+_datasetname("/event_"+std::to_string(iev))
+//_event(_file.openGroup(_datasetname))
 {
-	hdf5_read_scalar_attr(_event, "Nx", _Nx);
-	hdf5_read_scalar_attr(_event, "Ny", _Ny);
-	hdf5_read_scalar_attr(_event, "dxy", _dx);
-	hdf5_read_scalar_attr(_event, "dxy", _dy);
+	//hdf5_read_scalar_attr(_event, "Nx", _Nx);
+	//hdf5_read_scalar_attr(_event, "Ny", _Ny);
+	//hdf5_read_scalar_attr(_event, "dxy", _dx);
+	//hdf5_read_scalar_attr(_event, "dxy", _dy);
+	_dx = 0.1;
+	_dy = 0.1;
+	_Nx = 301;
+	_Ny = 301;
 	_dx *=  fmc_to_GeV_m1;
 	_dy *=  fmc_to_GeV_m1;
 	_x_min = -0.5*_Nx*_dx;
@@ -193,7 +197,7 @@ _event(_file.openGroup(_datasetname))
 	H5::DataSet dataset;	
 	H5::DataSpace dataspace(2, dims);
 	
-	dataset = _file.openDataSet(_datasetname+"/Ncoll_density");
+	dataset = _file.openDataSet(_datasetname);
 	dataset.read(_TAB.data(), H5::PredType::NATIVE_DOUBLE, 
 				dataspace, dataset.getSpace());
 	//////////// Init PDF ///////////////////

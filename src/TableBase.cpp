@@ -18,7 +18,7 @@ TableBase<T, N>::TableBase(std::string Name, Svec shape, Dvec low, Dvec high):
 _Name(Name), _rank(N), _power_rank(std::pow(2, _rank)),
 _shape(shape), _low(low), _high(high),_table(_shape)
 {
-	LOG_INFO<<_Name << " dim=" << _rank;
+	//LOG_INFO<<_Name << " dim=" << _rank;
 	for(auto i=0; i<_rank; ++i){
 		_step.push_back((high[i]-low[i])/(shape[i]-1));
 	}
@@ -127,7 +127,7 @@ bool TableBase<T, N>::Load(std::string fname){
 		return false;
 	}
 	else{
-		LOG_INFO<< "Rank compitable, loading table";
+		//LOG_INFO<< "Rank compitable, loading table";
 		for (auto i=0; i<_rank; ++i){
 			hdf5_read_scalar_attr(group, "shape-"+std::to_string(i), _shape[i]);
 			hdf5_read_scalar_attr(group, "low-"+std::to_string(i), _low[i]);

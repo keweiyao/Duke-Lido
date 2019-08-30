@@ -131,21 +131,21 @@ void init_process(Process& r, std::string mode, std::string table_path){
 		}
 }
 
-
 void initialize(std::string mode, std::string setting_path, std::string table_path,
-				double mu, // alphas(max(Q, mu*pi*T)), active when afix < 0
+				double mu,   // alphas(max(Q, mu*pi*T)), active when afix < 0
 				double afix, // fixed coupling, negative value for running coupling
-                double K, double a, double b, double p, double q, double gamma,
+				double K, double a, double b, double p, double q, double gamma,
 				// K, a, b, p, q, gamma are used in non-pert. qhat parametrization
-				// Its effect is off when K = 0. 
+				// Its effect is off when K = 0.
 				double cut, // Separation scale between diffusion
 							// and scattering both at leading order (weak coupled)
 				double Rvac // Vaccum veto region parameter
-				){
+)
+{
 	print_logo();
-    initialize_mD_and_scale(0, mu, afix, cut, Rvac);
+	initialize_mD_and_scale(0, mu, afix, cut, Rvac);
 	initialize_transport_coeff(K, a, b, p, q, gamma);
-    echo();
+	echo();
 
 	// for gluon
 	OneBody[21] = std::vector<Process>();
@@ -242,47 +242,74 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 }
 
 // split=1: q->q+g, colors = 1 - x + CF/CA * x^2
-// split=2: g->g+g, colors = 1 - x + x^2 
-// split=3: g->q+qbar, colors = 1 - x*CA/CF + x^2*CA/CF 
-double formation_time(fourvec p, fourvec k, double T, int split){
+// split=2: g->g+g, colors = 1 - x + x^2
+// split=3: g->q+qbar, colors = 1 - x*CA/CF + x^2*CA/CF
+double formation_time(fourvec p, fourvec k, double T, int split)
+{
 	double E0 = p.t();
-	double x = k.t()/(E0+k.t());
-	double mg2 = t_channel_mD2->get_mD2(T)/2., 
-		   mass_sqrs = 0.0,  colors = 1.;
-	if (split == 1) {
+	double x = k.t() / E0;
+	double mg2 = t_channel_mD2->get_mD2(T) / 2.,
+		   mass_sqrs = 0.0, colors = 1.;
+	if (split == 1)
+	{
 		// q --> q + g
-		colors = 1. - x + CF/CA*x*x;
-		mass_sqrs = x*x*dot(p, p) + (1.-x)*mg2;
+		colors = 1. - x + CF / CA * x * x;
+		mass_sqrs = x * x * dot(p, p) + (1. - x) * mg2;
 	}
-	if (split == 2) {
+	if (split == 2)
+	{
 		// g --> g + g
-		colors = 1. - x + x*x;
-		mass_sqrs = (1. - x + x*x)*mg2;
+		colors = 1. - x + x * x;
+		mass_sqrs = (1. - x + x * x) * mg2;
 	}
-	if (split == 3) {
+	if (split == 3)
+	{
 		// g --> q + qbar
-		colors = 1. - x*CA/CF + x*x*CA/CF;
-		mass_sqrs = (1-CA/CF*x+CA/CF*x*x)*mg2;
+		colors = 1. - x * CA / CF + x * x * CA / CF;
+		mass_sqrs = (1 - CA / CF * x + CA / CF * x * x) * mg2;
 	}
 
-	double QT2 = measure_perp(p,k).pabs2()*colors;
-	double tauf = 2*x*(1-x)*E0/(QT2 + mass_sqrs);
+	double QT2 = measure_perp(p, k).pabs2() * colors;
+	double tauf = 2 * x * (1 - x) * E0 / (QT2 + mass_sqrs);
 	return tauf;
 }
 
 int OneBodyUpdate_Parton(
-		double dt, double temp, std::vector<double> v3cell, 
-		particle & pIn, std::vector<particle> & pOut_list){
+	    double dt, double temp, std::vector<double> v3cell,
+	    particle &pIn, std::vector<particle> &pOut_list)
+{  
 	pOut_list.clear();
-	int absid = std::abs(pIn.pid);
+	const double Lido_pcut=3.;
+    int absid = std::abs(pIn.pid);
+    int temp_pid = pIn.pid;
+	pIn.Tf = temp;
+	pIn.vcell[0] = v3cell[0]; 
+	pIn.vcell[1] = v3cell[1]; 
+	pIn.vcell[2] = v3cell[2];
+	//transform light quark pid to 123
+	//transform back at the end
+	if (std::abs(pIn.pid) <= 3) pIn.pid = 123;
+
+    // freestream,
+    // In Mellin coordinates, we evolve everything in constant dtau
+	auto x0 = pIn.x;
+	double tau0 = std::sqrt(std::pow(pIn.x.t(),2) - std::pow(pIn.x.z(),2));
 	pIn.freestream(dt);
-    pIn.Tf = temp;
+	double tau1 = std::sqrt(std::pow(pIn.x.t(),2) - std::pow(pIn.x.z(),2));
+    double dtau = tau1 - tau0;
+
+	//ignore soft partons with a constant momentum cut
+	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_pcut || temp < 0.154){
+		pOut_list.push_back(pIn);
+		return pOut_list.size();
+	}
+
 	// Apply diffusion and update particle momentum
 	fourvec pnew;
 	Ito_update(pIn.pid, dt, pIn.mass, temp, v3cell, pIn.p, pnew);
 	pIn.p = pnew;
 
-	// Apply large angle scattering, and diffusion induced radiation
+	// Apply large angle scattering and diffusion induced radiation
 	auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
 	double dt_cell = dt / pIn.p.t() * p_cell.t();
 	double E_cell = p_cell.t();
@@ -290,7 +317,7 @@ int OneBodyUpdate_Parton(
 	// For diffusion induced radiation, qhat_Soft is an input
 	double qhatg = qhat(21, E_cell, 0., temp);
 
-	// Total rate for the 
+	// Total rate
 	int channel = 0;
 	std::vector<double> P_channels(OneBody[absid].size());
 	double P_total = 0., dR;
@@ -332,23 +359,24 @@ int OneBodyUpdate_Parton(
 				exit(-1);
 				break;
 		}
-		P_total += dR*dt_cell;
-		channel ++;
+		P_total += dR * dt_cell;
+		channel++;
 	}
 	// P_total is the total rate of reation within dt
-	if (P_total > 0.15 && !type2_warned) {
+	if (P_total > 0.15 && !type2_warned){
 		LOG_WARNING << "P(dt) = " << P_total << " may be too large";
 		type2_warned = true;
 	}
-	if ( Srandom::init_dis(Srandom::gen) > P_total ) {
+	if (Srandom::init_dis(Srandom::gen) > P_total){
 		channel = -1;
 	}
 	else{
 		// Normalize P_channels using P_total to sample
-		for(auto& item : P_channels) item /= P_total;
+		for (auto &item : P_channels)
+			item /= P_total;
 		double p = Srandom::init_dis(Srandom::gen);
-		for(int i=0; i<P_channels.size(); ++i){
-			if (P_channels[i] > p) {
+		for (int i = 0; i < P_channels.size(); ++i){
+			if (P_channels[i] > p){
 				channel = i;
 				break;
 			}
@@ -386,117 +414,22 @@ int OneBodyUpdate_Parton(
 				break;
 		}
 		// rotate the final state back and boost it back to the lab frame
-		for(auto & pmu : FS) {
+		for (auto &pmu : FS){
 			pmu = pmu.rotate_back(p_cell);
 			pmu = pmu.boost_back(v3cell[0], v3cell[1], v3cell[2]);
 		}
 
 		// elastic process changes the momentum immediately
-		if(channel ==0 || channel == 1) {
+		if (channel == 0 || channel == 1){
 			pIn.p = FS[0];
 		} 
 		// inelastic process takes a finite time to happen
 		if(channel == 2 || channel == 3){
-				// add the radiating daughters as ``virtual" particles 
-				// these are virtual particles, that pops out at a rate
-				// given by the incoherent calculation, which will be 
-				// dropped (suppressed) according to the LPM effect
-				particle vp;
-				
-				vp.pid = 21;
-				vp.mass = 0.0;
-				vp.weight = pIn.weight;
-				vp.p0 = FS[2]; 
-				vp.p = vp.p0;
-				vp.x0 = pIn.x;
-				vp.x = vp.x0;
-				vp.T0 = temp;
-				vp.is_vac = false;
-				vp.is_virtual = true;
-                vp.vcell.resize(3);        
-                vp.vcell[0] = v3cell[0];
-                vp.vcell[1] = v3cell[1];
-                vp.vcell[2] = v3cell[2];
-				
-				// The local 2->2 mean-free-path is estimated with
-				// the qhat_hard integrate from the 2->2 rate
-				double xfrac = vp.p.t()/pIn.p.t();
-				double local_qhat = 0.;
-				double vp_cell = vp.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
-				double boost_factor = vp.p.t()/vp_cell;
-				BOOST_FOREACH(Process& r, OneBody[21]){
-					switch(r.which()){
-						case 0:
-							if (boost::get<Rate22>(r).IsActive()){
-								tensor A = boost::get<Rate22>(r).GetSecondM(
-									{vp_cell, temp}
-								);			
-								local_qhat += A.T[1][1]+A.T[2][2];
-							}
-							break;
-						default:
-							break;
-					}
-				}
-				double mD2 = t_channel_mD2->get_mD2(temp);
-				// estimate mfp in the lab frame
-				vp.mfp0 = LPM_prefactor*mD2/local_qhat*boost_factor;
-				pIn.radlist.push_back(vp);
-		}
-		if(channel == 4 || channel == 5){
-			// Absorption processes happens mostly for gluon energy ~ 3*T, therefore we negelected the LPM effect
-			pIn.p = FS[0];
-		}
-		if(channel == 6){
 			// add the radiating daughters as ``virtual" particles 
 			// these are virtual particles, that pops out at a rate
 			// given by the incoherent calculation, which will be 
 			// dropped (suppressed) according to the LPM effect
-			particle vp;
-			
-			vp.pid = 21;
-			vp.mass = 0.0;
-			vp.weight = pIn.weight;
-			vp.p0 = FS[1]; 
-			vp.p = vp.p0;
-			vp.x0 = pIn.x;
-			vp.x = vp.x0;
-			vp.T0 = temp;
-			vp.is_vac = false;
-			vp.is_virtual = true;
-	        vp.vcell.resize(3); 
-		    vp.vcell[0] = v3cell[0];
-		    vp.vcell[1] = v3cell[1];
-		    vp.vcell[2] = v3cell[2];
-	
-			double mD2 = t_channel_mD2->get_mD2(temp);
-			// estimate mfp in the lab frame
-			vp.mfp0 = LPM_prefactor*mD2/qhatg*pIn.p.t()/E_cell; 
-			pIn.radlist.push_back(vp);
-		}
-		if(channel == 7){
-			// Absorption processes happens mostly for gluon energy ~ 3*T, therefore we negelected the LPM effect
-			pIn.p = FS[0];
-		}
-		// inelastic process takes a finite time to happen
-		if(channel == 8 || channel == 9){
-			// This should only happen for gluon
-			// gluon splits to q+qbar, pid changing!!
-			particle vp;				
-			vp.pid = Srandom::sample_flavor(3);
-			vp.mass = 0.0;
-			vp.weight = pIn.weight;
-			vp.p0 = FS[2]; 
-			vp.p = vp.p0;
-			vp.x0 = pIn.x;
-			vp.x = vp.x0;
-			vp.T0 = temp;
-			vp.is_vac = false;
-			vp.is_virtual = true;
-                        vp.vcell.resize(3);        
-                        vp.vcell[0] = v3cell[0];
-                        vp.vcell[1] = v3cell[1];
-                        vp.vcell[2] = v3cell[2];
+			particle vp = produce_parton(21, pIn, FS[2], x0, temp, v3cell);
 
 			// The local 2->2 mean-free-path is estimated with
 			// the qhat_hard integrate from the 2->2 rate
@@ -520,102 +453,173 @@ int OneBodyUpdate_Parton(
 			}
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
-			vp.mfp0 = LPM_prefactor*mD2/local_qhat*boost_factor;
+			vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
 			pIn.radlist.push_back(vp);
+			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_pcut){	
+				double tempid;
+				if (channel == 3) tempid = 21;
+				else tempid = Srandom::sample_flavor(3);
+				particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
+				pOut_list.push_back(ep);
+			}
 		}
-		if(channel == 10){
-			// This should only happen for gluon
-			// gluon splits to q+qbar, pid changing!! 
-			particle vp;
-			vp.pid = Srandom::sample_flavor(3);
-			vp.mass = 0.0;
-			vp.weight = pIn.weight;
-			vp.p0 = FS[1]; 
-			vp.p = vp.p0;
-			vp.x0 = pIn.x;
-			vp.x = vp.x0;
-			vp.T0 = temp;
-			vp.is_vac = false;
-			vp.is_virtual = true;
-                        vp.vcell.resize(3);        
-                        vp.vcell[0] = v3cell[0];
-                        vp.vcell[1] = v3cell[1];
-                        vp.vcell[2] = v3cell[2];
-			
+		if (channel == 4 || channel == 5){
+			// Absorption processes happens mostly for gluon energy ~ 3*T, therefore we negelected the LPM effect
+			pIn.p = FS[0];
+		}
+		if (channel == 6){
+			// add the radiating daughters as ``virtual" particles
+			// these are virtual particles, that pops out at a rate
+			// given by the incoherent calculation, which will be
+			// dropped (suppressed) according to the LPM effect
+			particle vp = produce_parton(21, pIn, FS[1], x0, temp, v3cell);
+
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
-			vp.mfp0 = LPM_prefactor*mD2/qhatg*pIn.p.t()/E_cell; 
+			vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
+			pIn.radlist.push_back(vp);
+		}
+		if (channel == 7)
+		{
+			// Absorption processes happens mostly for gluon energy ~ 3*T, 
+            //therefore we negelected the LPM effect
+			pIn.p = FS[0];
+		}
+		// inelastic process takes a finite time to happen
+		if (channel == 8 || channel == 9)
+		{
+			// This should only happen for gluon
+			// gluon splits to q+qbar, pid changing!!
+			particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[2], x0, temp, v3cell);
+
+			// The local 2->2 mean-free-path is estimated with
+			// the qhat_hard integrate from the 2->2 rate
+			double xfrac = vp.p.t() / pIn.p.t();
+			double local_qhat = 0.;
+			double vp_cell = vp.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
+			double boost_factor = vp.p.t()/vp_cell;
+			BOOST_FOREACH(Process& r, OneBody[21]){
+				switch(r.which()){
+					case 0:
+						if (boost::get<Rate22>(r).IsActive()){
+							tensor A = boost::get<Rate22>(r).GetSecondM(
+								{vp_cell, temp}
+							);			
+							local_qhat += A.T[1][1]+A.T[2][2];
+						}
+						break;
+					default:
+						break;
+				}
+			}
+			double mD2 = t_channel_mD2->get_mD2(temp);
+			// estimate mfp in the lab frame
+			vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
+			pIn.radlist.push_back(vp);
+		}
+		if (channel == 10)
+		{
+			// This should only happen for gluon
+			// gluon splits to q+qbar, pid changing!!
+			particle vp = produce_parton(Srandom::sample_flavor(3), 
+                                         pIn, FS[1], x0, temp, v3cell);
+
+			double mD2 = t_channel_mD2->get_mD2(temp);
+			// estimate mfp in the lab frame
+			vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
 			pIn.radlist.push_back(vp);
 		}
 	}
-
-
 	// Handle the virtual particle, (only for real mother parton)
-	if ( (!pIn.radlist.empty()) && (!pIn.is_virtual) ){
+	if ((!pIn.radlist.empty()) && (!pIn.is_virtual))
+	{
 		// loop over each virtual particles
-		for(std::vector<particle>::iterator it=pIn.radlist.begin(); it!=pIn.radlist.end();){
+		for (std::vector<particle>::iterator it = pIn.radlist.begin(); it != pIn.radlist.end();)
+		{
 			int split_type = 0;
-			if (pIn.pid != 21 && it->pid == 21) split_type = 1; // q --> q + g
-			if (pIn.pid == 21 && it->pid == 21) split_type = 2; // g --> g + g
-			if (pIn.pid == 21 && it->pid != 21) split_type = 3; // g --> q + qbar
-			double taun = formation_time(pIn.p,it->p,temp,split_type);
+			if (pIn.pid != 21 && it->pid == 21)
+				split_type = 1; // q --> q + g
+			if (pIn.pid == 21 && it->pid == 21)
+				split_type = 2; // g --> g + g
+			if (pIn.pid == 21 && it->pid != 21)
+				split_type = 3; // g --> q + qbar
+			double taun = formation_time(it->mother_p, it->p, temp, split_type);
 			// If t-t0 > tauf, or it reaches the boundary of QGP
 			// We check whether it sould be formed
-            //LOG_INFO << "Inside HF " << it->x.t() << " " << it->x0.t() << " "<< taun;
-			if (it->x.t() - it->x0.t() > taun){ 
+
+			// if not yet formed, evolve it to t+dt
+			std::vector<particle> pnew_Out;
+			double tau = std::sqrt(it->x.t()*it->x.t()-it->x.z()*it->x.z());
+			double dt_daughter = calcualte_dt_from_dtau(it->x, it->p, 
+					tau, dtau);
+			OneBodyUpdate_Parton(dt_daughter, temp, v3cell, *it, pnew_Out);
+			if (it->x.t() - it->x0.t() <= taun){
+				it++;
+			}
+			else{
+				// if formed, apply LPM suppression
 				double Acceptance = 0.;
-				if (!it->is_vac){ 
-					// medium-induced
-					double kt20 = measure_perp(pIn.p, it->p0).pabs2();
-					double kt2n = measure_perp(pIn.p, it->p).pabs2();
-					double theta2 = kt2n/std::pow(it->p.t(),2);
-					double thetaM2 = std::pow(pIn.mass/pIn.p.t(),2);
+				if (!it->is_vac)
+				{
+					// for medium-induced radiation
+					// 1): a change of running-coupling from elastic broadening
+					double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
+					double kt2n = measure_perp(it->mother_p, it->p).pabs2();
+					double Running = alpha_s(kt2n, it->T0) / alpha_s(kt20, it->T0);
+					// 2): a dead-cone approximation for massive particles
+					double theta2 = kt2n / std::pow(it->p.t(), 2);
+					double thetaM2 = std::pow(pIn.mass / it->mother_p.t(), 2);
+					double DeadCone = std::pow(theta2 / (theta2 + thetaM2), 2);
+					// 3): an NLL-inspired suppression factor for the LPM effect
 					double mD2 = t_channel_mD2->get_mD2(temp);
-					double mean_s = 6*it->p.t()*temp;
-					double log_factor = std::sqrt(std::log(1+taun/it->mfp0)
-								/std::log(1+mean_s/mD2) ) ;
-					double LPM = it->mfp0 / taun * log_factor;
-					double DeadCone = std::pow(theta2/(theta2+thetaM2), 2);
-					double Running = alpha_s(kt2n, it->T0)/alpha_s(kt20, it->T0);
+					double lnQ2_1 = std::log(1. + taun / it->mfp0);
+					double lnQ2_0 = std::log(1. + 6 * it->p.t() * temp / mD2);
+					double log_factor = std::sqrt(lnQ2_1 / lnQ2_0);
+					double LPM = std::min(it->mfp0 / taun * log_factor, 1.);
+					// The final rejection factor
 					Acceptance = LPM * Running * DeadCone;
-				} else { 
-					double kt20 = measure_perp(pIn.p0, it->p0).pabs2();
-					double kt2n = measure_perp(pIn.p0, it->p - it->p0).pabs2();
-					if (kt2n > Rvac*kt20) Acceptance = 0.0;
-    	                                else Acceptance = 1.0;
-				}				
-
+				}
+				else{
+					// for vacuum-like radiaiton formed inside the medium
+					double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
+					double Deltakt2 = measure_perp(it->mother_p, it->p - it->p0).pabs2();
+					if (Deltakt2 > Rvac * kt20)
+						Acceptance = 0.0;
+					else
+						Acceptance = 1.0;
+				}
 				if (Srandom::rejection(Srandom::gen) < Acceptance){
-					// If this fluctuation is accepted:
-					// add it to the pOut list
-					pIn.p = pIn.p - it->p0;	
-					pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);	
-					
-					if (split_type == 3) {
-						// pid changing!!!
+					// accepted branching causes physical effects
+					// momentum change, and put back on shell
+					//double xx = it->p0.t()/it->mother_p.t();
+					//pIn.p = pIn.p * (1. - xx);
+					pIn.p = pIn.p - it->p;
+					pIn.p.a[0] = std::sqrt(pIn.p.pabs2() + pIn.mass * pIn.mass);
+					// for g -> q + qbar, pid change
+					// also discard all other pre-splitting: causes higher-order difference
+					if (split_type == 3){
 						pIn.pid = -it->pid;
+						pIn.radlist.clear();
 					}
-
+					// label it as real and put it in output particle list
 					it->is_virtual = false;
 					pOut_list.push_back(*it);
-                    
 				}
+				// remove it from the radlist
 				it = pIn.radlist.erase(it);
-
-			}else{ // else, evolve it, while rescale its energy ("ekional limit")
-				std::vector<particle> pnew_Out;
-                //LOG_INFO << "beofre" << it->x.t() << " " << it->x0.t();
-				OneBodyUpdate_Parton(dt, temp, v3cell, (*it), pnew_Out);
-                //LOG_INFO << "after" << it->x.t() << " " << it->x0.t();
-				it->p = it->p*(it->p0.t()/it->p.t());
-                it->p.a[0] = std::sqrt(it->p.pabs2()+it->mass*it->mass);
-				it++;
 			}
 		}
 	}
-	// Add the mother parton to the output list
-    pOut_list.push_back(pIn);
-	return channel;
+    // For virtual particle, we rescale the energy back to the initial value
+	// so that we only focus on the elastic broadening effect.
+	//if (pIn.is_virtual) pIn.p = pIn.p*(pIn.p0.t()/pIn.p.t());
+
+	// Add the mother parton to the end of the output list
+	//also transform back its pid
+	pIn.pid = temp_pid;
+	pOut_list.push_back(pIn);
+	
+    return pOut_list.size();
 }
 
 
@@ -688,7 +692,6 @@ int OneBodyUpdate_Onium(
 			}
 		}
 	}
-
 	// If a scattering happens:
 	if (channel >= 0){
         int fQ, fQbar;
@@ -747,12 +750,12 @@ int OneBodyUpdate_Onium(
     else{
         pOut_list.push_back(pIn);
     }
-	return channel;
+	return pOut_list.size();
 }
 
 int TwoBodyUpdate_QQbar(double dt_lab, double temp, std::vector<double> v3cell, 
 		particle & P1, particle & P2, std::vector<particle> & pOut_list) {
-pOut_list.clear();
+    pOut_list.clear();
 	auto pair_id = std::make_pair(std::abs(P1.pid), -std::abs(P2.pid));
 	// boost to cell frame (z-direction)
 	auto p1_cell = P1.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
@@ -918,98 +921,132 @@ pOut_list.clear();
 	    vp.vcell[2] = v3cell[2];
 	    pOut_list.push_back(vp);
 	}
-	return channel;    
+    else{
+        pOut_list.push_back(P1);
+        pOut_list.push_back(P2);
+    }
+	return pOut_list.size();  
 }
 
+particle produce_parton(int pid, particle &mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> &v3cell, bool is_virtual, bool is_recoil){
+	particle vp;
+	vp.pid = pid;
+	vp.mass = 0.0;
+	vp.weight = mother_parton.weight;
+	vp.p0 = vp0;
+	vp.p = vp.p0;
+	vp.x0 = vx0;
+	vp.x = vp.x0;
+	vp.mother_p = mother_parton.p;
+	vp.T0 = T;
+	vp.is_vac = false;
+	vp.is_virtual = is_virtual;
+	vp.is_recoil = is_recoil;
+	vp.vcell.resize(3);
+	vp.vcell[0] = v3cell[0];
+	vp.vcell[1] = v3cell[1];
+	vp.vcell[2] = v3cell[2];
+
+	return vp;
+}
 
 void output(const std::vector<particle> plist, std::string fname){
-	int i=0;
+	int i = 0;
 	std::ofstream f(fname);
-	for (auto & p : plist){
-		f << std::setw(10) << std::setfill(' ') << i << "  " // particle index, i10,2x
+	for (auto &p : plist)
+	{
+		f << std::setw(10) << std::setfill(' ') << i << "  "	  // particle index, i10,2x
 		  << std::setw(10) << std::setfill(' ') << p.pid << "  "; // particle id, i10,2x
 		f << p.p.x() << "  "
 		  << p.p.y() << "  "
 		  << p.p.z() << "  "
 		  << p.p.t() << "  "
 		  << p.mass << "  "
-		  << p.x.x()/fmc_to_GeV_m1 << "  "
-		  << p.x.y()/fmc_to_GeV_m1 << "  "
-		  << p.x.z()/fmc_to_GeV_m1 << "  "
-		  << p.x.t()/fmc_to_GeV_m1 << " "
-		  << p.x0.x()/fmc_to_GeV_m1 << "  "
-		  << p.x0.y()/fmc_to_GeV_m1 << "  "
-		  << p.x0.z()/fmc_to_GeV_m1 << "  "
-		  << p.x0.t()/fmc_to_GeV_m1 << "\n";
+		  << p.x.x() / fmc_to_GeV_m1 << "  "
+		  << p.x.y() / fmc_to_GeV_m1 << "  "
+		  << p.x.z() / fmc_to_GeV_m1 << "  "
+		  << p.x.t() / fmc_to_GeV_m1 << " "
+		  << p.x0.x() / fmc_to_GeV_m1 << "  "
+		  << p.x0.y() / fmc_to_GeV_m1 << "  "
+		  << p.x0.z() / fmc_to_GeV_m1 << "  "
+		  << p.x0.t() / fmc_to_GeV_m1 << "\n";
 		i++;
 	}
 }
 
 void output_oscar(const std::vector<particle> plist, int abspid, std::string fname){
 	// output OSCAR Format
-	int Nparticles=0;
-	for (auto & p : plist){
-		if (std::abs(p.pid) == abspid) Nparticles ++;
+	int Nparticles = 0;
+	for (auto &p : plist){
+		if (std::abs(p.pid) == abspid)
+			Nparticles++;
 	}
 
 	std::ofstream f(fname);
 	f << "OSC1997A\n";
 	f << "final_id_p_x\n";
 	f << "     lbt  1.0alpha   208     82   208     82   aacm  0.1380E+04         1\n";
-	f << "         1  "<< std::setw(10) 
+	f << "         1  " << std::setw(10)
 	  << Nparticles << "     0.001     0.001     1     1        1\n";
 
-	int i=0;
-	for (auto & p : plist){
-                if (std::abs(p.pid) == abspid) {
-		f << std::setw(10) << std::setfill(' ') << i << "  " // particle index, i10,2x
-		  << std::setw(10) << std::setfill(' ') << p.pid << "  "; // particle id, i10,2x
-		f << ff(p.p.x()) << "  "
-		  << ff(p.p.y()) << "  "
-		  << ff(p.p.z()) << "  "
-		  << ff(p.p.t()) << "  "
-		  << ff(p.mass) << "  "
-		  << ff(p.x.x()/fmc_to_GeV_m1) << "  "
-		  << ff(p.x.y()/fmc_to_GeV_m1) << "  "
-		  << ff(p.x.z()/fmc_to_GeV_m1) << "  "
-		  << ff(p.x.t()/fmc_to_GeV_m1) << "  "
-	          << ff(p.Tf) << "  "
-	          << ff(p.vcell[0]) << "  "		  
-	          << ff(p.vcell[1]) << "  "		
-	          << ff(p.vcell[2]) << "  "	
-		  << ff(p.p0.x()) << "  "
-		  << ff(p.p0.y()) << "  "
-		  << ff(p.p0.z()) << "  "
-		  << ff(p.p0.t()) << "  "	
-		  << ff(p.weight) << "  "
-		  << ff(0.0) << "\n";
-                }
+	int i = 0;
+	for (auto &p : plist)
+	{
+		if (std::abs(p.pid) == abspid)
+		{
+			f << std::setw(10) << std::setfill(' ') << i << "  "	  // particle index, i10,2x
+			  << std::setw(10) << std::setfill(' ') << p.pid << "  "; // particle id, i10,2x
+			f << ff(p.p.x()) << "  "
+			  << ff(p.p.y()) << "  "
+			  << ff(p.p.z()) << "  "
+			  << ff(p.p.t()) << "  "
+			  << ff(p.mass) << "  "
+			  << ff(p.x.x() / fmc_to_GeV_m1) << "  "
+			  << ff(p.x.y() / fmc_to_GeV_m1) << "  "
+			  << ff(p.x.z() / fmc_to_GeV_m1) << "  "
+			  << ff(p.x.t() / fmc_to_GeV_m1) << "  "
+			  << ff(p.Tf) << "  "
+			  << ff(p.vcell[0]) << "  "
+			  << ff(p.vcell[1]) << "  "
+			  << ff(p.vcell[2]) << "  "
+			  << ff(p.p0.x()) << "  "
+			  << ff(p.p0.y()) << "  "
+			  << ff(p.p0.z()) << "  "
+			  << ff(p.p0.t()) << "  "
+			  << ff(p.weight) << "  "
+			  << ff(0.0) << "\n";
+		}
 		i++;
 	}
 }
 
-double calcualte_dt_from_dtau(fourvec x, fourvec p, double tau, double dtau){
-	double vz = p.z()/p.t();
-	double t_m_zvz= x.t() - x.z()*vz;
-	double one_m_vz2 = 1. - vz*vz;
-	double dtau2 = dtau*(dtau+2.*tau);
-	double dt_lab = (std::sqrt(t_m_zvz*t_m_zvz+one_m_vz2*dtau2) - t_m_zvz)/one_m_vz2;
+double calcualte_dt_from_dtau(fourvec x, fourvec p, double tau, double dtau)
+{
+	double vz = p.z() / p.t();
+	double t_m_zvz = x.t() - x.z() * vz;
+	double one_m_vz2 = 1. - vz * vz;
+	double dtau2 = dtau * (dtau + 2. * tau);
+	double dt_lab = (std::sqrt(t_m_zvz * t_m_zvz + one_m_vz2 * dtau2) - t_m_zvz) / one_m_vz2;
 	return dt_lab;
 }
 
-double mean_pT(const std::vector<particle> plist){
+double mean_pT(const std::vector<particle> plist)
+{
 	double W = 0., wsum_pT = 0.;
-	for (auto & p : plist) {
-		wsum_pT += p.weight * std::sqrt(p.p.x()*p.p.x()+p.p.y()*p.p.y());
+	for (auto &p : plist)
+	{
+		wsum_pT += p.weight * std::sqrt(p.p.x() * p.p.x() + p.p.y() * p.p.y());
 		W += p.weight;
 	}
-	return wsum_pT/W;
+	return wsum_pT / W;
 }
-double mean_E(const std::vector<particle> plist){
+double mean_E(const std::vector<particle> plist)
+{
 	double W = 0., wsum_pT = 0.;
-	for (auto & p : plist) {
+	for (auto &p : plist)
+	{
 		wsum_pT += p.weight * p.p.t();
 		W += p.weight;
 	}
-	return wsum_pT/W;
+	return wsum_pT / W;
 }

@@ -2,4 +2,10 @@ build/
 test/
 *~
 Tables/
+<<<<<<< HEAD
 jet_analysis/
+=======
+*.h5
+*.log
+*results*
+>>>>>>> Lido-2.0
