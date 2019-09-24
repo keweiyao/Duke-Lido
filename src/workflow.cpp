@@ -529,25 +529,38 @@ int update_particle_momentum_Lido(
 				split_type = 2; // g --> g + g
 			if (pIn.pid == 21 && it->pid != 21)
 				split_type = 3; // g --> q + qbar
+				
+				
 			double taun = formation_time(it->mother_p, it->p, temp, split_type);
-			// If t-t0 > tauf, or it reaches the boundary of QGP
-			// We check whether it sould be formed
-
-			// if not yet formed, evolve it to t+dt
 			std::vector<particle> pnew_Out;
 			double tau = std::sqrt(it->x.t()*it->x.t()-it->x.z()*it->x.z());
 			double dt_daughter = calcualte_dt_from_dtau(it->x, it->p, 
-					tau, dtau);
+					tau, dtau); 
+			
+			// In the local (adiabatic LPM) mode,
+			// use local information to determine the number of rescatterings
+			bool Adiabatic_LPM = true;
+			if (Adiabatic_LPM){
+			    do{
+			        update_particle_momentum_Lido(dt_daughter, temp, 
+											v3cell, *it, pnew_Out);
+					taun = formation_time(it->mother_p, it->p, temp, split_type);
+			    }while(it->x.t() - it->x0.t() <= taun);
+			    // once finished, reset its x to where it is produced
+			    it->x = it->x0;
+			}
+			
+			// update the partilce for this time step
 			update_particle_momentum_Lido(dt_daughter, temp, 
 											v3cell, *it, pnew_Out);
-			if (it->x.t() - it->x0.t() <= taun){
+			
+			if (it->x.t() - it->x0.t() <= taun && !Adiabatic_LPM){
 				it++;
 			}
 			else{
 				// if formed, apply LPM suppression
 				double Acceptance = 0.;
-				if (!it->is_vac)
-				{
+				if (!it->is_vac){
 					// for medium-induced radiation
 					// 1): a change of running-coupling from elastic broadening
 					double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
@@ -566,8 +579,7 @@ int update_particle_momentum_Lido(
 					// The final rejection factor
 					Acceptance = LPM * Running * DeadCone;
 				}
-				else
-				{
+				else{
 					// for vacuum-like radiaiton formed inside the medium
 					double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
 					double Deltakt2 = measure_perp(it->mother_p, it->p - it->p0).pabs2();
@@ -576,9 +588,7 @@ int update_particle_momentum_Lido(
 					else
 						Acceptance = 1.0;
 				}
-				if (Srandom::rejection(Srandom::gen) < Acceptance)
-				{
-
+				if (Srandom::rejection(Srandom::gen) < Acceptance){
 					// accepted branching causes physical effects
 					// momentum change, and put back on shell
 					//double xx = it->p0.t()/it->mother_p.t();
