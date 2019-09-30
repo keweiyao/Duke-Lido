@@ -13,6 +13,7 @@
 #include "predefine.h"
 
 std::map<int, std::vector<Process>> AllProcesses;
+std::ofstream ofs ("hq_gluon_accept.dat", std::ofstream::app);
 
 void init_process(Process &r, std::string mode, std::string table_path)
 {
@@ -538,9 +539,21 @@ int update_particle_momentum_Lido(
 			double tau = std::sqrt(it->x.t()*it->x.t()-it->x.z()*it->x.z());
 			double dt_daughter = calcualte_dt_from_dtau(it->x, it->p, 
 					tau, dtau);
+
+			bool Adiabatic_LPM = true;
+			if (Adiabatic_LPM){
+			    do{
+			        update_particle_momentum_Lido(dt_daughter, temp, 
+											v3cell, *it, pnew_Out);
+					taun = formation_time(it->mother_p, it->p, temp, split_type);
+			    }while(it->x.t() - it->x0.t() <= taun);
+			    // once finished, reset its x to where it is produced
+			    it->x = it->x0;
+			}
+
 			update_particle_momentum_Lido(dt_daughter, temp, 
 											v3cell, *it, pnew_Out);
-			if (it->x.t() - it->x0.t() <= taun){
+			if (it->x.t() - it->x0.t() <= taun && !Adiabatic_LPM){
 				it++;
 			}
 			else{
@@ -594,6 +607,7 @@ int update_particle_momentum_Lido(
 					}
 					// label it as real and put it in output particle list
 					it->is_virtual = false;
+					ofs<<it->p<<" "<<it->mother_p<<" "<<it->p0<<" "<<it->x<<" "<<it->x0<<" "<<it->pid<<" "<<it->is_vac<<" "<<it->is_recoil<<" "<<it->T0 <<" "<<it->weight<<std::endl;
 					pOut_list.push_back(*it);
 				}
 				// remove it from the radlist

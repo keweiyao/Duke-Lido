@@ -199,9 +199,9 @@ target_link_libraries(analytic-medium ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALA
 install(TARGETS analytic-medium DESTINATION bin)
 
 if(pythia8)
-	add_executable(jet-pythia ./examples/jet-pythia.cpp)
-	target_link_libraries(jet-pythia ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
-	install(TARGETS jet-pythia DESTINATION bin)
+	add_executable(brick-pythia ./examples/brick-pythia.cpp)
+	target_link_libraries(brick-pythia ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+	install(TARGETS brick-pythia DESTINATION bin)
 
 	add_executable(hydro-couple ./examples/hydro-couple.cpp)
 	target_link_libraries(hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)

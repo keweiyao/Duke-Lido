@@ -18,4 +18,8 @@ LHAPDFARGS =
 #jet:
 #	g++ -o Jet Jet_cs.cpp $(PYTHIAFLAGS) $(PYTHIALIBS) $(FASTJETARGS) $(LHAPDFARGS) 
 jet_simu:
-	g++ -std=c++11 -o jet_finding jet_finding.cpp $(PYTHIAFLAGS) $(PYTHIALIBS) $(FASTJETARGS) $(LHAPDFARGS) 
+	g++ -std=c++11 -o jet_cross_section jet_cross_section.cpp $(PYTHIAFLAGS) $(PYTHIALIBS) $(FASTJETARGS) $(LHAPDFARGS) 
+	g++ -std=c++11 -o jet_lund_diagram jet_lund_diagram.cpp $(PYTHIAFLAGS) $(PYTHIALIBS) $(FASTJETARGS) $(LHAPDFARGS) 
+	g++ -std=c++11 -o jet_shape jet_shape.cpp $(PYTHIAFLAGS) $(PYTHIALIBS) $(FASTJETARGS) $(LHAPDFARGS) 
+	g++ -std=c++11 -o jet_fragmentation jet_fragmentation.cpp $(PYTHIAFLAGS) $(PYTHIALIBS) $(FASTJETARGS) $(LHAPDFARGS) 
+	g++ -std=c++11 -o dijet_asymmetry dijet_asymmetry.cpp $(PYTHIAFLAGS) $(PYTHIALIBS) $(FASTJETARGS) $(LHAPDFARGS) 

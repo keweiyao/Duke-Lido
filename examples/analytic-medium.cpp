@@ -15,6 +15,12 @@
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
+void output_jet(std::string fname, std::vector<particle> plist){
+    std::ofstream f(fname);
+    for (auto & p : plist) f << p.pid << " " << p.p << " " << p.weight << std::endl;
+    f.close();
+}
+
 int main(int argc, char* argv[]){
     using OptDesc = po::options_description;
     OptDesc options{};
@@ -187,6 +193,12 @@ int main(int argc, char* argv[]){
 		LOG_INFO << "N-particles\t" << plist.size();
 		LOG_INFO << "Initial energy\t" << Ei << " [GeV]";
 		LOG_INFO << "Final energy\t" << Ef << " [GeV]";
+
+        std::ostringstream s;
+            s << "results/" << args["energy"].as<int>() << "-"
+              << args["temp"].as<int>() << "-" << args["nu"].as<double>() <<"-" <<  args["taui"].as<double>() <<"-" <<args["tauf"].as<double>();
+            output_jet(s.str(), plist);
+
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

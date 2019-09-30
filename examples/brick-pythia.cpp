@@ -8,14 +8,21 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
+#include <sstream>
 
 #include "simpleLogger.h"
 #include "Medium_Reader.h"
 #include "workflow.h"
-#include "pythia_wrapper.h"
+#include "pythia_jet_gen.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
+
+void output_jet(std::string fname, std::vector<particle> plist){
+    std::ofstream f(fname);
+    for (auto & p : plist) f << p.pid << " " << p.p << " " << p.weight << std::endl;
+    f.close();
+}
 
 int main(int argc, char* argv[]){
     using OptDesc = po::options_description;
@@ -26,53 +33,32 @@ int main(int argc, char* argv[]){
            po::value<fs::path>()->value_name("PATH")->required(),
            "Pythia setting file")
           ("pythia-events,n",
-            po::value<int>()->value_name("INT")->default_value(50000,"50000"),
-           "number of Pythia events")
-          ("ic,i",
-            po::value<fs::path>()->value_name("PATH")->required(),
-           "trento initial condition file")
-          ("eid,j",
-           po::value<int>()->value_name("INT")->default_value(0,"0"),
-           "trento event id")
-          ("hydro",
-           po::value<fs::path>()->value_name("PATH")->required(),
-           "hydro file")
+            po::value<int>()->value_name("INT")->default_value(100,"100"),
+           "number of Pythia events")        
+          ("pthat-low,l",
+            po::value<int>()->value_name("INT")->default_value(100,"100"),
+           "pThatMin")
+          ("pthat-high,h",
+            po::value<int>()->value_name("INT")->default_value(120,"120"),
+           "pThatMax")
           ("lido-setting,s", 
             po::value<fs::path>()->value_name("PATH")->required(),
            "Lido table setting file")
           ("lido-table,t", 
             po::value<fs::path>()->value_name("PATH")->required(),
            "Lido table path to file")
-          ("mu,m", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "medium scale paramtmer")
-          ("afix,f", 
-            po::value<double>()->value_name("FLOAT")->default_value(-1.0,"-1.0"),
-            "fixed alphas value, -1 is running")
-          ("k-factor,k", 
-            po::value<double>()->value_name("FLOAT")->default_value(0.0,"0.0"),
-            "K-factor for the delta-qhat")
-          ("t-scale,a", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "rescale the T-dependence")
-          ("e-scale,b", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "rescale the p-dependence")
-          ("t-power,p", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "T-dependence power")
-          ("e-power,q", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "p-dependence power")
-          ("gamma,g", 
-            po::value<double>()->value_name("FLOAT")->default_value(0.0,"0.0"),
-            "kpara / kperp anisotropy parameter")
-          ("qcut,c",
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"), 
-            "separation scale Q2 = qcut * mD2")
-          ("rvac,r", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"), 
-            "vacuum-like radiation remove factor")    
+           ("trento-event,i",
+           po::value<fs::path>()->value_name("PATH")->required(),
+           "trento event file")  
+           ("dt",
+           po::value<double>()->value_name("FLOAT")->default_value(0.05,"0.05"),
+           "time step [fm/c]")
+          ("tf",
+           po::value<double>()->value_name("FLOAT")->default_value(5.0,"5.0"),
+           "stopping time [fm/c]")
+          ("temp",
+           po::value<double>()->value_name("FLOAT")->default_value(0.3,"0.3"),
+           "medium temperature [GeV]")
     ;
     po::variables_map args{};
     try{
@@ -103,17 +89,6 @@ int main(int argc, char* argv[]){
             table_mode = (fs::exists(args["lido-table"].as<fs::path>())) ? 
                          "old" : "new";
         }
-        // check trento event
-        if (!args.count("ic")){
-            throw po::required_option{"<ic>"};
-            return 1;
-        }
-        else{
-            if (!fs::exists(args["ic"].as<fs::path>())) {
-                throw po::error{"<ic> path does not exist"};
-                return 1;
-            }
-        }
         // check pythia setting
         if (!args.count("pythia-setting")){
             throw po::required_option{"<pythia-setting>"};
@@ -125,112 +100,67 @@ int main(int argc, char* argv[]){
                 return 1;
             }
         }
-        // check hydro setting
-        if (!args.count("hydro")){
-            throw po::required_option{"<hydro>"};
-            return 1;
-        }
-        else{
-            if (!fs::exists(args["hydro"].as<fs::path>())) {
-                throw po::error{"<hydro> path does not exist"};
-                return 1;
-            }
-        }
 
         // start
-        std::vector<particle> plist;
+        std::vector<particle> plist, new_plist, pOut_list;
 
         /// HardGen
-        HardGen hardgen(
-                args["pythia-setting"].as<fs::path>().string(), 
-                args["ic"].as<fs::path>().string(),
-                args["eid"].as<int>()           
-        );
-        hardgen.Generate(
-                plist, 
-                args["pythia-events"].as<int>(),
-                4,
-                2.5,
-				true
+        PythiaGen pythiagen(
+                args["pythia-setting"].as<fs::path>().string(),
+                args["trento-event"].as<fs::path>().string(),
+                args["pthat-low"].as<int>(),
+                args["pthat-high"].as<int>(),
+                0
         );
     
-        /// Read Hydro
-        Medium<2> med1(args["hydro"].as<fs::path>().string());
-
         /// Lido init
         initialize(table_mode,
                 args["lido-setting"].as<fs::path>().string(),
-                args["lido-table"].as<fs::path>().string(),
-                args["mu"].as<double>(),
-                args["afix"].as<double>(),
-                args["k-factor"].as<double>(),
-                args["t-scale"].as<double>(),
-                args["e-scale"].as<double>(),
-                args["t-power"].as<double>(),
-                args["e-power"].as<double>(),
-                args["gamma"].as<double>(),
-                args["qcut"].as<double>(),
-                args["rvac"].as<double>()
+                args["lido-table"].as<fs::path>().string()
                 );
 
-        /// Assign each quark a transverse position according to TRENTo Nbin output
-        /// Freestream particle to the start of hydro
-        for (auto & p : plist){
-            double vz2 = p.p.z()*p.p.z()/p.p.t()/p.p.t();
-            double dt_fs = med1.get_tauH()/std::sqrt(1. - vz2);
-            p.freestream(dt_fs);
-        }
+        // proper times
+        double tau0 = 0.6 * 5.026;
+        double dtau = args["dt"].as<double>() * 5.026; // convert to GeV^-1
+        double tauf = args["tf"].as<double>() * 5.026; // convert to GeV^-1
 
+        double T0 = args["temp"].as<double>(); 
+        int Nsteps = int(tauf/dtau);
 
-
-        // initial pT
-        double pTi = mean_pT(plist);
-
-        // run
-        int counter = 0;
-        int Ns = 10;
-
-        while(med1.load_next()){
-            double current_hydro_clock = med1.get_tauL();
-            double hydro_dtau = med1.get_hydro_time_step();
-            for (int i=0; i<Ns; ++i){
-                double dtau = hydro_dtau/Ns; // use smaller dt step
-                for (auto & p : plist){
-                    if (p.freezeout) continue; // do not touch freezeout ones
-
-                    // determine dt needed to evolve to the next tau
-                    double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
-                    double dt_lab = calcualte_dt_from_dtau(p.x, p.p, tau, dtau);
-
-                    // get hydro information
-                    double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.;
-                    med1.interpolate(p.x, T, vx, vy, vz);
-                    double vabs = std::sqrt(vx*vx + vy*vy + vz*vy);
-                    // regulate v
-                    if (vabs > 1.){
-                        LOG_WARNING << "regulate |v| = " << vabs << " > 1."; 
-                        if (vabs > 1.-1e-6) {
-                            double rescale = (1.-1e-6)/vabs;
-                            vx *= rescale;
-                            vy *= rescale;    
-                            vz *= rescale;    
-                        }
-                    }
-                    // x,p-update
-                    int channel = 
-                        update_particle_momentum_Lido(dt_lab, T, {vx, vy, vz}, p);
-                }
+        for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
+            pythiagen.Generate(plist);
+            // freestream form t=0 to tau=tau0
+            for (auto & p : plist) {
+              double dt = calcualte_dt_from_dtau(p.x, p.p, 0, tau0);
+              p.freestream(dt); 
             }
-            counter ++;
+            for (int i=0; i<Nsteps; i++){
+                new_plist.clear();
+			          double tau =tau0+ i*dtau;
+				  // double T = T0*std::pow(tau0/tau, 0.4);
+				  double T=T0;
+			          if (i%10==0) LOG_INFO << tau/5.026 << " [fm/c]\t" 
+                                    << T << " [GeV]" << " #=" << plist.size();
+                
+		            for (auto & p : plist){
+                   
+                    double dt = calcualte_dt_from_dtau(p.x, p.p, tau, dtau);
+                    double vz = p.x.z()/( p.x.t() + 1e-5 );
+                    double eta = 0.5*std::log((1.+vz)/(1.-vz));
+                    if ( std::fabs(eta)>3) continue;
+		                int n = update_particle_momentum_Lido(
+		                           dt, T, {0., 0., vz}, p, pOut_list);
+					          for (auto & k : pOut_list) {
+		                new_plist.push_back(k);
+		            }
+		        }
+		        plist = new_plist;
+		    }
+            std::ostringstream s;
+            s << "results/" << args["pthat-low"].as<int>() << "-"
+              << args["pthat-high"].as<int>() << "-" << ie;
+            output_jet(s.str(), plist);
         }
-
-        // final pT
-        double pTf = mean_pT(plist);
-        LOG_INFO << "Nparticles: " << plist.size();
-        LOG_INFO << "Initial pT: " << pTi << " GeV";
-        LOG_INFO << "Final pT: " << pTf << " GeV";
-
-        output_oscar(plist, "c-quark-frzout.dat");
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";
