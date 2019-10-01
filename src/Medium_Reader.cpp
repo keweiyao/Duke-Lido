@@ -71,7 +71,7 @@ bool Medium<N>::load_next(){
 		std::stringstream FrameNumber;
 		FrameNumber << std::setw(4) << std::setfill('0') << _frame_count+iTau;
 		std::string FrameName = "/Event/Frame_"+FrameNumber.str();
-		LOG_INFO << "loading " << FrameName;
+		//LOG_INFO << "loading " << FrameName;
 		
 		// Temp
 		dataset = _file.openDataSet(FrameName+"/Temp");
@@ -174,17 +174,13 @@ void Medium<N>::interpolate(fourvec x, double & T, double & vx, double & vy, dou
 ////////////////////////// Trento ////////////////////////////////////
 TransverPositionSampler::TransverPositionSampler(std::string filename, int iev):
 _file(filename, H5F_ACC_RDONLY),
-_datasetname("/event_"+std::to_string(iev))
-//_event(_file.openGroup(_datasetname))
+_datasetname("/event_"+std::to_string(iev)),
+_event(_file.openGroup(_datasetname))
 {
-	//hdf5_read_scalar_attr(_event, "Nx", _Nx);
-	//hdf5_read_scalar_attr(_event, "Ny", _Ny);
-	//hdf5_read_scalar_attr(_event, "dxy", _dx);
-	//hdf5_read_scalar_attr(_event, "dxy", _dy);
-	_dx = 0.1;
-	_dy = 0.1;
-	_Nx = 301;
-	_Ny = 301;
+	hdf5_read_scalar_attr(_event, "Nx", _Nx);
+	hdf5_read_scalar_attr(_event, "Ny", _Ny);
+	hdf5_read_scalar_attr(_event, "dxy", _dx);
+	hdf5_read_scalar_attr(_event, "dxy", _dy);
 	_dx *=  fmc_to_GeV_m1;
 	_dy *=  fmc_to_GeV_m1;
 	_x_min = -0.5*_Nx*_dx;
@@ -197,7 +193,7 @@ _datasetname("/event_"+std::to_string(iev))
 	H5::DataSet dataset;	
 	H5::DataSpace dataspace(2, dims);
 	
-	dataset = _file.openDataSet(_datasetname);
+	dataset = _event.openDataSet("Ncoll_density");
 	dataset.read(_TAB.data(), H5::PredType::NATIVE_DOUBLE, 
 				dataspace, dataset.getSpace());
 	//////////// Init PDF ///////////////////

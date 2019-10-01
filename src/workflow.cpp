@@ -13,6 +13,7 @@
 #include "predefine.h"
 
 std::map<int, std::vector<Process>> AllProcesses;
+std::ofstream ofs ("hq_gluon_accept.dat", std::ofstream::app);
 
 void init_process(Process &r, std::string mode, std::string table_path)
 {
@@ -95,18 +96,29 @@ void init_process(Process &r, std::string mode, std::string table_path)
 	}
 }
 
-void initialize(std::string mode, std::string setting_path, std::string table_path,
-				double mu,   // alphas(max(Q, mu*pi*T)), active when afix < 0
-				double afix, // fixed coupling, negative value for running coupling
-				double K, double a, double b, double p, double q, double gamma,
-				// K, a, b, p, q, gamma are used in non-pert. qhat parametrization
-				// Its effect is off when K = 0.
-				double cut, // Separation scale between diffusion
-							// and scattering both at leading order (weak coupled)
-				double Rvac // Vaccum veto region parameter
-)
+void initialize(std::string mode, std::string setting_path, std::string table_path)
 {
 	print_logo();
+
+	boost::property_tree::ptree config;
+	std::ifstream input(setting_path);
+	read_xml(input, config);
+
+	double mu=config.get("mu", 2.0); //alphas(max(Q, mu*pi*T)), active when afix < 0
+	double afix=config.get("afix", -1.0);  // fixed coupling, negative value for running coupling
+	double K=config.get("K", 0.0);
+	double a=config.get("a", 1.0);
+	double b=config.get("b", 1.0);
+	double p=config.get("p", 1.0);
+	double q=config.get("q", 1.0);
+	double gamma=config.get("gamma", 1.0); // K, a, b, p, q, gamma are used in non-pert. qhat parametrization
+										   // Its effect is off when K = 0.
+	double cut=config.get("cut", 1.0); // Separation scale between diffusion
+										 // and scattering both at leading order (weak coupled)
+	double Rvac=config.get("Rvac", 1.0); // Vaccum veto region parameter
+
+	Lido_Ecut = config.get("Ecut", 2.0);
+
 	initialize_mD_and_scale(0, mu, afix, cut, Rvac);
 	initialize_transport_coeff(K, a, b, p, q, gamma);
 	echo();
@@ -206,7 +218,10 @@ int update_particle_momentum_Lido(
 	double dt, double temp, std::vector<double> v3cell,
 	particle &pIn, std::vector<particle> &pOut_list)
 {  
-	const double Lido_pcut=3.;
+	auto p00 = pIn.p;
+	//const double Lido_Ecut=5.*std::max(temp, 0.154);
+	//const double Lido_Ecut = 2.0;
+
 
 	pOut_list.clear();
 	pIn.Tf = temp;
@@ -221,9 +236,9 @@ int update_particle_momentum_Lido(
     double dtau = tau1 - tau0;
 
 	//ignore soft partons with a constant momentum cut
-	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_pcut 
-	    || temp < 0.154)
+	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut || temp < 0.154)
 	{
+		pIn.radlist.clear();
 		pOut_list.push_back(pIn);
 		return pOut_list.size();
 	}
@@ -338,6 +353,7 @@ int update_particle_momentum_Lido(
 	{
 		if (channel >= AllProcesses[absid].size())
 		{
+			LOG_INFO << p00 <<"//"<< pIn.p << "//" << temp;
 			LOG_FATAL << "3. Channel = " << channel << " not exists";
 			exit(-1);
 		}
@@ -377,16 +393,14 @@ int update_particle_momentum_Lido(
 		if (channel == 0 || channel == 1)
 		{
 			pIn.p = FS[0];
-
-			
-                particle ep;
-				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_pcut){
-					double tempid;
-					if (channel == 1) tempid = 21;
-					else tempid = Srandom::sample_flavor(3);
-					particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
-					pOut_list.push_back(ep);
-				}
+			particle ep;
+			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() >  Lido_Ecut){
+				double tempid;
+				if (channel == 1) tempid = 21;
+				else tempid = Srandom::sample_flavor(3);
+				particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
+				pOut_list.push_back(ep);
+			}
 				
 		}
 		// inelastic process takes a finite time to happen
@@ -424,15 +438,13 @@ int update_particle_momentum_Lido(
 			// estimate mfp in the lab frame
 			vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
 			pIn.radlist.push_back(vp);
-
-			
-				if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_pcut){	
-					double tempid;
-					if (channel == 3) tempid = 21;
-					else tempid = Srandom::sample_flavor(3);
-					particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
-					pOut_list.push_back(ep);
-				}
+			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_Ecut){	
+				double tempid;
+				if (channel == 3) tempid = 21;
+				else tempid = Srandom::sample_flavor(3);
+				particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
+				pOut_list.push_back(ep);
+			}
 				
 		}
 		if (channel == 4 || channel == 5)
@@ -518,25 +530,38 @@ int update_particle_momentum_Lido(
 				split_type = 2; // g --> g + g
 			if (pIn.pid == 21 && it->pid != 21)
 				split_type = 3; // g --> q + qbar
+				
+				
 			double taun = formation_time(it->mother_p, it->p, temp, split_type);
-			// If t-t0 > tauf, or it reaches the boundary of QGP
-			// We check whether it sould be formed
-
-			// if not yet formed, evolve it to t+dt
 			std::vector<particle> pnew_Out;
 			double tau = std::sqrt(it->x.t()*it->x.t()-it->x.z()*it->x.z());
 			double dt_daughter = calcualte_dt_from_dtau(it->x, it->p, 
-					tau, dtau);
+					tau, dtau); 
+			
+			// In the local (adiabatic LPM) mode,
+			// use local information to determine the number of rescatterings
+			bool Adiabatic_LPM = true;
+			if (Adiabatic_LPM){
+			    do{
+			        update_particle_momentum_Lido(dt_daughter, temp, 
+											v3cell, *it, pnew_Out);
+					taun = formation_time(it->mother_p, it->p, temp, split_type);
+			    }while(it->x.t() - it->x0.t() <= taun);
+			    // once finished, reset its x to where it is produced
+			    it->x = it->x0;
+			}
+			
+			// update the partilce for this time step
 			update_particle_momentum_Lido(dt_daughter, temp, 
 											v3cell, *it, pnew_Out);
-			if (it->x.t() - it->x0.t() <= taun){
+			
+			if (it->x.t() - it->x0.t() <= taun && !Adiabatic_LPM){
 				it++;
 			}
 			else{
 				// if formed, apply LPM suppression
 				double Acceptance = 0.;
-				if (!it->is_vac)
-				{
+				if (!it->is_vac){
 					// for medium-induced radiation
 					// 1): a change of running-coupling from elastic broadening
 					double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
@@ -555,8 +580,7 @@ int update_particle_momentum_Lido(
 					// The final rejection factor
 					Acceptance = LPM * Running * DeadCone;
 				}
-				else
-				{
+				else{
 					// for vacuum-like radiaiton formed inside the medium
 					double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
 					double Deltakt2 = measure_perp(it->mother_p, it->p - it->p0).pabs2();
@@ -565,9 +589,7 @@ int update_particle_momentum_Lido(
 					else
 						Acceptance = 1.0;
 				}
-				if (Srandom::rejection(Srandom::gen) < Acceptance)
-				{
-
+				if (Srandom::rejection(Srandom::gen) < Acceptance){
 					// accepted branching causes physical effects
 					// momentum change, and put back on shell
 					//double xx = it->p0.t()/it->mother_p.t();
@@ -583,6 +605,7 @@ int update_particle_momentum_Lido(
 					}
 					// label it as real and put it in output particle list
 					it->is_virtual = false;
+					ofs<<it->p<<" "<<it->mother_p<<" "<<it->p0<<" "<<it->x<<" "<<it->x0<<" "<<it->pid<<" "<<it->is_vac<<" "<<it->is_recoil<<" "<<it->T0 <<" "<<it->weight<<std::endl;
 					pOut_list.push_back(*it);
 				}
 				// remove it from the radlist

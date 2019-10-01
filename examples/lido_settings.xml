@@ -1,3 +1,15 @@
+<mu>2.0</mu>
+<afix>-1.0</afix>
+<K>0.0</K>
+<a>1.0</a>
+<b>1.0</b>
+<p>1.0</p>
+<q>1.0</q>
+<gamma>1.0</gamma>
+<cut>1.0</cut>
+<Ecut>3.0</Ecut>
+<Rvac>1.0</Rvac>
+
 <Boltzmann>
 	<!--  Gluon/elastic/G+q=G+q  -->
 	<gq2gq status="active" moments="on">
@@ -251,7 +263,7 @@
 
     <!-- Charm quark -->
 	<!--   charm/elastic/Q+q=Q+q  -->
-	<cq2cq status="inactive" moments="on">
+	<cq2cq status="active" moments="on">
 		<mass>0.0</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -265,7 +277,7 @@
 	</cq2cq>
 
 	<!--   charm/elastic/Q+g=Q+g  -->
-	<cg2cg status="inactive" moments="on">
+	<cg2cg status="active" moments="on">
 		<mass>0.0</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -279,7 +291,7 @@
 	</cg2cg>
 
 	<!--   charm/inelastic/Q+q=Q+q+G  -->
-	<cq2cqg status="inactive" moments="off">
+	<cq2cqg status="active" moments="off">
 		<mass>0.0</mass>
 		<degeneracy>36</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -293,7 +305,7 @@
 	</cq2cqg>
 
 	<!--   charm/inelastic/Q+g=Q+g+G  -->
-	<cg2cgg status="inactive" moments="off">
+	<cg2cgg status="active" moments="off">
 		<mass>0.0</mass>
 		<degeneracy>16</degeneracy>
 		<xsection slots="sqrts,temp">
@@ -339,7 +351,7 @@
 	</cgg2cg>
 
 	<!--   charm/inelastic/Q+diffusion=Q+g  -->
-	<c2cg status="inactive" moments="off">
+	<c2cg status="active" moments="off">
 		<mass>0.0</mass>
 		<rate slots="energy,temp">
 			<Nenergy>1000</Nenergy> <Lenergy>0.1</Lenergy> <Henergy>1000.0</Henergy>

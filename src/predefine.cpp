@@ -49,6 +49,8 @@ double Rvac;
 Debye_mass * t_channel_mD2;
 const double LPM_prefactor = 0.75; // to match analytic calculation, 0.75 by default
 
+double Lido_Ecut;
+
 qhat_params_struct qhat_params;
 
 void initialize_mD_and_scale(int _mD_type, double _scale, double _afix, double _cut, double _Rvac){

@@ -99,11 +99,6 @@ void Rate<LO, 2, 2, double(*)(const double, void *)>::
 	bool status = true;
 	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}},
 						std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
-	if (status == false){
-		final_states.resize(1);
-		final_states[0] = fourvec{E, 0, 0, std::sqrt(E*E-_mass*_mass)};
-		return;
-	}
 	double E2 = T*(std::exp(res[0])-1.),
 		   costheta = res[1];
 	double sintheta = std::sqrt(1. - costheta*costheta);

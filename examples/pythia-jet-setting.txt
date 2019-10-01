@@ -21,3 +21,12 @@ Check:event = off
 ! 5) Hadron level
 HadronLevel:all = off
 
+! 8) PDF
+PDF:useHard = on
+PDF:useHardNPDFA = on
+PDF:nPDFSetA = 1
+PDF:nPDFBeamA = 100822080 # nuclei = 10LZZZAAAI
+PDF:useHardNPDFB = on
+PDF:nPDFSetB = 1
+PDF:nPDFBeamB = 100822080 # nuclei = 10LZZZAAAI
+

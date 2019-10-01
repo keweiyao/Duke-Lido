@@ -15,6 +15,12 @@
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
+void output_jet(std::string fname, std::vector<particle> plist){
+    std::ofstream f(fname);
+    for (auto & p : plist) f << p.pid << " " << p.p << " " << p.weight << std::endl;
+    f.close();
+}
+
 int main(int argc, char* argv[]){
     using OptDesc = po::options_description;
     OptDesc options{};
@@ -47,33 +53,6 @@ int main(int argc, char* argv[]){
           ("lido-table,t", 
             po::value<fs::path>()->value_name("PATH")->required(),
            "Lido table path to file")
-          ("mu,m", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "medium scale paramtmer")
-          ("afix,f", 
-            po::value<double>()->value_name("FLOAT")->default_value(-1.0,"-1.0"),
-            "fixed alphas value, -1 is running")
-          ("k-factor,k", 
-            po::value<double>()->value_name("FLOAT")->default_value(0.0,"0.0"),
-            "K-factor for the delta-qhat")
-          ("t-scale,a", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "rescale the T-dependence")
-          ("e-scale,b", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "rescale the p-dependence")
-          ("t-power,p", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "T-dependence power")
-          ("e-power,q", 
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"),
-            "p-dependence power")
-          ("gamma,g", 
-            po::value<double>()->value_name("FLOAT")->default_value(0.0,"0.0"),
-            "kpara / kperp anisotropy parameter")
-          ("qcut,c",
-            po::value<double>()->value_name("FLOAT")->default_value(1.0,"1.0"), 
-            "separation scale Q2 = qcut * mD2")  
           ("mass",
             po::value<double>()->value_name("FLOAT")->default_value(1.3,"1.3"), 
             "quark mass")  
@@ -148,17 +127,7 @@ int main(int argc, char* argv[]){
         /// Lido init
         initialize(table_mode,
                 args["lido-setting"].as<fs::path>().string(),
-                args["lido-table"].as<fs::path>().string(),
-                args["mu"].as<double>(),
-                args["afix"].as<double>(),
-                args["k-factor"].as<double>(),
-                args["t-scale"].as<double>(),
-                args["e-scale"].as<double>(),
-                args["t-power"].as<double>(),
-                args["e-power"].as<double>(),
-                args["gamma"].as<double>(),
-                args["qcut"].as<double>(),
-                0
+                args["lido-table"].as<fs::path>().string()
                 );
 
         /// Assign each quark a transverse position according to TRENTo Nbin output
@@ -224,6 +193,12 @@ int main(int argc, char* argv[]){
 		LOG_INFO << "N-particles\t" << plist.size();
 		LOG_INFO << "Initial energy\t" << Ei << " [GeV]";
 		LOG_INFO << "Final energy\t" << Ef << " [GeV]";
+
+        std::ostringstream s;
+            s << "results/" << args["energy"].as<int>() << "-"
+              << args["temp"].as<int>() << "-" << args["nu"].as<double>() <<"-" <<  args["taui"].as<double>() <<"-" <<args["tauf"].as<double>();
+            output_jet(s.str(), plist);
+
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";
