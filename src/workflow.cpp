@@ -17,83 +17,83 @@ std::ofstream ofs ("hq_gluon_accept.dat", std::ofstream::app);
 
 void init_process(Process &r, std::string mode, std::string table_path)
 {
-	switch (r.which())
-	{
-	case 0:
-		if (boost::get<Rate22>(r).IsActive())
-			if (mode == "new")
-			{
-				boost::get<Rate22>(r).initX(table_path);
-				boost::get<Rate22>(r).init(table_path);
-			}
-			else
-			{
-				boost::get<Rate22>(r).loadX(table_path);
-				boost::get<Rate22>(r).load(table_path);
-			}
-		else
-			return;
-		break;
-	case 1:
-		if (boost::get<Rate23>(r).IsActive())
-			if (mode == "new")
-			{
-				boost::get<Rate23>(r).initX(table_path);
-				boost::get<Rate23>(r).init(table_path);
-			}
-			else
-			{
-				boost::get<Rate23>(r).loadX(table_path);
-				boost::get<Rate23>(r).load(table_path);
-			}
-		else
-			return;
-		break;
-	case 2:
-		if (boost::get<Rate32>(r).IsActive())
-			if (mode == "new")
-			{
-				boost::get<Rate32>(r).initX(table_path);
-				boost::get<Rate32>(r).init(table_path);
-			}
-			else
-			{
-				boost::get<Rate32>(r).loadX(table_path);
-				boost::get<Rate32>(r).load(table_path);
-			}
-		else
-			return;
-		break;
-	case 3:
-		if (boost::get<Rate12>(r).IsActive())
-			if (mode == "new")
-			{
-				boost::get<Rate12>(r).init(table_path);
-			}
-			else
-			{
-				boost::get<Rate12>(r).load(table_path);
-			}
-		else
-			return;
-		break;
-	case 4:
-		if (boost::get<Rate21>(r).IsActive())
-			if (mode == "new")
-			{
-				boost::get<Rate21>(r).init(table_path);
-			}
-			else
-			{
-				boost::get<Rate21>(r).load(table_path);
-			}
-		else
-			return;
-		break;
-	default:
-		exit(-1);
-		break;
-	}
+    switch (r.which())
+    {
+    case 0:
+        if (boost::get<Rate22>(r).IsActive())
+            if (mode == "new")
+            {
+                boost::get<Rate22>(r).initX(table_path);
+                boost::get<Rate22>(r).init(table_path);
+            }
+            else
+            {
+                boost::get<Rate22>(r).loadX(table_path);
+                boost::get<Rate22>(r).load(table_path);
+            }
+        else
+            return;
+        break;
+    case 1:
+        if (boost::get<Rate23>(r).IsActive())
+            if (mode == "new")
+            {
+                boost::get<Rate23>(r).initX(table_path);
+                boost::get<Rate23>(r).init(table_path);
+            }
+            else
+            {
+                boost::get<Rate23>(r).loadX(table_path);
+                boost::get<Rate23>(r).load(table_path);
+            }
+        else
+            return;
+        break;
+    case 2:
+        if (boost::get<Rate32>(r).IsActive())
+            if (mode == "new")
+            {
+                boost::get<Rate32>(r).initX(table_path);
+                boost::get<Rate32>(r).init(table_path);
+            }
+            else
+            {
+                boost::get<Rate32>(r).loadX(table_path);
+                boost::get<Rate32>(r).load(table_path);
+            }
+        else
+            return;
+        break;
+    case 3:
+        if (boost::get<Rate12>(r).IsActive())
+            if (mode == "new")
+            {
+                boost::get<Rate12>(r).init(table_path);
+            }
+            else
+            {
+                boost::get<Rate12>(r).load(table_path);
+            }
+        else
+            return;
+        break;
+    case 4:
+        if (boost::get<Rate21>(r).IsActive())
+            if (mode == "new")
+            {
+                boost::get<Rate21>(r).init(table_path);
+            }
+            else
+            {
+                boost::get<Rate21>(r).load(table_path);
+            }
+        else
+            return;
+        break;
+    default:
+        exit(-1);
+        break;
+    }
 }
 
 void initialize(std::string mode, std::string setting_path, std::string table_path)
@@ -179,6 +179,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 		init_process(r, mode, table_path);
 	BOOST_FOREACH (Process &r, AllProcesses[21])
 		init_process(r, mode, table_path);
+
 }
 
 // split=1: q->q+g, colors = 1 - x + CF/CA * x^2
@@ -186,37 +187,37 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 // split=3: g->q+qbar, colors = 1 - x*CA/CF + x^2*CA/CF
 double formation_time(fourvec p, fourvec k, double T, int split)
 {
-	double E0 = p.t();
-	double x = k.t() / E0;
-	double mg2 = t_channel_mD2->get_mD2(T) / 2.,
-		   mass_sqrs = 0.0, colors = 1.;
-	if (split == 1)
-	{
-		// q --> q + g
-		colors = 1. - x + CF / CA * x * x;
-		mass_sqrs = x * x * dot(p, p) + (1. - x) * mg2;
-	}
-	if (split == 2)
-	{
-		// g --> g + g
-		colors = 1. - x + x * x;
-		mass_sqrs = (1. - x + x * x) * mg2;
-	}
-	if (split == 3)
-	{
-		// g --> q + qbar
-		colors = 1. - x * CA / CF + x * x * CA / CF;
-		mass_sqrs = (1 - CA / CF * x + CA / CF * x * x) * mg2;
-	}
+    double E0 = p.t();
+    double x = k.t() / E0;
+    double mg2 = t_channel_mD2->get_mD2(T) / 2.,
+           mass_sqrs = 0.0, colors = 1.;
+    if (split == 1)
+    {
+        // q --> q + g
+        colors = 1. - x + CF / CA * x * x;
+        mass_sqrs = x * x * dot(p, p) + (1. - x) * mg2;
+    }
+    if (split == 2)
+    {
+        // g --> g + g
+        colors = 1. - x + x * x;
+        mass_sqrs = (1. - x + x * x) * mg2;
+    }
+    if (split == 3)
+    {
+        // g --> q + qbar
+        colors = 1. - x * CA / CF + x * x * CA / CF;
+        mass_sqrs = (1 - CA / CF * x + CA / CF * x * x) * mg2;
+    }
 
-	double QT2 = measure_perp(p, k).pabs2() * colors;
-	double tauf = 2 * x * (1 - x) * E0 / (QT2 + mass_sqrs);
-	return tauf;
+    double QT2 = measure_perp(p, k).pabs2() * colors;
+    double tauf = 2 * x * (1 - x) * E0 / (QT2 + mass_sqrs);
+    return tauf;
 }
-
+std::ofstream of("stat.dat");
 int update_particle_momentum_Lido(
-	double dt, double temp, std::vector<double> v3cell,
-	particle &pIn, std::vector<particle> &pOut_list)
+    double dt, double temp, std::vector<double> v3cell,
+    particle &pIn, std::vector<particle> &pOut_list)
 {  
 	auto p00 = pIn.p;
 	//const double Lido_Ecut=5.*std::max(temp, 0.154);
@@ -230,10 +231,10 @@ int update_particle_momentum_Lido(
 	pIn.vcell[0] = v3cell[3];
 	auto x0 = pIn.x;
 
-	double tau0 = std::sqrt(std::pow(pIn.x.t(),2) - std::pow(pIn.x.z(),2));
+	//double tau0 = std::sqrt(std::pow(pIn.x.t(),2) - std::pow(pIn.x.z(),2));
 	pIn.freestream(dt);
-	double tau1 = std::sqrt(std::pow(pIn.x.t(),2) - std::pow(pIn.x.z(),2));
-    double dtau = tau1 - tau0;
+	//double tau1 = std::sqrt(std::pow(pIn.x.t(),2) - std::pow(pIn.x.z(),2));
+    double dtau = dt;//tau1 - tau0;
 
 	//ignore soft partons with a constant momentum cut
 	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut || temp < 0.154)
@@ -534,13 +535,13 @@ int update_particle_momentum_Lido(
 				
 			double taun = formation_time(it->mother_p, it->p, temp, split_type);
 			std::vector<particle> pnew_Out;
-			double tau = std::sqrt(it->x.t()*it->x.t()-it->x.z()*it->x.z());
-			double dt_daughter = calcualte_dt_from_dtau(it->x, it->p, 
-					tau, dtau); 
+			//double tau = std::sqrt(it->x.t()*it->x.t()-it->x.z()*it->x.z());
+			double dt_daughter = dt;
+			//calcualte_dt_from_dtau(it->x, it->p, tau, dtau); 
 			
 			// In the local (adiabatic LPM) mode,
 			// use local information to determine the number of rescatterings
-			bool Adiabatic_LPM = true;
+			bool Adiabatic_LPM = false;
 			if (Adiabatic_LPM){
 			    do{
 			        update_particle_momentum_Lido(dt_daughter, temp, 
@@ -594,6 +595,7 @@ int update_particle_momentum_Lido(
 					// momentum change, and put back on shell
 					//double xx = it->p0.t()/it->mother_p.t();
 					//pIn.p = pIn.p * (1. - xx);
+					of << pIn.p.t()-it->p.t() << " " << it->p.t() << " " << pIn.p.t() << std::endl;
 					pIn.p = pIn.p - it->p;
 					pIn.p.a[0] = std::sqrt(pIn.p.pabs2() + pIn.mass * pIn.mass);
 					// for g -> q + qbar, pid change
@@ -628,127 +630,127 @@ int update_particle_momentum_Lido(
 
 particle produce_parton(int pid, particle &mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> &v3cell, bool is_virtual, bool is_recoil)
 {
-	particle vp;
-	vp.pid = pid;
-	vp.mass = 0.0;
-	vp.weight = mother_parton.weight;
-	vp.p0 = vp0;
-	vp.p = vp.p0;
-	vp.x0 = vx0;
-	vp.x = vp.x0;
-	vp.mother_p = mother_parton.p;
-	vp.T0 = T;
-	vp.is_vac = false;
-	vp.is_virtual = is_virtual;
-	vp.is_recoil = is_recoil;
-	vp.vcell.resize(3);
-	vp.vcell[0] = v3cell[0];
-	vp.vcell[1] = v3cell[1];
-	vp.vcell[2] = v3cell[2];
+    particle vp;
+    vp.pid = pid;
+    vp.mass = 0.0;
+    vp.weight = mother_parton.weight;
+    vp.p0 = vp0;
+    vp.p = vp.p0;
+    vp.x0 = vx0;
+    vp.x = vp.x0;
+    vp.mother_p = mother_parton.p;
+    vp.T0 = T;
+    vp.is_vac = false;
+    vp.is_virtual = is_virtual;
+    vp.is_recoil = is_recoil;
+    vp.vcell.resize(3);
+    vp.vcell[0] = v3cell[0];
+    vp.vcell[1] = v3cell[1];
+    vp.vcell[2] = v3cell[2];
 
-	return vp;
+    return vp;
 }
 
 void output(const std::vector<particle> plist, std::string fname)
 {
-	int i = 0;
-	std::ofstream f(fname);
-	for (auto &p : plist)
-	{
-		f << std::setw(10) << std::setfill(' ') << i << "  "	  // particle index, i10,2x
-		  << std::setw(10) << std::setfill(' ') << p.pid << "  "; // particle id, i10,2x
-		f << p.p.x() << "  "
-		  << p.p.y() << "  "
-		  << p.p.z() << "  "
-		  << p.p.t() << "  "
-		  << p.mass << "  "
-		  << p.x.x() / fmc_to_GeV_m1 << "  "
-		  << p.x.y() / fmc_to_GeV_m1 << "  "
-		  << p.x.z() / fmc_to_GeV_m1 << "  "
-		  << p.x.t() / fmc_to_GeV_m1 << " "
-		  << p.x0.x() / fmc_to_GeV_m1 << "  "
-		  << p.x0.y() / fmc_to_GeV_m1 << "  "
-		  << p.x0.z() / fmc_to_GeV_m1 << "  "
-		  << p.x0.t() / fmc_to_GeV_m1 << "\n";
-		i++;
-	}
+    int i = 0;
+    std::ofstream f(fname);
+    for (auto &p : plist)
+    {
+        f << std::setw(10) << std::setfill(' ') << i << "  "      // particle index, i10,2x
+          << std::setw(10) << std::setfill(' ') << p.pid << "  "; // particle id, i10,2x
+        f << p.p.x() << "  "
+          << p.p.y() << "  "
+          << p.p.z() << "  "
+          << p.p.t() << "  "
+          << p.mass << "  "
+          << p.x.x() / fmc_to_GeV_m1 << "  "
+          << p.x.y() / fmc_to_GeV_m1 << "  "
+          << p.x.z() / fmc_to_GeV_m1 << "  "
+          << p.x.t() / fmc_to_GeV_m1 << " "
+          << p.x0.x() / fmc_to_GeV_m1 << "  "
+          << p.x0.y() / fmc_to_GeV_m1 << "  "
+          << p.x0.z() / fmc_to_GeV_m1 << "  "
+          << p.x0.t() / fmc_to_GeV_m1 << "\n";
+        i++;
+    }
 }
 
 void output_oscar(const std::vector<particle> plist, int abspid, std::string fname)
 {
-	// output OSCAR Format
-	int Nparticles = 0;
-	for (auto &p : plist)
-	{
-		if (std::abs(p.pid) == abspid)
-			Nparticles++;
-	}
+    // output OSCAR Format
+    int Nparticles = 0;
+    for (auto &p : plist)
+    {
+        if (std::abs(p.pid) == abspid)
+            Nparticles++;
+    }
 
-	std::ofstream f(fname);
-	f << "OSC1997A\n";
-	f << "final_id_p_x\n";
-	f << "     lbt  1.0alpha   208     82   208     82   aacm  0.1380E+04         1\n";
-	f << "         1  " << std::setw(10)
-	  << Nparticles << "     0.001     0.001     1     1        1\n";
+    std::ofstream f(fname);
+    f << "OSC1997A\n";
+    f << "final_id_p_x\n";
+    f << "     lbt  1.0alpha   208     82   208     82   aacm  0.1380E+04         1\n";
+    f << "         1  " << std::setw(10)
+      << Nparticles << "     0.001     0.001     1     1        1\n";
 
-	int i = 0;
-	for (auto &p : plist)
-	{
-		if (std::abs(p.pid) == abspid)
-		{
-			f << std::setw(10) << std::setfill(' ') << i << "  "	  // particle index, i10,2x
-			  << std::setw(10) << std::setfill(' ') << p.pid << "  "; // particle id, i10,2x
-			f << ff(p.p.x()) << "  "
-			  << ff(p.p.y()) << "  "
-			  << ff(p.p.z()) << "  "
-			  << ff(p.p.t()) << "  "
-			  << ff(p.mass) << "  "
-			  << ff(p.x.x() / fmc_to_GeV_m1) << "  "
-			  << ff(p.x.y() / fmc_to_GeV_m1) << "  "
-			  << ff(p.x.z() / fmc_to_GeV_m1) << "  "
-			  << ff(p.x.t() / fmc_to_GeV_m1) << "  "
-			  << ff(p.Tf) << "  "
-			  << ff(p.vcell[0]) << "  "
-			  << ff(p.vcell[1]) << "  "
-			  << ff(p.vcell[2]) << "  "
-			  << ff(p.p0.x()) << "  "
-			  << ff(p.p0.y()) << "  "
-			  << ff(p.p0.z()) << "  "
-			  << ff(p.p0.t()) << "  "
-			  << ff(p.weight) << "  "
-			  << ff(0.0) << "\n";
-		}
-		i++;
-	}
+    int i = 0;
+    for (auto &p : plist)
+    {
+        if (std::abs(p.pid) == abspid)
+        {
+            f << std::setw(10) << std::setfill(' ') << i << "  "      // particle index, i10,2x
+              << std::setw(10) << std::setfill(' ') << p.pid << "  "; // particle id, i10,2x
+            f << ff(p.p.x()) << "  "
+              << ff(p.p.y()) << "  "
+              << ff(p.p.z()) << "  "
+              << ff(p.p.t()) << "  "
+              << ff(p.mass) << "  "
+              << ff(p.x.x() / fmc_to_GeV_m1) << "  "
+              << ff(p.x.y() / fmc_to_GeV_m1) << "  "
+              << ff(p.x.z() / fmc_to_GeV_m1) << "  "
+              << ff(p.x.t() / fmc_to_GeV_m1) << "  "
+              << ff(p.Tf) << "  "
+              << ff(p.vcell[0]) << "  "
+              << ff(p.vcell[1]) << "  "
+              << ff(p.vcell[2]) << "  "
+              << ff(p.p0.x()) << "  "
+              << ff(p.p0.y()) << "  "
+              << ff(p.p0.z()) << "  "
+              << ff(p.p0.t()) << "  "
+              << ff(p.weight) << "  "
+              << ff(0.0) << "\n";
+        }
+        i++;
+    }
 }
 
 double calcualte_dt_from_dtau(fourvec x, fourvec p, double tau, double dtau)
 {
-	double vz = p.z() / p.t();
-	double t_m_zvz = x.t() - x.z() * vz;
-	double one_m_vz2 = 1. - vz * vz;
-	double dtau2 = dtau * (dtau + 2. * tau);
-	double dt_lab = (std::sqrt(t_m_zvz * t_m_zvz + one_m_vz2 * dtau2) - t_m_zvz) / one_m_vz2;
-	return dt_lab;
+    double vz = p.z() / p.t();
+    double t_m_zvz = x.t() - x.z() * vz;
+    double one_m_vz2 = 1. - vz * vz;
+    double dtau2 = dtau * (dtau + 2. * tau);
+    double dt_lab = (std::sqrt(t_m_zvz * t_m_zvz + one_m_vz2 * dtau2) - t_m_zvz) / one_m_vz2;
+    return dt_lab;
 }
 
 double mean_pT(const std::vector<particle> plist)
 {
-	double W = 0., wsum_pT = 0.;
-	for (auto &p : plist)
-	{
-		wsum_pT += p.weight * std::sqrt(p.p.x() * p.p.x() + p.p.y() * p.p.y());
-		W += p.weight;
-	}
-	return wsum_pT / W;
+    double W = 0., wsum_pT = 0.;
+    for (auto &p : plist)
+    {
+        wsum_pT += p.weight * std::sqrt(p.p.x() * p.p.x() + p.p.y() * p.p.y());
+        W += p.weight;
+    }
+    return wsum_pT / W;
 }
 double mean_E(const std::vector<particle> plist)
 {
-	double W = 0., wsum_pT = 0.;
-	for (auto &p : plist)
-	{
-		wsum_pT += p.weight * p.p.t();
-		W += p.weight;
-	}
-	return wsum_pT / W;
+    double W = 0., wsum_pT = 0.;
+    for (auto &p : plist)
+    {
+        wsum_pT += p.weight * p.p.t();
+        W += p.weight;
+    }
+    return wsum_pT / W;
 }
