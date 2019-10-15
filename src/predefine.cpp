@@ -50,6 +50,8 @@ Debye_mass * t_channel_mD2;
 const double LPM_prefactor = 0.75; // to match analytic calculation, 0.75 by default
 
 double Lido_Ecut;
+int time_type;
+bool Adiabatic_LPM;
 
 qhat_params_struct qhat_params;
 

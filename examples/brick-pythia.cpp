@@ -102,7 +102,7 @@ int main(int argc, char* argv[]){
         }
 
         // start
-        std::vector<particle> plist, new_plist, pOut_list;
+        std::vector<particle> plist, new_plist, temp_list;
 
         /// HardGen
         PythiaGen pythiagen(
@@ -130,32 +130,26 @@ int main(int argc, char* argv[]){
         for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
             pythiagen.Generate(plist);
             // freestream form t=0 to tau=tau0
-            for (auto & p : plist) {
-              double dt = calcualte_dt_from_dtau(p.x, p.p, 0, tau0);
-              p.freestream(dt); 
-            }
+            for (auto & p : plist) p.freestream(compute_realtime_to_propagate(tau0, p.x, p.p)); 
+
             for (int i=0; i<Nsteps; i++){
                 new_plist.clear();
-			          double tau =tau0+ i*dtau;
-				  // double T = T0*std::pow(tau0/tau, 0.4);
-				  double T=T0;
-			          if (i%10==0) LOG_INFO << tau/5.026 << " [fm/c]\t" 
+                double tau =tau0+ i*dtau;
+                // double T = T0*std::pow(tau0/tau, 0.4);
+                double T=T0;
+                if (i%10==0) LOG_INFO << tau/5.026 << " [fm/c]\t" 
                                     << T << " [GeV]" << " #=" << plist.size();
                 
-		            for (auto & p : plist){
-                   
-                    double dt = calcualte_dt_from_dtau(p.x, p.p, tau, dtau);
+                for (auto & p : plist){
                     double vz = p.x.z()/( p.x.t() + 1e-5 );
                     double eta = 0.5*std::log((1.+vz)/(1.-vz));
                     if ( std::fabs(eta)>3) continue;
-		                int n = update_particle_momentum_Lido(
-		                           dt, T, {0., 0., vz}, p, pOut_list);
-					          for (auto & k : pOut_list) {
-		                new_plist.push_back(k);
-		            }
-		        }
-		        plist = new_plist;
-		    }
+                    int n = update_particle_momentum_Lido(
+                                   dtau, T, {0., 0., vz}, p, temp_list);
+                    for (auto & k : temp_list) new_plist.push_back(k);
+                }
+                plist = new_plist;
+            }
             std::ostringstream s;
             s << "results/" << args["pthat-low"].as<int>() << "-"
               << args["pthat-high"].as<int>() << "-" << ie;

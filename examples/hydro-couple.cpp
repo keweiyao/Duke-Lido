@@ -139,10 +139,8 @@ int main(int argc, char* argv[]){
         for (auto & p : plist){
             double tau_fs = med1.get_tauH();
 	    double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
-
 	    if (tau < tau_fs) {
-                double dt_fs = calcualte_dt_from_dtau(p.x, p.p, tau, tau_fs-tau);
-                p.freestream(dt_fs);
+                p.freestream(compute_realtime_to_propagate(tau_fs-tau, p.x, p.p));
                 for (auto & ip : p.radlist){
 	        	ip.x = p.x;
 	        }
@@ -165,9 +163,6 @@ int main(int argc, char* argv[]){
                 double dtau = hydro_dtau/Ns; // use smaller dt step
                 for (auto & p : plist){
                     if ( p.Tf <= 0.154) continue; // do not touch freezeout ones
-                    // determine dt needed to evolve to the next tau
-                    double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
-                    double dt_lab = calcualte_dt_from_dtau(p.x, p.p, tau, dtau);
                     // get hydro information
                     double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.;
                     med1.interpolate(p.x, T, vx, vy, vz);
@@ -188,7 +183,7 @@ int main(int argc, char* argv[]){
 
                     // x,p-update
                     int channel = 
-                        update_particle_momentum_Lido(dt_lab, T, {vx, vy, vz}, p, pOut_list);
+                        update_particle_momentum_Lido(dtau, T, {vx, vy, vz}, p, pOut_list);
                 }
                 counter ++;
             }

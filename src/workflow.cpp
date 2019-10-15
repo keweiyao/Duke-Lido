@@ -13,7 +13,7 @@
 #include "predefine.h"
 
 std::map<int, std::vector<Process>> AllProcesses;
-std::ofstream ofs ("hq_gluon_accept.dat", std::ofstream::app);
+//std::ofstream ofs ("hq_gluon_accept.dat", std::ofstream::app);
 
 void init_process(Process &r, std::string mode, std::string table_path)
 {
@@ -99,11 +99,16 @@ void init_process(Process &r, std::string mode, std::string table_path)
 void initialize(std::string mode, std::string setting_path, std::string table_path)
 {
 	print_logo();
-
 	boost::property_tree::ptree config;
 	std::ifstream input(setting_path);
 	read_xml(input, config);
 
+        time_type = config.get("t_type", 0); // 0: constant time step, 1: constant proper time step
+        bool Adiabatic_LPM = config.get("LPM_type", 0); // 0: default, 1: local approxiamtion
+        if (Adiabatic_LPM == true){
+            LOG_INFO << "default LPM";
+        }
+        else LOG_INFO << "local LPM";
 	double mu=config.get("mu", 2.0); //alphas(max(Q, mu*pi*T)), active when afix < 0
 	double afix=config.get("afix", -1.0);  // fixed coupling, negative value for running coupling
 	double K=config.get("K", 0.0);
@@ -214,8 +219,30 @@ double formation_time(fourvec p, fourvec k, double T, int split)
 	return tauf;
 }
 
+double compute_realtime_to_propagate(double dt, fourvec x, fourvec p){
+    if ( time_type==0 ) {
+       // dt is real time step
+       return dt;
+    }
+    else if ( time_type==1 ) {
+       // dt is constant proper time step
+       double tau = std::sqrt(x.t()*x.t() - x.z()*x.z());
+       double dtau = dt;    
+       double vz = p.z() / p.t();
+       double t_m_zvz = x.t() - x.z() * vz;
+       double one_m_vz2 = 1. - vz * vz;
+       double dtau2 = dtau * (dtau + 2. * tau);
+       double dt = (std::sqrt(t_m_zvz * t_m_zvz + one_m_vz2 * dtau2) - t_m_zvz) / one_m_vz2;
+       return dt;
+    }
+    else{
+       LOG_FATAL << "No such time-step corrdinate: 0 for real time step, 1 for proper time step";
+       exit(-1);
+    }
+}
+
 int update_particle_momentum_Lido(
-	double dt, double temp, std::vector<double> v3cell,
+	double dt_input, double temp, std::vector<double> v3cell,
 	particle &pIn, std::vector<particle> &pOut_list)
 {  
 	auto p00 = pIn.p;
@@ -229,11 +256,8 @@ int update_particle_momentum_Lido(
 	pIn.vcell[0] = v3cell[1]; 
 	pIn.vcell[0] = v3cell[3];
 	auto x0 = pIn.x;
-
-	double tau0 = std::sqrt(std::pow(pIn.x.t(),2) - std::pow(pIn.x.z(),2));
-	pIn.freestream(dt);
-	double tau1 = std::sqrt(std::pow(pIn.x.t(),2) - std::pow(pIn.x.z(),2));
-    double dtau = tau1 - tau0;
+        double dt_for_pIn = compute_realtime_to_propagate(dt_input, pIn.x, pIn.p);
+	pIn.freestream(dt_for_pIn);
 
 	//ignore soft partons with a constant momentum cut
 	if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut || temp < 0.154)
@@ -243,26 +267,20 @@ int update_particle_momentum_Lido(
 		return pOut_list.size();
 	}
 
-	//LOG_INFO << "pid: " << pIn.pid;
-	//LOG_INFO << pIn.p;
-	//LOG_INFO << pIn.x;
-
 	//transform light quark pid to 123
 	//transform back at the end
 	int temp_pid = pIn.pid;
 	if (std::abs(pIn.pid) <= 3) pIn.pid = 123;
-
-
 	int absid = std::abs(pIn.pid);
 
 	// Apply diffusion and update particle momentum
 	fourvec pnew;
-	Ito_update(pIn.pid, dt, pIn.mass, temp, v3cell, pIn.p, pnew);
+	Ito_update(pIn.pid, dt_for_pIn, pIn.mass, temp, v3cell, pIn.p, pnew);
 	pIn.p = pnew;
 
 	// Apply large angle scattering, and diffusion induced radiation
 	auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
-	double dt_cell = dt / pIn.p.t() * p_cell.t();
+	double dt_cell = dt_for_pIn / pIn.p.t() * p_cell.t();
 	double E_cell = p_cell.t();
 
 	// For diffusion induced radiation, qhat_Soft is an input
@@ -399,6 +417,7 @@ int update_particle_momentum_Lido(
 				if (channel == 1) tempid = 21;
 				else tempid = Srandom::sample_flavor(3);
 				particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
+                                ep.origin = 1;
 				pOut_list.push_back(ep);
 			}
 				
@@ -411,7 +430,7 @@ int update_particle_momentum_Lido(
 			// given by the incoherent calculation, which will be
 			// dropped (suppressed) according to the LPM effect
 			particle vp = produce_parton(21, pIn, FS[2], x0, temp, v3cell);
-
+                        vp.origin = (pIn.origin==-1)?0:pIn.origin;
 			// The local 2->2 mean-free-path is estimated with
 			// the qhat_hard integrate from the 2->2 rate
 			double xfrac = vp.p.t() / pIn.p.t();
@@ -437,12 +456,14 @@ int update_particle_momentum_Lido(
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
 			vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
+
 			pIn.radlist.push_back(vp);
 			if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Lido_Ecut){	
 				double tempid;
 				if (channel == 3) tempid = 21;
 				else tempid = Srandom::sample_flavor(3);
 				particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
+                                ep.origin = 1;
 				pOut_list.push_back(ep);
 			}
 				
@@ -459,7 +480,7 @@ int update_particle_momentum_Lido(
 			// given by the incoherent calculation, which will be
 			// dropped (suppressed) according to the LPM effect
 			particle vp = produce_parton(21, pIn, FS[1], x0, temp, v3cell);
-
+                        vp.origin = (pIn.origin==-1)?0:pIn.origin;
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
 			vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
@@ -476,7 +497,7 @@ int update_particle_momentum_Lido(
 			// This should only happen for gluon
 			// gluon splits to q+qbar, pid changing!!
 			particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[2], x0, temp, v3cell);
-
+                        vp.origin = (pIn.origin==-1)?0:pIn.origin;
 			// The local 2->2 mean-free-path is estimated with
 			// the qhat_hard integrate from the 2->2 rate
 			double xfrac = vp.p.t() / pIn.p.t();
@@ -509,6 +530,7 @@ int update_particle_momentum_Lido(
 			// This should only happen for gluon
 			// gluon splits to q+qbar, pid changing!!
 			particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[1], x0, temp, v3cell);
+                        vp.origin = (pIn.origin==-1)?0:pIn.origin;
 
 			double mD2 = t_channel_mD2->get_mD2(temp);
 			// estimate mfp in the lab frame
@@ -534,17 +556,12 @@ int update_particle_momentum_Lido(
 				
 			double taun = formation_time(it->mother_p, it->p, temp, split_type);
 			std::vector<particle> pnew_Out;
-			double tau = std::sqrt(it->x.t()*it->x.t()-it->x.z()*it->x.z());
-			double dt_daughter = calcualte_dt_from_dtau(it->x, it->p, 
-					tau, dtau); 
-			
+
 			// In the local (adiabatic LPM) mode,
 			// use local information to determine the number of rescatterings
-			bool Adiabatic_LPM = true;
 			if (Adiabatic_LPM){
 			    do{
-			        update_particle_momentum_Lido(dt_daughter, temp, 
-											v3cell, *it, pnew_Out);
+			        update_particle_momentum_Lido(dt_input, temp, v3cell, *it, pnew_Out);
 					taun = formation_time(it->mother_p, it->p, temp, split_type);
 			    }while(it->x.t() - it->x0.t() <= taun);
 			    // once finished, reset its x to where it is produced
@@ -552,8 +569,7 @@ int update_particle_momentum_Lido(
 			}
 			
 			// update the partilce for this time step
-			update_particle_momentum_Lido(dt_daughter, temp, 
-											v3cell, *it, pnew_Out);
+			update_particle_momentum_Lido(dt_input, temp, v3cell, *it, pnew_Out);
 			
 			if (it->x.t() - it->x0.t() <= taun && !Adiabatic_LPM){
 				it++;
@@ -605,7 +621,9 @@ int update_particle_momentum_Lido(
 					}
 					// label it as real and put it in output particle list
 					it->is_virtual = false;
-					ofs<<it->p<<" "<<it->mother_p<<" "<<it->p0<<" "<<it->x<<" "<<it->x0<<" "<<it->pid<<" "<<it->is_vac<<" "<<it->is_recoil<<" "<<it->T0 <<" "<<it->weight<<std::endl;
+					//ofs<<it->p<<" "<<it->mother_p<<" "<<it->p0<<" "<<it->x
+                                        //     <<" "<<it->x0<<" "<<it->pid<<" "<<it->is_vac<<" "
+                                        //     <<it->is_recoil<<" "<<it->T0 <<" "<<it->weight<<std::endl;
 					pOut_list.push_back(*it);
 				}
 				// remove it from the radlist
@@ -613,10 +631,6 @@ int update_particle_momentum_Lido(
 			}
 		}
 	}
-
-	// For virtual particle, we rescale the energy back to the initial value
-	// so that we only focus on the elastic broadening effect.
-	//if (pIn.is_virtual) pIn.p = pIn.p*(pIn.p0.t()/pIn.p.t());
 
 	// Add the mother parton to the end of the output list
 	//also transform back its pid
@@ -645,7 +659,6 @@ particle produce_parton(int pid, particle &mother_parton, fourvec vp0, fourvec v
 	vp.vcell[0] = v3cell[0];
 	vp.vcell[1] = v3cell[1];
 	vp.vcell[2] = v3cell[2];
-
 	return vp;
 }
 
@@ -720,16 +733,6 @@ void output_oscar(const std::vector<particle> plist, int abspid, std::string fna
 		}
 		i++;
 	}
-}
-
-double calcualte_dt_from_dtau(fourvec x, fourvec p, double tau, double dtau)
-{
-	double vz = p.z() / p.t();
-	double t_m_zvz = x.t() - x.z() * vz;
-	double one_m_vz2 = 1. - vz * vz;
-	double dtau2 = dtau * (dtau + 2. * tau);
-	double dt_lab = (std::sqrt(t_m_zvz * t_m_zvz + one_m_vz2 * dtau2) - t_m_zvz) / one_m_vz2;
-	return dt_lab;
 }
 
 double mean_pT(const std::vector<particle> plist)

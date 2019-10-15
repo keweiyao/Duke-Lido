@@ -1,5 +1,10 @@
+<!-- t-type, 0: constant time step, 
+             1: constant propertime step (for couple to usual hydro)
+ -->
+<t_type>0</t_type>
+<LPM_type>0</LPM_type>
 <mu>2.0</mu>
-<afix>-1.0</afix>
+<afix>0.1</afix>
 <K>0.0</K>
 <a>1.0</a>
 <b>1.0</b>

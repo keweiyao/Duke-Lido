@@ -145,9 +145,7 @@ int main(int argc, char* argv[]){
             Medium<2> med1(args["hydro"].as<fs::path>().string());
             // freestream form t=0 to tau=tau0
             for (auto & p : plist) {
-              double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
-              double dt = calcualte_dt_from_dtau(p.x, p.p, tau, med1.get_tauH());
-              p.freestream(dt);
+              p.freestream(compute_realtime_to_propagate(med1.get_tauH(), p.x, p.p));
               p.Tf = 0.151;
             }
             while(med1.load_next()){
@@ -159,9 +157,6 @@ int main(int argc, char* argv[]){
                 for (int i=0; i<Ns; ++i){
                     new_plist.clear();
                     for (auto & p : plist){
-                        // determine dt needed to evolve to the next tau
-                        double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
-                        double dt_lab = calcualte_dt_from_dtau(p.x, p.p, tau, dtau);
                         // get hydro information
                         double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.0;
                         med1.interpolate(p.x, T, vx, vy, vz);
@@ -178,7 +173,7 @@ int main(int argc, char* argv[]){
                             vz *= rescale;                            
                         }
                         int fs_size = update_particle_momentum_Lido(
-                                  dt_lab, T, {vx, vy, vz}, p, pOut_list);
+                                  dtau, T, {vx, vy, vz}, p, pOut_list);
                         for (auto & k : pOut_list) new_plist.push_back(k);
                     }
                     plist = new_plist;

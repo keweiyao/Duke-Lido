@@ -16,8 +16,10 @@ namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
 void output_jet(std::string fname, std::vector<particle> plist){
-    std::ofstream f(fname);
-    for (auto & p : plist) f << p.pid << " " << p.p << " " << p.weight << std::endl;
+    std::ofstream f;
+    f.open(fname, std::ofstream::out | std::ofstream::app);
+    f << "# " << plist.size() << std::endl;
+    for (auto & p : plist) f << p.pid << " " << p.x << " " << p.p << " " << p.origin << std::endl;
     f.close();
 }
 
@@ -27,8 +29,11 @@ int main(int argc, char* argv[]){
     options.add_options()
           ("help", "show this help message and exit")
           ("nparticles",
-            po::value<int>()->value_name("INT")->default_value(1000,"1000"),
+            po::value<int>()->value_name("INT")->default_value(100,"100"),
            "number of hard partons")
+          ("nevents",
+            po::value<int>()->value_name("INT")->default_value(10,"10"),
+           "number of events")
           ("energy",
             po::value<double>()->value_name("FLOAT")->default_value(10.0,"10.0"),
            "fixed parton energy [GeV]")
@@ -92,113 +97,77 @@ int main(int argc, char* argv[]){
         // check pid
         if (!args.count("pid")){
             if ( (std::abs(args["pid"].as<int>()) != 4)
-				&& (std::abs(args["pid"].as<int>()) != 21) ){
-		        throw po::error{"pid only suppots 4, 21"};
-		        return 1;
-			}
+                && (std::abs(args["pid"].as<int>()) != 21) ){
+                throw po::error{"pid only suppots 4, 21"};
+                return 1;
+            }
         }
 
-        // start
-        std::vector<particle> plist, new_plist;
-		int pid = args["pid"].as<int>();
-		double E0 = args["energy"].as<double>();
-		double M = args["mass"].as<double>();
-		fourvec p0{E0, 0, 0, std::sqrt(E0*E0-M*M)},
-				x0{0,0,0,0};;
+	/// Lido init
+	initialize(table_mode,
+	        args["lido-setting"].as<fs::path>().string(),
+	        args["lido-table"].as<fs::path>().string()
+	        );
+
+	/// Assign each quark a transverse position according to TRENTo Nbin output
+	/// Freestream particle to the start of hydro
+	double ti = args["taui"].as<double>() * 5.026; // convert to GeV^-1
+	double tf = args["tauf"].as<double>() * 5.026; // convert to GeV^-1
+	double dt = args["dtau"].as<double>() * 5.026; // convert to GeV^-1
+	double T0 = args["temp"].as<double>();
+	double nu = args["nu"].as<double>();
+	int Nsteps = int((tf-ti)/dt)+1;
+
+
+	std::vector<particle> plist, new_plist, temp_list;
+	int pid = args["pid"].as<int>();
+	double E0 = args["energy"].as<double>();
+	double M = args["mass"].as<double>();
+	fourvec p0{E0, 0, 0, std::sqrt(E0*E0-M*M)},
+	        x0{0,0,0,0};
+
+	// start
+	for (int ie=0; ie<args["nevents"].as<int>(); ie++){
+	    plist.clear();
 		for (int i=0; i<args["nparticles"].as<int>(); i++){
-			particle p_init;
-			p_init.p = p0; // 
-			p_init.p0 = p0; // 
-			p_init.mass = M; // mass
-			p_init.pid = pid; // light quark
-			p_init.x0 = x0; // initial position
-			p_init.x = x0; // initial position
-			p_init.weight = 1.;
-			p_init.Tf = 0.0;
-			p_init.is_vac = false;
-			p_init.is_virtual = false;
-			p_init.vcell.resize(3);
-			p_init.vcell[0] = 0.; 
-			p_init.vcell[1] = 0.; 
-			p_init.vcell[2] = 0.; 
-			plist.push_back(p_init); 
+		    particle p_init;
+		    p_init.origin = -1;
+		    p_init.p = p0; // 
+		    p_init.p0 = p0; // 
+		    p_init.mass = M; //
+		    p_init.pid = pid; 
+		    p_init.x0 = x0; //
+		    p_init.x = x0; //
+		    p_init.weight = 1.;
+		    p_init.Tf = 0.0;
+		    p_init.is_vac = false;
+		    p_init.is_virtual = false;
+		    p_init.vcell.resize(3);
+		    p_init.vcell[0] = 0.; 
+		    p_init.vcell[1] = 0.; 
+		    p_init.vcell[2] = 0.; 
+		    plist.push_back(p_init); 
 		}
 
-        /// Lido init
-        initialize(table_mode,
-                args["lido-setting"].as<fs::path>().string(),
-                args["lido-table"].as<fs::path>().string()
-                );
+		for (auto & p : plist) p.freestream(compute_realtime_to_propagate(ti, p.x, p.p));
+	       
+		for (int i=0; i<Nsteps; i++){
+		    new_plist.clear();
+		    double t = ti + dt*i;
+		    double T = T0 * std::pow(ti/t, 2./3.-1./nu/3.);
+		    if (i%100==0) LOG_INFO << t/5.026 << " [fm/c]\t"<< T << " [GeV]" << " #=" << plist.size();
+		    for (auto & p : plist){
+		        int n = update_particle_momentum_Lido(
+		                      dt, T, {0., 0., 0.}, p, temp_list);
+		        for (auto & k : temp_list) new_plist.push_back(k);
+		    }
+		    plist = new_plist;
+		}
 
-        /// Assign each quark a transverse position according to TRENTo Nbin output
-        /// Freestream particle to the start of hydro
-		double ti = args["taui"].as<double>() * 5.026; // convert to GeV^-1
-		double tf = args["tauf"].as<double>() * 5.026; // convert to GeV^-1
-		double dt = args["dtau"].as<double>() * 5.026; // convert to GeV^-1
-		double T0 = args["temp"].as<double>();
-		double nu = args["nu"].as<double>();
-		int Nsteps = int((tf-ti)/dt)+1;
-        for (auto & p : plist){
-            p.freestream(ti);
+		std::ostringstream s;
+		s << "results/test.dat";
+		output_jet(s.str(), plist);
         }
-
-        // initial E
-        double Ei = mean_E(plist);
-		std::vector<particle> pOut_list;
-
-		
-        for (int i=0; i<Nsteps; i++){
-            new_plist.clear();
-			double t = ti + dt*i;
-            double T = T0 * std::pow(ti/t, 2./3.-1./nu/3.);
-			if (i%100==0) LOG_INFO << t/5.026 << " [fm/c]\t" 
-                                << T << " [GeV]" << " #=" << plist.size();
-            for (auto & p : plist){
-                int n = update_particle_momentum_Lido(
-                              dt, T, {0., 0., 0.}, p, pOut_list);
-				for (auto & k : pOut_list) {
-                    if (k.p.t() > 5) new_plist.push_back(k);
-                }
-            }
-            plist = new_plist;
-
-		    if (1*5.026 < t+dt/2. && t-dt/2. < 1*5.026 ){
-		        std::ofstream fff("evo1.dat");
-		        for (auto & p : plist) fff << p.x << " " << p.p << std::endl;
-		    }
-		    if (5*5.026 < t+dt/2. && t-dt/2. < 5*5.026 ){
-		        std::ofstream fff("evo5.dat");
-		        for (auto & p : plist) fff << p.x << " " << p.p << std::endl;
-		    }
-		    if (10*5.026 < t+dt/2. && t-dt/2. < 10*5.026 ){
-		        std::ofstream fff("evo10.dat");
-		        for (auto & p : plist) fff << p.x << " " << p.p << std::endl;
-		    }
-		    if (20*5.026 < t+dt/2. && t-dt/2. < 20*5.026 ){
-		        std::ofstream fff("evo20.dat");
-		        for (auto & p : plist) fff << p.x << " " << p.p << std::endl;
-		    }
-		    if (40*5.026 < t+dt/2. && t-dt/2. < 40*5.026 ){
-		        std::ofstream fff("evo40.dat");
-		        for (auto & p : plist) fff << p.x << " " << p.p << std::endl;
-		    }
-		    if (80*5.026 < t+dt/2. && t-dt/2. < 80*5.026 ){
-		        std::ofstream fff("evo80.dat");
-		        for (auto & p : plist) fff << p.x << " " << p.p << std::endl;
-		    }
-
-        }
-		// final E
-        double Ef = mean_E(plist);
-		LOG_INFO << "N-particles\t" << plist.size();
-		LOG_INFO << "Initial energy\t" << Ei << " [GeV]";
-		LOG_INFO << "Final energy\t" << Ef << " [GeV]";
-
-        std::ostringstream s;
-            s << "results/" << args["energy"].as<int>() << "-"
-              << args["temp"].as<int>() << "-" << args["nu"].as<double>() <<"-" <<  args["taui"].as<double>() <<"-" <<args["tauf"].as<double>();
-            output_jet(s.str(), plist);
-
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

@@ -11,13 +11,14 @@ struct particle{
 	int pid;
 	double mass, weight;
 	bool is_vac, is_virtual, is_recoil;
+        int origin;
 	
 	double T0, mfp0, Tf; // production temperature, local mfp
 	fourvec x0; // production location
 	fourvec x; // current location
 	fourvec p0; // production momentum
 	fourvec p; // current momentum
-    fourvec mother_p;
+        fourvec mother_p;
 
 	std::vector<particle> radlist;
 	std::vector<double> vcell;
@@ -45,7 +46,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn, std::vector<particle> & pOut_list);
 
 double formation_time(fourvec p, fourvec k, double T, int split);
-double calcualte_dt_from_dtau(fourvec x, fourvec p, double tau, double dtau);
+double compute_realtime_to_propagate(double dt, fourvec x, fourvec p);
 void output(const std::vector<particle> plist, std::string fname);
 void output_oscar(const std::vector<particle> plist, int abspid, std::string fname);
 double mean_pT(const std::vector<particle> plist);
