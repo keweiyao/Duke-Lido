@@ -9,8 +9,8 @@ Beams:eCM = 5020.                 ! CM energy of collision
 
 ! 3) Hard process
 HardQCD:all = on
-#HardQCD:hardccbar = on
-#HardQCD:hardbbbar = on
+HardQCD:hardccbar = on
+HardQCD:hardbbbar = on
 
 ! 4) Parton shower / MPI / Remnants
 PartonLevel:all = on
@@ -30,10 +30,10 @@ HadronLevel:all = off
 #PhaseSpace:bias2SelectionPow = 2.
 
 ! 7) Decay
-#4:m0 = 1.3
-#4:mayDecay = off
-#5:m0 = 4.2
-#5:mayDecay = off
+4:m0 = 1.3
+4:mayDecay = off
+5:m0 = 4.2
+5:mayDecay = off
 #411:mayDecay = off
 #421:mayDecay = off
 #413:mayDecay = off

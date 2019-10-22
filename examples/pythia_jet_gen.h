@@ -12,7 +12,7 @@ class PythiaGen{
 public: 
     PythiaGen(std::string f_pythia, std::string f_trento, 
               int pTHL, int pTHH, int iev);
-    void Generate(std::vector<particle> & plist);
+    void Generate(std::vector<particle> & plist, bool heavy=false);
     double sigma_gen(void){
         return pythia.info.sigmaGen();
     }
@@ -50,48 +50,51 @@ TRENToSampler(f_trento, iev)
     pythia.init();
 }
 
-void PythiaGen::Generate(std::vector<particle> & plist){
-    plist.clear();
-    pythia.next();
+void PythiaGen::Generate(std::vector<particle> & plist, bool heavy){
     double x, y;
     TRENToSampler.SampleXY(x, y);
     double weight = pythia.info.sigmaGen();
-    for (size_t i = 0; i < pythia.event.size(); ++i) 
-    {
-        auto p = pythia.event[i];
-        if (p.isFinal()) {
-            // final momenta 
-            fourvec p0{p.e(), p.px(), p.py(), p.pz()};
-            particle _p;
-            // if ( std::abs(p.id()) <= 3)  _p.pid = 123;
-            //else _p.pid = p.id(); 
-            _p.pid = p.id();
-            _p.mass = std::abs(p.m());
-	        _p.x0 = fourvec{0,x,y,0}; 
-	        _p.x = _p.x0; 
-	        _p.p0 = p0; 
-            if (std::abs(_p.pid) != 4 && std::abs(_p.pid) != 5) {
-                _p.mass = 0.;
-                _p.p0.a[0] = std::sqrt(_p.p0.pabs2()+_p.mass*_p.mass);
-            }
-	        _p.p = _p.p0; 
-            _p.weight = weight;
-            _p.is_vac = false;
-	        _p.is_virtual = false;
-            _p.is_recoil = false;
-            _p.T0 = 0.;
-            _p.Tf = 0.;
-            _p.mfp0 = 0.;
-            _p.vcell.resize(3);
-            _p.vcell[0] = 0.; 
-            _p.vcell[1] = 0.; 
-            _p.vcell[2] = 0.; 
-            _p.radlist.clear();
-            
-            plist.push_back(_p);
-         }
-         
-    }
+    bool has_heavy;
+    do{
+        plist.clear();
+        pythia.next();
+        has_heavy = false;
+	for (size_t i = 0; i < pythia.event.size(); ++i) {
+		auto p = pythia.event[i];
+		if (p.isFinal()) {
+		    // final momenta 
+		    fourvec p0{p.e(), p.px(), p.py(), p.pz()};
+		    particle _p; 
+		    _p.pid = p.id();
+		    _p.mass = std::abs(p.m());
+			_p.x0 = fourvec{0,x,y,0}; 
+			_p.x = _p.x0; 
+			_p.p0 = p0; 
+		    if (std::abs(_p.pid) != 4 && std::abs(_p.pid) != 5) {
+		        _p.mass = 0;
+		    }
+                    if (std::abs(_p.pid) == 4){
+                        has_heavy = true;
+                    }
+                    _p.p0.a[0] = std::sqrt(_p.p0.pabs2()+_p.mass*_p.mass);
+		    _p.p = _p.p0; 
+		    _p.weight = weight;
+		    _p.is_vac = false;
+		    _p.is_virtual = false;
+		    _p.is_recoil = false;
+		    _p.T0 = 0.;
+		    _p.Tf = 0.;
+		    _p.mfp0 = 0.;
+		    _p.vcell.resize(3);
+		    _p.vcell[0] = 0.; 
+		    _p.vcell[1] = 0.; 
+		    _p.vcell[2] = 0.; 
+		    _p.radlist.clear();
+		    
+		    plist.push_back(_p);
+		 }
+	    }
+    } while(heavy && (!has_heavy) );
 }
 
 

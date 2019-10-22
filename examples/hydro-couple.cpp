@@ -121,7 +121,7 @@ int main(int argc, char* argv[]){
                 plist, 
                 args["pythia-events"].as<int>(),
                 2.5,
-				true
+		true
         );
     
         /// Read Hydro
@@ -140,37 +140,33 @@ int main(int argc, char* argv[]){
             double tau_fs = med1.get_tauH();
 	    double tau = std::sqrt(p.x.t()*p.x.t()-p.x.z()*p.x.z());
 	    if (tau < tau_fs) {
-                p.freestream(compute_realtime_to_propagate(tau_fs-tau, p.x, p.p));
-                for (auto & ip : p.radlist){
-	        	ip.x = p.x;
-	        }
+                p.freestream(compute_realtime_to_propagate(
+                               tau_fs-tau, p.x, p.p));
+                for (auto & ip : p.radlist) ip.x = p.x;
             }
         }
 
-
-
-        // initial pT
-        double pTi = mean_pT(plist);
-
         // run
-        int counter = 0;
         int Ns = 10;
         std::vector<particle> pOut_list;
+        double sys_tau = 0;
         while(med1.load_next()){
             double current_hydro_clock = med1.get_tauL();
+            sys_tau = current_hydro_clock;
             double hydro_dtau = med1.get_hydro_time_step();
             for (int i=0; i<Ns; ++i){
+                LOG_INFO << "Tau = " << sys_tau /5.026 << " fm/c";
                 double dtau = hydro_dtau/Ns; // use smaller dt step
+                sys_tau += dtau;
                 for (auto & p : plist){
-                    if ( p.Tf <= 0.154) continue; // do not touch freezeout ones
-                    // get hydro information
+                    if (p.x.t()*p.x.t()-p.x.z()*p.x.z() > sys_tau*sys_tau)
+                        continue;
                     double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.;
                     med1.interpolate(p.x, T, vx, vy, vz);
 
                     double vabs = std::sqrt(vx*vx + vy*vy + vz*vy);
                     // regulate v
                     if (vabs > 1.){
-                        LOG_WARNING << "regulate |v| = " << vabs << " > 1."; 
                         if (vabs > 1.-1e-6) {
                             double rescale = (1.-1e-6)/vabs;
                             vx *= rescale;
@@ -178,14 +174,10 @@ int main(int argc, char* argv[]){
                             vz *= rescale;    
                         }
                     }
-                    if (T < 0.1) T = 0.1;
-		    p.vcell[0] = vx; p.vcell[0] = vy; p.vcell[0] = vz;
-
                     // x,p-update
-                    int channel = 
-                        update_particle_momentum_Lido(dtau, T, {vx, vy, vz}, p, pOut_list);
+                    int fs_size = update_particle_momentum_Lido(
+                                  dtau, T, {vx, vy, vz}, p, pOut_list);
                 }
-                counter ++;
             }
         }
         // do any vac radiation that is left
@@ -197,14 +189,6 @@ int main(int argc, char* argv[]){
                  }
             }
         }
-
-
-        // final pT
-        double pTf = mean_pT(plist);
-        LOG_INFO << "Nparticles: " << plist.size();
-        LOG_INFO << "Initial pT: " << pTi << " GeV";
-        LOG_INFO << "Final pT: " << pTf << " GeV";
-
         output_oscar(plist, 4, "c-quark-frzout.dat");
         output_oscar(plist, 5, "b-quark-frzout.dat");
     }

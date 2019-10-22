@@ -20,7 +20,7 @@ namespace fs = boost::filesystem;
 
 void output_jet(std::string fname, std::vector<particle> plist){
     std::ofstream f(fname);
-    for (auto & p : plist) f << p.pid << " " << p.p << " " << p.weight << std::endl;
+    for (auto & p : plist) f << p.pid << " " << p.origin << " " << p.p << " " << p.weight << std::endl;
     f.close();
 }
 
@@ -56,6 +56,8 @@ int main(int argc, char* argv[]){
           ("lido-table,t", 
             po::value<fs::path>()->value_name("PATH")->required(),
            "Lido table path to file")  
+          ("heavy", po::bool_switch(),
+           "require pythia events contains at least a bottom quark")
     ;
     po::variables_map args{};
     try{
@@ -138,15 +140,20 @@ int main(int argc, char* argv[]){
                 );
 
         int Ns = 10;
+        if (args["heavy"].as<bool>())
+            LOG_INFO << 
+             "Requires Pythia parton level contains bottom quark(s)";
         for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
             std::vector<particle> plist, new_plist, pOut_list;
-            pythiagen.Generate(plist);
+            pythiagen.Generate(plist, args["heavy"].as<bool>());
             /// Read Hydro
             Medium<2> med1(args["hydro"].as<fs::path>().string());
             // freestream form t=0 to tau=tau0
             for (auto & p : plist) {
               p.freestream(compute_realtime_to_propagate(med1.get_tauH(), p.x, p.p));
               p.Tf = 0.151;
+              p.origin = -1;
+              //LOG_INFO <<"tau = "<< std::sqrt(p.x.t()*p.x.t() - p.x.z()*p.x.z());
             }
             while(med1.load_next()){
                 double current_hydro_clock = med1.get_tauL();
@@ -163,10 +170,6 @@ int main(int argc, char* argv[]){
                         double vabs = std::sqrt(vx*vx + vy*vy + vz*vy);
                         // regulate v
                         if (vabs > 1.-1e-6){
-                           // LOG_WARNING << "regulate |v| = " 
-                             //           << vabs << " > 1. and "
-                              //          << "y = " 
-                        //<< 0.5*std::log((p.x.t()+p.x.z())/(p.x.t()-p.x.z()));
                             double rescale = (1.-1e-6)/vabs;
                             vx *= rescale;
                             vy *= rescale;    
