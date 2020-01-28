@@ -2,7 +2,6 @@ build/
 test/
 *~
 Tables/
-jet_analysis/
 table.h5
 logfile.log
 

@@ -124,7 +124,7 @@ void PythiaGen::Generate(std::vector<particle> & plist, int heavyid){
 		    if (std::abs(_p.pid) != 4 && std::abs(_p.pid) != 5) {
 		        _p.mass = 0;
 		    }
-                    //if (std::abs(_p.pid) == heavyid) triggered = true;
+                    if (std::abs(_p.pid) == heavyid) triggered = true;
                     _p.p0.a[0] = std::sqrt(_p.p0.pabs2()+_p.mass*_p.mass);
 		    _p.p = _p.p0; 
 		    _p.weight = weight;
