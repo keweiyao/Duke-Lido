@@ -1,4 +1,4 @@
-# compile everything except the main source file into a statis lib to be linked 
+# compile everything except the main source file into a statis lib to be linked
 # to the main executable
 add_library(${LIBRARY_NAME} STATIC
 TableBase.cpp
@@ -18,6 +18,7 @@ Langevin.cpp
 predefine.cpp
 lorentz.cpp
 Medium_Reader.cpp
+Hadronize.cpp
 	)
 
 set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "")

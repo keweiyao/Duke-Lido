@@ -1,0 +1,12 @@
+1. Recoils partons are added.
+2. Negative partons striked by the hard ones are not included.
+3. Diffusion casued energy-momentum current are not tracked.
+4. #2-3 should in-principal be treated as hydrodynamical source term (as well as soft recoils from #1). Currently, for the jet contribution, if one does not include this, it will be assuming that these energy will be trasported to relatively large-R by hydro-like response, and does not affect small-R jet calculation too much.
+5. A jet finding algortihm code is integrated (jet_analysis/jet_finding.cpp and .h). One can add more applciation to this subfolder. The resulting analysis function can be called from the main code in (example/jet_3Dhydro_couple.cpp and jet_2Dhydro_couple.cpp).
+6. Lorentz.h now supports calculating tau() and rap() defined as:
+   a.tau() = sqrt(a[0]^2 - a[3]^2)
+   a.rap() = 1/2*ln[ (a[0] + a[3])/(a[0] - a[3]) ]
+7. Lido can set random seed by setting an environment variable
+   export lseed=1 for example.
+   Negative seed (by default) means set seed by device random number.
+8. You may find a Hadronize module in the src code. Which is still under test and development. The basic idea is to construct lund strings between the hard parton and a randomly sampled thermal parton in nuclear-nuclear collisions. The sampled parton are pulled out of the medium, thus, in principle generates a negative current to the medium evolution. For those cases where the sampled parton are close in phase space as the hard parton, recombination model should be applied (to do).

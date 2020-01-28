@@ -49,14 +49,14 @@ _Name(Name)
 
 template<size_t N>
 void StochasticBase<N>::load(std::string fname){
-	LOG_INFO << "Loading " << _Name+"/fmax";
-    _FunctionMax->Load(fname);
-	LOG_INFO << "Loading " << _Name+"/scalar";
+	//LOG_INFO << "Loading " << _Name+"/fmax";
+        _FunctionMax->Load(fname);
+	//LOG_INFO << "Loading " << _Name+"/scalar";
 	_ZeroMoment->Load(fname);
 	if (_with_moments){
-		LOG_INFO << "Loading " << _Name+"/vector";
+		//LOG_INFO << "Loading " << _Name+"/vector";
 		_FirstMoment->Load(fname);
-		LOG_INFO << "Loading " << _Name+"/tensor";
+		//LOG_INFO << "Loading " << _Name+"/tensor";
 		_SecondMoment->Load(fname);
 	}
 }

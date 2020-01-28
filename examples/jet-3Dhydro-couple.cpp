@@ -14,13 +14,15 @@
 #include "Medium_Reader.h"
 #include "workflow.h"
 #include "pythia_jet_gen.h"
+#include "Hadronize.h"
+#include "jet_finding.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
 void output_jet(std::string fname, std::vector<particle> plist){
     std::ofstream f(fname);
-    for (auto & p : plist) f << p.pid << " " << p.origin << " " << p.p << " " << p.weight << std::endl;
+    for (auto & p : plist) f << p.pid << " " << p.p << " " << p.x0 << " " << p.x << std::endl;
     f.close();
 }
 
@@ -56,8 +58,9 @@ int main(int argc, char* argv[]){
           ("lido-table,t", 
             po::value<fs::path>()->value_name("PATH")->required(),
            "Lido table path to file")  
-          ("heavy", po::bool_switch(),
-           "require pythia events contains at least a bottom quark")
+          ("heavy", 
+            po::value<int>()->value_name("INT")->default_value(0,"0"),
+           "require pythia event contains charm(4) or bottom(5) quark")
     ;
     po::variables_map args{};
     try{
@@ -122,8 +125,18 @@ int main(int argc, char* argv[]){
             }
         }
 
-        /// HardGen
-        LOG_INFO<<"hard gen";
+        if (args["heavy"].as<int>() >= 4){
+            if (args["heavy"].as<int>() == 4)
+                LOG_INFO << "Requires Pythia parton level has charm quark(s)";
+            else if (args["heavy"].as<int>() == 5)
+                LOG_INFO << "Requires Pythia parton level has bottom quark(s)";
+            else {
+                throw po::error{"Heavy trigger invalided"};
+                return 1;
+            }
+        }
+        std::ofstream fb("balance.txt");
+        /// Initialize pythia generator
         PythiaGen pythiagen(
                 args["pythia-setting"].as<fs::path>().string(),
                 args["ic"].as<fs::path>().string(),
@@ -131,61 +144,125 @@ int main(int argc, char* argv[]){
                 args["pthat-high"].as<int>(),
                 args["eid"].as<int>()
         );
-
-        /// Lido init
+        /// Initialize Lido in-medium transport
         LOG_INFO<<"init lido";
         initialize(table_mode,
                 args["lido-setting"].as<fs::path>().string(),
                 args["lido-table"].as<fs::path>().string()
                 );
-
-        int Ns = 10;
-        if (args["heavy"].as<bool>())
-            LOG_INFO << 
-             "Requires Pythia parton level contains bottom quark(s)";
+        /// Initialize a simple hadronizer
+        JetDenseMediumHadronize Hadronizer;
+        
+        std::ostringstream outname1, outname2;
+        outname1 << "I-" << args["pthat-low"].as<int>()
+                 << "-" << args["pthat-high"].as<int>();
+        outname2 << "F-" << args["pthat-low"].as<int>()
+                 << "-" << args["pthat-high"].as<int>();
         for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
-            std::vector<particle> plist, new_plist, pOut_list;
-            pythiagen.Generate(plist, args["heavy"].as<bool>());
-            /// Read Hydro
-            Medium<2> med1(args["hydro"].as<fs::path>().string());
+            std::vector<particle> plist, hlist, thermal_list,
+                                  new_plist, pOut_list;
+            std::vector<fourvec> clist;
+            // Initialize parton list from python
+            pythiagen.Generate(plist, args["heavy"].as<int>());
+            double sigma_gen = plist[0].weight;
+            for (int ir=0; ir<5; ir++){
+                std::ostringstream ss;
+                ss << outname1.str() << "-R" << (ir+1) << ".dat";
+                FindJet(plist, clist,
+                 0.2*(ir+1), 10, -2.8, 2.8,
+                 ss.str(), sigma_gen);
+            }
+
+            /// Initialzie a hydro reader
+            Medium<3> med1(args["hydro"].as<fs::path>().string());
+
             // freestream form t=0 to tau=tau0
+            for (auto & p : plist){
+                p.Tf = 0.155;
+                p.origin=-1;
+                if (p.x.tau() < med1.get_tauH()){
+                    p.freestream(compute_realtime_to_propagate(
+                                 med1.get_tauH(), p.x, p.p));
+                }else{
+                    LOG_INFO << "need to wait";
+                }
+            }   
+
+            // Energy-momentum checkbook
+            fourvec Pmu_Hard_In = {0., 0., 0., 0.};
+            fourvec Pmu_Hard_Out = {0., 0., 0., 0.};
+            fourvec Pmu_Soft_Gain = {0., 0., 0., 0.};
+            std::ofstream fsoft("soft.txt");
             for (auto & p : plist) {
-              p.freestream(compute_realtime_to_propagate(med1.get_tauH(), p.x, p.p));
-              p.Tf = 0.151;
-              p.origin = -1;
-              //LOG_INFO <<"tau = "<< std::sqrt(p.x.t()*p.x.t() - p.x.z()*p.x.z());
+                if (std::abs(p.p.rap())<2)
+                    Pmu_Hard_In = Pmu_Hard_In + p.p;
             }
             while(med1.load_next()){
                 double current_hydro_clock = med1.get_tauL();
                 double hydro_dtau = med1.get_hydro_time_step();
-                double dtau = hydro_dtau/Ns;
-               // LOG_INFO << current_hydro_clock/5.026 << " [fm/c]\t" 
-                //         << " #=" << plist.size();
+                LOG_INFO << current_hydro_clock/fmc_to_GeV_m1 
+                         << " [fm/c]\t" 
+                         << " # of hard =" << plist.size();
+                // further divide hydro step into 10 transpor steps
+                int Ns = 10; 
+                double dtau = hydro_dtau/Ns, DeltaTau;
                 for (int i=0; i<Ns; ++i){
                     new_plist.clear();
-                    for (auto & p : plist){
+                    for (auto & p : plist){     
+                        if (p.Tf < 0.15) {
+                            new_plist.push_back(p);
+                            continue;       
+                        }
+                        if (p.x.tau() > current_hydro_clock+(i+1)*dtau){
+                            // if the particle time is in the future 
+                            // (not formed to the medium yet), put it back 
+                            // in the list 
+                            new_plist.push_back(p);
+                            continue;
+                        }
+                        else{
+                            DeltaTau = current_hydro_clock 
+                                      + (i+1)*dtau - p.x.tau();
+                        }
                         // get hydro information
                         double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.0;
+                        double vzgrid = p.x.z()/p.x.t();
                         med1.interpolate(p.x, T, vx, vy, vz);
-                        double vabs = std::sqrt(vx*vx + vy*vy + vz*vy);
-                        // regulate v
-                        if (vabs > 1.-1e-6){
-                            double rescale = (1.-1e-6)/vabs;
-                            vx *= rescale;
-                            vy *= rescale;    
-                            vz *= rescale;                            
-                        }
+
+                        fourvec ploss = p.p;
                         int fs_size = update_particle_momentum_Lido(
-                                  dtau, T, {vx, vy, vz}, p, pOut_list);
-                        for (auto & k : pOut_list) new_plist.push_back(k);
+                                  DeltaTau, T, {vx, vy, vz}, p, pOut_list);
+                        
+                        for (auto & fp : pOut_list) {
+                            ploss = ploss - fp.p;
+                            new_plist.push_back(fp);
+                        }
+                       if (std::abs(ploss.rap())<2)            
+                       Pmu_Soft_Gain = Pmu_Soft_Gain + ploss;
+                       //if (ploss.pabs() > .3)
+                       //clist.push_back(ploss);
                     }
                     plist = new_plist;
                 }
             }
-            std::ostringstream s;
-            s << "results/" << args["pthat-low"].as<int>() << "-"
-              << args["pthat-high"].as<int>() << "-" << ie;
-            output_jet(s.str(), plist);
+            for (auto & p : plist) {
+                if (std::abs(p.p.rap())<2)
+                Pmu_Hard_Out = Pmu_Hard_Out + p.p;
+            }
+
+            for (int ir=0; ir<5; ir++){
+                std::ostringstream ss;
+                ss << outname2.str() << "-R" << (ir+1) << ".dat";
+                FindJet(plist, clist,
+                 0.2*(ir+1), 10, -2.8, 2.8,
+                 ss.str(), sigma_gen);
+            }
+            
+            //Hadronizer.hadronize(plist, hlist, thermal_list);
+            LOG_INFO << "Hard initial " << Pmu_Hard_In;
+            LOG_INFO << "Hard final " << Pmu_Hard_Out;
+            LOG_INFO << "Soft deposite " << Pmu_Soft_Gain;
+
         }
     }
     catch (const po::required_option& e){

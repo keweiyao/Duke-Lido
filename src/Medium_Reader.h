@@ -15,8 +15,14 @@
 template <size_t N> 
 class Medium{
 private:
-	double _dx,_dy,_dtau,_tau0, _xl, _xh, _yl, _yh;
-	int _iXL, _iXH, _iYL, _iYH; 
+	double _dtau,_tau0,
+               _dx,_dy,_deta, 
+               _xl, _xh, 
+               _yl, _yh,
+               _etal, _etah;
+	int _iXL, _iXH, 
+            _iYL, _iYH, 
+            _iETAL, _iETAH; 
 	std::vector<size_t> _shape;
 	std::vector<double> _xl_limits, _xh_limits, _x_steps;
 	const std::string _filename;
@@ -25,9 +31,10 @@ private:
 	H5::H5File _file;
 	H5::Group _event;
 	boost::multi_array<double, N> _buffer;
-    boost::multi_array<double, N+1> _Temp;
-    boost::multi_array<double, N+1> _Vx;
+        boost::multi_array<double, N+1> _Temp;
+        boost::multi_array<double, N+1> _Vx;
 	boost::multi_array<double, N+1> _Vy;
+	boost::multi_array<double, N+1> _Vz;
 public:
 	Medium(std::string filename);
 	~Medium(){_file.close();};

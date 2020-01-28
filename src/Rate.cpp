@@ -97,7 +97,7 @@ void Rate<LO, 2, 2, double(*)(const double, void *)>::
     	return 1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
 	};
 	bool status = true;
-	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}},
+	auto res = sample_nd(dR_dxdy, 2, {{0., 2.}, {-1., 1.}},
 						std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
 	double E2 = T*(std::exp(res[0])-1.),
 		   costheta = res[1];

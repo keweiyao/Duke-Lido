@@ -18,7 +18,7 @@ TableBase<T, N>::TableBase(std::string Name, Svec shape, Dvec low, Dvec high):
 _Name(Name), _rank(N), _power_rank(std::pow(2, _rank)),
 _shape(shape), _low(low), _high(high),_table(_shape)
 {
-	LOG_INFO<<_Name << " dim=" << _rank;
+	//LOG_INFO<<_Name << " dim=" << _rank;
 	for(auto i=0; i<_rank; ++i){
 		_step.push_back((high[i]-low[i])/(shape[i]-1));
 	}
