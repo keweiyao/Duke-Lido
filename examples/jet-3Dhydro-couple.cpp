@@ -15,7 +15,7 @@
 #include "workflow.h"
 #include "pythia_jet_gen.h"
 #include "Hadronize.h"
-#include "jet_finding.h"
+//#include "jet_finding.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -165,13 +165,7 @@ int main(int argc, char* argv[]){
             // Initialize parton list from python
             pythiagen.Generate(plist, args["heavy"].as<int>());
             double sigma_gen = plist[0].weight;
-            for (int ir=0; ir<5; ir++){
-                std::ostringstream ss;
-                ss << outname1.str() << "-R" << (ir+1) << ".dat";
-                FindJet(plist, clist,
-                 0.2*(ir+1), 10, -2.8, 2.8,
-                 ss.str(), sigma_gen);
-            }
+
 
             /// Initialzie a hydro reader
             Medium<3> med1(args["hydro"].as<fs::path>().string());
@@ -250,13 +244,6 @@ int main(int argc, char* argv[]){
                 Pmu_Hard_Out = Pmu_Hard_Out + p.p;
             }
 
-            for (int ir=0; ir<5; ir++){
-                std::ostringstream ss;
-                ss << outname2.str() << "-R" << (ir+1) << ".dat";
-                FindJet(plist, clist,
-                 0.2*(ir+1), 10, -2.8, 2.8,
-                 ss.str(), sigma_gen);
-            }
             
             //Hadronizer.hadronize(plist, hlist, thermal_list);
             LOG_INFO << "Hard initial " << Pmu_Hard_In;

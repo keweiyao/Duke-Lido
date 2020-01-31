@@ -261,7 +261,7 @@ int update_particle_momentum_Lido(
     // Delete soft partons below a energy cut from the hard parton list
     if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut*temp){
         pIn.radlist.clear();
-        pOut_list.push_back(pIn);
+        //pOut_list.push_back(pIn);
         return pOut_list.size();
     }
     // Freeze particles below Tc

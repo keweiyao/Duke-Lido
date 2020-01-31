@@ -196,10 +196,9 @@ set(LIBRARY_NAME "lib${PROJECT_NAME}")
 add_subdirectory(src)
 include_directories(src)
 
-set(LIBRARY_JETFIND "libjetfind")
+#set(LIBRARY_JETFIND "libjetfind")
 add_subdirectory(jet_analysis)
 include_directories(jet_analysis)
-
 
 
 add_executable(Lido-TabGen ./examples/Lido-TabGen.cpp)
@@ -214,9 +213,14 @@ install(TARGETS analytic-medium DESTINATION bin)
 if(pythia8)
 foreach(App "jet-2Dhydro-couple" "jet-3Dhydro-couple")
 	add_executable(${App} ./examples/${App}.cpp)
-	target_link_libraries(${App} ${LIBRARY_NAME} ${LIBRARY_JETFIND} ${PYTHIA8_LIBRARIES} ${FASTJET_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+	target_link_libraries(${App} ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${FASTJET_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS ${App} DESTINATION bin)
 endforeach()
+
+add_executable(2Dhydro-jet-analysis ./examples/2Dhydro-jet-analysis.cpp)
+target_link_libraries(2Dhydro-jet-analysis ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${FASTJET_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+install(TARGETS 2Dhydro-jet-analysis DESTINATION bin)
+
 endif(pythia8)
 
 

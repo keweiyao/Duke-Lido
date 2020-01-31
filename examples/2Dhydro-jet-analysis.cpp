@@ -17,6 +17,8 @@
 #include "Hadronize.h"
 //#include "jet_finding.h"
 
+#include "JetCrossSectionAnalyzer.h"
+
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
@@ -27,6 +29,16 @@ void output_jet(std::string fname, std::vector<particle> plist){
 }
 
 int main(int argc, char* argv[]){
+
+    std::vector<double> pTBin({39, 50, 63, 79, 100, 125, 158, 199, 251, 316});
+	JetCrossSectionAnalyzer analyzer=JetCrossSectionAnalyzer(pTBin, -1, 0.4, 2, 0, 2.1);
+
+    std::vector<double> pTHatBin({10,20,50,70,100,150,200,300,400,500,700,1000});
+	size_t nBin = pTHatBin.size() - 1;
+	
+    for (size_t iBin = 0; iBin < nBin; iBin++)
+	{
+
     using OptDesc = po::options_description;
     OptDesc options{};
     options.add_options()
@@ -135,15 +147,7 @@ int main(int argc, char* argv[]){
                 return 1;
             }
         }
-        std::ofstream fb("balance.txt");
-        /// Initialize pythia generator
-        PythiaGen pythiagen(
-                args["pythia-setting"].as<fs::path>().string(),
-                args["ic"].as<fs::path>().string(),
-                args["pthat-low"].as<int>(),
-                args["pthat-high"].as<int>(),
-                args["eid"].as<int>()
-        );
+        
         /// Initialize Lido in-medium transport
         LOG_INFO<<"init lido";
         initialize(table_mode,
@@ -152,12 +156,18 @@ int main(int argc, char* argv[]){
                 );
         /// Initialize a simple hadronizer
         JetDenseMediumHadronize Hadronizer;
-        
-        std::ostringstream outname1, outname2;
-        outname1 << "I-" << args["pthat-low"].as<int>()
-                 << "-" << args["pthat-high"].as<int>();
-        outname2 << "F-" << args["pthat-low"].as<int>()
-                 << "-" << args["pthat-high"].as<int>();
+
+
+        std::ofstream fb("balance.txt");
+        /// Initialize pythia generator
+        PythiaGen pythiagen(
+                args["pythia-setting"].as<fs::path>().string(),
+                args["ic"].as<fs::path>().string(),
+                pTHatBin[iBin],
+                pTHatBin[iBin+1],
+                args["eid"].as<int>()
+        );
+
         for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
             std::vector<particle> plist, hlist, thermal_list,
                                   new_plist, pOut_list;
@@ -165,7 +175,6 @@ int main(int argc, char* argv[]){
             // Initialize parton list from python
             pythiagen.Generate(plist, args["heavy"].as<int>());
             double sigma_gen = plist[0].weight;
-
 
             /// Initialzie a hydro reader
             Medium<2> med1(args["hydro"].as<fs::path>().string());
@@ -194,9 +203,9 @@ int main(int argc, char* argv[]){
             while(med1.load_next()){
                 double current_hydro_clock = med1.get_tauL();
                 double hydro_dtau = med1.get_hydro_time_step();
-                LOG_INFO << current_hydro_clock/fmc_to_GeV_m1 
-                         << " [fm/c]\t" 
-                         << " # of hard =" << plist.size();
+                //LOG_INFO << current_hydro_clock/fmc_to_GeV_m1 
+                //         << " [fm/c]\t" 
+                //         << " # of hard =" << plist.size();
                 // further divide hydro step into 10 transpor steps
                 int Ns = 10; 
                 double dtau = hydro_dtau/Ns, DeltaTau;
@@ -239,18 +248,23 @@ int main(int argc, char* argv[]){
                     plist = new_plist;
                 }
             }
+
+            std::vector<fastjet::PseudoJet> fjInputs;
             for (auto & p : plist) {
                 if (std::abs(p.p.rap())<2)
                 Pmu_Hard_Out = Pmu_Hard_Out + p.p;
+                fjInputs.push_back(fastjet::PseudoJet(p.p.x(), p.p.y(), p.p.z(), p.p.t()));
             }
 
+            double sigmapb_weight = sigma_gen * 1.0e9/args["pythia-events"].as<int>();
+
+			analyzer.doJetFinding(fjInputs, sigmapb_weight);
             
             //Hadronizer.hadronize(plist, hlist, thermal_list);
             LOG_INFO << "Hard initial " << Pmu_Hard_In;
             LOG_INFO << "Hard final " << Pmu_Hard_Out;
             LOG_INFO << "Soft deposite " << Pmu_Soft_Gain;
-
-        }
+    }
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";
@@ -263,6 +277,10 @@ int main(int argc, char* argv[]){
        std::cerr << e.what() << '\n';
        return 1;
     }    
+    }
+
+    analyzer.outputResults();
+
     return 0;
 }
 

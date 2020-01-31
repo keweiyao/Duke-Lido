@@ -118,7 +118,7 @@ void PythiaGen::Generate(std::vector<particle> & plist, int heavyid){
 		    _p.mass = std::abs(p.m());
 		    _p.x0 = fourvec{0,x,y,0};
                     _p.x = _p.x0; 
-		    find_production_x(i, _p.x, pythia.event); 
+		    //find_production_x(i, _p.x, pythia.event); 
 		    _p.p0 = p0;
  
 		    if (std::abs(_p.pid) != 4 && std::abs(_p.pid) != 5) {
