@@ -110,7 +110,7 @@ void PythiaGen::Generate(std::vector<particle> & plist, int heavyid){
 	for (size_t i = 0; i < pythia.event.size(); ++i) {
 		auto p = pythia.event[i];
                 
-		if (p.isFinal() && std::abs(p.y())< 5.0) {
+		if (p.isFinal() && std::abs(p.y())< 4.0) {
 		    // final momenta 
 		    fourvec p0{p.e(), p.px(), p.py(), p.pz()};
 		    particle _p; 

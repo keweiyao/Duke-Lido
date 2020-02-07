@@ -161,18 +161,24 @@ int main(int argc, char* argv[]){
         for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
             std::vector<particle> plist, hlist, thermal_list,
                                   new_plist, pOut_list;
-            std::vector<fourvec> clist;
+            std::vector<current> clist;
             // Initialize parton list from python
             pythiagen.Generate(plist, args["heavy"].as<int>());
             double sigma_gen = plist[0].weight;
-            for (int ir=0; ir<5; ir++){
+          /* for (int ir=0; ir<5; ir++){
                 std::ostringstream ss;
-                ss << outname1.str() << "-R" << (ir+1) << ".dat";
+                ss << outname1.str() << "-Raa-R" << (ir+1) << ".dat";
                 FindJet(plist, clist,
-                 0.2*(ir+1), 10, -2.8, 2.8,
+                 0.2*(ir+1), 60, -2.8, 2.8,
                  ss.str(), sigma_gen);
-            }
+            }continue;  
 
+            std::ostringstream sss;
+                sss << outname1.str() << "-R0d4" << ".dat";
+                JetShape(plist, clist,
+                 0.4, 80, -2, 2,
+                 sss.str(), sigma_gen);
+            continue;*/
             /// Initialzie a hydro reader
             Medium<2> med1(args["hydro"].as<fs::path>().string());
 
@@ -194,7 +200,7 @@ int main(int argc, char* argv[]){
             fourvec Pmu_Soft_Gain = {0., 0., 0., 0.};
             std::ofstream fsoft("soft.txt");
             for (auto & p : plist) {
-                if (std::abs(p.p.rap())<2)
+                if (std::abs(p.p.pseudorap())<2)
                     Pmu_Hard_In = Pmu_Hard_In + p.p;
             }
             while(med1.load_next()){
@@ -204,7 +210,7 @@ int main(int argc, char* argv[]){
                          << " [fm/c]\t" 
                          << " # of hard =" << plist.size();
                 // further divide hydro step into 10 transpor steps
-                int Ns = 10; 
+                int Ns = 2; 
                 double dtau = hydro_dtau/Ns, DeltaTau;
                 for (int i=0; i<Ns; ++i){
                     new_plist.clear();
@@ -237,28 +243,50 @@ int main(int argc, char* argv[]){
                             ploss = ploss - fp.p;
                             new_plist.push_back(fp);
                         }
-                       if (std::abs(ploss.rap())<2)            
-                       Pmu_Soft_Gain = Pmu_Soft_Gain + ploss;
-                       //if (ploss.pabs() > .3)
-                       //clist.push_back(ploss);
+                       if (std::abs(ploss.pseudorap())<2)            
+                           Pmu_Soft_Gain = Pmu_Soft_Gain + ploss;
+                   
+                    current J; 
+                    vx=0; vy=0; vz=vzgrid;
+                    ploss = ploss.boost_to(vx, vy, vz); 
+                    J.p = ploss;
+                    J.x = p.x;
+                    J.v[0] = vx; J.v[1] = vy; J.v[2] = vz;
+                    clist.push_back(J);           
+                   
                     }
                     plist = new_plist;
                 }
             }
             for (auto & p : plist) {
-                if (std::abs(p.p.rap())<2)
+                if (std::abs(p.p.pseudorap())<2)
                 Pmu_Hard_Out = Pmu_Hard_Out + p.p;
             }
-
-            for (int ir=0; ir<5; ir++){
-                std::ostringstream ss;
-                ss << outname2.str() << "-R" << (ir+1) << ".dat";
-                FindJet(plist, clist,
-                 0.2*(ir+1), 10, -2.8, 2.8,
-                 ss.str(), sigma_gen);
+            Hadronizer.hadronize(plist, hlist, thermal_list);
+          for(auto & it : thermal_list){
+                current J;
+                fourvec pmu{-it.p.t(), -it.p.x(), -it.p.y(), -it.p.z()};
+                J.p = pmu.boost_to(it.vcell[0], it.vcell[1], it.vcell[2]);
+                J.x = it.x;
+                J.v[0] = it.vcell[0];
+                J.v[1] = it.vcell[1];
+                J.v[2] = it.vcell[2];
+                clist.push_back(J);
             }
-            
-            //Hadronizer.hadronize(plist, hlist, thermal_list);
+              for (int ir=0; ir<5; ir++){
+                std::ostringstream ss;
+                ss << outname2.str() << "-Raa-R" << (ir+1) << ".dat";
+                FindJet(plist, clist,
+                 0.2*(ir+1), 60, -2.8, 2.8,
+                 ss.str(), sigma_gen);
+            } /*
+             std::ostringstream ss;
+                ss << outname2.str() << "-R0d4" << ".dat";
+                JetShape(hlist, clist,
+                 0.4, 80, -2, 2,
+                 ss.str(), sigma_gen);
+            */
+            //
             LOG_INFO << "Hard initial " << Pmu_Hard_In;
             LOG_INFO << "Hard final " << Pmu_Hard_Out;
             LOG_INFO << "Soft deposite " << Pmu_Soft_Gain;

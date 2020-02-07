@@ -51,8 +51,6 @@ struct fourvec {
   double x(void) const {return a[1];};
   double y(void) const {return a[2];};
   double z(void) const {return a[3];};
-  double tau(void) const {return std::sqrt(a[0]*a[0] - a[3]*a[3]);};
-  double rap(void) const {return .5*std::log((a[0]+a[3])/(a[0]-a[3]));};
   friend std::ostream& operator<<(std::ostream& os, const fourvec& A){
     os << A.t() << " " << A.x() << " " << A.y() << " " << A.z();
     return os;
@@ -107,6 +105,13 @@ struct fourvec {
   double get(int i) {return a[i];};
   double pabs2(){return a[1]*a[1]+a[2]*a[2]+a[3]*a[3];};
   double pabs(){return std::sqrt(pabs2());};
+  double tau(void) const {return std::sqrt(a[0]*a[0] - a[3]*a[3]);};
+  double rap(void) const {return .5*std::log((a[0]+a[3])/(a[0]-a[3]));};
+  double pseudorap(void) const {double p = std::sqrt(a[1]*a[1]+a[2]*a[2]+a[3]*a[3]);
+                                return .5*std::log((p+a[3])/(p-a[3]));};
+  double m2(void) const {return a[0]*a[0]-a[1]*a[1]-a[2]*a[2]-a[3]*a[3];};
+  double phi(void) const {return std::atan2(a[2], a[1]);};
+  double xT(void) const {return std::sqrt(a[1]*a[1]+a[2]*a[2]);}; 
 };
 
 struct tensor {

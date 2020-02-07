@@ -9,6 +9,11 @@
 #include "lorentz.h"
 #include "workflow.h"
 
+struct current{
+    fourvec p;
+    fourvec x;
+    double v[3];
+};
 template <typename T>
 std::string to_string(T value)
 {
@@ -39,7 +44,14 @@ class MyInfo: public fastjet::PseudoJet::UserInfoBase {
 
 
 void FindJet(std::vector<particle> plist, 
-             std::vector<fourvec> jlist,
+             std::vector<current> jlist,
+             double jetRadius, 
+             double jetpTMin, 
+             double jetyMin, 
+             double jetyMax,
+             std::string fname, double sigma_gen);
+void JetShape(std::vector<particle> plist, 
+             std::vector<current> jlist,
              double jetRadius, 
              double jetpTMin, 
              double jetyMin, 

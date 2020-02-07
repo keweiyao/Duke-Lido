@@ -161,17 +161,22 @@ int main(int argc, char* argv[]){
         for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
             std::vector<particle> plist, hlist, thermal_list,
                                   new_plist, pOut_list;
-            std::vector<fourvec> clist;
+            std::vector<current> clist;
             // Initialize parton list from python
             pythiagen.Generate(plist, args["heavy"].as<int>());
             double sigma_gen = plist[0].weight;
             for (int ir=0; ir<5; ir++){
                 std::ostringstream ss;
-                ss << outname1.str() << "-R" << (ir+1) << ".dat";
+                ss << outname1.str() << "-Raa-R" << (ir+1) << ".dat";
                 FindJet(plist, clist,
                  0.2*(ir+1), 10, -2.8, 2.8,
                  ss.str(), sigma_gen);
             }
+                            std::ostringstream sss;
+                sss << outname1.str() << "-R0d3" << ".dat";
+                JetShape(plist, clist,
+                 0.4, 120, -4, 4,
+                 sss.str(), sigma_gen);
 
             /// Initialzie a hydro reader
             Medium<3> med1(args["hydro"].as<fs::path>().string());
@@ -194,7 +199,7 @@ int main(int argc, char* argv[]){
             fourvec Pmu_Soft_Gain = {0., 0., 0., 0.};
             std::ofstream fsoft("soft.txt");
             for (auto & p : plist) {
-                if (std::abs(p.p.rap())<2)
+                if (std::abs(p.p.pseudorap())<2)
                     Pmu_Hard_In = Pmu_Hard_In + p.p;
             }
             while(med1.load_next()){
@@ -237,26 +242,31 @@ int main(int argc, char* argv[]){
                             ploss = ploss - fp.p;
                             new_plist.push_back(fp);
                         }
-                       if (std::abs(ploss.rap())<2)            
-                       Pmu_Soft_Gain = Pmu_Soft_Gain + ploss;
-                       //if (ploss.pabs() > .3)
-                       //clist.push_back(ploss);
+                       if (std::abs(ploss.pseudorap())<2)            
+                           Pmu_Soft_Gain = Pmu_Soft_Gain + ploss;
+                       current J; J.p = ploss; J.x = p.x;
+                       clist.push_back(J);            
                     }
                     plist = new_plist;
                 }
             }
             for (auto & p : plist) {
-                if (std::abs(p.p.rap())<2)
+                if (std::abs(p.p.pseudorap())<2)
                 Pmu_Hard_Out = Pmu_Hard_Out + p.p;
             }
 
             for (int ir=0; ir<5; ir++){
                 std::ostringstream ss;
-                ss << outname2.str() << "-R" << (ir+1) << ".dat";
+                ss << outname2.str() << "-Raa-R" << (ir+1) << ".dat";
                 FindJet(plist, clist,
                  0.2*(ir+1), 10, -2.8, 2.8,
                  ss.str(), sigma_gen);
             }
+                std::ostringstream ss;
+                ss << outname2.str() << "-R0d3" << ".dat";
+                JetShape(plist, clist,
+                 0.4, 120, -4, 4,
+                 ss.str(), sigma_gen);
             
             //Hadronizer.hadronize(plist, hlist, thermal_list);
             LOG_INFO << "Hard initial " << Pmu_Hard_In;

@@ -3,6 +3,7 @@
 3. Diffusion casued energy-momentum current are not tracked.
 4. #2-3 should in-principal be treated as hydrodynamical source term (as well as soft recoils from #1). Currently, for the jet contribution, if one does not include this, it will be assuming that these energy will be trasported to relatively large-R by hydro-like response, and does not affect small-R jet calculation too much.
 5. A jet finding algortihm code is integrated (jet_analysis/jet_finding.cpp and .h). One can add more applciation to this subfolder. The resulting analysis function can be called from the main code in (example/jet_3Dhydro_couple.cpp and jet_2Dhydro_couple.cpp).
+6. To compile with fastjet.
 6. Lorentz.h now supports calculating tau() and rap() defined as:
    a.tau() = sqrt(a[0]^2 - a[3]^2)
    a.rap() = 1/2*ln[ (a[0] + a[3])/(a[0] - a[3]) ]
