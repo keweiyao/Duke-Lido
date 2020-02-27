@@ -4,4 +4,5 @@ test/
 Tables/
 table.h5
 logfile.log
+simulation/
 

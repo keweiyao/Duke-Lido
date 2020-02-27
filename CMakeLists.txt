@@ -192,7 +192,6 @@ endif()
 string(APPEND CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_REQUIRED_FLAGS} --coverage")
 
 set(LIBRARY_NAME "lib${PROJECT_NAME}")
-
 add_subdirectory(src)
 include_directories(src)
 
@@ -201,31 +200,25 @@ add_subdirectory(jet_analysis)
 include_directories(jet_analysis)
 
 
-
-add_executable(Lido-TabGen ./examples/Lido-TabGen.cpp)
-target_link_libraries(Lido-TabGen ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
-install(TARGETS Lido-TabGen DESTINATION bin)
-
-add_executable(analytic-medium ./examples/analytic-medium.cpp)
-target_link_libraries(analytic-medium ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
-install(TARGETS analytic-medium DESTINATION bin)
-
+foreach(App "Lido-TabGen") #analytic-medium
+	add_executable(Lido-TabGen ./examples/Lido-TabGen.cpp)
+	target_link_libraries(Lido-TabGen ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
+	install(TARGETS Lido-TabGen DESTINATION bin)
+endforeach()
 
 if(pythia8)
-foreach(App "jet-2Dhydro-couple" "jet-3Dhydro-couple")
+foreach(App "jet-2Dhydro-couple" "jet-3Dhydro-couple" "testsource")
 	add_executable(${App} ./examples/${App}.cpp)
 	target_link_libraries(${App} ${LIBRARY_NAME} ${LIBRARY_JETFIND} ${PYTHIA8_LIBRARIES} ${FASTJET_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS ${App} DESTINATION bin)
 endforeach()
+
+foreach(App "HQ-2Dhydro-couple" "pythia_HQ_baseline")
+	add_executable(${App} ./examples/${App}.cpp)
+	target_link_libraries(${App} ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+	install(TARGETS ${App} DESTINATION bin)
+endforeach()
 endif(pythia8)
 
-
-install(FILES ./examples/lido_settings.xml DESTINATION share)
-if(pythia8)
-install(FILES ./examples/pythia-pp-200-setting.txt DESTINATION share)
-install(FILES ./examples/pythia-pp-5020-setting.txt DESTINATION share)
-install(FILES ./examples/pythia-PbPb-5020-setting.txt DESTINATION share)
-install(FILES ./examples/pythia-AuAu-200-setting.txt DESTINATION share)
-install(FILES ./examples/pythia-jet-setting.txt DESTINATION share)
-endif(pythia8)
+install(FILES ./settings/lido_settings.xml DESTINATION share)
 

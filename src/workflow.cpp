@@ -416,33 +416,37 @@ int update_particle_momentum_Lido(
             // these are virtual particles, that pops out at a rate
             // given by the incoherent calculation, which will be
             // dropped (suppressed) according to the LPM effect
-            particle vp = produce_parton(21, pIn, FS[2], x0, temp, v3cell);
-            vp.origin = (pIn.origin==-1)?0:pIn.origin;
-            // The local 2->2 mean-free-path is estimated with
-            // the qhat_hard integrate from the 2->2 rate
-            double xfrac = vp.p.t() / pIn.p.t();
-            double local_qhat = 0.;
-            double vp_cell = vp.p.boost_to(v3cell[0], 
-                                           v3cell[1], v3cell[2]).t();
-            double boost_factor = vp.p.t() / vp_cell;
-            BOOST_FOREACH (Process &r, AllProcesses[21]){
-                switch (r.which()){
-                case 0:
-                    if (boost::get<Rate22>(r).IsActive()){
-                        tensor A = boost::get<Rate22>(r).GetSecondM(
-                            {vp_cell, temp});
-                        local_qhat += A.T[1][1] + A.T[2][2];
-                    }
-                    break;
-                default:
-                    break;
-                }
-            }
+            // only handle > mD particles
             double mD2 = t_channel_mD2->get_mD2(temp);
-            // estimate mfp in the lab frame
-            vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
+            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > std::sqrt(mD2)) { 
+		    particle vp = produce_parton(21, pIn, FS[2], x0, temp, v3cell);
+		    vp.origin = (pIn.origin==-1)?0:pIn.origin;
+		    // The local 2->2 mean-free-path is estimated with
+		    // the qhat_hard integrate from the 2->2 rate
+		    double xfrac = vp.p.t() / pIn.p.t();
+		    double local_qhat = 0.;
+		    double vp_cell = vp.p.boost_to(v3cell[0], 
+		                                   v3cell[1], v3cell[2]).t();
+		    double boost_factor = vp.p.t() / vp_cell;
+		    BOOST_FOREACH (Process &r, AllProcesses[21]){
+		        switch (r.which()){
+		        case 0:
+		            if (boost::get<Rate22>(r).IsActive()){
+		                tensor A = boost::get<Rate22>(r).GetSecondM(
+		                    {vp_cell, temp});
+		                local_qhat += A.T[1][1] + A.T[2][2];
+		            }
+		            break;
+		        default:
+		            break;
+		        }
+		    }
+		    
+		    // estimate mfp in the lab frame
+		    vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
 
-            pIn.radlist.push_back(vp);
+		    pIn.radlist.push_back(vp);
+            }
         }
         if (channel == 4 || channel == 5){
             // Absorption processes happens mostly for gluon energy ~ 3*T, therefore we negelected the LPM effect
@@ -453,12 +457,15 @@ int update_particle_momentum_Lido(
             // these are virtual particles, that pops out at a rate
             // given by the incoherent calculation, which will be
             // dropped (suppressed) according to the LPM effect
-            particle vp = produce_parton(21, pIn, FS[1], x0, temp, v3cell);
-                    vp.origin = (pIn.origin==-1)?0:pIn.origin;
+            // only for E>mD
             double mD2 = t_channel_mD2->get_mD2(temp);
-            // estimate mfp in the lab frame
-            vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
-            pIn.radlist.push_back(vp);
+            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > std::sqrt(mD2)) {
+		    particle vp = produce_parton(21, pIn, FS[1], x0, temp, v3cell);
+		            vp.origin = (pIn.origin==-1)?0:pIn.origin;
+		    // estimate mfp in the lab frame
+		    vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
+		    pIn.radlist.push_back(vp);
+            }
         }
         if (channel == 7){
             // Absorption processes happens mostly for gluon energy ~ 3*T, therefore we negelected the LPM effect
@@ -468,42 +475,49 @@ int update_particle_momentum_Lido(
         if (channel == 8 || channel == 9){
             // This should only happen for gluon
             // gluon splits to q+qbar, pid changing!!
-            particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[2], x0, temp, v3cell);
-                    vp.origin = (pIn.origin==-1)?0:pIn.origin;
-            // The local 2->2 mean-free-path is estimated with
-            // the qhat_hard integrate from the 2->2 rate
-            double xfrac = vp.p.t() / pIn.p.t();
-            double local_qhat = 0.;
-            double vp_cell = vp.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
-            double boost_factor = vp.p.t() / vp_cell;
-            BOOST_FOREACH (Process &r, AllProcesses[21]){
-                switch (r.which()){
-                case 0:
-                    if (boost::get<Rate22>(r).IsActive()){
-                        tensor A = boost::get<Rate22>(r).GetSecondM(
-                            {vp_cell, temp});
-                        local_qhat += A.T[1][1] + A.T[2][2];
-                    }
-                    break;
-                default:
-                    break;
-                }
-            }
+            // only for E>mD
             double mD2 = t_channel_mD2->get_mD2(temp);
-            // estimate mfp in the lab frame
-            vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
-            pIn.radlist.push_back(vp);
+            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > std::sqrt(mD2)) {
+		    particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[2], x0, temp, v3cell);
+		            vp.origin = (pIn.origin==-1)?0:pIn.origin;
+		    // The local 2->2 mean-free-path is estimated with
+		    // the qhat_hard integrate from the 2->2 rate
+		    double xfrac = vp.p.t() / pIn.p.t();
+		    double local_qhat = 0.;
+		    double vp_cell = vp.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
+		    double boost_factor = vp.p.t() / vp_cell;
+		    BOOST_FOREACH (Process &r, AllProcesses[21]){
+		        switch (r.which()){
+		        case 0:
+		            if (boost::get<Rate22>(r).IsActive()){
+		                tensor A = boost::get<Rate22>(r).GetSecondM(
+		                    {vp_cell, temp});
+		                local_qhat += A.T[1][1] + A.T[2][2];
+		            }
+		            break;
+		        default:
+		            break;
+		        }
+		    }
+		    // estimate mfp in the lab frame
+		    vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
+		    pIn.radlist.push_back(vp);
+            }
         }
         if (channel == 10){
             // This should only happen for gluon
             // gluon splits to q+qbar, pid changing!!
-            particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[1], x0, temp, v3cell);
-                    vp.origin = (pIn.origin==-1)?0:pIn.origin;
-
+            // only for E>mD
             double mD2 = t_channel_mD2->get_mD2(temp);
-            // estimate mfp in the lab frame
-            vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
-            pIn.radlist.push_back(vp);
+            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > std::sqrt(mD2)) {
+		    particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[1], x0, temp, v3cell);
+		            vp.origin = (pIn.origin==-1)?0:pIn.origin;
+
+		    
+		    // estimate mfp in the lab frame
+		    vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
+		    pIn.radlist.push_back(vp);
+            }
         }
     }
 
@@ -535,11 +549,11 @@ int update_particle_momentum_Lido(
             }
 
             // update the partilce for this time step
-            //LOG_INFO << "b1";
             update_particle_momentum_Lido(dt_input, temp, v3cell, *it, pnew_Out);
-            //LOG_INFO << "b2";
 
-            if (it->x.t() - it->x0.t() <= taun && !Adiabatic_LPM){
+            if (it->x.t() - it->x0.t() <= taun 
+                && !Adiabatic_LPM 
+                && temp>0.161) {
                 it++;
             }
             else{
@@ -689,9 +703,7 @@ void output_oscar(const std::vector<particle> plist,
               << ff(p.p0.x()) << "  "
               << ff(p.p0.y()) << "  "
               << ff(p.p0.z()) << "  "
-              << ff(p.p0.t()) << "  "
-              << ff(p.weight) << "  "
-              << ff(0.0) << "\n";
+              << ff(p.weight) << "\n";
         }
         i++;
     }

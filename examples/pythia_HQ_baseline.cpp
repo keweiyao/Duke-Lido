@@ -8,11 +8,12 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
+#include <unistd.h>
 
 #include "simpleLogger.h"
 #include "Medium_Reader.h"
 #include "workflow.h"
-#include "pythia_wrapper.h"
+#include "pythia_HQ_gen.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -68,25 +69,28 @@ int main(int argc, char* argv[]){
         }
 
         // start
-        std::vector<particle> plist;
-
+        std::vector<particle> plist, dlist;
+        plist.clear();
         /// HardGen
-        HardGen hardgen(args["pythia-setting"].as<fs::path>().string(),
+        std::vector<double> pThatbins({2,4,6,8,10,15,20,30,40,50,60,80,100,120,150,200,300});
+        for (int i=0; i<pThatbins.size()-1; i++){
+            HQGenerator hardgen(args["pythia-setting"].as<fs::path>().string(),
                             args["ic"].as<fs::path>().string(),
-                            args["eid"].as<int>()
+                            args["eid"].as<int>(),
+                            pThatbins[i], pThatbins[i+1]
                             );
-        hardgen.Generate(plist,
-                            args["pythia-events"].as<int>(),
-                            2.5, false);
-
-
-        
-        double pTf = mean_pT(plist);
-        LOG_INFO << "Nparticles: " << plist.size();
-        LOG_INFO << "Mean pT: " << pTf << " GeV";
-
-        output_oscar(plist, 4, "c-quark-frzout.dat");
-        output_oscar(plist, 5, "b-quark-frzout.dat");
+            dlist.clear();
+            hardgen.Generate(dlist,
+                             args["pythia-events"].as<int>(),
+                             3.0);
+            plist.insert(plist.end(), dlist.begin(), dlist.end());
+        }
+        int processid = getpid();
+        std::stringstream outputfilename1,outputfilename2;
+        outputfilename1 << "c-quark-" << processid<<".dat";
+        outputfilename2 << "b-quark-" << processid<<".dat";
+        output_oscar(plist, 4, outputfilename1.str());
+        output_oscar(plist, 5, outputfilename2.str());
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

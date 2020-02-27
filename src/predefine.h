@@ -117,7 +117,7 @@ public:
 	friend std::ostream & operator<< (std::ostream & stream, const ff & x) {
 		// So that the log does not scream
 		if (x.value == 0.) {
-		    stream << "0.000000D+00";
+		    stream << "0.000000E+00";
 		    return stream;
 		}
 		int exponent = floor(log10(std::abs(x.value)));
@@ -140,8 +140,8 @@ public:
 			stream << std::setw(8) << newbase;
 		}
 		
-		if (exponent >= 0) stream << "D+" << std::setw(2) << std::setfill('0') << exponent;
-		else stream << "D-" << std::setw(2) << std::setfill('0') << std::abs(exponent);
+		if (exponent >= 0) stream << "E+" << std::setw(2) << std::setfill('0') << exponent;
+		else stream << "E-" << std::setw(2) << std::setfill('0') << std::abs(exponent);
 		return stream;
 	}
 };

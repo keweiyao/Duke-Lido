@@ -2,6 +2,10 @@
 # to the main executable
 add_library(${LIBRARY_JETFIND} STATIC
 jet_finding.cpp
+../src/lorentz.cpp
 )
 
-set_target_properties(${LIBRARY_JETFIND} PROPERTIES PREFIX "")
+#set_target_properties(${LIBRARY_JETFIND} PROPERTIES PREFIX "")
+# install the library headers
+#file(GLOB HEADERS *.h)
+#install(FILES ${HEADERS} DESTINATION include/${LIBRARY_NAME})
