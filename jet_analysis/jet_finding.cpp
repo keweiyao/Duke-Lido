@@ -32,7 +32,7 @@ void redistribute(
     int Nphi = int(_Nphi/coarse_level);
     const double dy = (ymax-ymin)/(Ny-1); 
     const double dphi = (phimax-phimin)/Nphi;
-    const double prefactor = std::pow(M_PI, 2)/3./std::pow(2*M_PI, 3)/4./M_PI;
+    const double prefactor = std::pow(M_PI, 2)/4./std::pow(2*M_PI, 3)/4./M_PI;
     const double vradial = 0.7;
     const double gamma_radial = 1./std::sqrt(1-std::pow(vradial,2));
 
@@ -86,12 +86,12 @@ void redistribute(
                     double vradial_x = vradial*kp.x()/kp.xT();
                     double vradial_y = vradial*kp.y()/kp.xT();
                     double krap = kp.rap();                   
-                    double G0 = source.p.t()/k.t()
+                    double G0 = source.p.t()*source.cs
                               + source.p.x()*k.x()
                               + source.p.y()*k.y()
                               + source.p.z()*k.z();
                     double G03 = 3.*G0;
-                    fourvec dgmu = {G0*k.t(), 
+                    fourvec dgmu = {G0/source.cs,
                                     G03*k.x(), 
                                     G03*k.y(), 
                                     G03*k.z()};
@@ -113,11 +113,17 @@ void redistribute(
                                );
                     double NdotdG = chy*dgmup.t() - shy*dgmup.z()
                                   - cphi*dgmup.x() - sphi*dgmup.y();
+                    double Ndotdk = chy*kp.t() - shy*kp.z()
+                                  - cphi*kp.x() - sphi*kp.y();
+                    double NdotU = gamma_radial*(
+                             chkpeta*chy - shkpeta*shy
+                         - vradial_x*cphi - vradial_y*sphi
+                               );
                     double sigma = gamma_radial*(
                                     chy*chkpeta - shy*shkpeta
                                - cphi*vradial_x - sphi*vradial_y
                                    );
-                    res[0] += (24.*UdotdG*sigma-18.*NdotdG)/std::pow(sigma,4);
+                    res[0] += (32.*UdotdG*sigma-24.*NdotdG)/std::pow(sigma,4);
                 }
                 return res;
             };
@@ -125,7 +131,7 @@ void redistribute(
 	    double xmax[2] = {1., M_PI};
             double error;
             double res = quad_nd(code, 2, 1, xmin, xmax, 
-                                error, 0., .05, 100)[0] 
+                                error, 0., .01, 100)[0] 
                        * prefactor;
             CoarsedPmu[iy][iphi] = CoarsedPmu[iy][iphi] + Nmu0*res;
             CoarsedPT[iy][iphi] += res;
