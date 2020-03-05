@@ -101,6 +101,7 @@ void find_production_x(int i, fourvec & x, Event & event){
 void PythiaGen::Generate(std::vector<particle> & plist, int heavyid){
     double x, y;
     TRENToSampler.SampleXY(x, y);
+    LOG_INFO << x/5.076 << " " << y/5.076; 
     bool triggered = false;
     do{
         if (heavyid < 4) triggered = true;
@@ -110,7 +111,7 @@ void PythiaGen::Generate(std::vector<particle> & plist, int heavyid){
 	for (size_t i = 0; i < pythia.event.size(); ++i) {
 		auto p = pythia.event[i];
                 
-		if (p.isFinal() && std::abs(p.y())< 4.0) {
+		if (p.isFinal() && std::abs(p.y())< 3.5) {
 		    // final momenta 
 		    fourvec p0{p.e(), p.px(), p.py(), p.pz()};
 		    particle _p; 
@@ -118,7 +119,7 @@ void PythiaGen::Generate(std::vector<particle> & plist, int heavyid){
 		    _p.mass = std::abs(p.m());
 		    _p.x0 = fourvec{0,x,y,0};
                     _p.x = _p.x0; 
-		    find_production_x(i, _p.x, pythia.event); 
+		    //find_production_x(i, _p.x, pythia.event); 
 		    _p.p0 = p0;
  
 		    if (std::abs(_p.pid) != 4 && std::abs(_p.pid) != 5) {

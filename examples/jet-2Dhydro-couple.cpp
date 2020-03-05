@@ -133,9 +133,6 @@ int main(int argc, char* argv[]){
 
         /// use process id to define filename
         int processid = getpid();
-        std::stringstream outputfilename2;
-        outputfilename2 << processid << "-shape.dat";
-
         /// Initialize Lido in-medium transport
         initialize(table_mode,
             args["lido-setting"].as<fs::path>().string(),
@@ -144,10 +141,12 @@ int main(int argc, char* argv[]){
         /// Initialize a simple hadronizer
         JetDenseMediumHadronize Hadronizer;
 
+
+        std::vector<double> TriggerBin({30,50,100,150});
         //std::vector<double> TriggerBin({30,60,100,200,300,
-        //                   400,500,600,800,1500});
-        std::vector<double> TriggerBin({80,100,120,125,135,
-                                       145,160,180,200,250,300,1000});
+        //                                400,500,600,800,1500});
+        //std::vector<double> TriggerBin({80,100,120,125,135,
+        //                               145,160,180,200,250,300,1000});
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
             PythiaGen pythiagen(
@@ -163,7 +162,8 @@ int main(int argc, char* argv[]){
                 std::vector<current> clist;
                 // Initialize parton list from python
                 pythiagen.Generate(plist, args["heavy"].as<int>());
-                double sigma_gen = plist[0].weight/args["pythia-events"].as<int>();
+                double sigma_gen = plist[0].weight
+                                  / args["pythia-events"].as<int>();
 
                 /// Initialzie a hydro reader
                 Medium<2> med1(args["hydro"].as<fs::path>().string());
@@ -186,10 +186,8 @@ int main(int argc, char* argv[]){
                 fourvec Pmu_Hard_Out = {0., 0., 0., 0.};
                 fourvec Pmu_Soft_Gain = {0., 0., 0., 0.};
                 for (auto & p : plist) {
-                    if (std::abs(p.p.pseudorap())<2)
-                        Pmu_Hard_In = Pmu_Hard_In + p.p;
+                    Pmu_Hard_In = Pmu_Hard_In + p.p;
                 }
-           
                 while(med1.load_next()){
                     double current_hydro_clock = med1.get_tauL();
                     double hydro_dtau = med1.get_hydro_time_step();
@@ -197,7 +195,7 @@ int main(int argc, char* argv[]){
                     //        << " [fm/c]\t" 
                     //       << " # of hard =" << plist.size();
                     // further divide hydro step into 10 transpor steps
-                    int Ns = 2; 
+                    int Ns = 1; 
                     double dtau = hydro_dtau/Ns, DeltaTau;
                     for (int i=0; i<Ns; ++i){
                         new_plist.clear();
@@ -220,9 +218,9 @@ int main(int argc, char* argv[]){
                             }
                             // get hydro information
                             double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.0;
-                            double vzgrid = p.x.z()/p.x.t();
+                            
                             med1.interpolate(p.x, T, vx, vy, vz);
-
+                            double vzgrid = p.x.z()/p.x.t();
                             fourvec ploss = p.p;
                             int fs_size = update_particle_momentum_Lido(
                                   DeltaTau, T, {vx, vy, vz}, p, pOut_list);
@@ -230,67 +228,51 @@ int main(int argc, char* argv[]){
                             for (auto & fp : pOut_list) {
                                 ploss = ploss - fp.p;
                                 new_plist.push_back(fp);
-                            }
-                            if (std::abs(ploss.pseudorap())<2)            
-                                Pmu_Soft_Gain = Pmu_Soft_Gain + ploss;
-                             {
+                            }   
+                             
+                            if (p.x.rap()*p.x.rap()<5){
+                                Pmu_Soft_Gain = Pmu_Soft_Gain + ploss; 
                                 current J; 
                                 vx = vx/std::sqrt(1-vzgrid*vzgrid);
                                 vy = vy/std::sqrt(1-vzgrid*vzgrid);
-                                ploss = ploss.boost_to(0, 0, vzgrid);
-                                ploss = ploss.boost_to(vx, vy, 0);
+                                ploss = ploss.boost_to(0, 0, vzgrid).boost_to(vx, vy, 0);
                                 J.p = ploss;
                                 J.x = p.x;
-
+                                J.tau = p.x.tau();
+                                J.rap = p.x.rap();
                                 J.v[0] = vx; J.v[1] = vy; J.v[2] = vzgrid;
-                    if (T>0.37) J.cs = std::sqrt(.3);
-                    else if (T>0.21)J.cs=std::sqrt(0.25+(T-.21)*.05/(.37-.21));
-                    else if (T>0.15)J.cs=std::sqrt(0.15+(T-.15)*.1/(.21-.15));
-                                clist.push_back(J);     
-                            }      
+                                double beta = std::sqrt(vx*vx+vy*vy+1e-9);
+                                double gammaR = 1./sqrt(1.-beta*beta);
+                                J.a00 = gammaR; 
+                                J.a01 = gammaR*vx;
+                                J.a02 = gammaR*vy;
+                                J.a11 = 1.+(gammaR-1.)*vx*vx/beta/beta;
+                                J.a12 = (gammaR-1.)*vx*vy/beta/beta;
+                                J.a22 = 1.+(gammaR-1.)*vy*vy/beta/beta;
+                                if (T>0.37)  J.cs = std::sqrt(.3);
+                                else if (T>0.21)J.cs=std::sqrt(0.25+(T-.21)*.05/(.37-.21));
+                                else if (T>0.15)J.cs=std::sqrt(0.15+(T-.15)*.1/(.21-.15));
+                                clist.push_back(J); }    
                         }
                         plist = new_plist;
                     }
                 }
                 for (auto & p : plist) {
-                    if (std::abs(p.p.pseudorap())<2)
-                    Pmu_Hard_Out = Pmu_Hard_Out + p.p;
+                     if (std::abs(p.p.pseudorap())<3.)
+                     Pmu_Hard_Out = Pmu_Hard_Out + p.p;
                 }
-                Hadronizer.hadronize(plist, hlist, thermal_list);
-                for(auto & it : thermal_list){
-                    current J;
-                    double vzgrid = it.x.z()/it.x.t();
-                    fourvec pmu{-it.p.t(), -it.p.x(), -it.p.y(), -it.p.z()};
-                    double vx = it.vcell[0]/std::sqrt(1-vzgrid*vzgrid);
-                    double vy = it.vcell[1]/std::sqrt(1-vzgrid*vzgrid);
-                    J.p = pmu.boost_to(0, 0, vzgrid).boost_to(vx, vy, 0);
-                    J.x = it.x;
-                    J.v[0] = vx;
-                    J.v[1] = vy;
-                    J.v[2] = vzgrid;
-                    J.cs = 0.15;
-                    clist.push_back(J);
-                }
-                /*LOG_INFO << "Hard initial " << Pmu_Hard_In;
+                
+                LOG_INFO << "Hard initial " << Pmu_Hard_In;
                 LOG_INFO << "Hard final " << Pmu_Hard_Out;
-                LOG_INFO << "Soft deposite " << Pmu_Soft_Gain;*/
-                /*std::stringstream outputfilename1;
-                outputfilename1 << processid << "-Raa-R.dat";
-                std::vector<double> Rs({.2,.4,.6, .8, 1.0});
+                LOG_INFO << "Soft deposite " << Pmu_Soft_Gain;
+                std::stringstream fheader;
+                fheader << processid;
+                std::vector<double> Rs({.2,.4,.6});
                 FindJetTower(
                     plist, clist,
                     Rs, 20,
                     -2., 2.,
-                    outputfilename1.str(), 
-                    sigma_gen
-                );*/
-                
-
-               JetShapeTower(
-                    plist, clist,
-                    0.4, 60,
-                    -1.6, 1.6,
-                    outputfilename2.str(),
+                    fheader.str(), 
                     sigma_gen
                 );
             }

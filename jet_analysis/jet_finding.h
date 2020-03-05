@@ -12,6 +12,7 @@
 struct current{
     fourvec p;
     fourvec x;
+    double rap, tau, a00, a01, a02, a11, a12, a22;
     double v[3];
     double cs;
 };
@@ -42,6 +43,7 @@ class MyInfo: public fastjet::PseudoJet::UserInfoBase {
     int _pdg_id, _mc_origin;
     double _w;
 };
+
 void TestSource(
              std::vector<current> jlist,
              std::string fname);
@@ -51,26 +53,7 @@ void FindJetTower(std::vector<particle> plist,
              double jetpTMin, 
              double jetyMin, 
              double jetyMax,
-             std::string fname, double sigma_gen);
-void FindJet(std::vector<particle> plist, 
-             std::vector<current> jlist,
-             double jetRadius, 
-             double jetpTMin, 
-             double jetyMin, 
-             double jetyMax,
-             std::string fname, double sigma_gen);
-void JetShape(std::vector<particle> plist, 
-             std::vector<current> jlist,
-             double jetRadius, 
-             double jetpTMin, 
-             double jetyMin, 
-             double jetyMax,
-             std::string fname, double sigma_gen);
-void JetShapeTower(std::vector<particle> plist, 
-             std::vector<current> jlist,
-             double jetRadius, 
-             double jetpTMin, 
-             double jetyMin, 
-             double jetyMax,
-             std::string fname, double sigma_gen);
+             std::string fname, 
+             double sigma_gen);
+
 #endif
