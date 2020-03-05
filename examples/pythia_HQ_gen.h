@@ -13,41 +13,15 @@ public:
     HQGenerator(std::string f_pythia, std::string f_trento, 
                 int iev, double pTHL, double pTHH);
     void Generate(std::vector<particle> & plist, int Neve, double ycut);
-    double sigma_gen(void){
-        return pythia.info.sigmaGen();
-    }
 private:
-    Pythia pythia;
+    double pL, pH;
+    std::string f_pythia;
     TransverPositionSampler TRENToSampler;
 };
 
-HQGenerator::HQGenerator(std::string f_pythia, std::string f_trento, int iev, double pTHL, double pTHH):
-TRENToSampler(f_trento, iev)
+HQGenerator::HQGenerator(std::string f_p, std::string f_trento, int iev, double pTHL, double pTHH):
+pL(pTHL), pH(pTHH),f_pythia(f_p),TRENToSampler(f_trento, iev)
 {    
-    // read pythia settings
-    pythia.readFile(f_pythia);
-    // suppress output
-    pythia.readString("Print:quiet = off");
-    pythia.readString("SoftQCD:all = off");
-    pythia.readString("PromptPhoton:all=off");
-    pythia.readString("WeakSingleBoson:all=off");
-    pythia.readString("WeakDoubleBoson:all=off");
-    pythia.readString("Init:showProcesses = off");  
-    pythia.readString("Init:showMultipartonInteractions = off");  
-    pythia.readString("Init:showChangedSettings = off");  
-    pythia.readString("Init:showChangedParticleData = off");  
-    pythia.readString("Next:numberCount = 1000");  
-    pythia.readString("Next:numberShowInfo = 0");  
-    pythia.readString("Next:numberShowProcess = 0");  
-    pythia.readString("Next:numberShowEvent = 0"); 
-
-    std::ostringstream s1, s2;
-    s1 << "PhaseSpace:pTHatMin = " << pTHL;
-    s2 << "PhaseSpace:pTHatMax = " << pTHH;
-    pythia.readString(s1.str());
-    pythia.readString(s2.str());
-    // Init
-    pythia.init();
 }
 
 void find_production_x(int i, fourvec & x, Event & event){
@@ -98,6 +72,33 @@ void find_production_x(int i, fourvec & x, Event & event){
 }
 
 void HQGenerator::Generate(std::vector<particle> & plist, int Neve, double ycut){
+    // read pythia settings
+    Pythia pythia;
+    pythia.readFile(f_pythia);
+    // suppress output
+    pythia.readString("Print:quiet = off");
+    pythia.readString("SoftQCD:all = off");
+    pythia.readString("PromptPhoton:all=off");
+    pythia.readString("WeakSingleBoson:all=off");
+    pythia.readString("WeakDoubleBoson:all=off");
+    pythia.readString("Init:showProcesses = off");
+    pythia.readString("Init:showMultipartonInteractions = off");
+    pythia.readString("Init:showChangedSettings = off");
+    pythia.readString("Init:showChangedParticleData = off");
+    pythia.readString("Next:numberCount = 1000");
+    pythia.readString("Next:numberShowInfo = 0");
+    pythia.readString("Next:numberShowProcess = 0");
+    pythia.readString("Next:numberShowEvent = 0");
+
+    std::ostringstream s1, s2;
+    s1 << "PhaseSpace:pTHatMin = " << pL;
+    s2 << "PhaseSpace:pTHatMax = " << pH;
+    pythia.readString(s1.str());
+    pythia.readString(s2.str());
+    // Init
+    pythia.init();
+
+
     double x0, y0;
     int Ncharm = 0, Nbottom = 0;
     plist.clear();
@@ -108,7 +109,7 @@ void HQGenerator::Generate(std::vector<particle> & plist, int Neve, double ycut)
         double weight = pythia.info.weight();
         for (size_t i = 0; i < pythia.event.size(); ++i) {
             auto p = pythia.event[i];
-            bool triggered = ((p.idAbs() == 5))
+            bool triggered = ((p.idAbs() == 5) || (p.idAbs() == 4))
                       && p.isFinal() && (std::abs(p.y())< ycut);
             if (triggered) {
                 if (p.idAbs() == 4) Ncharm ++;
