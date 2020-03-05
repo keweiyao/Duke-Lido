@@ -73,9 +73,9 @@ int main(int argc, char* argv[]){
            for(int it=0; it<1; it++){
             double t = current_hydro_clock + it*hydro_dtau;
            
-            bool make_source =  (.2*5.076<=t)&& (t <= .21*5.076);
+            bool make_source =  (4.2*5.076<=t)&& (t <= 4.21*5.076);
             LOG_INFO << make_source << t;
-            //xs = t;
+            xs = 0;
             
             if(make_source){
                 double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.0;
@@ -97,9 +97,10 @@ int main(int argc, char* argv[]){
                 J.tau = x.tau();
                 J.rap = x.rap();
                 J.v[0] = vx; J.v[1] = vy; J.v[2] = 0;
-                if (T>0.37) J.cs = std::sqrt(.3);
-                else if (T>0.21)J.cs=std::sqrt(0.25+(T-.21)*.05/(.37-.21));
-                else if (T>0.15)J.cs=std::sqrt(0.15+(T-.15)*.1/(.21-.15));
+                J.cs = std::sqrt(.333);
+                //if (T>0.37) J.cs = std::sqrt(.3);
+                //else if (T>0.21)J.cs=std::sqrt(0.25+(T-.21)*.05/(.37-.21));
+                //else if (T>0.15)J.cs=std::sqrt(0.15+(T-.15)*.1/(.21-.15));
                 double gammaR = 1./sqrt(1.-vx*vx-vy*vy);
                 J.a00 = gammaR; 
                 J.a01 = gammaR*vx;
