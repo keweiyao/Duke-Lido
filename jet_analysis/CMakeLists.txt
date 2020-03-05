@@ -3,6 +3,8 @@
 add_library(${LIBRARY_JETFIND} STATIC
 jet_finding.cpp
 ../src/lorentz.cpp
+../src/simpleLogger.cpp
+../src/hcubature.cpp
 )
 
 #set_target_properties(${LIBRARY_JETFIND} PROPERTIES PREFIX "")
