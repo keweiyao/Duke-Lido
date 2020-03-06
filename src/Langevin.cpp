@@ -5,7 +5,7 @@
 double const tiny = 1e-10;
 
 double delta_qhat(int pid, double E, double M, double T){
-        double CR = (pid==21) ? 0 : CF;
+        double CR = (pid==21) ? CA : CF;
 	double delta_qhat = CR/CF*qhat_params.K * std::pow(T, 3)
 		/(1. + std::pow(qhat_params.a*(T+tiny)/Tc, qhat_params.p))
 		/(1. + std::pow(qhat_params.b*(E)/(T+tiny), qhat_params.q));

@@ -142,7 +142,7 @@ int main(int argc, char* argv[]){
         JetDenseMediumHadronize Hadronizer;
 
 
-        std::vector<double> TriggerBin({30,50,100,150});
+        std::vector<double> TriggerBin({100,120,150,200,300,500,1000});
         //std::vector<double> TriggerBin({30,60,100,200,300,
         //                                400,500,600,800,1500});
         //std::vector<double> TriggerBin({80,100,120,125,135,
@@ -162,8 +162,9 @@ int main(int argc, char* argv[]){
                 std::vector<current> clist;
                 // Initialize parton list from python
                 pythiagen.Generate(plist, args["heavy"].as<int>());
-                double sigma_gen = plist[0].weight
+                double sigma_gen = pythiagen.sigma_gen()
                                   / args["pythia-events"].as<int>();
+                LOG_INFO << sigma_gen;
 
                 /// Initialzie a hydro reader
                 Medium<2> med1(args["hydro"].as<fs::path>().string());
@@ -230,29 +231,18 @@ int main(int argc, char* argv[]){
                                 new_plist.push_back(fp);
                             }   
                              
-                            if (p.x.rap()*p.x.rap()<5){
                                 Pmu_Soft_Gain = Pmu_Soft_Gain + ploss; 
                                 current J; 
-                                vx = vx/std::sqrt(1-vzgrid*vzgrid);
-                                vy = vy/std::sqrt(1-vzgrid*vzgrid);
-                                ploss = ploss.boost_to(0, 0, vzgrid).boost_to(vx, vy, 0);
+                                vx = 0*vx/std::sqrt(1-vzgrid*vzgrid);
+                                vy = 0*vy/std::sqrt(1-vzgrid*vzgrid);
+                                ploss = ploss.boost_to(0, 0, vzgrid);
                                 J.p = ploss;
                                 J.x = p.x;
                                 J.tau = p.x.tau();
                                 J.rap = p.x.rap();
-                                J.v[0] = vx; J.v[1] = vy; J.v[2] = vzgrid;
-                                double beta = std::sqrt(vx*vx+vy*vy+1e-9);
-                                double gammaR = 1./sqrt(1.-beta*beta);
-                                J.a00 = gammaR; 
-                                J.a01 = gammaR*vx;
-                                J.a02 = gammaR*vy;
-                                J.a11 = 1.+(gammaR-1.)*vx*vx/beta/beta;
-                                J.a12 = (gammaR-1.)*vx*vy/beta/beta;
-                                J.a22 = 1.+(gammaR-1.)*vy*vy/beta/beta;
-                                if (T>0.37)  J.cs = std::sqrt(.3);
-                                else if (T>0.21)J.cs=std::sqrt(0.25+(T-.21)*.05/(.37-.21));
-                                else if (T>0.15)J.cs=std::sqrt(0.15+(T-.15)*.1/(.21-.15));
-                                clist.push_back(J); }    
+                                J.v[0] = 0; J.v[1] = 0; J.v[2] = vzgrid;
+                                J.cs = std::sqrt(.3333);
+                                clist.push_back(J);  
                         }
                         plist = new_plist;
                     }
@@ -267,10 +257,11 @@ int main(int argc, char* argv[]){
                 LOG_INFO << "Soft deposite " << Pmu_Soft_Gain;
                 std::stringstream fheader;
                 fheader << processid;
-                std::vector<double> Rs({.2,.4,.6});
+                std::vector<double> Rs({.4});
+                clist.clear();
                 FindJetTower(
                     plist, clist,
-                    Rs, 20,
+                    Rs, 80,
                     -2., 2.,
                     fheader.str(), 
                     sigma_gen
