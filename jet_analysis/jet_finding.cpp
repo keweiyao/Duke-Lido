@@ -33,7 +33,7 @@ void redistribute(
     const double dy = (ymax-ymin)/(Ny-1); 
     const double dphi = (phimax-phimin)/Nphi;
     const double prefactor = std::pow(M_PI, 2)/4./std::pow(2*M_PI, 3)/4./M_PI;
-    const double vradial = 0.7;
+    const double vradial = 0.6;
     const double gamma_radial = 1./std::sqrt(1-std::pow(vradial,2));
 
     std::vector<std::vector<fourvec> > CoarsedPmu;
@@ -77,15 +77,9 @@ void redistribute(
                               sthetak*cphik,
                               sthetak*sphik, 
                               cthetak};     
-                    fourvec kp = {
-                         source.a00*k.t()+source.a01*k.x()+source.a02*k.y(),
-                         source.a01*k.t()+source.a11*k.x()+source.a12*k.y(),
-                         source.a02*k.t()+source.a12*k.x()+source.a22*k.y(),
-                         k.z(),
-                           };
-                    double vradial_x = vradial*kp.x()/kp.xT();
-                    double vradial_y = vradial*kp.y()/kp.xT();
-                    double krap = kp.rap();                   
+                    double vradial_x = vradial*k.x()/k.xT();
+                    double vradial_y = vradial*k.y()/k.xT();
+                    double krap = k.rap();                   
                     double G0 = source.p.t()*source.cs
                               + source.p.x()*k.x()
                               + source.p.y()*k.y()
@@ -95,32 +89,26 @@ void redistribute(
                                     G03*k.x(), 
                                     G03*k.y(), 
                                     G03*k.z()};
-                    fourvec dgmup={
-                   source.a00*dgmu.t()+source.a01*dgmu.x()+source.a02*dgmu.y(),
-                   source.a01*dgmu.t()+source.a11*dgmu.x()+source.a12*dgmu.y(),
-                   source.a02*dgmu.t()+source.a12*dgmu.x()+source.a22*dgmu.y(),
-                   dgmu.z(),
-                           };
-                    double kT = kp.xT();
+                    double kT = k.xT();
 
-                    double chkpeta = (kp.t()*source.x.t()+
-                              kp.z()*source.x.z())/source.tau/kp.tau();
-                    double shkpeta = (kp.z()*source.x.t()+
-                              kp.t()*source.x.z())/source.tau/kp.tau();
+                    double chketa = (k.t()*source.x.t()+
+                              k.z()*source.x.z())/source.tau/k.tau();
+                    double shketa = (k.z()*source.x.t()+
+                              k.t()*source.x.z())/source.tau/k.tau();
                     double UdotdG = gamma_radial*(
-                             chkpeta*dgmup.t() - shkpeta*dgmup.z() 
-                         - vradial_x*dgmup.x() - vradial_y*dgmup.y()
+                             chketa*dgmu.t() - shketa*dgmu.z() 
+                         - vradial_x*dgmu.x() - vradial_y*dgmu.y()
                                );
-                    double NdotdG = chy*dgmup.t() - shy*dgmup.z()
-                                  - cphi*dgmup.x() - sphi*dgmup.y();
-                    double Ndotdk = chy*kp.t() - shy*kp.z()
-                                  - cphi*kp.x() - sphi*kp.y();
+                    double NdotdG = chy*dgmu.t() - shy*dgmu.z()
+                                  - cphi*dgmu.x() - sphi*dgmu.y();
+                    double Ndotdk = chy*k.t() - shy*k.z()
+                                  - cphi*k.x() - sphi*k.y();
                     double NdotU = gamma_radial*(
-                             chkpeta*chy - shkpeta*shy
+                             chketa*chy - shketa*shy
                          - vradial_x*cphi - vradial_y*sphi
                                );
                     double sigma = gamma_radial*(
-                                    chy*chkpeta - shy*shkpeta
+                                    chy*chketa - shy*shketa
                                - cphi*vradial_x - sphi*vradial_y
                                    );
                     res[0] += (32.*UdotdG*sigma-24.*NdotdG)/std::pow(sigma,4);
@@ -131,7 +119,7 @@ void redistribute(
 	    double xmax[2] = {1., M_PI};
             double error;
             double res = quad_nd(code, 2, 1, xmin, xmax, 
-                                error, 0., .01, 100)[0] 
+                                error, 0., .05, 100)[0] 
                        * prefactor;
             CoarsedPmu[iy][iphi] = CoarsedPmu[iy][iphi] + Nmu0*res;
             CoarsedPT[iy][iphi] += res;
@@ -155,10 +143,12 @@ void redistribute(
             double v[2] = {1.-residue2, residue2};
             for (int k1=0; k1<2; k1++){
                 for (int k2=0; k2<2; k2++){
+                    LOG_INFO << "a"<< DeltaPmu[i][j] << " " << CoarsedPmu[ii+k1][jj+k2];
                     DeltaPmu[i][j] = DeltaPmu[i][j] + 
                         CoarsedPmu[ii+k1][jj+k2]*fine_dy*fine_dphi*u[k1]*v[k2];
                     DeltaPT[i][j] += 
                         u[k1]*v[k2]*CoarsedPT[ii+k1][jj+k2]*fine_dy*fine_dphi;
+                    LOG_INFO << "b"<< DeltaPmu[i][j];
                 }
             }
         }
@@ -204,6 +194,7 @@ void FindJetTower(std::vector<particle> plist,
         PTtowers[ieta][iphi] += p.p.xT();
     }
     // put soft energy-momentum deposition into the towers
+    if (jlist.size() >0){
     redistribute(
           jlist, 
           Pmutowers,
@@ -212,6 +203,7 @@ void FindJetTower(std::vector<particle> plist,
           etamin, etamax,
           phimin, phimax,
           24);
+    }
     // Use the towers to do jet finding: anti-kT
     int power = -1; 
     // loop over jetradius
@@ -382,6 +374,7 @@ void TestSource(
             T0 = T0 + it;
         }
     }
+    if (jlist.size() >0){
     redistribute(
           jlist, 
           towers,
@@ -389,6 +382,7 @@ void TestSource(
           Neta, Nphi,
           etamin, etamax,
           phimin, phimax, 1);
+    }
 
     fourvec T1{0,0,0,0};
     for (auto& r : towers){

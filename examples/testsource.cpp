@@ -73,9 +73,9 @@ int main(int argc, char* argv[]){
            for(int it=0; it<1; it++){
             double t = current_hydro_clock + it*hydro_dtau;
            
-            bool make_source =  (4.2*5.076<=t)&& (t <= 4.21*5.076);
+            bool make_source =  (.2*5.076<=t)&& (t <= 4.21*5.076);
             LOG_INFO << make_source << t;
-            xs = 0;
+            xs = t;
             
             if(make_source){
                 double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.0;
@@ -85,10 +85,10 @@ int main(int argc, char* argv[]){
                 double vzgrid = vz;
                 LOG_INFO << "here2" << vx << " " << vy;
                 current J; 
-                vx = vx/std::sqrt(1-vzgrid*vzgrid);
-                vy = vy/std::sqrt(1-vzgrid*vzgrid);
+                vx = 0*vx/std::sqrt(1-vzgrid*vzgrid);
+                vy = 0*vy/std::sqrt(1-vzgrid*vzgrid);
                 fourvec ploss{1,1,0,0};
-                ploss = ploss;//*(hydro_dtau/0.4/5.076);
+                ploss = ploss*(hydro_dtau/0.4/5.076);
                 total = total + ploss;
                 ploss = ploss.boost_to(0, 0, vzgrid).boost_to(vx, vy, 0);
                 J.p = ploss;
