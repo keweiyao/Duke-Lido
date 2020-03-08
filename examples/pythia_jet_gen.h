@@ -87,6 +87,7 @@ void find_production_x(int i, fourvec & x, Event & event){
             x.a[1] = x.x() + tf*Mpx/ME;
             x.a[2] = x.y() + tf*Mpy/ME;
             x.a[3] = x.z() + tf*Mpz/ME;
+            return;
             find_production_x(im1, x, event);
         }
         else{

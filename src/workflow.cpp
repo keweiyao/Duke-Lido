@@ -418,7 +418,7 @@ int update_particle_momentum_Lido(
             // dropped (suppressed) according to the LPM effect
             // only handle > mD particles
             double mD2 = t_channel_mD2->get_mD2(temp);
-            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > std::sqrt(mD2)) { 
+            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3*temp) { 
 		    particle vp = produce_parton(21, pIn, FS[2], x0, temp, v3cell);
 		    vp.origin = (pIn.origin==-1)?0:pIn.origin;
 		    // The local 2->2 mean-free-path is estimated with
@@ -459,7 +459,7 @@ int update_particle_momentum_Lido(
             // dropped (suppressed) according to the LPM effect
             // only for E>mD
             double mD2 = t_channel_mD2->get_mD2(temp);
-            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > std::sqrt(mD2)) {
+            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3*temp) {
 		    particle vp = produce_parton(21, pIn, FS[1], x0, temp, v3cell);
 		            vp.origin = (pIn.origin==-1)?0:pIn.origin;
 		    // estimate mfp in the lab frame
@@ -477,7 +477,7 @@ int update_particle_momentum_Lido(
             // gluon splits to q+qbar, pid changing!!
             // only for E>mD
             double mD2 = t_channel_mD2->get_mD2(temp);
-            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > std::sqrt(mD2)) {
+            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3*temp) {
 		    particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[2], x0, temp, v3cell);
 		            vp.origin = (pIn.origin==-1)?0:pIn.origin;
 		    // The local 2->2 mean-free-path is estimated with
@@ -509,7 +509,7 @@ int update_particle_momentum_Lido(
             // gluon splits to q+qbar, pid changing!!
             // only for E>mD
             double mD2 = t_channel_mD2->get_mD2(temp);
-            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > std::sqrt(mD2)) {
+            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3*temp) {
 		    particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[1], x0, temp, v3cell);
 		            vp.origin = (pIn.origin==-1)?0:pIn.origin;
 
@@ -552,8 +552,7 @@ int update_particle_momentum_Lido(
             update_particle_momentum_Lido(dt_input, temp, v3cell, *it, pnew_Out);
 
             if (it->x.t() - it->x0.t() <= taun 
-                && !Adiabatic_LPM 
-                && temp>0.161) {
+                && !Adiabatic_LPM ) {
                 it++;
             }
             else{
@@ -563,7 +562,11 @@ int update_particle_momentum_Lido(
                     // for medium-induced radiation
                     // 1): a change of running-coupling from elastic broadening
                     double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
-                    double kt2n = measure_perp(it->mother_p, it->p).pabs2();
+                    double kt2n = measure_perp(
+                                   pIn.p*(it->mother_p.t()/pIn.p.t()),
+                                   it->p*(it->p0.t()/it->p.t()) 
+                                  ).pabs2();
+                
                     double Running = alpha_s(kt2n, it->T0) / alpha_s(kt20, it->T0);
                     // 2): a dead-cone approximation for massive particles
                     double theta2 = kt2n / std::pow(it->p.t(), 2);
@@ -590,8 +593,9 @@ int update_particle_momentum_Lido(
                 if (Srandom::rejection(Srandom::gen) < Acceptance){
                     // accepted branching causes physical effects
                     // momentum change, and put back on shell
-                    // double xx = it->p0.t()/it->mother_p.t();
-                    pIn.p = pIn.p - it->p;
+                    double xx = it->p0.t()/it->mother_p.t();
+                    pIn.p = pIn.p*(1.-xx);
+                    it->p = pIn.p*xx;
                     pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass + pIn.p.pabs2());
                     // for g -> q + qbar, pid change
                     // also discard all other pre-splitting: causes higher-order difference

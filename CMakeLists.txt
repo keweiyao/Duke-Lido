@@ -207,7 +207,7 @@ foreach(App "Lido-TabGen") #analytic-medium
 endforeach()
 
 if(pythia8)
-foreach(App "jet-2Dhydro-couple" "jet-3Dhydro-couple" "testsource")
+foreach(App "jet-2Dhydro-couple" "testsource")
 	add_executable(${App} ./examples/${App}.cpp)
 	target_link_libraries(${App} ${LIBRARY_NAME} ${LIBRARY_JETFIND} ${PYTHIA8_LIBRARIES} ${FASTJET_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS ${App} DESTINATION bin)

@@ -11,9 +11,7 @@
 
 struct current{
     fourvec p;
-    fourvec x;
-    double rap, tau, a00, a01, a02, a11, a12, a22;
-    double v[3];
+    double chetas, shetas;
     double cs;
 };
 template <typename T>
