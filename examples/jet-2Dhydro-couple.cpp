@@ -142,7 +142,7 @@ int main(int argc, char* argv[]){
         JetDenseMediumHadronize Hadronizer;
 
 
-        std::vector<double> TriggerBin({100,120,150,200,300,500,1000});
+        std::vector<double> TriggerBin({20,40,60,90, 110,130,140,160,180,200,250,300,350,400,500,700,1000,1500,2000});
         //std::vector<double> TriggerBin({30,60,100,200,300,
         //                                400,500,600,800,1500});
         //std::vector<double> TriggerBin({80,100,120,125,135,
@@ -156,6 +156,7 @@ int main(int argc, char* argv[]){
                 TriggerBin[iBin+1],
                 args["eid"].as<int>()
             );
+            LOG_INFO << pythiagen.sigma_gen() << " " << TriggerBin[iBin] << " "<< TriggerBin[iBin];
             for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
                 std::vector<particle> plist, hlist, thermal_list,
                                       new_plist, pOut_list;
@@ -164,14 +165,14 @@ int main(int argc, char* argv[]){
                 pythiagen.Generate(plist, args["heavy"].as<int>());
                 double sigma_gen = pythiagen.sigma_gen()
                                   / args["pythia-events"].as<int>();
-                LOG_INFO << sigma_gen;
+                
 
                 /// Initialzie a hydro reader
                 Medium<2> med1(args["hydro"].as<fs::path>().string());
 
                 // freestream form t=0 to tau=tau0
                 for (auto & p : plist){
-                    p.Tf = 0.15;
+                    p.Tf = 0.17;
                     p.origin=-1;
                     if (p.x.tau() < med1.get_tauH()){
                         p.freestream(
@@ -202,7 +203,7 @@ int main(int argc, char* argv[]){
                         new_plist.clear();
                         for (auto & p : plist){     
 
-                            if (p.Tf < 0.15) {
+                            if (p.Tf < 0.17) {
                                 new_plist.push_back(p);
                                 continue;       
                             }
@@ -231,18 +232,14 @@ int main(int argc, char* argv[]){
                                 new_plist.push_back(fp);
                             }   
                              
-                                Pmu_Soft_Gain = Pmu_Soft_Gain + ploss; 
-                                current J; 
-                                vx = 0*vx/std::sqrt(1-vzgrid*vzgrid);
-                                vy = 0*vy/std::sqrt(1-vzgrid*vzgrid);
-                                ploss = ploss.boost_to(0, 0, vzgrid);
-                                J.p = ploss;
-                                J.x = p.x;
-                                J.tau = p.x.tau();
-                                J.rap = p.x.rap();
-                                J.v[0] = 0; J.v[1] = 0; J.v[2] = vzgrid;
-                                J.cs = std::sqrt(.3333);
-                                clist.push_back(J);  
+                            Pmu_Soft_Gain = Pmu_Soft_Gain + ploss; 
+                            current J; 
+                            ploss = ploss.boost_to(0, 0, vzgrid);
+                            J.p = ploss;
+                            J.chetas = std::cosh(p.x.rap());
+                            J.shetas = std::sinh(p.x.rap());
+                            J.cs = std::sqrt(.3333);
+                            clist.push_back(J);  
                         }
                         plist = new_plist;
                     }
@@ -252,17 +249,17 @@ int main(int argc, char* argv[]){
                      Pmu_Hard_Out = Pmu_Hard_Out + p.p;
                 }
                 
-                LOG_INFO << "Hard initial " << Pmu_Hard_In;
-                LOG_INFO << "Hard final " << Pmu_Hard_Out;
-                LOG_INFO << "Soft deposite " << Pmu_Soft_Gain;
+                //LOG_INFO << "Hard initial " << Pmu_Hard_In;
+                //LOG_INFO << "Hard final " << Pmu_Hard_Out;
+                //LOG_INFO << "Soft deposite " << Pmu_Soft_Gain;
                 std::stringstream fheader;
                 fheader << processid;
-                std::vector<double> Rs({.4});
-                clist.clear();
+                std::vector<double> Rs({.2,.4,.6,.8,1.});
+                //clist.clear();
                 FindJetTower(
                     plist, clist,
-                    Rs, 80,
-                    -2., 2.,
+                    Rs, 10,
+                    -3, 3,
                     fheader.str(), 
                     sigma_gen
                 );

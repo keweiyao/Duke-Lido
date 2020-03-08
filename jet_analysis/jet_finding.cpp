@@ -32,8 +32,7 @@ void redistribute(
     int Nphi = int(_Nphi/coarse_level);
     const double dy = (ymax-ymin)/(Ny-1); 
     const double dphi = (phimax-phimin)/Nphi;
-    const double prefactor = std::pow(M_PI, 2)/4./std::pow(2*M_PI, 3)/4./M_PI;
-    const double vradial = 0.6;
+    const double vradial = 0.7;
     const double gamma_radial = 1./std::sqrt(1-std::pow(vradial,2));
 
     std::vector<std::vector<fourvec> > CoarsedPmu;
@@ -51,8 +50,24 @@ void redistribute(
 
 
     LOG_INFO << jlist.size() << " sources";
+    //organizes souce by rapidity
+    std::vector<current> clist;
+    clist.resize(_Ny);
+    for (int iy=0; iy<_Ny; iy++){
+        clist[iy].chetas = std::cosh(ymin+iy*dy/coarse_level);
+        clist[iy].shetas = std::sinh(ymin+iy*dy/coarse_level);
+        clist[iy].cs = .45;
+        clist[iy].p.a[0] = 0.;
+	clist[iy].p.a[1] = 0.;
+	clist[iy].p.a[2] = 0.;
+	clist[iy].p.a[3] = 0.;
+    }
+    for (auto & s: jlist){
+        int i = corp_index(std::atanh(s.shetas/s.chetas), ymin, ymax, dy/coarse_level, _Ny);
+        if (i<0) continue;
+        clist[i].p = clist[i].p + s.p;
+    }
     for (int iy=0; iy<Ny; iy++){
-        LOG_INFO << iy << " " << ymin+iy*dy;
         double y = ymin+iy*dy;    
         double chy = std::cosh(y), 
                shy = std::sinh(y);
@@ -60,67 +75,65 @@ void redistribute(
             double phi = phimin+(iphi+.5)*dphi;
             double cphi = std::cos(phi), sphi = std::sin(phi);
             fourvec Nmu0{chy,cphi,sphi,shy};
-            auto code = [jlist,
-                         phi, cphi, sphi, 
-                         y, chy, shy, 
-                         vradial,gamma_radial]
-                         (const double * X){
-                std::vector<double> res;
-                res.push_back(0.);
-                double cthetak = X[0], phik = X[1];
-                double sthetak = std::sqrt(1.-std::pow(cthetak,2));
-                double cphik=std::cos(phik), 
-                       sphik=std::sin(phik);
-                for (auto & source : jlist){
-                    double etas = source.rap;
-                    fourvec k{1./source.cs, 
-                              sthetak*cphik,
-                              sthetak*sphik, 
-                              cthetak};     
-                    double vradial_x = vradial*k.x()/k.xT();
-                    double vradial_y = vradial*k.y()/k.xT();
-                    double krap = k.rap();                   
-                    double G0 = source.p.t()*source.cs
-                              + source.p.x()*k.x()
-                              + source.p.y()*k.y()
-                              + source.p.z()*k.z();
-                    double G03 = 3.*G0;
-                    fourvec dgmu = {G0/source.cs,
-                                    G03*k.x(), 
-                                    G03*k.y(), 
-                                    G03*k.z()};
-                    double kT = k.xT();
-
-                    double chketa = (k.t()*source.x.t()+
-                              k.z()*source.x.z())/source.tau/k.tau();
-                    double shketa = (k.z()*source.x.t()+
-                              k.t()*source.x.z())/source.tau/k.tau();
-                    double UdotdG = gamma_radial*(
-                             chketa*dgmu.t() - shketa*dgmu.z() 
-                         - vradial_x*dgmu.x() - vradial_y*dgmu.y()
-                               );
-                    double NdotdG = chy*dgmu.t() - shy*dgmu.z()
-                                  - cphi*dgmu.x() - sphi*dgmu.y();
-                    double Ndotdk = chy*k.t() - shy*k.z()
-                                  - cphi*k.x() - sphi*k.y();
-                    double NdotU = gamma_radial*(
-                             chketa*chy - shketa*shy
-                         - vradial_x*cphi - vradial_y*sphi
-                               );
-                    double sigma = gamma_radial*(
-                                    chy*chketa - shy*shketa
-                               - cphi*vradial_x - sphi*vradial_y
-                                   );
-                    res[0] += (32.*UdotdG*sigma-24.*NdotdG)/std::pow(sigma,4);
+            auto code = [clist,
+                         cphi, sphi, 
+                         chy, shy, 
+                         vradial, gamma_radial]
+                         (double costhetak){
+                double one_and_cs = 4./3.;
+                double res=0.;
+                double sinthetak = std::sqrt(1.-std::pow(costhetak,2)); 
+                double Tri_sinthetak= sinthetak*3.;
+                double Tri_costhetak = costhetak*3.;
+                for (auto & source : clist){
+                    double cs = source.cs;
+                    double chetas = source.chetas,
+                           shetas = source.shetas;
+                    double tauk = std::sqrt(1./cs/cs-costhetak*costhetak);
+                    double coshyk = 1./cs/tauk,
+                           sinhyk = costhetak/tauk;
+                    double cosh_y_etas = chy*chetas-shy*shetas,
+                           sinh_y_etas = shy*chetas-chy*shetas;
+                    double cosh_y_etas_yk = cosh_y_etas*coshyk
+                                          - sinh_y_etas*sinhyk;
+                    double D = gamma_radial * cosh_y_etas_yk;
+                    double alpha = vradial/cosh_y_etas_yk;
+                    double alpha2 = std::pow(alpha,2);
+                    double one_minus_alpha2 = 1. - alpha2;
+                    double one_minus_alpha2_pow_n3d5 =
+                                 std::pow(one_minus_alpha2, -3.5);
+                    double one_minus_alpha2_pow_n2d5 = 
+                               one_minus_alpha2_pow_n3d5 * one_minus_alpha2;
+                          
+                    double E03 = cs*source.p.t()+costhetak*source.p.z();
+                    double E12 = cphi*source.p.x()+sphi*source.p.y();
+                    double UdotG_phikint = 
+                      gamma_radial*one_minus_alpha2_pow_n2d5* (
+                       ( (2.+alpha2)*E03 + alpha*E12*Tri_sinthetak)*(
+                              coshyk/cs
+                            - sinhyk*Tri_costhetak
+                            - Tri_sinthetak*vradial
+                         )
+                      );
+                    double NdotG_phikint = 
+                      one_minus_alpha2_pow_n3d5 * (
+                        ((2.+3.*alpha2)*E03
+                         +alpha*(4.+alpha2)*E12*sinthetak)*(
+                              cosh_y_etas/cs
+                            - sinh_y_etas*Tri_costhetak
+                         )
+                       - (alpha*(4.+alpha2)*E03
+                         + (1.+4.*alpha2)*sinthetak*E12)*Tri_sinthetak
+                      );
+                    res += (one_and_cs*UdotG_phikint*D
+                               - NdotG_phikint)/std::pow(D,4);    
+                                
                 }
                 return res;
             };
-	    double xmin[2] = {-1., -M_PI};
-	    double xmax[2] = {1., M_PI};
             double error;
-            double res = quad_nd(code, 2, 1, xmin, xmax, 
-                                error, 0., .05, 100)[0] 
-                       * prefactor;
+            double res = 3*M_PI/std::pow(4.*M_PI,2)*
+                         quad_1d(code, {-.99,.99}, error, 0, 0.1, 20);
             CoarsedPmu[iy][iphi] = CoarsedPmu[iy][iphi] + Nmu0*res;
             CoarsedPT[iy][iphi] += res;
         }
@@ -136,19 +149,17 @@ void redistribute(
         double residue1 = (y-(ymin+dy*ii))/dy;
         double u[2] = {1.-residue1, residue1};
         for (int j=0; j<_Nphi; j++){ 
-            double phi = phimin + fine_dphi*(j+.5);
+            double phi = phimin + fine_dphi*(j);
             int jj = corp_index(phi, phimin, phimax, dphi, Nphi);
             if (jj==Nphi-1) jj--;
-            double residue2 = (phi-(phimin+dphi*(jj+.5)))/dphi;
+            double residue2 = (phi-(phimin+dphi*(jj)))/dphi;
             double v[2] = {1.-residue2, residue2};
             for (int k1=0; k1<2; k1++){
                 for (int k2=0; k2<2; k2++){
-                    LOG_INFO << "a"<< DeltaPmu[i][j] << " " << CoarsedPmu[ii+k1][jj+k2];
                     DeltaPmu[i][j] = DeltaPmu[i][j] + 
                         CoarsedPmu[ii+k1][jj+k2]*fine_dy*fine_dphi*u[k1]*v[k2];
                     DeltaPT[i][j] += 
                         u[k1]*v[k2]*CoarsedPT[ii+k1][jj+k2]*fine_dy*fine_dphi;
-                    LOG_INFO << "b"<< DeltaPmu[i][j];
                 }
             }
         }
@@ -164,7 +175,7 @@ void FindJetTower(std::vector<particle> plist,
              std::string fheader, 
              double sigma_gen) {
     // contruct four momentum tower in the eta-phi plane
-    int Neta = 240, Nphi = 240;
+    int Neta = 300, Nphi = 300;
     double etamin = -3., etamax = 3.;
     double deta = (etamax-etamin)/(Neta-1); 
     // Phi range has to be the same as the range of std::atan2(*,*);
@@ -194,7 +205,7 @@ void FindJetTower(std::vector<particle> plist,
         PTtowers[ieta][iphi] += p.p.xT();
     }
     // put soft energy-momentum deposition into the towers
-    if (jlist.size() >0){
+    if (jlist.size()>0){
     redistribute(
           jlist, 
           Pmutowers,
@@ -202,7 +213,7 @@ void FindJetTower(std::vector<particle> plist,
           Neta, Nphi,
           etamin, etamax,
           phimin, phimax,
-          24);
+          10);
     }
     // Use the towers to do jet finding: anti-kT
     int power = -1; 
@@ -216,14 +227,15 @@ void FindJetTower(std::vector<particle> plist,
               fastjet::SelectorRapRange(jetyMin, jetyMax);
         for (int ieta=0; ieta<Neta; ieta++) {
             double eta = etamin+ieta*deta;
-            double kz = std::sinh(eta), k0 = std::cosh(eta);
+            double chy = std::cosh(eta), shy = std::sinh(eta);
             for (int iphi=0; iphi<Nphi; iphi++) {
                 auto ipmu = Pmutowers[ieta][iphi];
-                auto ipT = PTtowers[ieta][iphi];
+                double phi = phimin+iphi*dphi;
+                double cphi = std::cos(phi), sphi = std::sin(phi);
                 // when we do the first jet finding,
                 // only use towers with positive contribution
-                if (ipmu.t()>0 && ipT>0){
-                    fastjet::PseudoJet fp(ipmu.x(), ipmu.y(),
+                if (ipmu.t()>0){
+                    fastjet::PseudoJet fp(ipmu.x(), ipmu.y(), 
                                           ipmu.z(), ipmu.t());
                     fp.set_user_info(new MyInfo(0, 0, 0));
                     fjInputs.push_back(fp);
@@ -253,10 +265,12 @@ void FindJetTower(std::vector<particle> plist,
                 if (ieta<0) continue;
                 double Rp = std::sqrt(1e-9+std::pow(jetRadius,2)
                                           -std::pow(Jeta-eta,2) ); 
+                double chy = std::cosh(eta), shy = std::sinh(eta);
                 for (double phi=Jphi-Rp; phi<=Jphi+Rp; phi+=dphi){
                     double newphi = phi;
                     if (phi<-M_PI) newphi+=2*M_PI;
                     if (phi>M_PI) newphi-=2*M_PI;
+                    double cphi = std::cos(newphi), sphi = std::sin(newphi);
                     int iphi = corp_index(newphi, phimin, phimax, dphi, Nphi);
                     newP = newP + Pmutowers[ieta][iphi];
                 }  
