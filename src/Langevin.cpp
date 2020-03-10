@@ -14,41 +14,16 @@ double delta_qhat(int pid, double E, double M, double T){
 
 double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
         double CR = (pid==21) ? CA : CF;
-        double alphas_at_T = alpha_s(0, T); 
         double mD2 = t_channel_mD2->get_mD2(T);
-        double Q2cut = cut*mD2;
-        double thermal2 = std::pow(scale*M_PI*T, 2);
-        double logs;
-        if (Q2cut > thermal2 && afix < 0.){
-            double log0 = std::log(1.+thermal2/mD2);
-            double log1 = std::log(thermal2/Lambda2);
-            double log2 = std::log(Q2cut/Lambda2);
-            logs = log0 + log1*(1. - log1/log2);
-        }
-        else{
-            logs = std::log(1.+Q2cut/mD2);
-        }
-	return alphas_at_T * CR * T * mD2 * ( logs -.5 );
+        double Q2cut = std::min(cut*mD2, 6*E*T);
+        return alpha_s(Q2cut, T) * CR * T * mD2 * std::log(1.+Q2cut/mD2);
 }
 
 double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
         double CR = (pid==21) ? CA : CF;
-        double alphas_at_T = alpha_s(0, T);
-        double mD2 = t_channel_mD2->get_mD2(T);
-        double Q2cut = cut*mD2;
-	double minf2 = .5*mD2;
-        double thermal2 = std::pow(scale*M_PI*T, 2);
-        double logs;
-        if (Q2cut > thermal2 && afix < 0.){
-            double log0 = std::log(1.+thermal2/minf2);
-            double log1 = std::log(thermal2/Lambda2);
-            double log2 = std::log(Q2cut/Lambda2);
-            logs = log0 + log1*(1. - log1/log2);
-        }
-        else{
-            logs = std::log(1.+Q2cut/minf2);
-        }
-        return alphas_at_T * CR * T * minf2 * (logs-.5);
+        double minf2 = .5*t_channel_mD2->get_mD2(T);
+        double Q2cut = std::min(cut*minf2, 3*E*T);
+        return alpha_s(Q2cut, T) * CR * T * minf2 * std::log(1.+Q2cut/minf2);
 }
 
 
@@ -84,9 +59,7 @@ void Ito_update(int pid, double dt_lab, double M, double T, std::vector<double> 
 	double p0 = std::sqrt(E0*E0 - M*M+1e-9);
 
 	double kt = qhat(pid, E0, M, T)/2.;
-        double kl;
-        if (p0>3*T) kl = qhat_L(pid, E0, M, T);
-        else kl = kt;
+        double kl = qhat_L(pid, E0, M, T);
 	double dkl_dp2 = dqhat_L_dp2(pid, E0, M, T);
 	double drag = kl/(2.*E0*T) - (kl - kt)/std::pow(p0, 2) - dkl_dp2;
 		   

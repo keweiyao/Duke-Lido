@@ -56,7 +56,11 @@ int main(int argc, char* argv[]){
           ("heavy", 
             po::value<int>()->value_name("INT")->default_value(0,"0"),
            "require pythia event contains charm(4) or bottom(5) quark")
+           ("output,o",
+           po::value<fs::path>()->value_name("PATH")->default_value("./"),
+           "output file prefix or folder")
     ;
+
     po::variables_map args{};
     try{
         po::store(po::command_line_parser(argc, argv).options(options).run(), args);
@@ -253,7 +257,8 @@ int main(int argc, char* argv[]){
                 //LOG_INFO << "Hard final " << Pmu_Hard_Out;
                 //LOG_INFO << "Soft deposite " << Pmu_Soft_Gain;
                 std::stringstream fheader;
-                fheader << processid;
+                fheader << args["output"].as<fs::path>().string() 
+                        << processid;
                 std::vector<double> Rs({.2,.4,.6,.8,1.});
                 //clist.clear();
                 FindJetTower(

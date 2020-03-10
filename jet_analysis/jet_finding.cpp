@@ -56,7 +56,7 @@ void redistribute(
     for (int iy=0; iy<_Ny; iy++){
         clist[iy].chetas = std::cosh(ymin+iy*dy/coarse_level);
         clist[iy].shetas = std::sinh(ymin+iy*dy/coarse_level);
-        clist[iy].cs = .45;
+        clist[iy].cs = .56;
         clist[iy].p.a[0] = 0.;
 	clist[iy].p.a[1] = 0.;
 	clist[iy].p.a[2] = 0.;

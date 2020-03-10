@@ -5,7 +5,7 @@
 #include "Pythia8/Pythia.h"
 #include "workflow.h"
 #include <sstream>
-
+#include <unistd.h>
 using namespace Pythia8;
 
 class HQGenerator{
@@ -40,14 +40,18 @@ TRENToSampler(f_trento, iev)
     pythia.readString("Next:numberShowInfo = 0");  
     pythia.readString("Next:numberShowProcess = 0");  
     pythia.readString("Next:numberShowEvent = 0"); 
+    int processid = getpid();
 
-    std::ostringstream s1, s2;
+    std::ostringstream s1, s2, s3;
     s1 << "PhaseSpace:pTHatMin = " << pTHL;
     s2 << "PhaseSpace:pTHatMax = " << pTHH;
+    s3 << "Random:seed = " << processid;
     pythia.readString(s1.str());
     pythia.readString(s2.str());
+    pythia.readString(s3.str());
     // Init
-    pythia.init();
+    pythia.init(); 
+    for (int i=0; i<1000; i++) pythia.next();
 }
 
 void find_production_x(int i, fourvec & x, Event & event){
@@ -105,15 +109,15 @@ void HQGenerator::Generate(std::vector<particle> & plist, int Neve, double ycut)
         if (Ntot%1000==0) LOG_INFO << "Ncharm = " << Ncharm << ", Nbottom = " << Nbottom;
         TRENToSampler.SampleXY(x0, y0);
         pythia.next();
-        double weight = pythia.info.weight();
+        double weight = pythia.info.sigmaGen()/Neve;
         for (size_t i = 0; i < pythia.event.size(); ++i) {
             auto p = pythia.event[i];
-            bool triggered = ((p.idAbs() == 5))
+            bool triggered = ((p.idAbs() == 4))
                       && p.isFinal() && (std::abs(p.y())< ycut);
             if (triggered) {
                 if (p.idAbs() == 4) Ncharm ++;
                 if (p.idAbs() == 5) Nbottom ++;
-                for(int iphi=0; iphi<8; iphi++){
+                for(int iphi=0; iphi<1; iphi++){
                     double phi = iphi*2*M_PI/8.;
                     double cos = std::cos(phi), sin = std::sin(phi);
                     fourvec p0{p.e(), p.px()*cos-p.py()*sin, 
@@ -123,10 +127,9 @@ void HQGenerator::Generate(std::vector<particle> & plist, int Neve, double ycut)
                     _p.mass = std::abs(p.m());
                     _p.x0 = fourvec{0,x0,y0,0};
                     _p.x = _p.x0; 
-                    //find_production_x(i, _p.x, pythia.event); 
                     _p.p0 = p0;
                 _p.p = _p.p0; 
-                _p.weight = weight/8.;
+                _p.weight = weight;
                 _p.is_vac = false;
                 _p.is_virtual = false;
                 _p.is_recoil = false;
@@ -143,9 +146,9 @@ void HQGenerator::Generate(std::vector<particle> & plist, int Neve, double ycut)
            }
         }
     }
-    double normW = 0.5*pythia.info.sigmaGen()/pythia.info.weightSum();
-    for (auto & p : plist) p.weight *= normW;
-    LOG_INFO << "norm = " << normW;
+    //double normW = 0.5*pythia.info.sigmaGen()/pythia.info.weightSum();
+    //for (auto & p : plist) p.weight *= normW;
+    //LOG_INFO << "norm = " << normW;
 }
 
 

@@ -42,11 +42,15 @@ TRENToSampler(f_trento, iev)
     pythia.readString("Next:numberShowProcess = 0");  
     pythia.readString("Next:numberShowEvent = 0"); 
 
-    std::ostringstream s1, s2;
+    int processid = getpid();
+
+    std::ostringstream s1, s2, s3;
     s1 << "PhaseSpace:pTHatMin = " << pTHL;
     s2 << "PhaseSpace:pTHatMax = " << pTHH;
+    s3 << "Random:seed = " << processid;
     pythia.readString(s1.str());
     pythia.readString(s2.str());
+    pythia.readString(s3.str());
     // Init
     pythia.init(); 
     for (int i=0; i<1000; i++) pythia.next();
@@ -87,7 +91,6 @@ void find_production_x(int i, fourvec & x, Event & event){
             x.a[1] = x.x() + tf*Mpx/ME;
             x.a[2] = x.y() + tf*Mpy/ME;
             x.a[3] = x.z() + tf*Mpz/ME;
-            return;
             find_production_x(im1, x, event);
         }
         else{
@@ -121,7 +124,9 @@ void PythiaGen::Generate(std::vector<particle> & plist, int heavyid){
 		    _p.mass = std::abs(p.m());
 		    _p.x0 = fourvec{0,x,y,0};
                     _p.x = _p.x0; 
-		    //find_production_x(i, _p.x, pythia.event); 
+                    fourvec x1{0,0,0,0};
+		    find_production_x(i, x1, pythia.event); 
+                    _p.tau_i = x1.t();
 		    _p.p0 = p0;
  
 		    if (std::abs(_p.pid) != 4 && std::abs(_p.pid) != 5) {
