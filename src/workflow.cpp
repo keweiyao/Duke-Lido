@@ -264,7 +264,7 @@ int update_particle_momentum_Lido(
         return pOut_list.size();
     }
     // Freeze particles below Tc
-    if (temp < 0.154){
+    if (temp < 0.161){
         pIn.radlist.clear();
         pOut_list.push_back(pIn);
         return pOut_list.size();

@@ -117,7 +117,7 @@ void HQGenerator::Generate(std::vector<particle> & plist, int Neve, double ycut)
             if (triggered) {
                 if (p.idAbs() == 4) Ncharm ++;
                 if (p.idAbs() == 5) Nbottom ++;
-                for(int iphi=0; iphi<1; iphi++){
+                for(int iphi=0; iphi<8; iphi++){
                     double phi = iphi*2*M_PI/8.;
                     double cos = std::cos(phi), sin = std::sin(phi);
                     fourvec p0{p.e(), p.px()*cos-p.py()*sin, 
@@ -126,10 +126,13 @@ void HQGenerator::Generate(std::vector<particle> & plist, int Neve, double ycut)
                     _p.pid = p.idAbs();
                     _p.mass = std::abs(p.m());
                     _p.x0 = fourvec{0,x0,y0,0};
+                    fourvec xx{0,0,0,0};
+                    find_production_x(i, xx, pythia.event);
+                    _p.tau_i = xx.t();
                     _p.x = _p.x0; 
                     _p.p0 = p0;
                 _p.p = _p.p0; 
-                _p.weight = weight;
+                _p.weight = weight/8.;
                 _p.is_vac = false;
                 _p.is_virtual = false;
                 _p.is_recoil = false;
