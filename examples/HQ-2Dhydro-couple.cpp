@@ -148,7 +148,7 @@ int main(int argc, char* argv[]){
 
         // freestream form t=0 to tau=tau0
         for (auto & p : plist){
-            p.Tf = 0.161;
+            p.Tf = 0.0;
             p.origin=-1;
             if (p.x.tau() < med1.get_tauH()){
                 p.freestream(
@@ -159,6 +159,7 @@ int main(int argc, char* argv[]){
             }
         }   
         int itau = 0;
+        bool started = false;
         while(med1.load_next()){
             
             double current_hydro_clock = med1.get_tauL();
@@ -171,7 +172,7 @@ int main(int argc, char* argv[]){
             double dtau = hydro_dtau/Ns, DeltaTau;
             for (int i=0; i<Ns; ++i){
                 for (auto & p : plist){     
-                    if (p.Tf < 0.161) {
+                    if (p.Tf < 0.161 && started) {
                         continue;       
                     }
                     if (p.x.tau() > current_hydro_clock+(i+1)*dtau){
@@ -191,6 +192,7 @@ int main(int argc, char* argv[]){
                     int fs_size = update_particle_momentum_Lido(
                                   DeltaTau, T, {vx, vy, vz}, p, flist);
                 }
+                started = true;
             }
             itau ++; 
         }

@@ -146,7 +146,8 @@ int main(int argc, char* argv[]){
         JetDenseMediumHadronize Hadronizer;
 
 
-        std::vector<double> TriggerBin({20,40,60,90, 110,130,140,160,180,200,250,300,350,400,500,700,1000,1500,2000});
+        std::vector<double> TriggerBin({20,40,60,
+80,100,120,140,160,180,200,250,300,350,400,500,700,1000,1500,2000});
         //std::vector<double> TriggerBin({30,60,100,200,300,
         //                                400,500,600,800,1500});
         //std::vector<double> TriggerBin({80,100,120,125,135,

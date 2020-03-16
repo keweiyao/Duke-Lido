@@ -264,7 +264,7 @@ int update_particle_momentum_Lido(
         return pOut_list.size();
     }
     // Freeze particles below Tc
-    if (temp < 0.154){
+    if (temp < 0.161){
         pIn.radlist.clear();
         pOut_list.push_back(pIn);
         return pOut_list.size();
@@ -595,8 +595,9 @@ int update_particle_momentum_Lido(
                     // accepted branching causes physical effects
                     // momentum change, and put back on shell
                     double xx = it->p0.t()/it->mother_p.t();
+                    it->p = pIn.p*xx;
                     pIn.p = pIn.p*(1.-xx);
-                    it->p = it->p*xx;
+                    
                     pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass + pIn.p.pabs2());
                     // for g -> q + qbar, pid change
                     // also discard all other pre-splitting: causes higher-order difference
