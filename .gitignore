@@ -1,6 +1,7 @@
 build/
 test/
 *~
+weak_decay/
 Tables/
 table.h5
 logfile.log
