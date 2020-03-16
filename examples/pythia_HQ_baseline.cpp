@@ -35,6 +35,9 @@ int main(int argc, char* argv[]){
           ("eid,j",
            po::value<int>()->value_name("INT")->default_value(0,"0"),
            "trento event id")
+           ("output,o",
+           po::value<fs::path>()->value_name("PATH")->default_value("./"),
+           "output file prefix or folder")
     ;
 
     po::variables_map args{};
@@ -72,7 +75,7 @@ int main(int argc, char* argv[]){
         std::vector<particle> plist, dlist;
         plist.clear();
         /// HardGen
-        std::vector<double> pThatbins({2,4,6,8,10,15,20,30,40,50,60,80,100,120,150,200,300});
+        std::vector<double> pThatbins({2,4,6,8,10,15,20,30,40,50,60,80,100,120,150,200,300,500});
         for (int i=0; i<pThatbins.size()-1; i++){
             HQGenerator hardgen(args["pythia-setting"].as<fs::path>().string(),
                             args["ic"].as<fs::path>().string(),
@@ -87,8 +90,10 @@ int main(int argc, char* argv[]){
         }
         int processid = getpid();
         std::stringstream outputfilename1,outputfilename2;
-        outputfilename1 << "c-quark-" << processid<<".dat";
-        outputfilename2 << "b-quark-" << processid<<".dat";
+        outputfilename1 << args["output"].as<fs::path>().string() 
+                        << "c-quark-" << processid<<".dat";
+        outputfilename2 << args["output"].as<fs::path>().string()
+                        << "b-quark-" << processid<<".dat";
         output_oscar(plist, 4, outputfilename1.str());
         output_oscar(plist, 5, outputfilename2.str());
     }

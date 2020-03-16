@@ -73,7 +73,7 @@ int main(int argc, char* argv[]){
            for(int it=0; it<1; it++){
             double t = current_hydro_clock + it*hydro_dtau;
            
-            bool make_source =  (.2*5.076<=t)&& (t <= 4.21*5.076);
+            bool make_source =  (.2*5.076<=t)&& (t < 4.21*5.076);
             LOG_INFO << make_source << t;
             xs = t;
             

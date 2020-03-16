@@ -32,7 +32,7 @@ void redistribute(
     int Nphi = int(_Nphi/coarse_level);
     const double dy = (ymax-ymin)/(Ny-1); 
     const double dphi = (phimax-phimin)/Nphi;
-    const double vradial = 0.7;
+    const double vradial = 0.6;
     const double gamma_radial = 1./std::sqrt(1-std::pow(vradial,2));
 
     std::vector<std::vector<fourvec> > CoarsedPmu;
@@ -56,7 +56,7 @@ void redistribute(
     for (int iy=0; iy<_Ny; iy++){
         clist[iy].chetas = std::cosh(ymin+iy*dy/coarse_level);
         clist[iy].shetas = std::sinh(ymin+iy*dy/coarse_level);
-        clist[iy].cs = .45;
+        clist[iy].cs = 0.575;
         clist[iy].p.a[0] = 0.;
 	clist[iy].p.a[1] = 0.;
 	clist[iy].p.a[2] = 0.;

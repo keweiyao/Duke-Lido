@@ -50,8 +50,11 @@ int main(int argc, char* argv[]){
 	  ("ch",
            po::value<int>()->value_name("INT")->default_value(0,"100"),
            "cent high")
-
+           ("output,o",
+           po::value<fs::path>()->value_name("PATH")->default_value("./"),
+           "output file prefix or folder")
     ;
+
     po::variables_map args{};
     try{
         po::store(po::command_line_parser(argc, argv).options(options).run(), args);
@@ -128,10 +131,8 @@ int main(int argc, char* argv[]){
                 args["lido-table"].as<fs::path>().string()
                 );
 
-	int CL = args["cl"].as<int>();
-        int CH = args["ch"].as<int>();
         /// generate events from pythia
-        std::vector<double> pThatbins({5,10,15,20,25,30,35,40,50,60,80,100,150});
+        std::vector<double> pThatbins({2,4,6,8,10,15,20,30,40,50,60,80,100,120,150,200,300,500});
         for (int i=0; i<pThatbins.size()-1; i++){
             HQGenerator hardgen(args["pythia-setting"].as<fs::path>().string(),
                             args["ic"].as<fs::path>().string(),
@@ -191,52 +192,13 @@ int main(int argc, char* argv[]){
                                   DeltaTau, T, {vx, vy, vz}, p, flist);
                 }
             }
-            if (itau%10==0){
-            int processid = getpid();
-	    for (int iid=4; iid<=5; iid++){
-            std::stringstream outputfilename;
-            outputfilename  << CL << "-" << CH 
-		            << "/" << iid << "/"
-		            << processid << "-tau-" 
-			    << itau/10 <<".dat";
-            // compute spectra and v2
-	    std::ofstream fout(outputfilename.str());
-	    std::vector<double> pTb({0,1,2,3,4,5,6,9,12,16,20,30,50,70,100});
-	    std::vector<double> yield, v2, pTmid;
-	    yield.resize(pTb.size()-1);
-	    v2.resize(pTb.size()-1);
-	    pTmid.resize(pTb.size()-1);
-	    for (auto & it : v2) it=0;
-	    for (auto & it : yield) it=0;
-	    for (auto & p : plist){
-		if (std::abs(p.pid)==iid && std::abs(p.p.rap())<2.4){
-		    double pT = p.p.xT();
-		    double w = p.weight;
-		    double c2 = (p.p.x()*p.p.x()-p.p.y()*p.p.y())/pT/pT;
-		    int i=0;
-		    for (i=0;i<pTb.size()-1; i++){
-		        if((pT>pTb[i]) & (pT<pTb[i+1])) break;
-		    }
-		    pTmid[i] += pT*w;
-		    yield[i] += w;
-                    v2[i] += w*c2;
-		}
-	    }
-	    for (int i=0;i<pTb.size()-1; i++) {
-		    v2[i] /= yield[i];
-		    pTmid[i] /= yield[i];
-		    yield[i] /= (pTb[i+1]-pTb[i]);
-	    }
-	    for (auto & it: pTmid) fout << it << " ";
-	    fout << std::endl; 
-	    for (auto & it: yield) fout << it << " ";
-	    fout << std::endl;
-  	    for (auto & it: v2) fout << it << " ";
-            fout << std::endl;
-            }
-            }
             itau ++; 
         }
+        int processid = getpid();
+        std::stringstream outputfilename1;
+        outputfilename1 << args["output"].as<fs::path>().string()
+                        << "c-quark-" << processid <<".dat";
+        output_oscar(plist, 4, outputfilename1.str());
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

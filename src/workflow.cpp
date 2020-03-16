@@ -297,6 +297,7 @@ int update_particle_momentum_Lido(
 
     BOOST_FOREACH (Process &r, AllProcesses[absid])
     {
+        bool can_rad = (!pIn.is_virtual) && (pIn.x.t()>pIn.tau_i);
         switch (r.which())
         {
         case 0:
@@ -307,28 +308,28 @@ int update_particle_momentum_Lido(
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 1:
-            if (boost::get<Rate23>(r).IsActive() && (!pIn.is_virtual))
+            if (boost::get<Rate23>(r).IsActive() && can_rad)
                 dR = boost::get<Rate23>(r).GetZeroM({E_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 2:
-            if (boost::get<Rate32>(r).IsActive() && (!pIn.is_virtual))
+            if (boost::get<Rate32>(r).IsActive() && can_rad)
                 dR = boost::get<Rate32>(r).GetZeroM({E_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 3:
-            if (boost::get<Rate12>(r).IsActive() && (!pIn.is_virtual))
+            if (boost::get<Rate12>(r).IsActive() && can_rad)
                 dR = qhatg * boost::get<Rate12>(r).GetZeroM({E_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 4:
-            if (boost::get<Rate21>(r).IsActive() && (!pIn.is_virtual))
+            if (boost::get<Rate21>(r).IsActive() && can_rad)
                 dR = qhatg * boost::get<Rate21>(r).GetZeroM({E_cell, temp}).s;
             else
                 dR = 0.0;
@@ -595,7 +596,7 @@ int update_particle_momentum_Lido(
                     // momentum change, and put back on shell
                     double xx = it->p0.t()/it->mother_p.t();
                     pIn.p = pIn.p*(1.-xx);
-                    it->p = pIn.p*xx;
+                    it->p = it->p*xx;
                     pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass + pIn.p.pabs2());
                     // for g -> q + qbar, pid change
                     // also discard all other pre-splitting: causes higher-order difference
