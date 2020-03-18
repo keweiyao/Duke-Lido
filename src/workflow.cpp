@@ -259,7 +259,9 @@ int update_particle_momentum_Lido(
     double dt_for_pIn = compute_realtime_to_propagate(dt_input, pIn.x, pIn.p);
     pIn.freestream(dt_for_pIn);
     // Delete soft partons below a energy cut from the hard parton list
-    if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut*temp){
+    if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut*temp
+        && (std::abs(pIn.pid)!=4 || std::abs(pIn.pid)!=5)
+	){
         pIn.radlist.clear();
         return pOut_list.size();
     }
