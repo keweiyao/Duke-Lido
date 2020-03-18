@@ -44,6 +44,12 @@ int main(int argc, char* argv[]){
           ("lido-table,t", 
             po::value<fs::path>()->value_name("PATH")->required(),
            "Lido table path to file")   
+	  ("cl",
+           po::value<int>()->value_name("INT")->default_value(0,"0"),
+           "cent low")
+	  ("ch",
+           po::value<int>()->value_name("INT")->default_value(0,"100"),
+           "cent high")
            ("output,o",
            po::value<fs::path>()->value_name("PATH")->default_value("./"),
            "output file prefix or folder")

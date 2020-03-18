@@ -13,16 +13,15 @@ public:
     HQGenerator(std::string f_pythia, std::string f_trento, 
                 int iev, double pTHL, double pTHH);
     void Generate(std::vector<particle> & plist, int Neve, double ycut);
-    double sigma_gen(void){
-        return pythia.info.sigmaGen();
-    }
 private:
+    double pL, pH;
     Pythia pythia;
+    std::string f_pythia;
     TransverPositionSampler TRENToSampler;
 };
 
-HQGenerator::HQGenerator(std::string f_pythia, std::string f_trento, int iev, double pTHL, double pTHH):
-TRENToSampler(f_trento, iev)
+HQGenerator::HQGenerator(std::string f_p, std::string f_trento, int iev, double pTHL, double pTHH):
+pL(pTHL), pH(pTHH),f_pythia(f_p),TRENToSampler(f_trento, iev)
 {    
     // read pythia settings
     pythia.readFile(f_pythia);
@@ -112,7 +111,7 @@ void HQGenerator::Generate(std::vector<particle> & plist, int Neve, double ycut)
         double weight = pythia.info.sigmaGen()/Neve;
         for (size_t i = 0; i < pythia.event.size(); ++i) {
             auto p = pythia.event[i];
-            bool triggered = ((p.idAbs() == 4))
+            bool triggered = ((p.idAbs() == 5) || (p.idAbs() == 4))
                       && p.isFinal() && (std::abs(p.y())< ycut);
             if (triggered) {
                 if (p.idAbs() == 4) Ncharm ++;
