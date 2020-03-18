@@ -14,11 +14,13 @@ public:
               int pTHL, int pTHH, int iev);
     void Generate(std::vector<particle> & plist, int heavyid);
     double sigma_gen(void){
-        return pythia.info.sigmaGen();
+        return sigma0/Navg;
     }
 private:
     Pythia pythia;
     TransverPositionSampler TRENToSampler;
+    double sigma0;
+    int Navg;
 };
 
 PythiaGen::PythiaGen(std::string f_pythia, std::string f_trento,
@@ -52,8 +54,9 @@ TRENToSampler(f_trento, iev)
     pythia.readString(s2.str());
     pythia.readString(s3.str());
     // Init
-    pythia.init(); 
+    pythia.init();
     for (int i=0; i<1000; i++) pythia.next();
+    sigma0 = pythia.info.sigmaGen();
 }
 
 void find_production_x(int i, fourvec & x, Event & event){
@@ -108,14 +111,15 @@ void PythiaGen::Generate(std::vector<particle> & plist, int heavyid){
     TRENToSampler.SampleXY(x, y);
     //LOG_INFO << x/5.076 << " " << y/5.076; 
     bool triggered = false;
+    Navg = 0;
     do{
+        Navg += 1.;
         if (heavyid < 4) triggered = true;
         plist.clear();
         pythia.next();
-        double weight = pythia.info.sigmaGen();
+        double weight = sigma0/Navg;
 	for (size_t i = 0; i < pythia.event.size(); ++i) {
 		auto p = pythia.event[i];
-                
 		if (p.isFinal() && std::abs(p.y())< 4) {
 		    // final momenta 
 		    fourvec p0{p.e(), p.px(), p.py(), p.pz()};
@@ -124,15 +128,25 @@ void PythiaGen::Generate(std::vector<particle> & plist, int heavyid){
 		    _p.mass = std::abs(p.m());
 		    _p.x0 = fourvec{0,x,y,0};
                     _p.x = _p.x0; 
-                    fourvec x1{0,0,0,0};
-		    find_production_x(i, x1, pythia.event); 
                     _p.tau_i = 0.;
 		    _p.p0 = p0;
  
 		    if (std::abs(_p.pid) != 4 && std::abs(_p.pid) != 5) {
 		        _p.mass = 0;
 		    }
-                    if (std::abs(_p.pid) == heavyid) triggered = true;
+                    int absid = std::abs(_p.pid);
+                    if (heavyid==4){
+                        if ( absid == 4 || 
+                             absid == 411 || absid == 421 ||
+                             absid == 413 || absid == 423  
+                           ) triggered = true;
+                    }
+                    if (heavyid==5){
+                        if ( absid == 5 || 
+                             absid == 511 || absid == 521 ||
+                             absid == 513 || absid == 523  
+                           ) triggered = true;
+                    }
                     _p.p0.a[0] = std::sqrt(_p.p0.pabs2()+_p.mass*_p.mass);
 		    _p.p = _p.p0; 
 		    _p.weight = weight;

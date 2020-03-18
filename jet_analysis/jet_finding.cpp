@@ -282,7 +282,14 @@ void FindJetTower(std::vector<particle> plist,
             int flavor=0;
             fourvec pf{0,0,0,0};
             for (auto & p : plist){
-                if ( std::abs(p.pid) == 5){
+                int absid = std::abs(p.pid);
+                bool trigger = absid == 4 || 
+                             absid == 411 || absid == 421 ||
+                             absid == 413 || absid == 423 ||
+                             absid == 5 || 
+                             absid == 511 || absid == 521 ||
+                             absid == 513 || absid == 523;
+                if ( trigger){
                     double eta = p.p.pseudorap();
                     double phi = p.p.phi();
                     if (std::sqrt(std::pow(eta-Jeta,2)
