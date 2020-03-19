@@ -146,8 +146,8 @@ int main(int argc, char* argv[]){
         JetDenseMediumHadronize Hadronizer;
 
 
-        std::vector<double> TriggerBin({20,40,60,
-80,100,120,140,160,180,200,250,300,350,400,500,700,1000,1500,2000});
+        std::vector<double> TriggerBin({30,40,50,60,70,
+80,100,120,140,160,180,220,300,350,400,500,700,1000,1500,2000});
         //std::vector<double> TriggerBin({30,60,100,200,300,
         //                                400,500,600,800,1500});
         //std::vector<double> TriggerBin({80,100,120,125,135,
@@ -177,7 +177,7 @@ int main(int argc, char* argv[]){
 
                 // freestream form t=0 to tau=tau0
                 for (auto & p : plist){
-                    p.Tf = 0.17;
+                    p.Tf = 0.161;
                     p.origin=-1;
                     if (p.x.tau() < med1.get_tauH()){
                         p.freestream(
@@ -208,7 +208,7 @@ int main(int argc, char* argv[]){
                         new_plist.clear();
                         for (auto & p : plist){     
 
-                            if (p.Tf < 0.17) {
+                            if (p.Tf < 0.161) {
                                 new_plist.push_back(p);
                                 continue;       
                             }
@@ -253,7 +253,17 @@ int main(int argc, char* argv[]){
                      if (std::abs(p.p.pseudorap())<3.)
                      Pmu_Hard_Out = Pmu_Hard_Out + p.p;
                 }
-                
+                Hadronizer.hadronize(plist, hlist, thermal_list);
+                for(auto & it : thermal_list){
+                    current J;
+                    double vzgrid = it.x.z()/it.x.t();
+                    fourvec pmu{-it.p.t(), -it.p.x(), -it.p.y(), -it.p.z()};
+                    J.p = pmu.boost_to(0, 0, vzgrid);
+                    J.chetas = std::cosh(it.x.rap());
+                    J.shetas = std::sinh(it.x.rap());
+                    J.cs = std::sqrt(.3333);
+                    clist.push_back(J);
+                }
                 //LOG_INFO << "Hard initial " << Pmu_Hard_In;
                 //LOG_INFO << "Hard final " << Pmu_Hard_Out;
                 //LOG_INFO << "Soft deposite " << Pmu_Soft_Gain;
@@ -261,9 +271,9 @@ int main(int argc, char* argv[]){
                 fheader << args["output"].as<fs::path>().string() 
                         << processid;
                 std::vector<double> Rs({.2,.4,.6,.8,1.});
-                //clist.clear();
+
                 FindJetTower(
-                    plist, clist,
+                    hlist, clist,
                     Rs, 10,
                     -3, 3,
                     fheader.str(), 

@@ -26,9 +26,9 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("3:m0 = 0");
     pythia.readString("4:m0 = 1.3");
     pythia.readString("5:m0 = 4.2");
-    /*pythia.readString("HadronLevel:Decay = off");
-    pythia.readString("4:mayDecay = off");
-    pythia.readString("5:mayDecay = off");*/
+    pythia.readString("HadronLevel:Decay = off");
+    /*pythia.readString("4:mayDecay = off");
+    pythia.readString("5:mayDecay = off");
     pythia.readString("111:mayDecay = off");
     pythia.readString("211:mayDecay = off");
     pythia.readString("311:mayDecay = off");
@@ -40,7 +40,7 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("511:mayDecay = off");
     pythia.readString("521:mayDecay = off");
     pythia.readString("513:mayDecay = off");
-    pythia.readString("523:mayDecay = off");
+    pythia.readString("523:mayDecay = off");*/
     pythia.init();
 }
 
@@ -127,6 +127,9 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                          p.p.x(), p.p.y(), p.p.z(), p.p.t(), p.mass); 
             pythia.event.append(cpid, status, anticolor, color, 
                          pth.x(), pth.y(), pth.z(), pth.t(), 0.0); 
+	                pythia.event[1].scale(1.5);
+            pythia.event[2].scale(1.5);
+ pythia.forceTimeShower(1,2,1.5);
             particle thermal_p;
             thermal_p.pid = cpid;
             thermal_p.p = pth;
@@ -152,7 +155,10 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                          pth1.x(), pth1.y(), pth1.z(), pth1.t(), 0.0);  
             pythia.event.append(pid2, status, 0, color, 
                          pth2.x(), pth2.y(), pth2.z(), pth2.t(), 0.0);  
-
+            pythia.event[1].scale(1.5);
+	    pythia.event[2].scale(1.5);
+	    pythia.event[3].scale(1.5);
+	    pythia.forceTimeShower(1,3,1.5);
             particle thermal_p1;
             thermal_p1.pid = pid1;
             thermal_p1.p = pth1;
@@ -180,6 +186,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
         sqrts = std::sqrt(dot(ptot, ptot));
         //LOG_INFO << "sqrts of fragmentation = " << sqrts << " GeV"; 
         }while(sqrts < threshold);
+
         int s = pythia.next();
         bool need_recombiantion = false;
         for (int i = 0; i < pythia.event.size(); ++i) {
@@ -255,21 +262,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                 }
                 if (std::abs(plist[1].pid) == 3){
                     h.mass = 1.019;
-                    h.pid = (plist[0].pid>0)?(-531):(531);
-                }
-            }
-            else if (std::abs(plist[1].pid) == 3) {
-                if (std::abs(plist[0].pid) == 1){
-                    h.mass = 0.493677;
-                    h.pid = (plist[1].pid>0)?(-321):(321);
-                }
-                if (std::abs(plist[0].pid) == 2){
-                    h.mass = 0.497611;
-                    h.pid = (plist[1].pid>0)?(-311):(311);
-                }
-                if (std::abs(plist[0].pid) == 3){
-                    h.mass = 1.019;
-                    h.pid = (plist[1].pid>0)?(-531):(531);
+                    h.pid = (plist[0].pid>0)?(-331):(331);
                 }
             }
             if(h.mass<0){
