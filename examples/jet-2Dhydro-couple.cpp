@@ -60,7 +60,7 @@ int main(int argc, char* argv[]){
            po::value<fs::path>()->value_name("PATH")->default_value("./"),
            "output file prefix or folder")
           ("Q0,q",
-           po::value<int>()->value_name("DOUBLE")->default_value(.4,".4"),
+           po::value<double>()->value_name("DOUBLE")->default_value(.4,".4"),
            "Scale [GeV] to insert in-medium transport")
     ;
 
