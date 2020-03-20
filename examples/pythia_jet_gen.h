@@ -11,20 +11,19 @@ using namespace Pythia8;
 class PythiaGen{
 public: 
     PythiaGen(std::string f_pythia, std::string f_trento, 
-              int pTHL, int pTHH, int iev);
+              int pTHL, int pTHH, int iev, double Q0);
     void Generate(std::vector<particle> & plist, int heavyid);
     double sigma_gen(void){
-        return sigma0/Navg;
+        return sigma0;
     }
 private:
-    Pythia pythia;
+    Pythia pythia, pythia2;
     TransverPositionSampler TRENToSampler;
     double sigma0;
-    int Navg;
 };
 
 PythiaGen::PythiaGen(std::string f_pythia, std::string f_trento,
-                     int pTHL, int pTHH, int iev):
+                     int pTHL, int pTHH, int iev, double Q0):
 TRENToSampler(f_trento, iev)
 {    
     // read pythia settings
@@ -35,6 +34,7 @@ TRENToSampler(f_trento, iev)
     pythia.readString("PromptPhoton:all=off");
     pythia.readString("WeakSingleBoson:all=off");
     pythia.readString("WeakDoubleBoson:all=off");
+    pythia.readString("TimeShower:QEDshowerByQ = off");
     pythia.readString("Init:showProcesses = off");  
     pythia.readString("Init:showMultipartonInteractions = off");  
     pythia.readString("Init:showChangedSettings = off");  
@@ -46,80 +46,61 @@ TRENToSampler(f_trento, iev)
 
     int processid = getpid();
 
-    std::ostringstream s1, s2, s3;
+    std::ostringstream s1, s2, s3, s4;
     s1 << "PhaseSpace:pTHatMin = " << pTHL;
     s2 << "PhaseSpace:pTHatMax = " << pTHH;
     s3 << "Random:seed = " << processid;
+    s4 << "TimeShower:pTmin = " << Q0;
     pythia.readString(s1.str());
     pythia.readString(s2.str());
     pythia.readString(s3.str());
+    pythia.readString(s4.str());
     // Init
     pythia.init();
     for (int i=0; i<1000; i++) pythia.next();
     sigma0 = pythia.info.sigmaGen();
+  
+    /*pythia2.readString("Random:setSeed = on");
+    pythia2.readString("Random:seed = 0");
+    pythia2.readString("ProcessLevel:all = off");
+    pythia2.readString("TimeShower:QEDshowerByQ = off");
+    pythia2.readString("HadronLevel:all = off");
+    pythia2.readString("HadronLevel:decay = off");
+    pythia2.init();*/
 }
 
-void find_production_x(int i, fourvec & x, Event & event){
-    double tf;
-    auto p = event[i];
-    int im1 = p.mother1();
-    int im2 = p.mother2();
-    if (im1==im2 && im2 > 0){
-        // simply recoil effect, go on
-        find_production_x(im1, x, event);
-    }
-    if (im1==0 && im2 ==0) {
-        return;
-    }
-    if (im1>0 && im2==0){
-        auto m1 = event[im1];
-        // FSR or ISR
-
-        if (p.status() == 51) {
-             int d1 = m1.daughter1();
-             int d2 = m1.daughter2();
-             auto D1 = event[d1];
-             auto D2 = event[d2];
-             
-             double ME = D1.e()+D2.e();
-             double f = p.e()/ME;
-             double Mpx = D1.px()+D2.px(), Mpy = D1.py()+D2.py(), Mpz = D1.pz()+D2.pz();
-             double p2 = p.px()*p.px() + p.py()*p.py() + p.pz()*p.pz();
-             double Q2 = Mpx*Mpx + Mpy*Mpy + Mpz*Mpz;
-             double pdotQ = p.px()*Mpx + p.py()*Mpy + p.pz()*Mpz;
-             double pT2 = p2 - pdotQ*pdotQ/Q2;
-             tf = 2.*f*(1.-f)*ME/pT2;
-       
-            x.a[0] = x.t() + tf;
-            x.a[1] = x.x() + tf*Mpx/ME;
-            x.a[2] = x.y() + tf*Mpy/ME;
-            x.a[3] = x.z() + tf*Mpz/ME;
-            find_production_x(im1, x, event);
-        }
-        else{
-            find_production_x(im1, x, event);
-        }
-    }
-    if (im1 != im2 && im1 > 0 && im2 > 0){
-        // hard 2->n process, time scale is short, and we negelect
-        return;
-    }
-}
 
 void PythiaGen::Generate(std::vector<particle> & plist, int heavyid){
     double x, y;
     TRENToSampler.SampleXY(x, y);
     //LOG_INFO << x/5.076 << " " << y/5.076; 
     bool triggered = false;
-    Navg = 0;
     do{
-        Navg += 1.;
         if (heavyid < 4) triggered = true;
         plist.clear();
         pythia.next();
-        double weight = sigma0/Navg;
-	for (size_t i = 0; i < pythia.event.size(); ++i) {
-		auto p = pythia.event[i];
+        ////// Force time shower
+        /*pythia2.event.reset();
+        // copy old event:
+        int k = 1;
+        for (int i = 0; i < pythia.event.size(); ++i){
+            auto p = pythia.event[i];
+            if (p.isFinal() && p.isParton()){
+                pythia2.event.append(p.id(), p.status(), p.col(), p.acol(), 
+                                     p.px(), p.py(), p.pz(), p.e(), p.m());
+                pythia2.event[k].scale(p.scale());
+                k++;
+            }
+        }
+        pythia2.forceTimeShower(1, k, .4);
+        pythia2.next();*/
+        ////////////////////////
+        double weight = sigma0;
+        auto & event = pythia.event;
+	for (size_t i = 0; i < event.size(); ++i) {
+		auto p = event[i];
+                //if (p.isParton() && event[p.daughter1()].isHadron()
+                //    && std::abs(p.y()) < 4) {
 		if (p.isFinal() && std::abs(p.y())< 4) {
 		    // final momenta 
 		    fourvec p0{p.e(), p.px(), p.py(), p.pz()};

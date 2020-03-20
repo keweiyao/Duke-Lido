@@ -281,9 +281,10 @@ int update_particle_momentum_Lido(
 
     // Apply diffusion and update particle momentum
     fourvec pnew;
-    Ito_update(pIn.pid, dt_for_pIn, pIn.mass, temp, v3cell, pIn.p, pnew);
-    pIn.p = pnew;
-
+    //if (pIn.is_virtual){
+        Ito_update(pIn.pid, dt_for_pIn, pIn.mass, temp, v3cell, pIn.p, pnew);
+        pIn.p = pnew;
+    //}
     // Apply large angle scattering, and diffusion induced radiation
     auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
     double dt_cell = dt_for_pIn / pIn.p.t() * p_cell.t();
@@ -405,7 +406,9 @@ int update_particle_momentum_Lido(
 
         // elastic process changes the momentum immediately
         if (channel == 0 || channel == 1){
-            pIn.p = FS[0];
+            //if (pIn.is_virtual){
+                pIn.p = FS[0];
+            //}
             double tempid;
             if (channel == 1) tempid = 21;
             else tempid = Srandom::sample_flavor(3);

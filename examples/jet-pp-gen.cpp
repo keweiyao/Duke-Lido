@@ -50,6 +50,9 @@ int main(int argc, char* argv[]){
            ("output,o",
            po::value<fs::path>()->value_name("PATH")->default_value("./"),
            "output file prefix or folder")
+          ("Q0,q",
+           po::value<int>()->value_name("DOUBLE")->default_value(.4,".4"),
+           "Scale [GeV] to insert in-medium transport")
     ;
 
     po::variables_map args{};
@@ -94,11 +97,12 @@ int main(int argc, char* argv[]){
             }
         }
 
+        // Scale to insert In medium transport
+        double Q0 = args["Q0"].as<double>();
         /// use process id to define filename
         int processid = getpid();
 
-        std::vector<double> TriggerBin({20,40,60,
-90,110,130,140,160,180,200,250,300,350,400,500,700,1000,1500,2000});
+        std::vector<double> TriggerBin({50,60,70,80,90,100,120,150,200});
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
             PythiaGen pythiagen(
@@ -106,9 +110,12 @@ int main(int argc, char* argv[]){
                 args["ic"].as<fs::path>().string(),
                 TriggerBin[iBin],
                 TriggerBin[iBin+1],
-                args["eid"].as<int>()
+                args["eid"].as<int>(),
+                Q0
             );
-            LOG_INFO << pythiagen.sigma_gen() << " " << TriggerBin[iBin] << " "<< TriggerBin[iBin];
+            LOG_INFO << pythiagen.sigma_gen() << " "
+                     << TriggerBin[iBin] << " "
+                     << TriggerBin[iBin];
             for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
                 std::vector<particle> plist, hlist, thermal_list,
                                       new_plist, pOut_list;

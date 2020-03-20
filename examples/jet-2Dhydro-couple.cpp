@@ -59,6 +59,9 @@ int main(int argc, char* argv[]){
            ("output,o",
            po::value<fs::path>()->value_name("PATH")->default_value("./"),
            "output file prefix or folder")
+          ("Q0,q",
+           po::value<int>()->value_name("DOUBLE")->default_value(.4,".4"),
+           "Scale [GeV] to insert in-medium transport")
     ;
 
     po::variables_map args{};
@@ -145,13 +148,10 @@ int main(int argc, char* argv[]){
         /// Initialize a simple hadronizer
         JetDenseMediumHadronize Hadronizer;
 
-
-        std::vector<double> TriggerBin({30,40,50,60,70,
-80,100,120,140,160,180,220,300,350,400,500,700,1000,1500,2000});
-        //std::vector<double> TriggerBin({30,60,100,200,300,
-        //                                400,500,600,800,1500});
-        //std::vector<double> TriggerBin({80,100,120,125,135,
-        //                               145,160,180,200,250,300,1000});
+        // Scale to insert In medium transport
+        double Q0 = args["Q0"].as<double>();
+        std::vector<double> TriggerBin({20,40,60,80,120,160,200,300,
+                                        400,500,700,1000,1500,2000});
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
             PythiaGen pythiagen(
@@ -159,19 +159,21 @@ int main(int argc, char* argv[]){
                 args["ic"].as<fs::path>().string(),
                 TriggerBin[iBin],
                 TriggerBin[iBin+1],
-                args["eid"].as<int>()
+                args["eid"].as<int>(),
+                Q0
             );
-            LOG_INFO << pythiagen.sigma_gen() << " " << TriggerBin[iBin] << " "<< TriggerBin[iBin];
+            LOG_INFO << pythiagen.sigma_gen() << " " 
+                     << TriggerBin[iBin] << " "
+                     << TriggerBin[iBin];
             for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
                 std::vector<particle> plist, hlist, thermal_list,
                                       new_plist, pOut_list;
                 std::vector<current> clist;
+                
                 // Initialize parton list from python
                 pythiagen.Generate(plist, args["heavy"].as<int>());
                 double sigma_gen = pythiagen.sigma_gen()
                                   / args["pythia-events"].as<int>();
-                
-
                 /// Initialzie a hydro reader
                 Medium<2> med1(args["hydro"].as<fs::path>().string());
 
@@ -189,12 +191,6 @@ int main(int argc, char* argv[]){
                 }   
 
                 // Energy-momentum checkbook
-                fourvec Pmu_Hard_In = {0., 0., 0., 0.};
-                fourvec Pmu_Hard_Out = {0., 0., 0., 0.};
-                fourvec Pmu_Soft_Gain = {0., 0., 0., 0.};
-                for (auto & p : plist) {
-                    Pmu_Hard_In = Pmu_Hard_In + p.p;
-                }
                 while(med1.load_next()){
                     double current_hydro_clock = med1.get_tauL();
                     double hydro_dtau = med1.get_hydro_time_step();
@@ -237,7 +233,6 @@ int main(int argc, char* argv[]){
                                 new_plist.push_back(fp);
                             }   
                              
-                            Pmu_Soft_Gain = Pmu_Soft_Gain + ploss; 
                             current J; 
                             ploss = ploss.boost_to(0, 0, vzgrid);
                             J.p = ploss;
@@ -249,11 +244,8 @@ int main(int argc, char* argv[]){
                         plist = new_plist;
                     }
                 }
-                for (auto & p : plist) {
-                     if (std::abs(p.p.pseudorap())<3.)
-                     Pmu_Hard_Out = Pmu_Hard_Out + p.p;
-                }
-                Hadronizer.hadronize(plist, hlist, thermal_list);
+
+                Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 0);
                 for(auto & it : thermal_list){
                     current J;
                     double vzgrid = it.x.z()/it.x.t();
@@ -264,9 +256,6 @@ int main(int argc, char* argv[]){
                     J.cs = std::sqrt(.3333);
                     clist.push_back(J);
                 }
-                //LOG_INFO << "Hard initial " << Pmu_Hard_In;
-                //LOG_INFO << "Hard final " << Pmu_Hard_Out;
-                //LOG_INFO << "Soft deposite " << Pmu_Soft_Gain;
                 std::stringstream fheader;
                 fheader << args["output"].as<fs::path>().string() 
                         << processid;

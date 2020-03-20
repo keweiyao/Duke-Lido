@@ -18,6 +18,7 @@ using namespace Pythia8;
 
 JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("ProcessLevel:all = off");
+    pythia.readString("TimeShower:QEDshowerByQ = off");
     pythia.readString("Next:numberShowInfo = 0");
     pythia.readString("Next:numberShowProcess = 0");
     pythia.readString("Next:numberShowEvent = 0");
@@ -78,10 +79,11 @@ double GetThreshold(int pid){
     }
 }
 
-std::ofstream fff("recombin.dat");
 int JetDenseMediumHadronize::hadronize(std::vector<particle> partons, 
                                        std::vector<particle> & hadrons, 
-                                       std::vector<particle> & thermal_partons){
+                                       std::vector<particle> & thermal_partons,
+                                       double Q0,
+                                       int level){
     
     const int color1 = 101, color2 = 102;
     const int status = 23;
@@ -107,7 +109,8 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
         double threshold = GetThreshold(p.pid), sqrts;
         do{
         fourvec ptot{0., 0., 0., 0.};
-        if (absid==123 || absid==1 || absid==2 || absid==3 || absid==4 || absid==5) {
+        if (absid==123 || absid==1 || absid==2 
+           || absid==3 || absid==4 || absid==5) {
             int cpid, color, anticolor;
             if (p.pid>0) {
                 // a quark
@@ -127,9 +130,9 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                          p.p.x(), p.p.y(), p.p.z(), p.p.t(), p.mass); 
             pythia.event.append(cpid, status, anticolor, color, 
                          pth.x(), pth.y(), pth.z(), pth.t(), 0.0); 
-	                pythia.event[1].scale(1.5);
-            pythia.event[2].scale(1.5);
- pythia.forceTimeShower(1,2,1.5);
+	    pythia.event[1].scale(Q0);
+            pythia.event[2].scale(0.);
+            pythia.forceTimeShower(1,2,Q0);
             particle thermal_p;
             thermal_p.pid = cpid;
             thermal_p.p = pth;
@@ -155,10 +158,10 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                          pth1.x(), pth1.y(), pth1.z(), pth1.t(), 0.0);  
             pythia.event.append(pid2, status, 0, color, 
                          pth2.x(), pth2.y(), pth2.z(), pth2.t(), 0.0);  
-            pythia.event[1].scale(1.5);
-	    pythia.event[2].scale(1.5);
-	    pythia.event[3].scale(1.5);
-	    pythia.forceTimeShower(1,3,1.5);
+            pythia.event[1].scale(Q0);
+	    pythia.event[2].scale(0.);
+	    pythia.event[3].scale(0.);
+	    pythia.forceTimeShower(1,3,Q0);
             particle thermal_p1;
             thermal_p1.pid = pid1;
             thermal_p1.p = pth1;
@@ -191,7 +194,16 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
         bool need_recombiantion = false;
         for (int i = 0; i < pythia.event.size(); ++i) {
             auto ip = pythia.event[i];
-            if (ip.isFinal() && ip.isHadron()) {
+            bool good = false;
+            if (level==1){
+                good = ip.isFinal() && ip.isHadron();
+            }
+            if (level==0){
+                good = (ip.isParton() 
+                       && pythia.event[ip.daughter1()].isHadron())
+                      || (ip.isFinal() && ip.isParton());
+            }
+            if (good) {
                 particle h;
                 h.pid = ip.id();
                 h.p.a[0] = ip.e();
@@ -206,12 +218,12 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                 hadrons.push_back(h);
             }
             
-            if (ip.isFinal() && ip.isParton()){
+            if (level==1 && ip.isFinal() && ip.isParton()){
                 need_recombiantion = true;
                 break;
             }
         }
-        if (need_recombiantion){
+        /*if (level==1 && need_recombiantion){
             // go back to plist:
             fourvec ptot{0.,0.,0.,0.};
             for (auto & ip : plist) ptot = ptot + ip.p;
@@ -265,19 +277,13 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                     h.pid = (plist[0].pid>0)?(-331):(331);
                 }
             }
-            if(h.mass<0){
-                for (auto & ip : plist) {
-                    fff << ip.pid << " ";
-                }
-                fff << std::sqrt(dot(ptot, ptot)) << std::endl;
-            }
             h.p.a[0] = std::sqrt(h.mass*h.mass + h.p.pabs2());
             h.weight = -1;
             h.x0 = p.x;
             h.x = p.x;
             h.vcell = p.vcell;
             hadrons.push_back(h);
-        }
+        }*/
         
     }
     return hadrons.size();

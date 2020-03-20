@@ -17,7 +17,8 @@ public:
    JetDenseMediumHadronize();
    int hadronize(std::vector<particle> partons, 
                  std::vector<particle> & hadrons, 
-                 std::vector<particle> & thermal_partons);
+                 std::vector<particle> & thermal_partons,
+                 double Q0, int level);
 private:
    Pythia pythia;
 };
