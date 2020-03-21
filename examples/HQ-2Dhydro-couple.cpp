@@ -149,7 +149,6 @@ int main(int argc, char* argv[]){
         // freestream form t=0 to tau=tau0
         for (auto & p : plist){
             p.Tf = 0.0;
-            p.origin=-1;
             if (p.x.tau() < med1.get_tauH()){
                 p.freestream(
                     compute_realtime_to_propagate(

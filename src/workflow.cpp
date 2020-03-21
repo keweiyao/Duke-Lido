@@ -13,7 +13,6 @@
 #include "predefine.h"
 
 std::map<int, std::vector<Process>> AllProcesses;
-//std::ofstream ofs ("hq_gluon_accept.dat", std::ofstream::app);
 
 void init_process(Process &r, std::string mode, std::string table_path)
 {
@@ -413,7 +412,6 @@ int update_particle_momentum_Lido(
             if (channel == 1) tempid = 21;
             else tempid = Srandom::sample_flavor(3);
             particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
-            ep.origin = 1;
             pOut_list.push_back(ep);
         }
         // inelastic process takes a finite time to happen
@@ -426,7 +424,6 @@ int update_particle_momentum_Lido(
             double mD2 = t_channel_mD2->get_mD2(temp);
             if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3*temp) { 
 		    particle vp = produce_parton(21, pIn, FS[2], x0, temp, v3cell);
-		    vp.origin = (pIn.origin==-1)?0:pIn.origin;
 		    // The local 2->2 mean-free-path is estimated with
 		    // the qhat_hard integrate from the 2->2 rate
 		    double xfrac = vp.p.t() / pIn.p.t();
@@ -467,7 +464,6 @@ int update_particle_momentum_Lido(
             double mD2 = t_channel_mD2->get_mD2(temp);
             if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3*temp) {
 		    particle vp = produce_parton(21, pIn, FS[1], x0, temp, v3cell);
-		            vp.origin = (pIn.origin==-1)?0:pIn.origin;
 		    // estimate mfp in the lab frame
 		    vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
 		    pIn.radlist.push_back(vp);
@@ -485,7 +481,6 @@ int update_particle_momentum_Lido(
             double mD2 = t_channel_mD2->get_mD2(temp);
             if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3*temp) {
 		    particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[2], x0, temp, v3cell);
-		            vp.origin = (pIn.origin==-1)?0:pIn.origin;
 		    // The local 2->2 mean-free-path is estimated with
 		    // the qhat_hard integrate from the 2->2 rate
 		    double xfrac = vp.p.t() / pIn.p.t();
@@ -517,8 +512,6 @@ int update_particle_momentum_Lido(
             double mD2 = t_channel_mD2->get_mD2(temp);
             if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3*temp) {
 		    particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[1], x0, temp, v3cell);
-		            vp.origin = (pIn.origin==-1)?0:pIn.origin;
-
 		    
 		    // estimate mfp in the lab frame
 		    vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
@@ -597,11 +590,17 @@ int update_particle_momentum_Lido(
                         Acceptance = 1.0;
                 }
                 if (Srandom::rejection(Srandom::gen) < Acceptance){
+                    double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
+                    double kt2n = measure_perp(
+                                   pIn.p*(it->mother_p.t()/pIn.p.t()),
+                                   it->p*(it->p0.t()/it->p.t()) 
+                                  ).pabs2();
                     // accepted branching causes physical effects
                     // momentum change, and put back on shell
                     double xx = it->p0.t()/it->mother_p.t();
                     it->p = it->p*(pIn.p.t()*xx/it->p.t());
                     pIn.p = pIn.p - it->p;
+                    pIn.Q0 = std::sqrt(kt2n);
                     
                     pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass + pIn.p.pabs2());
                     // for g -> q + qbar, pid change

@@ -130,9 +130,9 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                          p.p.x(), p.p.y(), p.p.z(), p.p.t(), p.mass); 
             pythia.event.append(cpid, status, anticolor, color, 
                          pth.x(), pth.y(), pth.z(), pth.t(), 0.0); 
-	    pythia.event[1].scale(Q0);
-            pythia.event[2].scale(0.);
-            pythia.forceTimeShower(1,2,Q0);
+	    pythia.event[1].scale(p.Q0);
+            pythia.event[2].scale(0.4);
+            pythia.forceTimeShower(1,2,p.Q0);
             particle thermal_p;
             thermal_p.pid = cpid;
             thermal_p.p = pth;
@@ -158,10 +158,10 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                          pth1.x(), pth1.y(), pth1.z(), pth1.t(), 0.0);  
             pythia.event.append(pid2, status, 0, color, 
                          pth2.x(), pth2.y(), pth2.z(), pth2.t(), 0.0);  
-            pythia.event[1].scale(Q0);
-	    pythia.event[2].scale(0.);
-	    pythia.event[3].scale(0.);
-	    pythia.forceTimeShower(1,3,Q0);
+            pythia.event[1].scale(p.Q0);
+	    pythia.event[2].scale(0.4);
+	    pythia.event[3].scale(0.4);
+	    pythia.forceTimeShower(1,3,p.Q0);
             particle thermal_p1;
             thermal_p1.pid = pid1;
             thermal_p1.p = pth1;

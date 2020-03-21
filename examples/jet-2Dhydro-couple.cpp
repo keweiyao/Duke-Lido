@@ -23,7 +23,7 @@ namespace fs = boost::filesystem;
 
 void output_jet(std::string fname, std::vector<particle> plist){
     std::ofstream f(fname);
-    for (auto & p : plist) f << p.pid << " " << p.p << " " << p.x0 << " " << p.x << std::endl;
+    for (auto & p : plist) f << p.pid << " " << p.p << " " << p.x << " " << p.Q0 << std::endl;
     f.close();
 }
 
@@ -150,8 +150,8 @@ int main(int argc, char* argv[]){
 
         // Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
-        std::vector<double> TriggerBin({20,40,60,80,120,160,200,300,
-                                        400,500,700,1000,1500,2000});
+        std::vector<double> TriggerBin({90,100,110,120,130,140,150, 160,180,200,250,300,500});
+        //std::vector<double> TriggerBin({200,220});
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
             PythiaGen pythiagen(
@@ -162,6 +162,7 @@ int main(int argc, char* argv[]){
                 args["eid"].as<int>(),
                 Q0
             );
+            
             LOG_INFO << pythiagen.sigma_gen() << " " 
                      << TriggerBin[iBin] << " "
                      << TriggerBin[iBin];
@@ -172,6 +173,7 @@ int main(int argc, char* argv[]){
                 
                 // Initialize parton list from python
                 pythiagen.Generate(plist, args["heavy"].as<int>());
+                output_jet("init.dat", plist);
                 double sigma_gen = pythiagen.sigma_gen()
                                   / args["pythia-events"].as<int>();
                 /// Initialzie a hydro reader
@@ -180,7 +182,6 @@ int main(int argc, char* argv[]){
                 // freestream form t=0 to tau=tau0
                 for (auto & p : plist){
                     p.Tf = 0.161;
-                    p.origin=-1;
                     if (p.x.tau() < med1.get_tauH()){
                         p.freestream(
                             compute_realtime_to_propagate(

@@ -34,6 +34,7 @@ TRENToSampler(f_trento, iev)
     pythia.readString("PromptPhoton:all=off");
     pythia.readString("WeakSingleBoson:all=off");
     pythia.readString("WeakDoubleBoson:all=off");
+    pythia.readString("SpaceShower:QEDshowerByQ=off");
     pythia.readString("TimeShower:QEDshowerByQ = off");
     pythia.readString("Init:showProcesses = off");  
     pythia.readString("Init:showMultipartonInteractions = off");  
@@ -111,6 +112,7 @@ void PythiaGen::Generate(std::vector<particle> & plist, int heavyid){
                     _p.x = _p.x0; 
                     _p.tau_i = 0.;
 		    _p.p0 = p0;
+                    _p.Q0 = p.scale();
  
 		    if (std::abs(_p.pid) != 4 && std::abs(_p.pid) != 5) {
 		        _p.mass = 0;

@@ -6,9 +6,11 @@ double const tiny = 1e-10;
 
 double delta_qhat(int pid, double E, double M, double T){
         double CR = (pid==21) ? CA : CF;
-	double delta_qhat = CR/CF*qhat_params.K * std::pow(T, 3)
-		/(1. + std::pow(qhat_params.a*(T+tiny)/Tc, qhat_params.p))
-		/(1. + std::pow(qhat_params.b*(E)/(T+tiny), qhat_params.q));
+        int absid = std::abs(pid);
+        double EM = 1. + std::log (1+ (E-M)/qhat_params.b/T );
+        double delta_qhat = CR/CF*qhat_params.K * std::pow(T, 3)
+                /(1. + std::pow(qhat_params.a*(T-Tc)/Tc, qhat_params.p))
+                /std::pow(EM, qhat_params.q);
         return delta_qhat;
 }
 
@@ -61,7 +63,8 @@ void Ito_update(int pid, double dt_lab, double M, double T, std::vector<double> 
 	double kt = qhat(pid, E0, M, T)/2.;
         double kl = qhat_L(pid, E0, M, T);
 	double dkl_dp2 = dqhat_L_dp2(pid, E0, M, T);
-	double drag = kl/(2.*E0*T) - (kl - kt)/std::pow(p0, 2) - dkl_dp2;
+	double drag = kl/(2.*E0*T);
+                   // - (kl - kt)/std::pow(p0, 2) - dkl_dp2;
 		   
 	double Ct = std::sqrt(kt*dt);
 	double Cl = std::sqrt(kl*dt);

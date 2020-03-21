@@ -9,9 +9,8 @@
 struct particle{
 	// mass, x, p, t, all in units of [GeV^a]
 	int pid;
-	double mass, weight, tau_i;
+	double mass, weight, tau_i, Q0;
 	bool is_vac, is_virtual, is_recoil;
-        int origin;
 	
 	double T0, mfp0, Tf; // production temperature, local mfp
 	fourvec x0; // production location

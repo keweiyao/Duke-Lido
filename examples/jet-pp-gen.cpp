@@ -102,7 +102,8 @@ int main(int argc, char* argv[]){
         /// use process id to define filename
         int processid = getpid();
 
-        std::vector<double> TriggerBin({50,60,70,80,90,100,120,150,200});
+        std::vector<double> TriggerBin({10,20,40,60,80,120,160,200,300,
+                                        400,500,700,1000,1500,2000});
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
             PythiaGen pythiagen(
