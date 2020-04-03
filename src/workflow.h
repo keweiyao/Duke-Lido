@@ -8,9 +8,9 @@
 
 struct particle{
 	// mass, x, p, t, all in units of [GeV^a]
-	int pid;
+	int pid, col, acol;
 	double mass, weight, tau_i, Q0;
-	bool is_vac, is_virtual, is_recoil;
+	bool is_virtual;
 	
 	double T0, mfp0, Tf; // production temperature, local mfp
 	fourvec x0; // production location
@@ -46,9 +46,10 @@ int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3
 
 double formation_time(fourvec p, fourvec k, double T, int split);
 double compute_realtime_to_propagate(double dt, fourvec x, fourvec p);
-void output(const std::vector<particle> plist, std::string fname);
 void output_oscar(const std::vector<particle> plist, int abspid, std::string fname);
-double mean_pT(const std::vector<particle> plist);
-double mean_E(const std::vector<particle> plist);
-particle produce_parton(int pid, particle & mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> & v3cell, bool is_virtual = true, bool is_recoil = false);
+particle produce_parton(int pid, fourvec pmu, particle & mother, bool is_virtual);
+void SampleFlavorAndColor(int mother_id, int mother_col, int mother_acol, 
+                int channel, int daughter_id, 
+                int & daughter_col, int & daughter_acol,
+                int & new_mother_col, int & new_mother_acol);
 #endif

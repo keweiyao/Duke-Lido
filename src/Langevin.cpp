@@ -5,6 +5,7 @@
 double const tiny = 1e-10;
 
 double delta_qhat(int pid, double E, double M, double T){
+        if (qhat_params.K<1e-3) return 0.;
         double CR = (pid==21) ? CA : CF;
         int absid = std::abs(pid);
         double EM = 1. + std::log (1+ (E-M)/qhat_params.b/T );
@@ -58,7 +59,7 @@ void Ito_update(int pid, double dt_lab, double M, double T, std::vector<double> 
 	double dt = dt_lab*pIn_cell.t()/pIn.t();
 	// imaging rotating to a frame where pIn lies on z-axis
 	double E0 = pIn_cell.t();
-	double p0 = std::sqrt(E0*E0 - M*M+1e-9);
+	double p0 = std::sqrt(E0*E0 - M*M + 1e-6);
 
 	double kt = qhat(pid, E0, M, T)/2.;
         double kl = qhat_L(pid, E0, M, T);

@@ -6,6 +6,7 @@
 #include "workflow.h"
 #include <sstream>
 #include <unistd.h>
+#include "predefine.h"
 using namespace Pythia8;
 
 class HQGenerator{
@@ -130,9 +131,7 @@ void HQGenerator::Generate(std::vector<particle> & plist, int Neve, double ycut)
                     _p.p0 = p0;
                 _p.p = _p.p0; 
                 _p.weight = weight/8;
-                _p.is_vac = false;
                 _p.is_virtual = false;
-                _p.is_recoil = false;
                 _p.T0 = 0.;
                 _p.Tf = 0.;
                 _p.mfp0 = 0.;

@@ -14,6 +14,12 @@ struct current{
     double chetas, shetas;
     double cs;
 };
+
+struct HadronizeCurrent{
+    fourvec G;
+    double UdotG, phiu, gamma_perp, v_perp, etas;
+};
+
 template <typename T>
 std::string to_string(T value)
 {
@@ -44,14 +50,23 @@ class MyInfo: public fastjet::PseudoJet::UserInfoBase {
 
 void TestSource(
              std::vector<current> jlist,
-             std::string fname);
-void FindJetTower(std::vector<particle> plist, 
+             std::vector<HadronizeCurrent> slist,
+             std::string fname
+     );
+void FindJetTower(
+             std::vector<particle> plist, 
              std::vector<current> jlist,
+             std::vector<HadronizeCurrent> slist,
              std::vector<double> Rs,
              double jetpTMin, 
              double jetyMin, 
              double jetyMax,
              std::string fname, 
-             double sigma_gen);
-
+             double sigma_gen
+     );
+void LeadingParton(
+             std::vector<particle> plist,
+             std::string fname, 
+             double sigma_gen
+     );
 #endif

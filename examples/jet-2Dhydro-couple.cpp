@@ -53,9 +53,6 @@ int main(int argc, char* argv[]){
           ("lido-table,t", 
             po::value<fs::path>()->value_name("PATH")->required(),
            "Lido table path to file")  
-          ("heavy", 
-            po::value<int>()->value_name("INT")->default_value(0,"0"),
-           "require pythia event contains charm(4) or bottom(5) quark")
            ("output,o",
            po::value<fs::path>()->value_name("PATH")->default_value("./"),
            "output file prefix or folder")
@@ -127,16 +124,6 @@ int main(int argc, char* argv[]){
             }
         }
 
-        if (args["heavy"].as<int>() >= 4){
-            if (args["heavy"].as<int>() == 4)
-                LOG_INFO << "Requires Pythia parton level has charm quark(s)";
-            else if (args["heavy"].as<int>() == 5)
-                LOG_INFO << "Requires Pythia parton level has bottom quark(s)";
-            else {
-                throw po::error{"Heavy trigger invalided"};
-                return 1;
-            }
-        }
 
         /// use process id to define filename
         int processid = getpid();
@@ -150,7 +137,8 @@ int main(int argc, char* argv[]){
 
         // Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
-        std::vector<double> TriggerBin({90,100,110,120,130,140,150, 160,180,200,250,300,500});
+        std::vector<double> TriggerBin({9,14,19,26,34,44,56,70,87,107,130,
+        157,187,222,261,305,355,410,472,540,616,699,790,890,1000,1500,2000});
         //std::vector<double> TriggerBin({200,220});
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
@@ -170,14 +158,15 @@ int main(int argc, char* argv[]){
                 std::vector<particle> plist, hlist, thermal_list,
                                       new_plist, pOut_list;
                 std::vector<current> clist;
+                std::vector<HadronizeCurrent> slist;
                 
-                // Initialize parton list from python
-                pythiagen.Generate(plist, args["heavy"].as<int>());
-                output_jet("init.dat", plist);
-                double sigma_gen = pythiagen.sigma_gen()
-                                  / args["pythia-events"].as<int>();
                 /// Initialzie a hydro reader
                 Medium<2> med1(args["hydro"].as<fs::path>().string());
+                // Initialize parton list from python
+                pythiagen.Generate(plist);
+                double sigma_gen = pythiagen.sigma_gen()
+                                  / args["pythia-events"].as<int>();
+                
 
                 // freestream form t=0 to tau=tau0
                 for (auto & p : plist){
@@ -204,8 +193,7 @@ int main(int argc, char* argv[]){
                     for (int i=0; i<Ns; ++i){
                         new_plist.clear();
                         for (auto & p : plist){     
-
-                            if (p.Tf < 0.161) {
+                            if (p.Tf < 0.16) {
                                 new_plist.push_back(p);
                                 continue;       
                             }
@@ -245,25 +233,34 @@ int main(int argc, char* argv[]){
                         plist = new_plist;
                     }
                 }
-
+                for (auto & p : plist)  
+                    LOG_INFO<< "At Final: "<< p.pid << " " << p.col << " " << p.acol;
                 Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 0);
                 for(auto & it : thermal_list){
-                    current J;
-                    double vzgrid = it.x.z()/it.x.t();
+                    HadronizeCurrent J;
+                    double vx = it.vcell[0], vy = it.vcell[1], 
+                           vz = it.vcell[2];
+                    double gamma = 1./std::sqrt(1.-vx*vx-vy*vy-vz*vz);
+                    fourvec Umu{gamma, gamma*vx, gamma*vy, gamma*vz};
                     fourvec pmu{-it.p.t(), -it.p.x(), -it.p.y(), -it.p.z()};
-                    J.p = pmu.boost_to(0, 0, vzgrid);
-                    J.chetas = std::cosh(it.x.rap());
-                    J.shetas = std::sinh(it.x.rap());
-                    J.cs = std::sqrt(.3333);
-                    clist.push_back(J);
+                    J.UdotG = dot(Umu, pmu);
+                    J.G = pmu;
+                    J.gamma_perp = Umu.tau();
+                    J.v_perp = std::sqrt(1.-1./(J.gamma_perp*J.gamma_perp));
+                    J.etas = it.x.rap();
+                    J.phiu = std::atan2(vy,vx);
+                    slist.push_back(J);
                 }
+
                 std::stringstream fheader;
                 fheader << args["output"].as<fs::path>().string() 
                         << processid;
                 std::vector<double> Rs({.2,.4,.6,.8,1.});
-
+                LeadingParton(
+                    hlist, fheader.str(), sigma_gen 
+                );
                 FindJetTower(
-                    hlist, clist,
+                    hlist, clist, slist,
                     Rs, 10,
                     -3, 3,
                     fheader.str(), 

@@ -31,6 +31,7 @@ extern const double CF;
 extern const double CA;
 extern const double CF_over_CA;
 extern const double TR;
+extern int color_count;
 
 // the prefractor for gluon debye mass with Boltzmann statistics
 // mD^2 = 8\pi*(Nc+nf)*alpha_s*T^2 ~ 15*alpha_s*T^2

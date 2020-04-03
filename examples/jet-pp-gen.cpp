@@ -44,9 +44,6 @@ int main(int argc, char* argv[]){
           ("eid,j",
            po::value<int>()->value_name("INT")->default_value(0,"0"),
            "trento event id") 
-          ("heavy", 
-            po::value<int>()->value_name("INT")->default_value(0,"0"),
-           "require pythia event contains charm(4) or bottom(5) quark")
            ("output,o",
            po::value<fs::path>()->value_name("PATH")->default_value("./"),
            "output file prefix or folder")
@@ -86,24 +83,13 @@ int main(int argc, char* argv[]){
             }
         }
 
-        if (args["heavy"].as<int>() >= 4){
-            if (args["heavy"].as<int>() == 4)
-                LOG_INFO << "Requires Pythia parton level has charm quark(s)";
-            else if (args["heavy"].as<int>() == 5)
-                LOG_INFO << "Requires Pythia parton level has bottom quark(s)";
-            else {
-                throw po::error{"Heavy trigger invalided"};
-                return 1;
-            }
-        }
-
         // Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
         /// use process id to define filename
         int processid = getpid();
 
-        std::vector<double> TriggerBin({10,20,40,60,80,120,160,200,300,
-                                        400,500,700,1000,1500,2000});
+        std::vector<double> TriggerBin({5,9,14,19,26,34,44,56,70,87,107,130,
+    157,187,222,261,305,355,410,472,540,616,699,790,890,1000,1200,1500,2000});
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
             PythiaGen pythiagen(
@@ -121,8 +107,9 @@ int main(int argc, char* argv[]){
                 std::vector<particle> plist, hlist, thermal_list,
                                       new_plist, pOut_list;
                 std::vector<current> clist;
+                std::vector<HadronizeCurrent> slist;
                 // Initialize parton list from python
-                pythiagen.Generate(plist, args["heavy"].as<int>());
+                pythiagen.Generate(plist);
                 double sigma_gen = pythiagen.sigma_gen()
                                   / args["pythia-events"].as<int>();
                 
@@ -130,8 +117,11 @@ int main(int argc, char* argv[]){
                 fheader << args["output"].as<fs::path>().string() 
                         << processid;
                 std::vector<double> Rs({.2,.4,.6,.8,1.});
+                LeadingParton(
+                    plist, fheader.str(), sigma_gen 
+                );
                 FindJetTower(
-                    plist, clist,
+                    plist, clist, slist,
                     Rs, 10,
                     -3, 3,
                     fheader.str(), 

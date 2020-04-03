@@ -13,5 +13,6 @@ extern std::uniform_real_distribution<double> dist_costheta;
 extern std::normal_distribution<double> white_noise;
 extern std::gamma_distribution<double> sample_E_over_T;
 int sample_flavor(int Nf);
+bool binary_choice();
 }
 #endif

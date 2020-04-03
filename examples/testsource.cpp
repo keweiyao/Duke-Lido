@@ -95,11 +95,11 @@ int main(int argc, char* argv[]){
             }
            }
         }
-        LOG_INFO << "here3" << total;
         std::stringstream outputfilename1;
         outputfilename1 << "gT.dat";
-        TestSource(clist, outputfilename1.str());
-LOG_INFO << "here4";
+        std::vector<HadronizeCurrent> slist;
+        slist.clear();
+        TestSource(clist, slist, outputfilename1.str());
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

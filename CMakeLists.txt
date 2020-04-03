@@ -200,14 +200,14 @@ add_subdirectory(jet_analysis)
 include_directories(jet_analysis)
 
 
-foreach(App "Lido-TabGen") #analytic-medium
-	add_executable(Lido-TabGen ./examples/Lido-TabGen.cpp)
-	target_link_libraries(Lido-TabGen ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
-	install(TARGETS Lido-TabGen DESTINATION bin)
+foreach(App "Lido-TabGen" "brick")
+	add_executable(${App} ./examples/${App}.cpp)
+	target_link_libraries(${App} ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
+	install(TARGETS ${App} DESTINATION bin)
 endforeach()
 
 if(pythia8)
-foreach(App "jet-2Dhydro-couple" "jet-pp-gen" "testsource")
+foreach(App "jet-2Dhydro-couple" "jet-pp-gen" "jet-energy-flow" "testsource")
 	add_executable(${App} ./examples/${App}.cpp)
 	target_link_libraries(${App} ${LIBRARY_NAME} ${LIBRARY_JETFIND} ${PYTHIA8_LIBRARIES} ${FASTJET_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS ${App} DESTINATION bin)

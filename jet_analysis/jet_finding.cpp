@@ -20,7 +20,8 @@ double inline F(double gamma_perp, double vperp, double dphi, double deta){
 }
 
 void redistribute(
-          std::vector<current> & jlist, 
+          std::vector<current> & SourceList, 
+          std::vector<HadronizeCurrent> & HadronizeList, 
           std::vector<std::vector<fourvec> > & DeltaPmu,
           std::vector<std::vector<double> > & DeltaPT,
           const int _Ny, const int _Nphi, 
@@ -49,7 +50,7 @@ void redistribute(
     }
 
 
-    LOG_INFO << jlist.size() << " sources";
+    LOG_INFO << SourceList.size() << " sources";
     //organizes souce by rapidity
     std::vector<current> clist;
     clist.resize(_Ny);
@@ -62,7 +63,7 @@ void redistribute(
 	clist[iy].p.a[2] = 0.;
 	clist[iy].p.a[3] = 0.;
     }
-    for (auto & s: jlist){
+    for (auto & s: SourceList){
         int i = corp_index(std::atanh(s.shetas/s.chetas), ymin, ymax, dy/coarse_level, _Ny);
         if (i<0) continue;
         clist[i].p = clist[i].p + s.p;
@@ -136,6 +137,16 @@ void redistribute(
                          quad_1d(code, {-.99,.99}, error, 0, 0.1, 20);
             CoarsedPmu[iy][iphi] = CoarsedPmu[iy][iphi] + Nmu0*res;
             CoarsedPT[iy][iphi] += res;
+            /// add hadronization contribution
+            for (auto & p : HadronizeList){
+                double sigma = p.gamma_perp*(std::cosh(y-p.etas)
+                               - p.v_perp*std::cos(phi-p.phiu) );
+                double dpT = 3/(4.*M_PI)
+                            *(4./3.*sigma*p.UdotG - dot(Nmu0, p.G))
+                            /std::pow(sigma, 4);
+                CoarsedPT[iy][iphi] += dpT;
+                CoarsedPmu[iy][iphi] = CoarsedPmu[iy][iphi] + Nmu0*dpT;
+            }
         }
     }
     // Interpolate the coarse grid to finer grid
@@ -167,7 +178,8 @@ void redistribute(
 }
 
 void FindJetTower(std::vector<particle> plist, 
-             std::vector<current> jlist,
+             std::vector<current> SourceList,
+             std::vector<HadronizeCurrent> HadronizeList,
              std::vector<double> Rs,
              double jetpTMin, 
              double jetyMin, 
@@ -205,9 +217,10 @@ void FindJetTower(std::vector<particle> plist,
         PTtowers[ieta][iphi] += p.p.xT();
     }
     // put soft energy-momentum deposition into the towers
-    if (jlist.size()>0){
+    if (SourceList.size()>0){
     redistribute(
-          jlist, 
+          SourceList, 
+          HadronizeList,
           Pmutowers,
           PTtowers,
           Neta, Nphi,
@@ -366,7 +379,8 @@ void FindJetTower(std::vector<particle> plist,
 }
 
 void TestSource(
-             std::vector<current> jlist,
+             std::vector<current> SourceList,
+             std::vector<HadronizeCurrent> HadronizeList,
              std::string fname) {
     // contruct four momentum tower in the eta-phi plane
     int Neta = 43, Nphi = 48;
@@ -395,9 +409,10 @@ void TestSource(
             T0 = T0 + it;
         }
     }
-    if (jlist.size() >0){
+    if (SourceList.size() >0){
     redistribute(
-          jlist, 
+          SourceList, 
+          HadronizeList,
           towers,
           dpTarray,
           Neta, Nphi,
@@ -426,3 +441,35 @@ void TestSource(
     }   
 }
 
+
+void LeadingParton(
+             std::vector<particle> plist,
+             std::string fheader, 
+             double sigma_gen
+     ){
+    std::stringstream filename_pions;
+    filename_pions << fheader << "-pi.dat";
+    std::ofstream fpi(filename_pions.str(), std::ios_base::app);
+    std::stringstream filename_D;
+    filename_D << fheader << "-D.dat";
+    std::ofstream fD(filename_D.str(), std::ios_base::app);
+    std::stringstream filename_B;
+    filename_B << fheader << "-B.dat";
+    std::ofstream fB(filename_B.str(), std::ios_base::app);
+
+    for (auto & p : plist){
+        int pid = std::abs(p.pid);
+        if (pid==111 || pid == 211) 
+            fpi << pid << " " << p.p.xT() << " " << p.p.phi() << " " 
+               << p.p.rap() << " " << std::sqrt(p.p.m2()) << " " 
+               << sigma_gen << std::endl;
+        if (pid==411 || pid == 421 || pid == 413 || pid == 423) 
+            fD << pid << " " << p.p.xT() << " " << p.p.phi() << " " 
+               << p.p.rap() << " " << std::sqrt(p.p.m2()) << " " 
+               << sigma_gen << std::endl;
+        if (pid==511 || pid == 521 || pid == 513 || pid == 523) 
+            fB << pid << " " << p.p.xT() << " " << p.p.phi() << " " 
+               << p.p.rap() << " " << std::sqrt(p.p.m2()) << " " 
+               << sigma_gen << std::endl;
+    }
+}

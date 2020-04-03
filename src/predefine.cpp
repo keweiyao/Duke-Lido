@@ -18,7 +18,7 @@ const double c16pi2 = 16.*M_PI*M_PI;
 const double c64d9pi2 = 64./9.*M_PI*M_PI;
 const double c256pi4 = 256.*std::pow(M_PI, 4);
 const double fmc_to_GeV_m1 = 5.076;
-
+int color_count = -1;
 // number of color=3 (3*3-1 = 8 gluons), number of flavor=3, (u,d,s quark)
 const int Nc = 3, nf = 3;
 const double CF = 4./3.;
@@ -45,7 +45,7 @@ double scale;
 double afix;
 double Rvac;
 Debye_mass * t_channel_mD2;
-const double LPM_prefactor = 0.75; // to match analytic calculation, 0.75 by default
+const double LPM_prefactor = 1.0; // to match analytic calculation, 0.75 by default
 
 double Lido_Ecut;
 int time_type;

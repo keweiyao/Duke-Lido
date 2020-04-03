@@ -6,7 +6,7 @@ namespace Srandom{
 int getEnvSeed(){
     char *val = std::getenv("lseed");
     int seed = (val == NULL) ? -1 : std::stoi(std::string(val));
-    std::cout << "Lido seed = " << seed;
+    std::cout << "Lido seed = " << seed << std::endl;
     return seed;
 }
 std::mt19937 gen(  (getEnvSeed() < 0) ? std::random_device{}() : getEnvSeed());
@@ -26,6 +26,10 @@ int sample_flavor(int Nf){
         return flavor;
     else 
         return -flavor;
+}
+bool binary_choice(){
+    if (gen()%2==0) return true;
+    else return false;
 }
 
 }

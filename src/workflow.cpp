@@ -192,26 +192,22 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
 // split=1: q->q+g, colors = 1 - x + CF/CA * x^2
 // split=2: g->g+g, colors = 1 - x + x^2
 // split=3: g->q+qbar, colors = 1 - x*CA/CF + x^2*CA/CF
-double formation_time(fourvec p, fourvec k, double T, int split)
-{
+double formation_time(fourvec p, fourvec k, double T, int split) {
     double E0 = p.t();
     double x = k.t() / E0;
     double mg2 = t_channel_mD2->get_mD2(T) / 2.,
            mass_sqrs = 0.0, colors = 1.;
-    if (split == 1)
-    {
+    if (split == 1) {
         // q --> q + g
         colors = 1. - x + CF / CA * x * x;
         mass_sqrs = x * x * dot(p, p) + (1. - x) * mg2;
     }
-    if (split == 2)
-    {
+    if (split == 2) {
         // g --> g + g
         colors = 1. - x + x * x;
         mass_sqrs = (1. - x + x * x) * mg2;
     }
-    if (split == 3)
-    {
+    if (split == 3) {
         // g --> q + qbar
         colors = 1. - x * CA / CF + x * x * CA / CF;
         mass_sqrs = (CF/CA - x + x * x) * mg2;
@@ -244,9 +240,10 @@ double compute_realtime_to_propagate(double dt, fourvec x, fourvec p){
     }
 }
 
+std::ofstream f("stat.dat");
 int update_particle_momentum_Lido(
     double dt_input, double temp, std::vector<double> v3cell,
-    particle & pIn, std::vector<particle> &pOut_list){
+    particle & pIn, std::vector<particle> & pOut_list){
 
     auto p00 = pIn.p;
     pOut_list.clear();
@@ -259,14 +256,18 @@ int update_particle_momentum_Lido(
     pIn.freestream(dt_for_pIn);
     // Delete soft partons below a energy cut from the hard parton list
     if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut*temp
-        && (std::abs(pIn.pid)!=4 || std::abs(pIn.pid)!=5)
-	){
+        && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
+            std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) ){
         pIn.radlist.clear();
         return pOut_list.size();
     }
     // Freeze particles below Tc
-    if (temp < 0.161){
+    if (temp < 0.16){
         pIn.radlist.clear();
+        pOut_list.push_back(pIn);
+        return pOut_list.size();
+    }
+    if (!((pIn.pid==21) || (std::abs(pIn.pid)<=5))){
         pOut_list.push_back(pIn);
         return pOut_list.size();
     }
@@ -280,10 +281,8 @@ int update_particle_momentum_Lido(
 
     // Apply diffusion and update particle momentum
     fourvec pnew;
-    //if (pIn.is_virtual){
-        Ito_update(pIn.pid, dt_for_pIn, pIn.mass, temp, v3cell, pIn.p, pnew);
-        pIn.p = pnew;
-    //}
+    Ito_update(pIn.pid, dt_for_pIn, pIn.mass, temp, v3cell, pIn.p, pnew);
+    pIn.p = pnew;
     // Apply large angle scattering, and diffusion induced radiation
     auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
     double dt_cell = dt_for_pIn / pIn.p.t() * p_cell.t();
@@ -364,8 +363,8 @@ int update_particle_momentum_Lido(
             }
         }
     }
-    //LOG_INFO<<"Lido channel: "<<channel;
-
+    double mD2 = t_channel_mD2->get_mD2(temp);
+    double mD = std::sqrt(mD2);
     // If a scattering happens:
     if (channel >= 0){
         if (channel >= AllProcesses[absid].size()){
@@ -405,14 +404,21 @@ int update_particle_momentum_Lido(
 
         // elastic process changes the momentum immediately
         if (channel == 0 || channel == 1){
-            //if (pIn.is_virtual){
-                pIn.p = FS[0];
-            //}
-            double tempid;
-            if (channel == 1) tempid = 21;
-            else tempid = Srandom::sample_flavor(3);
-            particle ep = produce_parton(tempid, pIn, FS[1], pIn.x, temp, v3cell, false, true);
-            pOut_list.push_back(ep);
+            if (!pIn.is_virtual){
+                 pIn.p = FS[0];
+		    int id = (channel==0) ? (Srandom::sample_flavor(3)) : 21;
+		    int col=-100, acol=-100, mcol=-100, macol=-100;
+		    SampleFlavorAndColor(
+		        temp_pid, pIn.col, pIn.acol, channel,
+		        id, col, acol, mcol, macol);
+		    particle ep = produce_parton(id, FS[1], pIn, false);
+		    ep.col = col; 
+		    ep.acol = acol;
+		    pIn.col = mcol;
+		    pIn.acol = macol;
+		    pOut_list.push_back(ep);
+           }
+           else pIn.p = FS[0]*(pIn.p.t()/FS[0].t());
         }
         // inelastic process takes a finite time to happen
         if (channel == 2 || channel == 3){
@@ -421,34 +427,34 @@ int update_particle_momentum_Lido(
             // given by the incoherent calculation, which will be
             // dropped (suppressed) according to the LPM effect
             // only handle > mD particles
-            double mD2 = t_channel_mD2->get_mD2(temp);
-            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3*temp) { 
-		    particle vp = produce_parton(21, pIn, FS[2], x0, temp, v3cell);
-		    // The local 2->2 mean-free-path is estimated with
-		    // the qhat_hard integrate from the 2->2 rate
-		    double xfrac = vp.p.t() / pIn.p.t();
-		    double local_qhat = 0.;
-		    double vp_cell = vp.p.boost_to(v3cell[0], 
-		                                   v3cell[1], v3cell[2]).t();
-		    double boost_factor = vp.p.t() / vp_cell;
-		    BOOST_FOREACH (Process &r, AllProcesses[21]){
-		        switch (r.which()){
-		        case 0:
-		            if (boost::get<Rate22>(r).IsActive()){
-		                tensor A = boost::get<Rate22>(r).GetSecondM(
-		                    {vp_cell, temp});
-		                local_qhat += A.T[1][1] + A.T[2][2];
-		            }
-		            break;
-		        default:
-		            break;
-		        }
-		    }
-		    
-		    // estimate mfp in the lab frame
-		    vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
+            
+            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > mD) { 
+                particle vp = produce_parton(21, FS[2], pIn, true);
+                // The local 2->2 mean-free-path is estimated with
+                // the qhat_hard integrate from the 2->2 rate
+                double xfrac = vp.p.t() / pIn.p.t();
+                double local_qhat = 0.;
+                double vp_cell = vp.p.boost_to(v3cell[0], 
+                                           v3cell[1], v3cell[2]).t();
+                double boost_factor = vp.p.t() / vp_cell;
+                BOOST_FOREACH (Process &r, AllProcesses[21]){
+                switch (r.which()){
+                case 0:
+                    if (boost::get<Rate22>(r).IsActive()){
+                        tensor A = boost::get<Rate22>(r).GetSecondM(
+                            {vp_cell, temp});
+                        local_qhat += A.T[1][1] + A.T[2][2];
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            
+            // estimate mfp in the lab frame
+            vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
 
-		    pIn.radlist.push_back(vp);
+            pIn.radlist.push_back(vp);
             }
         }
         if (channel == 4 || channel == 5){
@@ -461,12 +467,11 @@ int update_particle_momentum_Lido(
             // given by the incoherent calculation, which will be
             // dropped (suppressed) according to the LPM effect
             // only for E>mD
-            double mD2 = t_channel_mD2->get_mD2(temp);
-            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3*temp) {
-		    particle vp = produce_parton(21, pIn, FS[1], x0, temp, v3cell);
-		    // estimate mfp in the lab frame
-		    vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
-		    pIn.radlist.push_back(vp);
+            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > mD) {
+                particle vp = produce_parton(21, FS[1], pIn, true);
+                // estimate mfp in the lab frame
+                vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
+                pIn.radlist.push_back(vp);
             }
         }
         if (channel == 7){
@@ -478,44 +483,44 @@ int update_particle_momentum_Lido(
             // This should only happen for gluon
             // gluon splits to q+qbar, pid changing!!
             // only for E>mD
-            double mD2 = t_channel_mD2->get_mD2(temp);
-            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3*temp) {
-		    particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[2], x0, temp, v3cell);
-		    // The local 2->2 mean-free-path is estimated with
-		    // the qhat_hard integrate from the 2->2 rate
-		    double xfrac = vp.p.t() / pIn.p.t();
-		    double local_qhat = 0.;
-		    double vp_cell = vp.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
-		    double boost_factor = vp.p.t() / vp_cell;
-		    BOOST_FOREACH (Process &r, AllProcesses[21]){
-		        switch (r.which()){
-		        case 0:
-		            if (boost::get<Rate22>(r).IsActive()){
-		                tensor A = boost::get<Rate22>(r).GetSecondM(
-		                    {vp_cell, temp});
-		                local_qhat += A.T[1][1] + A.T[2][2];
-		            }
-		            break;
-		        default:
-		            break;
-		        }
-		    }
-		    // estimate mfp in the lab frame
-		    vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
-		    pIn.radlist.push_back(vp);
+            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > mD) {
+            particle vp = produce_parton(
+                               Srandom::sample_flavor(3), FS[2], pIn, true);
+            // The local 2->2 mean-free-path is estimated with
+            // the qhat_hard integrate from the 2->2 rate
+            double xfrac = vp.p.t() / pIn.p.t();
+            double local_qhat = 0.;
+            double vp_cell = vp.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
+            double boost_factor = vp.p.t() / vp_cell;
+            BOOST_FOREACH (Process &r, AllProcesses[21]){
+                switch (r.which()){
+                case 0:
+                    if (boost::get<Rate22>(r).IsActive()){
+                        tensor A = boost::get<Rate22>(r).GetSecondM(
+                            {vp_cell, temp});
+                        local_qhat += A.T[1][1] + A.T[2][2];
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            // estimate mfp in the lab frame
+            vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
+            pIn.radlist.push_back(vp);
             }
         }
         if (channel == 10){
             // This should only happen for gluon
             // gluon splits to q+qbar, pid changing!!
             // only for E>mD
-            double mD2 = t_channel_mD2->get_mD2(temp);
-            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > 3*temp) {
-		    particle vp = produce_parton(Srandom::sample_flavor(3), pIn, FS[1], x0, temp, v3cell);
-		    
-		    // estimate mfp in the lab frame
-		    vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
-		    pIn.radlist.push_back(vp);
+            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > mD) {
+                particle vp = produce_parton(
+                                Srandom::sample_flavor(3), FS[1], pIn, true);
+            
+                // estimate mfp in the lab frame
+                vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
+                pIn.radlist.push_back(vp);
             }
         }
     }
@@ -531,76 +536,63 @@ int update_particle_momentum_Lido(
                 split_type = 2; // g --> g + g
             if (pIn.pid == 21 && it->pid != 21)
                 split_type = 3; // g --> q + qbar
-
-
-            double taun = formation_time(it->mother_p, it->p, temp, split_type);
+            double taun = formation_time(it->mother_p, it->p, 
+                                         temp, split_type);
             std::vector<particle> pnew_Out;
 
             // In the local (adiabatic LPM) mode,
             // use local information to determine the number of rescatterings
             if (Adiabatic_LPM){
                 do{
-                   update_particle_momentum_Lido(dt_input, temp, v3cell, *it, pnew_Out);
-                    taun = formation_time(it->mother_p, it->p, temp, split_type);
+                   update_particle_momentum_Lido(
+                           dt_input, temp, v3cell, *it, pnew_Out);
+                   taun = formation_time(
+                           it->mother_p, it->p, temp, split_type);
                 }while(it->x.t() - it->x0.t() <= taun);
                 // once finished, reset its x to where it is produced
                 it->x = it->x0;
             }
-
             // update the partilce for this time step
-            update_particle_momentum_Lido(dt_input, temp, v3cell, *it, pnew_Out);
+            update_particle_momentum_Lido(
+                           dt_input, temp, v3cell, *it, pnew_Out);
 
-            if (it->x.t() - it->x0.t() <= taun 
-                && !Adiabatic_LPM ) {
+            if (it->x.t() - it->x0.t() <= taun && !Adiabatic_LPM ) {
                 it++;
             }
             else{
                 // if formed, apply LPM suppression
                 double Acceptance = 0.;
-                if (!it->is_vac){
-                    // for medium-induced radiation
-                    // 1): a change of running-coupling from elastic broadening
-                    double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
-                    double kt2n = measure_perp(
-                                   pIn.p*(it->mother_p.t()/pIn.p.t()),
-                                   it->p*(it->p0.t()/it->p.t()) 
-                                  ).pabs2();
+                // for medium-induced radiation
+                // 1): a change of running-coupling from elastic broadening
+                double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
+                double kt2n = measure_perp(
+                               pIn.p*(it->mother_p.t()/pIn.p.t()),
+                               it->p*(it->p0.t()/it->p.t()) 
+                              ).pabs2();
                 
-                    double Running = alpha_s(kt2n, it->T0) / alpha_s(kt20, it->T0);
-                    // 2): a dead-cone approximation for massive particles
-                    double theta2 = kt2n / std::pow(it->p.t(), 2);
-                    double thetaM2 = std::pow(pIn.mass / it->mother_p.t(), 2);
-                    double DeadCone = std::pow(theta2 / (theta2 + thetaM2), 2);
-                    // 3): an NLL-inspired suppression factor for the LPM effect
-                    double mD2 = t_channel_mD2->get_mD2(temp);
-                    double lnQ2_1 = std::log(1. + taun / it->mfp0);
-                    double lnQ2_0 = std::log(1. + 6 * it->p.t() * temp / mD2);
-                    double log_factor = std::sqrt(lnQ2_1 / lnQ2_0);
-                    double LPM = std::min(it->mfp0 / taun * log_factor, 1.);
-                    // The final rejection factor
-                    Acceptance = LPM * Running * DeadCone;
-                }
-                else{
-                    // for vacuum-like radiaiton formed inside the medium
-                    double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
-                    double Deltakt2 = measure_perp(it->mother_p, it->p - it->p0).pabs2();
-                    if (Deltakt2 > Rvac * kt20)
-                        Acceptance = 0.0;
-                    else
-                        Acceptance = 1.0;
-                }
+                double Running = alpha_s(kt2n, it->T0) / alpha_s(kt20, it->T0);
+                // 2): a dead-cone approximation for massive particles
+                double theta2 = kt2n / std::pow(it->p.t(), 2);
+                double thetaM2 = std::pow(pIn.mass / it->mother_p.t(), 2);
+                double DeadCone = std::pow(theta2 / (theta2 + thetaM2), 2);
+                // 3): an NLL-inspired suppression factor for the LPM effect
+                double mD2 = t_channel_mD2->get_mD2(temp);
+                double lnQ2_1 = std::log(1. + taun / it->mfp0);
+                double lnQ2_0 = std::log(1. + 6 * it->p.t() * temp / mD2);
+                double log_factor = std::sqrt(lnQ2_1 / lnQ2_0);
+                double LPM = std::min(it->mfp0 / taun * log_factor, 1.);
+                // The final rejection factor
+                Acceptance = LPM * Running * DeadCone;
+
                 if (Srandom::rejection(Srandom::gen) < Acceptance){
                     double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
                     double kt2n = measure_perp(
-                                   pIn.p*(it->mother_p.t()/pIn.p.t()),
-                                   it->p*(it->p0.t()/it->p.t()) 
-                                  ).pabs2();
+                                   pIn.p,it->p).pabs2();
                     // accepted branching causes physical effects
                     // momentum change, and put back on shell
-                    double xx = it->p0.t()/it->mother_p.t();
-                    it->p = it->p*(pIn.p.t()*xx/it->p.t());
                     pIn.p = pIn.p - it->p;
                     pIn.Q0 = std::sqrt(kt2n);
+                    it->Q0 = std::sqrt(kt2n);
                     
                     pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass + pIn.p.pabs2());
                     // for g -> q + qbar, pid change
@@ -609,6 +601,16 @@ int update_particle_momentum_Lido(
                         pIn.pid = -it->pid;
                         pIn.radlist.clear();
                     }
+                    int col=-100, acol=-100, mcol=-100, macol=-100;
+
+                    SampleFlavorAndColor(temp_pid, pIn.col,
+                                         pIn.acol, 2,
+                                         21, col, acol, mcol, macol);
+                    it->col = col; 
+                    it->acol = acol;
+                    pIn.col = mcol;
+                    pIn.acol = macol;
+                    f << it->p.t() << " " << it->p.xT() << " " << pIn.p.t() <<" " << pIn.x.t() << std::endl;
                     // label it as real and put it in output particle list
                     it->is_virtual = false;
                     pOut_list.push_back(*it);
@@ -628,55 +630,150 @@ int update_particle_momentum_Lido(
     return pOut_list.size();
 }
 
-particle produce_parton(int pid, particle &mother_parton, fourvec vp0,
-                fourvec vx0, double T, std::vector<double> &v3cell,
-                bool is_virtual, bool is_recoil){
+void SampleFlavorAndColor(int mother_id, int mother_col, int mother_acol, 
+                int channel, 
+                int daughter_id, int & daughter_col, int & daughter_acol,
+                int & new_mother_col, int & new_mother_acol) {
+    if (mother_id == 21){
+    
+        if (channel==0) {
+            int color = color_count; 
+            color_count ++;
+            if (daughter_id > 0){
+                daughter_col = color;
+                daughter_acol = 0;
+                new_mother_col = mother_col;
+                new_mother_acol = color;
+            } 
+            else {
+                daughter_col = 0;
+                daughter_acol = color;
+                new_mother_col = color;
+                new_mother_acol = mother_acol;
+            }
+        }
+        if (channel==1) {
+            int color1 = color_count; 
+            color_count ++;
+            int color2 = color_count; 
+            color_count ++;
+            daughter_col = color1;
+            daughter_acol = color2;
+            if (Srandom::binary_choice()) {
+                new_mother_col = mother_col;
+                new_mother_acol = color1;
+            }
+            else {
+                new_mother_col = color2;
+                new_mother_acol = mother_acol;
+            }
+        }
+        if (channel==2 || channel==3 || channel == 6) {
+            int color = color_count;
+            color_count ++;
+            if (Srandom::binary_choice()) {
+                new_mother_col = mother_col;
+                new_mother_acol = color;
+                daughter_col = color;
+                daughter_acol = mother_acol;
+            }
+            else {
+                new_mother_col = color;
+                new_mother_acol = mother_acol;
+                daughter_col = mother_col;;
+                daughter_acol = color;
+            }
+        }
+    }
+
+    if (std::abs(mother_id) <= 5){
+        if (channel==0) {
+            int color = color_count; 
+            color_count ++; 
+            if (daughter_id > 0 && mother_id > 0){
+                daughter_col = mother_col;
+                daughter_acol = 0;
+                new_mother_col = color;
+                new_mother_acol = 0;
+            } 
+            if (daughter_id < 0 && mother_id < 0){
+                daughter_col = 0;
+                daughter_acol = mother_acol;
+                new_mother_col = 0;
+                new_mother_acol = color;
+            } 
+            if (daughter_id > 0 && mother_id < 0){
+                daughter_col = color;
+                daughter_acol = 0;
+                new_mother_col = 0;
+                new_mother_acol = color;
+            } 
+            if (daughter_id < 0 && mother_id > 0){
+                daughter_col = 0;
+                daughter_acol = color;
+                new_mother_col = color;
+                new_mother_acol = 0;
+            } 
+        }
+        if (channel==1) {
+            int color1 = color_count; 
+            color_count ++;
+            int color2 = color_count; 
+            color_count ++;
+            daughter_col = color1;
+            daughter_acol = color2;
+            if (mother_id<0) {
+                new_mother_col = 0;
+                new_mother_acol = color1;
+            }
+            else {
+                new_mother_col = color2;
+                new_mother_acol = 0;
+            }
+        }
+        if (channel==2 || channel==3 || channel == 6) {
+            int color = color_count;
+            color_count ++;
+            if (mother_id<0) {
+                new_mother_col = 0;
+                new_mother_acol = color;
+                daughter_col = color;
+                daughter_acol = mother_acol;
+            }
+            else {
+                new_mother_col = color;
+                new_mother_acol = 0;
+                daughter_col = mother_col;
+                daughter_acol = color;
+            }
+        }
+    }
+    
+}
+
+particle produce_parton(int pid, fourvec pmu, particle & mother, bool is_virtual){
     particle vp;
     vp.pid = pid;
     vp.mass = 0.0;
-    vp.weight = mother_parton.weight;
-    vp.p0 = vp0;
-    vp.p = vp.p0;
-    vp.x0 = vx0;
-    vp.x = vp.x0;
-    vp.mother_p = mother_parton.p;
-    vp.T0 = T;
-    vp.is_vac = false;
+    vp.weight = mother.weight;
+    vp.p0 = pmu;
+    vp.p = pmu;
+    vp.x0 = mother.x;
+    vp.x = mother.x;
+    vp.mother_p = mother.p;
+    vp.T0 = mother.Tf;
     vp.is_virtual = is_virtual;
-    vp.is_recoil = is_recoil;
     vp.vcell.resize(3);
-    vp.vcell[0] = v3cell[0];
-    vp.vcell[1] = v3cell[1];
-    vp.vcell[2] = v3cell[2];
+    vp.vcell[0] = mother.vcell[0];
+    vp.vcell[1] = mother.vcell[1];
+    vp.vcell[2] = mother.vcell[2];
+    vp.col=-100;
+    vp.acol=-100;
     return vp;
 }
 
-void output(const std::vector<particle> plist, std::string fname){
-    int i = 0;
-    std::ofstream f(fname);
-    for (auto &p : plist)
-    {
-        f << std::setw(10) << std::setfill(' ') << i << "  "      // particle index, i10,2x
-          << std::setw(10) << std::setfill(' ') << p.pid << "  "; // particle id, i10,2x
-        f << p.p.x() << "  "
-          << p.p.y() << "  "
-          << p.p.z() << "  "
-          << p.p.t() << "  "
-          << p.mass << "  "
-          << p.x.x() / fmc_to_GeV_m1 << "  "
-          << p.x.y() / fmc_to_GeV_m1 << "  "
-          << p.x.z() / fmc_to_GeV_m1 << "  "
-          << p.x.t() / fmc_to_GeV_m1 << " "
-          << p.x0.x() / fmc_to_GeV_m1 << "  "
-          << p.x0.y() / fmc_to_GeV_m1 << "  "
-          << p.x0.z() / fmc_to_GeV_m1 << "  "
-          << p.x0.t() / fmc_to_GeV_m1 << "\n";
-        i++;
-    }
-}
-
 void output_oscar(const std::vector<particle> plist,
-                                    int abspid, std::string fname){
+                  int abspid, std::string fname){
     // output OSCAR Format
     int Nparticles = 0;
     for (auto &p : plist)
@@ -717,24 +814,4 @@ void output_oscar(const std::vector<particle> plist,
         }
         i++;
     }
-}
-
-double mean_pT(const std::vector<particle> plist){
-    double W = 0., wsum_pT = 0.;
-    for (auto &p : plist)
-    {
-        wsum_pT += p.weight * std::sqrt(p.p.x() * p.p.x() + p.p.y() * p.p.y());
-        W += p.weight;
-    }
-    return wsum_pT / W;
-}
-
-double mean_E(const std::vector<particle> plist){
-    double W = 0., wsum_pT = 0.;
-    for (auto &p : plist)
-    {
-        wsum_pT += p.weight * p.p.t();
-        W += p.weight;
-    }
-    return wsum_pT / W;
 }
