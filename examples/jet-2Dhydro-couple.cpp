@@ -137,8 +137,10 @@ int main(int argc, char* argv[]){
 
         // Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
-        std::vector<double> TriggerBin({9,14,19,26,34,44,56,70,87,107,130,
-        157,187,222,261,305,355,410,472,540,616,699,790,890,1000,1500,2000});
+        std::vector<double> TriggerBin({9,14,19,26,34,44,56,70,87,100,110,120,130,140,150,
+        160,170,187,222,261,305,355,410,472,540,616,699,790,890,1000,1500,2000});
+        //std::vector<double> TriggerBin({34,70,87,107,130,
+        //157,187,222,261,305,355,410,472,540,616,699,790,890,1000,1500,2000});
         //std::vector<double> TriggerBin({200,220});
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
@@ -170,6 +172,7 @@ int main(int argc, char* argv[]){
 
                 // freestream form t=0 to tau=tau0
                 for (auto & p : plist){
+                    p.tau_i=0.;
                     p.Tf = 0.161;
                     if (p.x.tau() < med1.get_tauH()){
                         p.freestream(
@@ -233,14 +236,19 @@ int main(int argc, char* argv[]){
                         plist = new_plist;
                     }
                 }
-                for (auto & p : plist)  
-                    LOG_INFO<< "At Final: "<< p.pid << " " << p.col << " " << p.acol;
                 Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 0);
                 for(auto & it : thermal_list){
-                    HadronizeCurrent J;
-                    double vx = it.vcell[0], vy = it.vcell[1], 
+                    //HadronizeCurrent J;
+                    double vx = it.vcell[0], 
+                           vy = it.vcell[1], 
                            vz = it.vcell[2];
-                    double gamma = 1./std::sqrt(1.-vx*vx-vy*vy-vz*vz);
+                            current J; 
+                            J.p = it.p.boost_to(0, 0, vz)*(-1.);
+                            J.chetas = std::cosh(it.x.rap());
+                            J.shetas = std::sinh(it.x.rap());
+                            J.cs = std::sqrt(.3333);
+                            clist.push_back(J);  
+                    /*double gamma = 1./std::sqrt(1.-vx*vx-vy*vy-vz*vz);
                     fourvec Umu{gamma, gamma*vx, gamma*vy, gamma*vz};
                     fourvec pmu{-it.p.t(), -it.p.x(), -it.p.y(), -it.p.z()};
                     J.UdotG = dot(Umu, pmu);
@@ -249,16 +257,18 @@ int main(int argc, char* argv[]){
                     J.v_perp = std::sqrt(1.-1./(J.gamma_perp*J.gamma_perp));
                     J.etas = it.x.rap();
                     J.phiu = std::atan2(vy,vx);
-                    slist.push_back(J);
+                    slist.push_back(J);*/
                 }
 
                 std::stringstream fheader;
                 fheader << args["output"].as<fs::path>().string() 
                         << processid;
-                std::vector<double> Rs({.2,.4,.6,.8,1.});
+                std::vector<double> Rs({.2,.4,.6,.8, 1.});
                 LeadingParton(
                     hlist, fheader.str(), sigma_gen 
                 );
+                //clist.clear();
+                //slist.clear();
                 FindJetTower(
                     hlist, clist, slist,
                     Rs, 10,

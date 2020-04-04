@@ -240,7 +240,6 @@ double compute_realtime_to_propagate(double dt, fourvec x, fourvec p){
     }
 }
 
-std::ofstream f("stat.dat");
 int update_particle_momentum_Lido(
     double dt_input, double temp, std::vector<double> v3cell,
     particle & pIn, std::vector<particle> & pOut_list){
@@ -283,6 +282,7 @@ int update_particle_momentum_Lido(
     fourvec pnew;
     Ito_update(pIn.pid, dt_for_pIn, pIn.mass, temp, v3cell, pIn.p, pnew);
     pIn.p = pnew;
+    //if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
     // Apply large angle scattering, and diffusion induced radiation
     auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
     double dt_cell = dt_for_pIn / pIn.p.t() * p_cell.t();
@@ -404,8 +404,8 @@ int update_particle_momentum_Lido(
 
         // elastic process changes the momentum immediately
         if (channel == 0 || channel == 1){
-            if (!pIn.is_virtual){
-                 pIn.p = FS[0];
+            pIn.p = FS[0];
+            if (!pIn.is_virtual){  
 		    int id = (channel==0) ? (Srandom::sample_flavor(3)) : 21;
 		    int col=-100, acol=-100, mcol=-100, macol=-100;
 		    SampleFlavorAndColor(
@@ -418,7 +418,6 @@ int update_particle_momentum_Lido(
 		    pIn.acol = macol;
 		    pOut_list.push_back(ep);
            }
-           else pIn.p = FS[0]*(pIn.p.t()/FS[0].t());
         }
         // inelastic process takes a finite time to happen
         if (channel == 2 || channel == 3){
@@ -565,10 +564,7 @@ int update_particle_momentum_Lido(
                 // for medium-induced radiation
                 // 1): a change of running-coupling from elastic broadening
                 double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
-                double kt2n = measure_perp(
-                               pIn.p*(it->mother_p.t()/pIn.p.t()),
-                               it->p*(it->p0.t()/it->p.t()) 
-                              ).pabs2();
+                double kt2n = measure_perp(pIn.p, it->p).pabs2();
                 
                 double Running = alpha_s(kt2n, it->T0) / alpha_s(kt20, it->T0);
                 // 2): a dead-cone approximation for massive particles
@@ -585,18 +581,18 @@ int update_particle_momentum_Lido(
                 Acceptance = LPM * Running * DeadCone;
 
                 if (Srandom::rejection(Srandom::gen) < Acceptance){
-                    double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
-                    double kt2n = measure_perp(
-                                   pIn.p,it->p).pabs2();
                     // accepted branching causes physical effects
                     // momentum change, and put back on shell
-                    pIn.p = pIn.p - it->p;
-                    pIn.Q0 = std::sqrt(kt2n);
+                    
+                    //double xx = it->p0.t()/it->mother_p.t();
+                    
+                    //it->p = pIn.p*xx;
+                    pIn.p = pIn.p - it->p;//*(1.-xx);
                     it->Q0 = std::sqrt(kt2n);
+                    pIn.Q0 = std::sqrt(kt2n+pIn.Q00*pIn.Q00);
                     
                     pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass + pIn.p.pabs2());
                     // for g -> q + qbar, pid change
-                    // also discard all other pre-splitting: causes higher-order difference
                     if (split_type == 3){
                         pIn.pid = -it->pid;
                         pIn.radlist.clear();
@@ -610,7 +606,6 @@ int update_particle_momentum_Lido(
                     it->acol = acol;
                     pIn.col = mcol;
                     pIn.acol = macol;
-                    f << it->p.t() << " " << it->p.xT() << " " << pIn.p.t() <<" " << pIn.x.t() << std::endl;
                     // label it as real and put it in output particle list
                     it->is_virtual = false;
                     pOut_list.push_back(*it);
@@ -769,6 +764,7 @@ particle produce_parton(int pid, fourvec pmu, particle & mother, bool is_virtual
     vp.vcell[2] = mother.vcell[2];
     vp.col=-100;
     vp.acol=-100;
+    vp.tau_i = -1.;
     return vp;
 }
 

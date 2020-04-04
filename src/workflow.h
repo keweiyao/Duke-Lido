@@ -9,7 +9,7 @@
 struct particle{
 	// mass, x, p, t, all in units of [GeV^a]
 	int pid, col, acol;
-	double mass, weight, tau_i, Q0;
+	double mass, weight, tau_i, Q0, Q00;
 	bool is_virtual;
 	
 	double T0, mfp0, Tf; // production temperature, local mfp
