@@ -239,7 +239,7 @@ double compute_realtime_to_propagate(double dt, fourvec x, fourvec p){
       exit(-1);
     }
 }
-
+//std::ofstream f("stat.dat");
 int update_particle_momentum_Lido(
     double dt_input, double temp, std::vector<double> v3cell,
     particle & pIn, std::vector<particle> & pOut_list){
@@ -258,7 +258,8 @@ int update_particle_momentum_Lido(
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) ){
         pIn.radlist.clear();
-        return pOut_list.size();
+        pOut_list.push_back(pIn);
+        return -1;
     }
     // Freeze particles below Tc
     if (temp < 0.16){
@@ -564,13 +565,17 @@ int update_particle_momentum_Lido(
                 // for medium-induced radiation
                 // 1): a change of running-coupling from elastic broadening
                 double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
-                double kt2n = measure_perp(pIn.p, it->p).pabs2();
+                double kt2n = measure_perp(
+                          pIn.p*(it->mother_p.t()/pIn.p.t()), 
+                          it->p*(it->p0.t()/it->p.t())
+                         ).pabs2();
                 
                 double Running = alpha_s(kt2n, it->T0) / alpha_s(kt20, it->T0);
                 // 2): a dead-cone approximation for massive particles
                 double theta2 = kt2n / std::pow(it->p.t(), 2);
                 double thetaM2 = std::pow(pIn.mass / it->mother_p.t(), 2);
-                double DeadCone = std::pow(theta2 / (theta2 + thetaM2), 2);
+                double DeadCone = std::min(
+                       std::pow(theta2 / (theta2 + thetaM2), 2), 1.);
                 // 3): an NLL-inspired suppression factor for the LPM effect
                 double mD2 = t_channel_mD2->get_mD2(temp);
                 double lnQ2_1 = std::log(1. + taun / it->mfp0);
@@ -583,13 +588,9 @@ int update_particle_momentum_Lido(
                 if (Srandom::rejection(Srandom::gen) < Acceptance){
                     // accepted branching causes physical effects
                     // momentum change, and put back on shell
-                    
-                    //double xx = it->p0.t()/it->mother_p.t();
-                    
-                    //it->p = pIn.p*xx;
-                    pIn.p = pIn.p - it->p;//*(1.-xx);
+                    pIn.p = pIn.p - it->p;
                     it->Q0 = std::sqrt(kt2n);
-                    pIn.Q0 = std::sqrt(kt2n+pIn.Q00*pIn.Q00);
+                    pIn.Q0 = std::sqrt(pIn.Q00*pIn.Q00+kt2n);
                     
                     pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass + pIn.p.pabs2());
                     // for g -> q + qbar, pid change
@@ -598,7 +599,7 @@ int update_particle_momentum_Lido(
                         pIn.radlist.clear();
                     }
                     int col=-100, acol=-100, mcol=-100, macol=-100;
-
+                    //f << it->p0.t() << " " << sqrt(kt2n) << " " << pIn.p.t() << " " << pIn.x.t() << std::endl; 
                     SampleFlavorAndColor(temp_pid, pIn.col,
                                          pIn.acol, 2,
                                          21, col, acol, mcol, macol);
@@ -765,6 +766,8 @@ particle produce_parton(int pid, fourvec pmu, particle & mother, bool is_virtual
     vp.col=-100;
     vp.acol=-100;
     vp.tau_i = -1.;
+    vp.Q00 = 0.;
+    vp.Q0 =0.;
     return vp;
 }
 

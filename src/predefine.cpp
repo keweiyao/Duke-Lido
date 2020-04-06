@@ -144,8 +144,7 @@ double alpha_s(double Q2, double T){
         else{
                 double screen_scale2 = std::pow(scale*M_PI*T, 2);
                 double mu2;
-                if (Q2 < 0.) mu2 = std::max(-Q2, screen_scale2);
-                else mu2 = std::max(Q2, screen_scale2);
+                mu2 = std::max(std::abs(Q2), screen_scale2);
 
                 if (mu2 <= mu2_NP) return 1.0;
                 else return alpha0 / std::log(mu2/Lambda2);

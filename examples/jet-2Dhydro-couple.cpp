@@ -157,9 +157,9 @@ int main(int argc, char* argv[]){
             
             LOG_INFO << pythiagen.sigma_gen() << " " 
                      << TriggerBin[iBin] << " "
-                     << TriggerBin[iBin];
+                     << TriggerBin[iBin+1];
             for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
-                std::vector<particle> plist, hlist, thermal_list,
+                std::vector<particle> plist, colorlist, hlist, thermal_list,
                                       new_plist, pOut_list;
                 std::vector<current> clist;
                 std::vector<HadronizeCurrent> slist;
@@ -219,14 +219,21 @@ int main(int argc, char* argv[]){
                             med1.interpolate(p.x, T, vx, vy, vz);
                             double vzgrid = p.x.z()/p.x.t();
                             fourvec ploss = p.p;
+
                             int fs_size = update_particle_momentum_Lido(
                                   DeltaTau, T, {vx, vy, vz}, p, pOut_list);
                          
-                            for (auto & fp : pOut_list) {
-                                ploss = ploss - fp.p;
-                                new_plist.push_back(fp);
-                            }   
-                             
+                            if (fs_size==-1){
+                                // particle lost to the medium, but we
+                                // track its color
+                                colorlist.push_back(pOut_list[0]);
+                            }
+                            else {
+                                for (auto & fp : pOut_list) {
+                                    ploss = ploss - fp.p;
+                                    new_plist.push_back(fp);
+                                }
+                            }               
                             current J; 
                             ploss = ploss.boost_to(0, 0, vzgrid);
                             J.p = ploss;
@@ -238,7 +245,8 @@ int main(int argc, char* argv[]){
                         plist = new_plist;
                     }
                 }
-                Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 0);
+                for (auto & p : colorlist) plist.push_back(p);
+                Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 1);
                 for(auto & it : thermal_list){
                     //HadronizeCurrent J;
                     double vz = it.x.z()/it.x.t();

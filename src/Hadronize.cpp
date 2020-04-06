@@ -27,7 +27,7 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("3:m0 = 0");
     pythia.readString("4:m0 = 1.3");
     pythia.readString("5:m0 = 4.2");
-    pythia.readString("HadronLevel:all = off");
+    pythia.readString("HadronLevel:all = on");
     pythia.readString("HadronLevel:Decay = off");
     pythia.init();
 }
@@ -161,9 +161,9 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
         chains.push_back(chain);
     }
    
-    
+    LOG_INFO << "# of chains" << chains.size();
     for (auto & c : chains){
-        double maxQ0 = 0.;
+        double maxQ0 = Q0;
         pythia.event.reset();
         int count=1;
         for (auto &p : c){
@@ -180,7 +180,8 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
             auto ip = pythia.event[i];
             bool good = false;
             if (level==1){
-                good = ip.isFinal() && ip.isHadron();
+                good = (ip.isFinal() && ip.isHadron())
+                      || (ip.isFinal() && ip.isParton());
             }
             if (level==0){
                 good = (ip.isParton() 
