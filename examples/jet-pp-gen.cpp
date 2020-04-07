@@ -87,7 +87,13 @@ int main(int argc, char* argv[]){
         double Q0 = args["Q0"].as<double>();
         /// use process id to define filename
         int processid = getpid();
+        std::stringstream fheader;
+        fheader << args["output"].as<fs::path>().string() 
+                << processid;
 
+        std::vector<double> pTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
+               50,60,80,100,120,150,200,300,400,500,600,1000,2000});
+        LeadingParton dNdpT(pTbins);
         std::vector<double> TriggerBin({5,9,14,19,26,34,44,56,70,87,107,130,
     157,187,222,261,305,355,410,472,540,616,699,790,890,1000,1200,1500,2000});
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
@@ -113,22 +119,18 @@ int main(int argc, char* argv[]){
                 double sigma_gen = pythiagen.sigma_gen()
                                   / args["pythia-events"].as<int>();
                 
-                std::stringstream fheader;
-                fheader << args["output"].as<fs::path>().string() 
-                        << processid;
                 std::vector<double> Rs({.2,.4,.6,.8,1.});
-                LeadingParton(
-                    plist, fheader.str(), sigma_gen 
-                );
-                FindJetTower(
+                dNdpT.add_event(plist, sigma_gen);
+                /*FindJetTower(
                     plist, clist, slist,
                     Rs, 10,
                     -3, 3,
                     fheader.str(), 
                     sigma_gen
-                );
+                );*/
             }
         }
+        dNdpT.write(fheader.str());
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

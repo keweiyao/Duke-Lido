@@ -64,9 +64,15 @@ void FindJetTower(
              std::string fname, 
              double sigma_gen
      );
-void LeadingParton(
-             std::vector<particle> plist,
-             std::string fname, 
-             double sigma_gen
-     );
+
+class LeadingParton{
+   public:
+   LeadingParton(std::vector<double> _pTbins);
+   void add_event(std::vector<particle> plist, double sigma_gen);
+   void write(std::string fheader);
+   private:
+   std::vector<double> pTbins, binwidth, nchg, npi, nD, nB;
+   int NpT;
+};
+
 #endif

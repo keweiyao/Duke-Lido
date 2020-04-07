@@ -124,9 +124,12 @@ int main(int argc, char* argv[]){
             }
         }
 
-
+   
         /// use process id to define filename
         int processid = getpid();
+        std::stringstream fheader;
+        fheader << args["output"].as<fs::path>().string() 
+                << processid;
         /// Initialize Lido in-medium transport
         initialize(table_mode,
             args["lido-setting"].as<fs::path>().string(),
@@ -135,6 +138,9 @@ int main(int argc, char* argv[]){
         /// Initialize a simple hadronizer
         JetDenseMediumHadronize Hadronizer;
 
+        std::vector<double> pTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
+               50,60,80,100,120,150,200,300,400,500,600,1000,2000});
+        LeadingParton dNdpT(pTbins);
         // Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
         std::vector<double> TriggerBin({
@@ -268,24 +274,19 @@ int main(int argc, char* argv[]){
                     slist.push_back(J);*/
                 }
 
-                std::stringstream fheader;
-                fheader << args["output"].as<fs::path>().string() 
-                        << processid;
+                
                 std::vector<double> Rs({.2,.4,.6,.8, 1.});
-                LeadingParton(
-                    hlist, fheader.str(), sigma_gen 
-                );
-                //clist.clear();
-                //slist.clear();
-                FindJetTower(
-                    hlist, clist, slist,
+                dNdpT.add_event(plist, sigma_gen);
+                /*FindJetTower(
+                    plist, clist, slist,
                     Rs, 10,
                     -3, 3,
                     fheader.str(), 
                     sigma_gen
-                );
+                );*/
             }
         }
+        dNdpT.write(fheader.str());
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

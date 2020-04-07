@@ -442,34 +442,55 @@ void TestSource(
 }
 
 
-void LeadingParton(
-             std::vector<particle> plist,
-             std::string fheader, 
-             double sigma_gen
-     ){
-    std::stringstream filename_pions;
-    filename_pions << fheader << "-pi.dat";
-    std::ofstream fpi(filename_pions.str(), std::ios_base::app);
-    std::stringstream filename_D;
-    filename_D << fheader << "-D.dat";
-    std::ofstream fD(filename_D.str(), std::ios_base::app);
-    std::stringstream filename_B;
-    filename_B << fheader << "-B.dat";
-    std::ofstream fB(filename_B.str(), std::ios_base::app);
-
+LeadingParton::LeadingParton(std::vector<double> _pTbins){
+    pTbins = _pTbins;
+    NpT = pTbins.size()-1;
+    
+    nchg.resize(NpT); for (auto & it:nchg) it=0.;
+    npi.resize(NpT); for (auto & it:npi) it=0.;
+    nD.resize(NpT); for (auto & it:nD) it=0.;
+    nB.resize(NpT); for (auto & it:nB) it=0.;
+    binwidth.resize(NpT); 
+    for (int i=0; i<NpT; i++) 
+        binwidth[i]=pTbins[i+1]-pTbins[i];
+}
+void LeadingParton::add_event(std::vector<particle> plist, double sigma_gen){
     for (auto & p : plist){
         int pid = std::abs(p.pid);
-        if (pid==111 || pid == 211) 
-            fpi << pid << " " << p.p.xT() << " " << p.p.phi() << " " 
-               << p.p.rap() << " " << std::sqrt(p.p.m2()) << " " 
-               << sigma_gen << std::endl;
-        if (pid==411 || pid == 421 || pid == 413 || pid == 423) 
-            fD << pid << " " << p.p.xT() << " " << p.p.phi() << " " 
-               << p.p.rap() << " " << std::sqrt(p.p.m2()) << " " 
-               << sigma_gen << std::endl;
-        if (pid==511 || pid == 521 || pid == 513 || pid == 523) 
-            fB << pid << " " << p.p.xT() << " " << p.p.phi() << " " 
-               << p.p.rap() << " " << std::sqrt(p.p.m2()) << " " 
-               << sigma_gen << std::endl;
+        bool ispi = pid==111 || pid == 211;
+        bool ischg = pid==211 || pid==321 || pid==2212;
+        bool isD = pid==411 || pid == 421 || pid == 413 || pid == 423;
+        bool isB = pid==511 || pid == 521 || pid == 513 || pid == 523;
+        if (std::abs(p.p.rap()) < 1.) {
+            double pT = p.p.xT();
+            int ii=0;
+            for (int i=0; i<NpT; i++){
+                if ( (pTbins[i]<pT) && (pT<pTbins[i+1]) ) {
+                    ii = i;
+                    break;
+                }
+            }
+            if (ii==NpT) ii=NpT-1;
+            if (ispi) npi[ii] += sigma_gen;
+            if (ischg) nchg[ii] += sigma_gen;
+            if (isD) nD[ii] += sigma_gen;
+            if (isB) nB[ii] += sigma_gen;
+        }
     }
+}
+void LeadingParton::write(std::string fheader){
+    std::stringstream filename;
+    filename << fheader << "-LeadingHadron.dat";
+    std::ofstream f(filename.str());
+
+    for (int i=0; i<NpT; i++) {
+        f    << (pTbins[i]+pTbins[i+1])/2. << " "
+             << pTbins[i] << " "
+             << pTbins[i+1] << " "
+             << nchg[i]/binwidth[i] << " "
+             << npi[i]/binwidth[i] << " " 
+             << nD[i]/binwidth[i] << " "
+             << nB[i]/binwidth[i] << std::endl;
+    }
+    f.close();
 }
