@@ -1,7 +1,7 @@
 #include "random.h"
 #include <string>
 #include <iostream>
-
+#include "lorentz.h"
 namespace Srandom{
 int getEnvSeed(){
     char *val = std::getenv("lseed");
@@ -31,5 +31,13 @@ bool binary_choice(){
     if (gen()%2==0) return true;
     else return false;
 }
-
+fourvec generate_thermal_parton_with_boost(double T, double vx, double vy, double vz){
+    // randomly sample the four momentum
+    double se = T*Srandom::sample_E_over_T(Srandom::gen);
+    double phi = Srandom::dist_phi(Srandom::gen);
+    double cos = Srandom::dist_costheta(Srandom::gen);
+    double sin = std::sqrt(1.-cos*cos);
+    fourvec p{se, se*sin*std::cos(phi), se*sin*std::sin(phi),se*cos};
+    return p.boost_back(vx, vy, vz);
+}
 }

@@ -145,7 +145,7 @@ int main(int argc, char* argv[]){
         double Q0 = args["Q0"].as<double>();
                 
 	std::vector<double> TriggerBin({
-	//5,10,15,20,25,30,40,50,
+	5,10,15,20,25,30,40,50,
 	60,80,100,
 	110,120,130,140,150,160,170,180,200,
 	220,240,260,280,300,
@@ -243,11 +243,12 @@ int main(int argc, char* argv[]){
                             if (fs_size==-1){
                                 // particle lost to the medium, but we
                                 // track its color
+                                ploss = ploss - pOut_list[0].p;
                                 colorlist.push_back(pOut_list[0]);
                             }
                             else {
                                 for (auto & fp : pOut_list) {
-                                    ploss = ploss*0.;
+                                    ploss = ploss - fp.p;
                                     new_plist.push_back(fp);
                                 }
                             }               

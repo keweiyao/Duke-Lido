@@ -11,6 +11,7 @@
 #include "logo.h"
 #include "Langevin.h"
 #include "predefine.h"
+#include "random.h"
 
 std::map<int, std::vector<Process>> AllProcesses;
 
@@ -258,6 +259,8 @@ int update_particle_momentum_Lido(
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) ){
         pIn.radlist.clear();
+        pIn.p = Srandom::generate_thermal_parton_with_boost(
+                    temp, v3cell[0], v3cell[1], v3cell[2]);
         pOut_list.push_back(pIn);
         return -1;
     }

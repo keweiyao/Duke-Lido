@@ -45,16 +45,6 @@ pythia.readString("523:mayDecay = off");*/
     pythia.init();
 }
 
-fourvec generate_thermal_parton_with_boost(double T, double vx, double vy, double vz){
-    // randomly sample the four momentum
-    double se = T*Srandom::sample_E_over_T(Srandom::gen);
-    double phi = Srandom::dist_phi(Srandom::gen);
-    double cos = Srandom::dist_costheta(Srandom::gen);
-    double sin = std::sqrt(1.-cos*cos);
-    fourvec p{se, se*sin*std::cos(phi), se*sin*std::sin(phi),se*cos};
-    return p.boost_back(vx, vy, vz);
-}
-
 double GetMass(int pid){
     int absid = std::abs(pid);
     if (absid == 21) return 0.;
@@ -108,7 +98,7 @@ void FormChain(particle pi, particle pf,
             th.col = 0;
             th.acol = pi.col;
             th.pid = -std::abs(Srandom::sample_flavor(3));
-	    th.p = generate_thermal_parton_with_boost(
+	    th.p = Srandom::generate_thermal_parton_with_boost(
                   std::max(pi.Tf,.15), pi.vcell[0], pi.vcell[1], pi.vcell[2]);
             th.mass = 0.;
 	    th.x0 = pi.x;
@@ -128,7 +118,7 @@ void FormChain(particle pi, particle pf,
             th.col = pf.acol;
             th.acol = 0;
             th.pid = std::abs(Srandom::sample_flavor(3));
-	    th.p = generate_thermal_parton_with_boost(
+	    th.p = Srandom::generate_thermal_parton_with_boost(
                   std::max(pf.Tf,.15), pf.vcell[0], pf.vcell[1], pf.vcell[2]);
             th.mass = 0.;
 	    th.x0 = pf.x;

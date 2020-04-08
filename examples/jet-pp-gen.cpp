@@ -94,8 +94,14 @@ int main(int argc, char* argv[]){
         std::vector<double> pTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
                50,60,80,100,120,150,200,300,400,500,600,1000,2000});
         LeadingParton dNdpT(pTbins);
-        std::vector<double> TriggerBin({5,9,14,19,26,34,44,56,70,87,107,130,
-    157,187,222,261,305,355,410,472,540,616,699,790,890,1000,1200,1500,2000});
+        std::vector<double> TriggerBin({
+        //1,2,3,4,
+        5,10,15,20,25,30,40,50,60,80,100,
+	110,120,130,140,150,160,170,180,200,
+	220,240,260,280,300,
+	350,400,450,500,550,600,650,700,
+	750,800,900,1000,1200,1400,1600,
+	1800,2000});
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
             PythiaGen pythiagen(
@@ -121,13 +127,13 @@ int main(int argc, char* argv[]){
                 
                 std::vector<double> Rs({.2,.4,.6,.8,1.});
                 dNdpT.add_event(plist, sigma_gen);
-                /*FindJetTower(
+                FindJetTower(
                     plist, clist, slist,
                     Rs, 10,
                     -3, 3,
                     fheader.str(), 
                     sigma_gen
-                );*/
+                );
             }
         }
         dNdpT.write(fheader.str());

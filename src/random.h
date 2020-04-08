@@ -1,7 +1,7 @@
 #ifndef RANDOM_H
 #define RANDOM_H
 #include <random>
-
+#include "lorentz.h"
 namespace Srandom{
 int getEnvSeed();
 extern std::mt19937 gen;
@@ -14,5 +14,6 @@ extern std::normal_distribution<double> white_noise;
 extern std::gamma_distribution<double> sample_E_over_T;
 int sample_flavor(int Nf);
 bool binary_choice();
+fourvec generate_thermal_parton_with_boost(double T, double vx, double vy, double vz);
 }
 #endif
