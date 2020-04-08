@@ -255,14 +255,15 @@ int update_particle_momentum_Lido(
     double dt_for_pIn = compute_realtime_to_propagate(dt_input, pIn.x, pIn.p);
     pIn.freestream(dt_for_pIn);
     // Delete soft partons below a energy cut from the hard parton list
-    if (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut*temp
+    if ((!pIn.is_virtual) && 
+        pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut*temp
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) ){
         pIn.radlist.clear();
-        pIn.p = Srandom::generate_thermal_parton_with_boost(
-                    temp, v3cell[0], v3cell[1], v3cell[2]);
-        pOut_list.push_back(pIn);
-        return -1;
+        //pIn.p = Srandom::generate_thermal_parton_with_boost(
+        //            temp, v3cell[0], v3cell[1], v3cell[2]);
+        pOut_list.clear();
+        return pOut_list.size();
     }
     // Freeze particles below Tc
     if (temp < 0.16){
@@ -285,8 +286,8 @@ int update_particle_momentum_Lido(
     // Apply diffusion and update particle momentum
     fourvec pnew;
     Ito_update(pIn.pid, dt_for_pIn, pIn.mass, temp, v3cell, pIn.p, pnew);
-    pIn.p = pnew;
-    //if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
+    if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
+    else pIn.p = pnew;
     // Apply large angle scattering, and diffusion induced radiation
     auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
     double dt_cell = dt_for_pIn / pIn.p.t() * p_cell.t();
@@ -408,8 +409,8 @@ int update_particle_momentum_Lido(
 
         // elastic process changes the momentum immediately
         if (channel == 0 || channel == 1){
-            pIn.p = FS[0];
             if (!pIn.is_virtual){  
+                 pIn.p = FS[0];
 		    int id = (channel==0) ? (Srandom::sample_flavor(3)) : 21;
 		    int col=-100, acol=-100, mcol=-100, macol=-100;
 		    SampleFlavorAndColor(
@@ -422,6 +423,7 @@ int update_particle_momentum_Lido(
 		    pIn.acol = macol;
 		    pOut_list.push_back(ep);
            }
+           else pIn.p = FS[0]*(pIn.p.t()/FS[0].t());;
         }
         // inelastic process takes a finite time to happen
         if (channel == 2 || channel == 3){
@@ -591,6 +593,8 @@ int update_particle_momentum_Lido(
                 if (Srandom::rejection(Srandom::gen) < Acceptance){
                     // accepted branching causes physical effects
                     // momentum change, and put back on shell
+                    it->p = it->p*(pIn.p.t()/it->p.t()
+                                  *it->p0.t()/it->mother_p.t());
                     pIn.p = pIn.p - it->p;
                     it->Q0 = std::sqrt(kt2n);
                     pIn.Q0 = std::sqrt(pIn.Q00*pIn.Q00+kt2n);

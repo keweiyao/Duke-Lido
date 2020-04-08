@@ -145,8 +145,9 @@ int main(int argc, char* argv[]){
         double Q0 = args["Q0"].as<double>();
                 
 	std::vector<double> TriggerBin({
-	5,10,15,20,25,30,40,50,
-	60,80,100,
+	5,10,15,20,25,
+        30,40,50,60,
+        80,100,
 	120,140,160,180,200,
 	240,280,320,
 	360,400,450,500,550,600,650,700,
@@ -240,18 +241,10 @@ int main(int argc, char* argv[]){
                             int fs_size = update_particle_momentum_Lido(
                                   DeltaTau, T, {vx, vy, vz}, p, pOut_list);
                          
-                            if (fs_size==-1){
-                                // particle lost to the medium, but we
-                                // track its color
-                                ploss = ploss - pOut_list[0].p;
-                                colorlist.push_back(pOut_list[0]);
-                            }
-                            else {
-                                for (auto & fp : pOut_list) {
-                                    ploss = ploss - fp.p;
-                                    new_plist.push_back(fp);
-                                }
-                            }               
+                            for (auto & fp : pOut_list) {
+                                ploss = ploss - fp.p;
+                                new_plist.push_back(fp);
+                            }            
                             current J; 
                             ploss = ploss.boost_to(0, 0, vzgrid);
                             J.p = ploss;
@@ -264,8 +257,10 @@ int main(int argc, char* argv[]){
                     }
                 }
                 for (auto & p : colorlist) plist.push_back(p);
-                Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 0);
+                Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 1);
+                LOG_INFO << "add themal = "<<thermal_list.size();
                 for(auto & it : thermal_list){
+                   
                     //HadronizeCurrent J;
                     double vz = it.x.z()/it.x.t();
                     current J; 
