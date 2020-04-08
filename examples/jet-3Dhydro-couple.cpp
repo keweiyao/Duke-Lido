@@ -275,7 +275,7 @@ int main(int argc, char* argv[]){
                 }
 
                 std::vector<double> Rs({.2,.4,.6,.8, 1.});
-                dNdpT.add_event(plist, sigma_gen);
+                dNdpT.add_event(hlist, sigma_gen);
                 /*FindJetTower(
                     plist, clist, slist,
                     Rs, 10,

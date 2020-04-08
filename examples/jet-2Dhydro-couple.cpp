@@ -143,13 +143,24 @@ int main(int argc, char* argv[]){
         LeadingParton dNdpT(pTbins);
         // Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
-        std::vector<double> TriggerBin({
-	5,10,15,20,25,30,40,50,60,80,100,
+                
+	std::vector<double> TriggerBin({
+	//5,10,15,20,25,30,40,50,
+	60,80,100,
 	110,120,130,140,150,160,170,180,200,
 	220,240,260,280,300,
 	350,400,450,500,550,600,650,700,
 	750,800,900,1000,1200,1400,1600,
 	1800,2000});
+	
+	/*        std::vector<double> TriggerBin({
+        1,3,5,10,20,30,40,60,80,100,
+        120,140,160,180,200,
+        240,280,320,360,400,
+        450,500,550,600,650,700,
+        800,900,1000,1200,1400,1600,
+        1800,2000});*/
+
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
             PythiaGen pythiagen(
@@ -236,7 +247,7 @@ int main(int argc, char* argv[]){
                             }
                             else {
                                 for (auto & fp : pOut_list) {
-                                    ploss = ploss - fp.p;
+                                    ploss = ploss*0.;
                                     new_plist.push_back(fp);
                                 }
                             }               
@@ -252,7 +263,7 @@ int main(int argc, char* argv[]){
                     }
                 }
                 for (auto & p : colorlist) plist.push_back(p);
-                Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 1);
+                Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 0);
                 for(auto & it : thermal_list){
                     //HadronizeCurrent J;
                     double vz = it.x.z()/it.x.t();
@@ -276,14 +287,14 @@ int main(int argc, char* argv[]){
 
                 
                 std::vector<double> Rs({.2,.4,.6,.8, 1.});
-                dNdpT.add_event(plist, sigma_gen);
-                /*FindJetTower(
+                dNdpT.add_event(hlist, sigma_gen);
+                FindJetTower(
                     plist, clist, slist,
                     Rs, 10,
                     -3, 3,
                     fheader.str(), 
                     sigma_gen
-                );*/
+                );
             }
         }
         dNdpT.write(fheader.str());
