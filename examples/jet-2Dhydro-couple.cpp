@@ -14,7 +14,7 @@
 #include "simpleLogger.h"
 #include "Medium_Reader.h"
 #include "workflow.h"
-#include "pythia_jet_gen.h"
+#include "pythia_jet_tree.h"
 #include "Hadronize.h"
 #include "jet_finding.h"
 
@@ -145,22 +145,10 @@ int main(int argc, char* argv[]){
         double Q0 = args["Q0"].as<double>();
                 
 	std::vector<double> TriggerBin({
-	5,10,15,20,25,
-        30,40,50,60,
-        80,100,
-	120,140,160,180,200,
-	240,280,320,
-	360,400,450,500,550,600,650,700,
-	750,800,900,1000,1200,1400,1600,
-	1800,2000});
-	
-	/*        std::vector<double> TriggerBin({
-        1,3,5,10,20,30,40,60,80,100,
-        120,140,160,180,200,
-        240,280,320,360,400,
-        450,500,550,600,650,700,
-        800,900,1000,1200,1400,1600,
-        1800,2000});*/
+        50,60,70,80,90,100,110,
+	120,130,140,150,160,180,200,
+	220,240,260,280,320,
+	360,400});
 
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
@@ -204,7 +192,7 @@ int main(int argc, char* argv[]){
                 }   
 
                 // Energy-momentum checkbook
-                while(med1.load_next()){
+                /*while(med1.load_next()){
                     double current_hydro_clock = med1.get_tauL();
                     double hydro_dtau = med1.get_hydro_time_step();
                     //LOG_INFO << current_hydro_clock/fmc_to_GeV_m1 
@@ -255,30 +243,18 @@ int main(int argc, char* argv[]){
                         }
                         plist = new_plist;
                     }
-                }
+                }*/
                 for (auto & p : colorlist) plist.push_back(p);
                 Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 1);
                 LOG_INFO << "add themal = "<<thermal_list.size();
                 for(auto & it : thermal_list){
-                   
-                    //HadronizeCurrent J;
                     double vz = it.x.z()/it.x.t();
                     current J; 
-                            J.p = it.p.boost_to(0, 0, vz)*(-1.);
-                            J.chetas = std::cosh(it.x.rap());
-                            J.shetas = std::sinh(it.x.rap());
-                            J.cs = std::sqrt(.3333);
-                            clist.push_back(J);  
-                    /*double gamma = 1./std::sqrt(1.-vx*vx-vy*vy-vz*vz);
-                    fourvec Umu{gamma, gamma*vx, gamma*vy, gamma*vz};
-                    fourvec pmu{-it.p.t(), -it.p.x(), -it.p.y(), -it.p.z()};
-                    J.UdotG = dot(Umu, pmu);
-                    J.G = pmu;
-                    J.gamma_perp = Umu.tau();
-                    J.v_perp = std::sqrt(1.-1./(J.gamma_perp*J.gamma_perp));
-                    J.etas = it.x.rap();
-                    J.phiu = std::atan2(vy,vx);
-                    slist.push_back(J);*/
+                    J.p = it.p.boost_to(0, 0, vz)*(-1.);
+                    J.chetas = std::cosh(it.x.rap());
+                    J.shetas = std::sinh(it.x.rap());
+                    J.cs = std::sqrt(.3333);
+                    clist.push_back(J);  
                 }
 
                 

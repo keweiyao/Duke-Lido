@@ -373,7 +373,9 @@ int update_particle_momentum_Lido(
     // If a scattering happens:
     if (channel >= 0){
         if (channel >= AllProcesses[absid].size()){
-            LOG_INFO << p00 <<"//"<< pIn.p << "//" << pnew;
+            LOG_INFO << absid  <<" " << temp  << " "<< v3cell[0] << " " << v3cell[1] << " " << v3cell[2];
+            LOG_INFO << x0;
+            LOG_INFO << " " <<p00 <<"//"<< pIn.p << "//" << pnew;
             LOG_FATAL << "3. Channel = " << channel << " not exists";
             exit(-1);
         }
