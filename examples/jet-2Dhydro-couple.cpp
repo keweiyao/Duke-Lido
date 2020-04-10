@@ -145,13 +145,13 @@ int main(int argc, char* argv[]){
         double Q0 = args["Q0"].as<double>();
                 
 	std::vector<double> TriggerBin({
-	//5,10,15,20,25,30,40,50,
+	5,10,15,20,25,30,40,50,
 	60,80,100,
-	110,120,130,140,150,160,170,180,200,
+	120,140,160,180,200,
 	220,240,260,280,300,
-	350,400,450,500,550,600,650,700,
-	750,800,900,1000,1200,1400,1600,
-	1800,2000});
+	350,400,500,600,700,
+	800,900,1000,1200,1400,1600,
+	2000});
 	
 	/*        std::vector<double> TriggerBin({
         1,3,5,10,20,30,40,60,80,100,
@@ -215,7 +215,7 @@ int main(int argc, char* argv[]){
                     for (int i=0; i<Ns; ++i){
                         new_plist.clear();
                         for (auto & p : plist){     
-                            if (p.Tf < 0.16) {
+                            if (p.Tf < 0.16 || std::abs(p.p.rap())>4.) {
                                 new_plist.push_back(p);
                                 continue;       
                             }
@@ -243,11 +243,12 @@ int main(int argc, char* argv[]){
                             if (fs_size==-1){
                                 // particle lost to the medium, but we
                                 // track its color
+				ploss = ploss*0.;
                                 colorlist.push_back(pOut_list[0]);
                             }
                             else {
                                 for (auto & fp : pOut_list) {
-                                    ploss = ploss*0.;
+                                    ploss = ploss - fp.p;
                                     new_plist.push_back(fp);
                                 }
                             }               
@@ -263,7 +264,7 @@ int main(int argc, char* argv[]){
                     }
                 }
                 for (auto & p : colorlist) plist.push_back(p);
-                Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 0);
+                Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 1);
                 for(auto & it : thermal_list){
                     //HadronizeCurrent J;
                     double vz = it.x.z()/it.x.t();
