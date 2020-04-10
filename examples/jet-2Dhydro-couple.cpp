@@ -145,21 +145,11 @@ int main(int argc, char* argv[]){
         double Q0 = args["Q0"].as<double>();
                 
 	std::vector<double> TriggerBin({
-	5,10,15,20,25,30,40,50,
+	5,10,15,20,30,50,
 	60,80,100,
-	120,140,160,180,200,
-	220,240,260,280,300,
-	350,400,500,600,700,
-	800,900,1000,1200,1400,1600,
-	2000});
-	
-	/*        std::vector<double> TriggerBin({
-        1,3,5,10,20,30,40,60,80,100,
-        120,140,160,180,200,
-        240,280,320,360,400,
-        450,500,550,600,650,700,
-        800,900,1000,1200,1400,1600,
-        1800,2000});*/
+	150,200,250,300,
+	500,1000});
+
 
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
@@ -251,7 +241,7 @@ int main(int argc, char* argv[]){
                                     ploss = ploss - fp.p;
                                     new_plist.push_back(fp);
                                 }
-                            }               
+                            }
                             current J; 
                             ploss = ploss.boost_to(0, 0, vzgrid);
                             J.p = ploss;
@@ -278,13 +268,13 @@ int main(int argc, char* argv[]){
                 
                 std::vector<double> Rs({.2,.4,.6,.8, 1.});
                 dNdpT.add_event(hlist, sigma_gen);
-                FindJetTower(
+                /*FindJetTower(
                     plist, clist, slist,
                     Rs, 10,
                     -3, 3,
                     fheader.str(), 
                     sigma_gen
-                );
+                );*/
             }
         }
         dNdpT.write(fheader.str());

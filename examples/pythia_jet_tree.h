@@ -146,24 +146,35 @@ particle transfer_particle(Particle p, fourvec x){
     return _p;
 }
 
-void find_daughter(Event & event, Particle p, int point, fourvec x0, std::vector<particle> & plist){
+void find_daughter(Event & event, Particle p, int point, fourvec x0, std::vector<particle> & plist, std::vector<int>& proj){
     fourvec pmu{p.e(), p.px(), p.py(), p.pz()};
     double tau0 = x0.tau();
     int d1 = p.daughter1();
     int d2 = p.daughter2();
-    if ( (d1==d2 && d2==0 )|| tau0>5.076) {
-        plist.push_back(transfer_particle(p, x0));
-        return;
+    if ( (d1==d2 && d2==0 ) || tau0>5*5.076) {
+        bool exist=false;
+        for (auto & k : proj) {
+            if (k==point){
+                exist=true; break;
+            }
+        }
+        if (exist) return;
+        else {
+            proj.push_back(point);
+            plist.push_back(transfer_particle(p, x0));
+            return;
+        }
     }
     if (d1==d2 && d2>0)  {
         auto pp = event[d1];
-        find_daughter(event, pp, d1, x0, plist);
+        find_daughter(event, pp, d1, x0, plist,proj);
     }
     if (d1>0 && d2==0)  {
         auto pp = event[d1];
-        find_daughter(event, pp, d1, x0, plist);
+        find_daughter(event, pp, d1, x0, plist,proj);
     }
     if (d1<d2 && d1>0)  {
+        if (d2>d1+1) LOG_INFO << "???????????????????????????";
         auto p1 = event[d1];
         auto p2 = event[d2];
         fourvec kmu{p1.e(), p1.px(), p1.py(), p1.pz()};
@@ -172,16 +183,16 @@ void find_daughter(Event & event, Particle p, int point, fourvec x0, std::vector
         p0.a[0] = std::sqrt(p0.pabs2());
         double e0 = p0.t();
         double xx = kmu.t()/e0;
-        double tauf = xx*(1.0-xx)*e0/(.2*.2+measure_perp(p0,kmu).pabs2());
+        double tauf = 2*xx*(1.0-xx)*e0/(measure_perp(p0,kmu).pabs2());
         x0 = x0 + p0*(tauf/p0.t());
-        find_daughter(event, p1, d1, x0, plist);
-        if (d2!=4) find_daughter(event, p2, d2, x0, plist);
+        find_daughter(event, p1, d1, x0, plist, proj);
+        find_daughter(event, p2, d2, x0, plist, proj);
     }
     if (d1>d2 && d1>0 && d2>0)  {
         auto p1 = event[d1];
         auto p2 = event[d2];
-        find_daughter(event, p1, d1, x0, plist);
-        find_daughter(event, p2, d2, x0, plist);
+        find_daughter(event, p1, d1, x0, plist,proj);
+        find_daughter(event, p2, d2, x0, plist,proj);
     }
 }
 
@@ -197,21 +208,27 @@ void PythiaGen::Generate(std::vector<particle> & plist){
     int Nfinal = 0;
     for (size_t i = 0; i < event.size(); ++i) {
         auto p = event[i];
-        LOG_INFO  << i << " " << p.status() << " "<< p.isFinal() << " "<< p.mother1() << " " << p.mother2() << " " << p.daughter1() << " " << p.daughter2();
+        LOG_INFO  << i << " " << p.id() << " " << p.status() << " "<< p.isFinal() << " "<< p.col() << " " << p.acol();
         if (p.id()==2212){
             Hardest.push_back(p);
-            LOG_INFO  << p.id() << " "<< p.col() << " " << p.acol();
+           // LOG_INFO  << p.id() << " "<< p.col() << " " << p.acol();
         }
         if (p.isFinal()) {
         //  plist.push_back(transfer_particle(p, x0));
           Nfinal++;
         }
+        if (p.status()==63) {
+          //plist.push_back(transfer_particle(p, x0));
+          Nfinal++;
+        }
     }
-    
-    find_daughter(event, Hardest[0], 1, x0, plist);
-    //find_daughter(event, Hardest[1], 2, x0, plist); 
+    std::vector<int> proj;
+    proj.clear();
+    find_daughter(event, Hardest[0], 1, x0, plist, proj);
+    find_daughter(event, Hardest[1], 2, x0, plist, proj); 
     LOG_INFO << "Nparticles = " << plist.size() << " out of "<< Nfinal;
     for(auto & p : plist) {
+      LOG_INFO << p.pid;
      fourvec x0{0,x,y,0};
       p.x0 = x0;
       p.x=x0;

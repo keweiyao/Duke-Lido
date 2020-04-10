@@ -305,7 +305,7 @@ int update_particle_momentum_Lido(
 
     BOOST_FOREACH (Process &r, AllProcesses[absid])
     {
-        bool can_rad = (!pIn.is_virtual) && (pIn.x.t()>pIn.tau_i);
+        bool can_rad = (!pIn.is_virtual);
         switch (r.which())
         {
         case 0:

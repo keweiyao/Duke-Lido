@@ -9,7 +9,7 @@
 #include "integrator.h"
 #include <sstream>
 #include <gsl/gsl_sf_gamma.h>
-//gsl_sf_gamma_inc_Q(s, x)
+
 inline int corp_index(double x, double xL, double xH, double dx, int Nx){
     if (x<xL || x>xH) return -1;
     else if (x==xH) return Nx-1;
@@ -128,8 +128,9 @@ void redistribute(
                        - (alpha*(4.+alpha2)*E03
                          + (1.+4.*alpha2)*sinthetak*E12)*Tri_sinthetak
                       );
-                    res += gsl_sf_gamma_inc_Q(5., pTmin/0.16*D0)*(one_and_cs*UdotG_phikint*D
-                               - NdotG_phikint)/std::pow(D,4);    
+                    res += gsl_sf_gamma_inc_Q(5., pTmin/0.16*D0)
+                           *(one_and_cs*UdotG_phikint*D
+                             - NdotG_phikint)/std::pow(D,4);    
                                 
                 }
                 return res;
@@ -189,7 +190,7 @@ void FindJetTower(std::vector<particle> plist,
              std::string fheader, 
              double sigma_gen) {
     // contruct four momentum tower in the eta-phi plane
-    int Neta = 300, Nphi = 300;
+    int Neta = 400, Nphi = 400;
     double etamin = -3., etamax = 3.;
     double deta = (etamax-etamin)/(Neta-1); 
     // Phi range has to be the same as the range of std::atan2(*,*);
@@ -206,7 +207,6 @@ void FindJetTower(std::vector<particle> plist,
         it.resize(Nphi);
         for (auto & iit: it) iit = fourvec{0.,0.,0.,0.};
     }
-
     PTtowers.resize(Neta); dummyPT.resize(Neta);
     for (auto & it : PTtowers) {
         it.resize(Nphi);
@@ -217,14 +217,13 @@ void FindJetTower(std::vector<particle> plist,
         for (auto & iit: it) iit = 0.;
     }
 
-
-
     // put hard particles into the towers
     for (auto & p : plist){
         double eta = p.p.pseudorap();
         double phi = p.p.phi();
         int ieta = corp_index(eta, etamin, etamax, deta, Neta);
         if (ieta<0) continue;
+        if (p.p.xT()<.7) continue;
         int iphi = corp_index(phi, phimin, phimax, dphi, Nphi);
         Pmutowers[ieta][iphi] = Pmutowers[ieta][iphi] + p.p;
         PTtowers[ieta][iphi] += p.p.xT();
@@ -254,7 +253,6 @@ void FindJetTower(std::vector<particle> plist,
           etamin, etamax,
           phimin, phimax,
           5, .7);
-
     }
     // Use the towers to do jet finding: anti-kT
     int power = -1; 
@@ -296,11 +294,16 @@ void FindJetTower(std::vector<particle> plist,
         filename_jets << fheader << "-jets.dat";
         std::ofstream f1(filename_jets.str(), std::ios_base::app);
         std::vector<fourvec> results;
+       
+
+        
         for (auto & j : jets){
             fourvec jetP{j.e(), j.px(), j.py(), j.pz()};
             fourvec newP{0., 0., 0., 0.};
             double Jphi = jetP.phi();
             double Jeta = jetP.pseudorap();
+
+
             for (double eta=Jeta-jetRadius; eta<=Jeta+jetRadius; eta+=deta){
                 int ieta = corp_index(eta, etamin, etamax, deta, Neta);
                 if (ieta<0) continue;
@@ -313,6 +316,7 @@ void FindJetTower(std::vector<particle> plist,
                     if (phi>M_PI) newphi-=2*M_PI;
                     double cphi = std::cos(newphi), sphi = std::sin(newphi);
                     int iphi = corp_index(newphi, phimin, phimax, dphi, Nphi);
+                    fourvec Nmu0{chy,cphi,sphi,shy};
                     newP = newP + Pmutowers[ieta][iphi];
                 }  
             }
@@ -373,6 +377,7 @@ void FindJetTower(std::vector<particle> plist,
         for (auto newP : results){
             double Jphi = newP.phi();
             double Jeta = newP.pseudorap();
+
             std::vector<double> hist;
             hist.resize(18);
             for (auto & it : hist) it = 0.;

@@ -27,10 +27,11 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("3:m0 = 0");
     pythia.readString("4:m0 = 1.3");
     pythia.readString("5:m0 = 4.2");
+    pythia.readString("PartonLevel:Remnants = off");
     pythia.readString("HadronLevel:all = on");
     pythia.readString("HadronLevel:Decay = on");
-pythia.readString("111:mayDecay = off");
-pythia.readString("211:mayDecay = off");
+    pythia.readString("111:mayDecay = off");
+    pythia.readString("211:mayDecay = off");
 pythia.readString("311:mayDecay = off");
 pythia.readString("321:mayDecay = off");
 pythia.readString("2212:mayDecay = off");
@@ -99,13 +100,13 @@ void FormChain(particle pi, particle pf,
             th.acol = pi.col;
             th.pid = -std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pi.Tf,.15), pi.vcell[0], pi.vcell[1], pi.vcell[2]);
+                  std::max(pi.Tf,.15), 0,0,pi.x.z()/pi.x.t());
             th.mass = 0.;
 	    th.x0 = pi.x;
             th.vcell.resize(3);
-	    th.vcell[0] = pi.vcell[0];
-            th.vcell[1] = pi.vcell[1];
-            th.vcell[2] = pi.vcell[2];
+	    th.vcell[0] = 0;
+            th.vcell[1] = 0;
+            th.vcell[2] = pi.x.z()/pi.x.t();
 	    th.x = pi.x;
 	    th.Tf = pi.Tf;
             th.Q0 = pi.Tf;
@@ -119,13 +120,13 @@ void FormChain(particle pi, particle pf,
             th.acol = 0;
             th.pid = std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pf.Tf,.15), pf.vcell[0], pf.vcell[1], pf.vcell[2]);
+                  std::max(pf.Tf,.15), 0 ,0, pf.x.z()/pf.x.t());
             th.mass = 0.;
 	    th.x0 = pf.x;
             th.vcell.resize(3);
-	    th.vcell[0] = pf.vcell[0];
-            th.vcell[1] = pf.vcell[1];
-            th.vcell[2] = pf.vcell[2];
+	    th.vcell[0] = 0;
+            th.vcell[1] = 0;
+            th.vcell[2] = pf.x.z()/pf.x.t();
 	    th.x = pf.x;
 	    th.Tf = pf.Tf;
             th.Q0 = pi.Tf;
@@ -144,6 +145,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                                        std::vector<particle> & thermal_partons,
                                        double Q0,
                                        int level){
+    int Npartons = partons.size();
     const int status = 23;
     hadrons.clear();
     thermal_partons.clear();
@@ -209,6 +211,6 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
             }
         }
     }        
-
+    LOG_INFO << Npartons << " to " << hadrons.size();
     return hadrons.size();
 }
