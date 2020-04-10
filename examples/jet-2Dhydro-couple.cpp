@@ -14,7 +14,7 @@
 #include "simpleLogger.h"
 #include "Medium_Reader.h"
 #include "workflow.h"
-#include "pythia_jet_tree.h"
+#include "pythia_jet_gen.h"
 #include "Hadronize.h"
 #include "jet_finding.h"
 
@@ -145,10 +145,21 @@ int main(int argc, char* argv[]){
         double Q0 = args["Q0"].as<double>();
                 
 	std::vector<double> TriggerBin({
-        50,60,70,80,90,100,110,
-	120,130,140,150,160,180,200,
-	220,240,260,280,320,
-	360,400});
+	5,10,15,20,25,30,40,50,
+	60,80,100,
+	120,140,160,180,200,
+	220,240,260,280,300,
+	350,400,500,600,700,
+	800,900,1000,1200,1400,1600,
+	2000});
+	
+	/*        std::vector<double> TriggerBin({
+        1,3,5,10,20,30,40,60,80,100,
+        120,140,160,180,200,
+        240,280,320,360,400,
+        450,500,550,600,650,700,
+        800,900,1000,1200,1400,1600,
+        1800,2000});*/
 
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
@@ -192,7 +203,7 @@ int main(int argc, char* argv[]){
                 }   
 
                 // Energy-momentum checkbook
-                /*while(med1.load_next()){
+                while(med1.load_next()){
                     double current_hydro_clock = med1.get_tauL();
                     double hydro_dtau = med1.get_hydro_time_step();
                     //LOG_INFO << current_hydro_clock/fmc_to_GeV_m1 
@@ -204,7 +215,7 @@ int main(int argc, char* argv[]){
                     for (int i=0; i<Ns; ++i){
                         new_plist.clear();
                         for (auto & p : plist){     
-                            if (p.Tf < 0.16) {
+                            if (p.Tf < 0.16 || std::abs(p.p.rap())>4.) {
                                 new_plist.push_back(p);
                                 continue;       
                             }
@@ -229,10 +240,18 @@ int main(int argc, char* argv[]){
                             int fs_size = update_particle_momentum_Lido(
                                   DeltaTau, T, {vx, vy, vz}, p, pOut_list);
                          
-                            for (auto & fp : pOut_list) {
-                                ploss = ploss - fp.p;
-                                new_plist.push_back(fp);
-                            }            
+                            if (fs_size==-1){
+                                // particle lost to the medium, but we
+                                // track its color
+				ploss = ploss*0.;
+                                colorlist.push_back(pOut_list[0]);
+                            }
+                            else {
+                                for (auto & fp : pOut_list) {
+                                    ploss = ploss - fp.p;
+                                    new_plist.push_back(fp);
+                                }
+                            }               
                             current J; 
                             ploss = ploss.boost_to(0, 0, vzgrid);
                             J.p = ploss;
@@ -243,10 +262,9 @@ int main(int argc, char* argv[]){
                         }
                         plist = new_plist;
                     }
-                }*/
+                }
                 for (auto & p : colorlist) plist.push_back(p);
                 Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 1);
-                LOG_INFO << "add themal = "<<thermal_list.size();
                 for(auto & it : thermal_list){
                     double vz = it.x.z()/it.x.t();
                     current J; 

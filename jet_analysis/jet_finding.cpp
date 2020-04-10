@@ -8,7 +8,8 @@
 #include "simpleLogger.h"
 #include "integrator.h"
 #include <sstream>
-
+#include <gsl/gsl_sf_gamma.h>
+//gsl_sf_gamma_inc_Q(s, x)
 inline int corp_index(double x, double xL, double xH, double dx, int Nx){
     if (x<xL || x>xH) return -1;
     else if (x==xH) return Nx-1;
@@ -27,7 +28,7 @@ void redistribute(
           const int _Ny, const int _Nphi, 
           const double ymin, const double ymax,
           const double phimin, const double phimax,
-          int coarse_level){
+          int coarse_level, double pTmin=0.){
     // use coarse grid
     int Ny = int(_Ny/coarse_level);
     int Nphi = int(_Nphi/coarse_level);
@@ -79,7 +80,7 @@ void redistribute(
             auto code = [clist,
                          cphi, sphi, 
                          chy, shy, 
-                         vradial, gamma_radial]
+                         vradial, gamma_radial, pTmin]
                          (double costhetak){
                 double one_and_cs = 4./3.;
                 double res=0.;
@@ -98,6 +99,7 @@ void redistribute(
                     double cosh_y_etas_yk = cosh_y_etas*coshyk
                                           - sinh_y_etas*sinhyk;
                     double D = gamma_radial * cosh_y_etas_yk;
+		    double D0 = gamma_radial * (cosh_y_etas_yk-vradial);
                     double alpha = vradial/cosh_y_etas_yk;
                     double alpha2 = std::pow(alpha,2);
                     double one_minus_alpha2 = 1. - alpha2;
@@ -126,7 +128,7 @@ void redistribute(
                        - (alpha*(4.+alpha2)*E03
                          + (1.+4.*alpha2)*sinthetak*E12)*Tri_sinthetak
                       );
-                    res += (one_and_cs*UdotG_phikint*D
+                    res += gsl_sf_gamma_inc_Q(5., pTmin/0.16*D0)*(one_and_cs*UdotG_phikint*D
                                - NdotG_phikint)/std::pow(D,4);    
                                 
                 }
@@ -193,18 +195,29 @@ void FindJetTower(std::vector<particle> plist,
     // Phi range has to be the same as the range of std::atan2(*,*);
     double phimin = -M_PI, phimax = M_PI; 
     double dphi = (phimax-phimin)/Nphi;
-    std::vector<std::vector<fourvec> > Pmutowers;
-    std::vector<std::vector<double> > PTtowers;
-    Pmutowers.resize(Neta);
+    std::vector<std::vector<fourvec> > Pmutowers, dummyPmu;
+    std::vector<std::vector<double> > PTtowers, dummyPT;
+    Pmutowers.resize(Neta); dummyPmu.resize(Neta);
     for (auto & it : Pmutowers) {
         it.resize(Nphi);
         for (auto & iit: it) iit = fourvec{0.,0.,0.,0.};
     }
-    PTtowers.resize(Neta);
+    for (auto & it : dummyPmu) {
+        it.resize(Nphi);
+        for (auto & iit: it) iit = fourvec{0.,0.,0.,0.};
+    }
+
+    PTtowers.resize(Neta); dummyPT.resize(Neta);
     for (auto & it : PTtowers) {
         it.resize(Nphi);
         for (auto & iit: it) iit = 0.;
     }
+    for (auto & it : dummyPT) {
+        it.resize(Nphi);
+        for (auto & iit: it) iit = 0.;
+    }
+
+
 
     // put hard particles into the towers
     for (auto & p : plist){
@@ -215,10 +228,15 @@ void FindJetTower(std::vector<particle> plist,
         int iphi = corp_index(phi, phimin, phimax, dphi, Nphi);
         Pmutowers[ieta][iphi] = Pmutowers[ieta][iphi] + p.p;
         PTtowers[ieta][iphi] += p.p.xT();
+        if (p.p.xT()>0.7){
+ 	    dummyPmu[ieta][iphi] = dummyPmu[ieta][iphi] + p.p;
+            dummyPT[ieta][iphi] += p.p.xT();
+	}
     }
     // put soft energy-momentum deposition into the towers
     if (SourceList.size()>0){
-    redistribute(
+	
+        redistribute(
           SourceList, 
           HadronizeList,
           Pmutowers,
@@ -226,7 +244,17 @@ void FindJetTower(std::vector<particle> plist,
           Neta, Nphi,
           etamin, etamax,
           phimin, phimax,
-          10);
+          5, 0.);
+        redistribute(
+          SourceList,
+          HadronizeList,
+          dummyPmu,
+          dummyPT,
+          Neta, Nphi,
+          etamin, etamax,
+          phimin, phimax,
+          5, .7);
+
     }
     // Use the towers to do jet finding: anti-kT
     int power = -1; 
@@ -365,7 +393,7 @@ void FindJetTower(std::vector<particle> plist,
                     if (phi<-M_PI) newphi+=2*M_PI;
                     if (phi>M_PI) newphi-=2*M_PI;
                     int iphi = corp_index(newphi, phimin, phimax, dphi, Nphi);
-                    hist[index] += PTtowers[ieta][iphi];
+                    hist[index] += dummyPT[ieta][iphi];
                 }  
             }
             f2 << iR << " " << newP.xT() << " " << newP.phi() << " " 
