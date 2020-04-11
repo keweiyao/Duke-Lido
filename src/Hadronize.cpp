@@ -100,7 +100,7 @@ void FormChain(particle pi, particle pf,
             th.acol = pi.col;
             th.pid = -std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pi.Tf,.15), 0,0,pi.x.z()/pi.x.t());
+                  std::max(pi.Tf,.16), 0, 0, pi.x.z()/pi.x.t());
             th.mass = 0.;
 	    th.x0 = pi.x;
             th.vcell.resize(3);
@@ -120,7 +120,7 @@ void FormChain(particle pi, particle pf,
             th.acol = 0;
             th.pid = std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pf.Tf,.15), 0 ,0, pf.x.z()/pf.x.t());
+                  std::max(pf.Tf,.16), 0, 0, pf.x.z()/pf.x.t());
             th.mass = 0.;
 	    th.x0 = pf.x;
             th.vcell.resize(3);
@@ -166,7 +166,6 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
         chains.push_back(chain);
     }
    
-    LOG_INFO << "# of chains" << chains.size();
     for (auto & c : chains){
         double maxQ0 = Q0;
         pythia.event.reset();
