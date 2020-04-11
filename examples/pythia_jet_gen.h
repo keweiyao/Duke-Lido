@@ -128,15 +128,13 @@ void PythiaGen::Generate(std::vector<particle> & plist){
             _p.mass = std::abs(p.m());
             _p.x0 = fourvec{0,x,y,0};
             _p.x = _p.x0; 
-            fourvec xx{0., 0., 0., 0.};
-            //find_production_x(i, xx, event);
-            _p.tau_i = xx.t()/2.;
+            _p.tau_i = 0.;
             _p.p0 = p0;
             _p.Q0 = Q0;
             _p.Q00 = Q0;
  
             if (std::abs(_p.pid) != 4 && 
-                        std::abs(_p.pid) != 5 && p.isParton()) {
+                std::abs(_p.pid) != 5 && p.isParton()) {
                 _p.mass = 0;
             }
             _p.col = p.col();

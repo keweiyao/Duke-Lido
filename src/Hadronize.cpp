@@ -99,7 +99,7 @@ void FormChain(particle pi, particle pf,
             th.acol = pi.col;
             th.pid = -std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pi.Tf,.15), pi.vcell[0], pi.vcell[1], pi.vcell[2]);
+                  std::max(pi.Tf,.16), pi.vcell[0], pi.vcell[1], pi.vcell[2]);
             th.mass = 0.;
 	    th.x0 = pi.x;
             th.vcell.resize(3);
@@ -119,7 +119,7 @@ void FormChain(particle pi, particle pf,
             th.acol = 0;
             th.pid = std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pf.Tf,.15), pf.vcell[0], pf.vcell[1], pf.vcell[2]);
+                  std::max(pf.Tf,.16), pf.vcell[0], pf.vcell[1], pf.vcell[2]);
             th.mass = 0.;
 	    th.x0 = pf.x;
             th.vcell.resize(3);

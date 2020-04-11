@@ -255,6 +255,7 @@ int update_particle_momentum_Lido(
     double dt_for_pIn = compute_realtime_to_propagate(dt_input, pIn.x, pIn.p);
     pIn.freestream(dt_for_pIn);
 
+    // we only handle u,d,s,c,b,g
     if (!((pIn.pid==21) || (std::abs(pIn.pid)<=5))){
         pOut_list.push_back(pIn);
         return pOut_list.size();
@@ -264,10 +265,11 @@ int update_particle_momentum_Lido(
     if ((!pIn.is_virtual) && 
         pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut*temp
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
-            std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) ){
+            std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 
+	){
         pIn.radlist.clear();
-        //pIn.p = Srandom::generate_thermal_parton_with_boost(
-        //            temp, v3cell[0], v3cell[1], v3cell[2]);
+        pIn.p = Srandom::generate_thermal_parton_with_boost(
+                    temp, v3cell[0], v3cell[1], v3cell[2]);
         pOut_list.push_back(pIn);
         return -1;
     }
@@ -375,7 +377,8 @@ int update_particle_momentum_Lido(
     // If a scattering happens:
     if (channel >= 0){
         if (channel >= AllProcesses[absid].size()){
-            LOG_INFO << absid  <<" " << temp  << " "<< v3cell[0] << " " << v3cell[1] << " " << v3cell[2];
+            LOG_INFO << absid  <<" " << temp  << " " 
+		     << v3cell[0] << " " << v3cell[1] << " " << v3cell[2];
             LOG_INFO << x0;
             LOG_INFO << " " <<p00 <<"//"<< pIn.p << "//" << pnew;
             LOG_FATAL << "3. Channel = " << channel << " not exists";
@@ -610,7 +613,6 @@ int update_particle_momentum_Lido(
                         pIn.radlist.clear();
                     }
                     int col=-100, acol=-100, mcol=-100, macol=-100;
-                    //f << it->p0.t() << " " << sqrt(kt2n) << " " << pIn.p.t() << " " << pIn.x.t() << std::endl; 
                     SampleFlavorAndColor(temp_pid, pIn.col,
                                          pIn.acol, 2,
                                          21, col, acol, mcol, macol);
