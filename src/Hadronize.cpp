@@ -99,13 +99,13 @@ void FormChain(particle pi, particle pf,
             th.acol = pi.col;
             th.pid = -std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pi.Tf,.16), pi.vcell[0], pi.vcell[1], pi.vcell[2]);
+                  std::max(pi.Tf,.16), 0, 0, pi.x.z()/pi.x.t());
             th.mass = 0.;
 	    th.x0 = pi.x;
             th.vcell.resize(3);
-	    th.vcell[0] = pi.vcell[0];
-            th.vcell[1] = pi.vcell[1];
-            th.vcell[2] = pi.vcell[2];
+	    th.vcell[0] = 0;
+            th.vcell[1] = 0;
+            th.vcell[2] = pi.x.z()/pi.x.t();
 	    th.x = pi.x;
 	    th.Tf = pi.Tf;
             th.Q0 = pi.Tf;
@@ -119,13 +119,13 @@ void FormChain(particle pi, particle pf,
             th.acol = 0;
             th.pid = std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pf.Tf,.16), pf.vcell[0], pf.vcell[1], pf.vcell[2]);
+                  std::max(pf.Tf,.16), 0, 0, pf.x.z()/pf.x.t());
             th.mass = 0.;
 	    th.x0 = pf.x;
             th.vcell.resize(3);
-	    th.vcell[0] = pf.vcell[0];
-            th.vcell[1] = pf.vcell[1];
-            th.vcell[2] = pf.vcell[2];
+	    th.vcell[0] = 0;
+            th.vcell[1] = 0;
+            th.vcell[2] = pf.x.z()/pf.x.t();
 	    th.x = pf.x;
 	    th.Tf = pf.Tf;
             th.Q0 = pi.Tf;
@@ -164,7 +164,6 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
         chains.push_back(chain);
     }
    
-    LOG_INFO << "# of chains" << chains.size();
     for (auto & c : chains){
         double maxQ0 = Q0;
         pythia.event.reset();

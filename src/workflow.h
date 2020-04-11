@@ -31,6 +31,7 @@ struct particle{
 	}
 };
 
+
 typedef Rate<LO, 2, 2, double(*)(const double, void*)> Rate22;
 typedef Rate<GB, 2, 2, double(*)(const double*, void*)> Rate23;
 typedef Rate<GB, 2, 4, double(*)(const double*, void*)> Rate32;

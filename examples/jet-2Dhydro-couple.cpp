@@ -27,6 +27,13 @@ void output_jet(std::string fname, std::vector<particle> plist){
     f.close();
 }
 
+struct event{
+std::vector<particle> plist, colorlist, thermal_list, hlist;
+std::vector<current> clist;
+std::vector<HadronizeCurrent> slist;
+double sigma;
+};
+
 int main(int argc, char* argv[]){
     using OptDesc = po::options_description;
     OptDesc options{};
@@ -144,15 +151,23 @@ int main(int argc, char* argv[]){
         // Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
                 
-	std::vector<double> TriggerBin({
-	2,6,10,16,
-	20,30,40,50,
-	60,80,100,120,
-	140,160,200,240,
-	300,400,500,600,800,
-	1000,1500,2000});
-	
-        for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
+    std::vector<double> TriggerBin({
+    2,4,6,8,10,12,16,
+    20,30,40,50,60,
+    70,80,90,100,120,
+    140,160,180,200,220,240,260,
+    300,340,380,420,460,500,
+    600,700,800,900,
+    1000,1200,1400});
+    
+
+        /// Initialzie a hydro reader
+        Medium<2> med1(args["hydro"].as<fs::path>().string());
+
+        std::vector<event> events;
+        // Fill in all events
+        LOG_INFO << "Events initialization";
+        for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++) {    
             /// Initialize a pythia generator for each pT trigger bin
             PythiaGen pythiagen(
                 args["pythia-setting"].as<fs::path>().string(),
@@ -162,70 +177,58 @@ int main(int argc, char* argv[]){
                 args["eid"].as<int>(),
                 Q0
             );
-            
-            LOG_INFO << pythiagen.sigma_gen() << " " 
-                     << TriggerBin[iBin] << " "
-                     << TriggerBin[iBin+1];
-            for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
-                std::vector<particle> plist, colorlist, hlist, thermal_list,
-                                      new_plist, pOut_list;
-                std::vector<current> clist;
-                std::vector<HadronizeCurrent> slist;
-                
-                // Initialize parton list from python
-                pythiagen.Generate(plist);
-                double sigma_gen = pythiagen.sigma_gen()
-                                  / args["pythia-events"].as<int>();
-                
-                /// Initialzie a hydro reader
-                Medium<2> med1(args["hydro"].as<fs::path>().string());
+            LOG_INFO << " Generating " 
+                     << TriggerBin[iBin] << " < PT_hat <"
+                     << TriggerBin[iBin+1] << " GeV";
+            for (int i=0; i<args["pythia-events"].as<int>(); i++){
+                event e1;
+                pythiagen.Generate(e1.plist);
+                e1.sigma = pythiagen.sigma_gen()
+                           /args["pythia-events"].as<int>();            
                 // freestream form t=0 to tau=tau0
-                for (auto & p : plist){
+                for (auto & p : e1.plist){
                     p.Tf = 0.161;
-                    if (p.x.tau() < med1.get_tauH()){
-                        p.freestream(
-                            compute_realtime_to_propagate(
-                                med1.get_tauH(), p.x, p.p
-                            )
+                    if (p.x.tau() < med1.get_tauH())
+                        p.freestream(compute_realtime_to_propagate(
+                                   med1.get_tauH(), p.x, p.p)
                         );
-                    }
                 }   
-		// Evolution
-		while(med1.load_next()){
-                    double current_hydro_clock = med1.get_tauL();
-                    double dtau = med1.get_hydro_time_step();
-                    new_plist.clear();
-                    for (auto & p : plist){     
-                        if (p.Tf < 0.15 || std::abs(p.p.rap())>5.) {
-                            new_plist.push_back(p);
-                            continue;       
-                        }
-			double DeltaTau=0.;
-                        if (p.x.tau() > current_hydro_clock+dtau){
-                            // if the particle time is in the future 
-                            // (not formed to the medium yet), put it back 
-                            // in the list 
-                            new_plist.push_back(p);
-                            continue;
-                        }
-                        else{
-                            DeltaTau = current_hydro_clock 
-                                     + dtau - p.x.tau();
-                        }
+                events.push_back(e1);
+            }
+        }
+        LOG_INFO << "Start evolution of " << events.size() << " hard events";
+        while(med1.load_next()) {
+            double current_hydro_clock = med1.get_tauL();
+            double dtau = med1.get_hydro_time_step();
+            LOG_INFO << "Hydro t = " << current_hydro_clock/5.076 << " fm/c";
+            for (auto & ie : events){
+                std::vector<particle> new_plist, pOut_list;
+                for (auto & p : ie.plist){     
+                    if (p.Tf < 0.15 || std::abs(p.p.rap())>5.) {
+                        new_plist.push_back(p);
+                        continue;       
+                    }
+               
+                    if (p.x.tau() > current_hydro_clock+dtau){
+                        // if the particle time is in the future 
+                        // (not formed to the medium yet), put it back 
+                        // in the list 
+                        new_plist.push_back(p);
+                        continue;
+                    }
+                    else{
+                        double DeltaTau = 
+                               current_hydro_clock + dtau - p.x.tau();
                         // get hydro information
                         double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.0;
-                            
                         med1.interpolate(p.x, T, vx, vy, vz);
-                        double vzgrid = p.x.z()/p.x.t();
                         fourvec ploss = p.p;
-
                         int fs_size = update_particle_momentum_Lido(
-                                  DeltaTau, T, {vx, vy, vz}, p, pOut_list);
-                         
+                                DeltaTau, T, {vx, vy, vz}, p, pOut_list);     
                         if (fs_size==-1){
                             // particle lost to the medium, but we
                             // track its color
-                            colorlist.push_back(pOut_list[0]);
+                            ie.colorlist.push_back(pOut_list[0]);
                         }
                         else {
                             for (auto & fp : pOut_list) {
@@ -233,37 +236,46 @@ int main(int argc, char* argv[]){
                                 new_plist.push_back(fp);
                             }                           
                             current J; 
-                            ploss = ploss.boost_to(0, 0, vzgrid);
+                            ploss = ploss.boost_to(0, 0, p.x.z()/p.x.t());
                             J.p = ploss;
                             J.chetas = std::cosh(p.x.rap());
                             J.shetas = std::sinh(p.x.rap());
                             J.cs = std::sqrt(.3333);
-                            clist.push_back(J);  
-			}
+                            ie.clist.push_back(J);  
+                        }
                     }
-                    plist = new_plist;
                 }
-                for (auto & p : colorlist) plist.push_back(p);
-                Hadronizer.hadronize(plist, hlist, thermal_list, Q0, 1);
-                for(auto & it : thermal_list){
-                    double vz = it.x.z()/it.x.t();
-                    current J; 
-                    J.p = it.p.boost_to(0, 0, vz)*(-1.);
-                    J.chetas = std::cosh(it.x.rap());
-                    J.shetas = std::sinh(it.x.rap());
-                    J.cs = std::sqrt(.3333);
-                    clist.push_back(J);  
-                }
-                std::vector<double> Rs({.2,.4,.6,.8, 1.});
-                dNdpT.add_event(hlist, sigma_gen);
-                /*FindJetTower(
-                    plist, clist, slist,
+                ie.plist = new_plist;
+            }
+        }    
+
+        // Hadronization
+        // put back lost particles with their color
+        LOG_INFO << "Hadronization";
+        for (auto & ie : events){
+            for (auto & p : ie.colorlist) ie.plist.push_back(p);
+            Hadronizer.hadronize(ie.plist, ie.hlist, ie.thermal_list, Q0, 1);
+            for(auto & it : ie.thermal_list){
+                double vz = it.x.z()/it.x.t();
+                current J; 
+                J.p = it.p.boost_to(0, 0, vz)*(-1.);
+                J.chetas = std::cosh(it.x.rap());
+                J.shetas = std::sinh(it.x.rap());
+                J.cs = std::sqrt(.3333);
+                ie.clist.push_back(J);  
+            }
+         }
+        LOG_INFO << "Jet finding, w/ medium excitation";
+        for (auto & ie : events){
+            std::vector<double> Rs({.2,.4,.6,.8, 1.});
+            dNdpT.add_event(ie.hlist, ie.sigma);
+            /*FindJetTower(
+                    ie.hlist, ie.clist, ie.slist,
                     Rs, 10,
                     -3, 3,
                     fheader.str(), 
                     sigma_gen
-                );*/
-            }
+            );*/
         }
         dNdpT.write(fheader.str());
     }
