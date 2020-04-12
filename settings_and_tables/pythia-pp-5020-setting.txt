@@ -1,0 +1,48 @@
+! 1) Set random seed
+Random:setSeed = on
+Random:seed = 0
+
+! 2) Beam
+Beams:idA = 2212            ! first beam, p = 2212, 
+Beams:idB = 2212            ! second beam, p = 2212, pbar = -2212
+Beams:eCM = 5020                 ! CM energy of collision
+
+! 3) Hard process
+HardQCD:all = on
+HardQCD:hardccbar = on
+HardQCD:hardbbbar = on
+
+! 4) Parton shower / MPI / Remnants
+PartonLevel:all = on
+PartonLevel:MPI = off
+PartonLevel:ISR = on
+PartonLevel:FSR = on
+PartonLevel:Remnants = on
+Check:event = on
+TimeShower:pTmaxFudge = .25
+
+! 5) Hadron level
+HadronLevel:all = on
+HadronLevel:Decay = on
+
+! 7) Decay
+4:m0 = 1.3
+5:m0 = 4.2
+# Uncomment below for pi, K, p, D, B hadrons
+#111:mayDecay = off
+#211:mayDecay = off
+#311:mayDecay = off
+#321:mayDecay = off
+#2212:mayDecay = off
+#411:mayDecay = off
+#421:mayDecay = off
+#413:mayDecay = off
+#423:mayDecay = off
+#511:mayDecay = off
+#521:mayDecay = off
+#513:mayDecay = off
+#523:mayDecay = off
+
+! 8) PDF
+#CTEQ6L1, LO alpha_s(M_Z) = 0.1298.
+PDF:pSet = 8

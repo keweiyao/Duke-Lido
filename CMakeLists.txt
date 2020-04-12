@@ -201,24 +201,24 @@ include_directories(jet_analysis)
 
 
 foreach(App "Lido-TabGen" "brick")
-	add_executable(${App} ./examples/${App}.cpp)
+	add_executable(${App} ./TestMains/${App}.cpp)
 	target_link_libraries(${App} ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
 	install(TARGETS ${App} DESTINATION bin)
 endforeach()
 
 if(pythia8)
-foreach(App "jet-2Dhydro-couple" "jet-pp-gen" "jet-energy-flow" "testsource")
-	add_executable(${App} ./examples/${App}.cpp)
+foreach(App "jet-2Dhydro-couple" "jet-pp-gen")
+	add_executable(${App} ./JetMains/${App}.cpp)
 	target_link_libraries(${App} ${LIBRARY_NAME} ${LIBRARY_JETFIND} ${PYTHIA8_LIBRARIES} ${FASTJET_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS ${App} DESTINATION bin)
 endforeach()
 
 foreach(App "HQ-2Dhydro-couple" "pythia_HQ_baseline")
-	add_executable(${App} ./examples/${App}.cpp)
+	add_executable(${App} ./HeavyQuarkMains/${App}.cpp)
 	target_link_libraries(${App} ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS ${App} DESTINATION bin)
 endforeach()
 endif(pythia8)
 
-install(FILES ./settings/lido_settings.xml DESTINATION share)
+#install(FILES ./settings/lido_settings.xml DESTINATION share)
 
