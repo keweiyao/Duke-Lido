@@ -48,23 +48,28 @@ class MyInfo: public fastjet::PseudoJet::UserInfoBase {
     double _w;
 };
 
+
+struct Fjet{
+    fourvec pmu, Lpmu;
+    double R, pT, M2, phi, eta;
+    std::vector<double> shape;
+    int LFlavor;
+    double LpT, Lphi, Ly, Leta;
+};
 void TestSource(
              std::vector<current> jlist,
              std::vector<HadronizeCurrent> slist,
              std::string fname
      );
-void FindJetTower(
-             std::vector<particle> plist, 
-             std::vector<current> jlist,
-             std::vector<HadronizeCurrent> slist,
+std::vector<Fjet> FindJetTower(std::vector<particle> plist,
+             std::vector<current> SourceList,
+             std::vector<HadronizeCurrent> HadronizeList,
              std::vector<double> Rs,
-             double jetpTMin, 
-             double jetyMin, 
+	     std::vector<double> rbins,
+             double jetpTMin,
+             double jetyMin,
              double jetyMax,
-             std::string fname, 
-             double sigma_gen
-     );
-
+             double sigma_gen);
 class LeadingParton{
    public:
    LeadingParton(std::vector<double> _pTbins);
@@ -74,5 +79,15 @@ class LeadingParton{
    std::vector<double> pTbins, binwidth, nchg, npi, nD, nB;
    int NpT;
 };
-
+class JetStatistics{
+   public:
+   JetStatistics(std::vector<double> _pTbins, std::vector<double> Rs, std::vector<double> shapepTbins, std::vector<double> shaperbins);
+   void add_event(std::vector<Fjet> jets, double sigma_gen);
+   void write(std::string fheader);
+   private:
+   std::vector<double> pTbins, binwidth, shape_pTbins, shape_rbins;
+   std::vector<double> shape_w, Rs;
+   std::vector<std::vector<double> > shapes, dsigmadpT, dBdpT, dDdpT;
+   int NpT, shape_NpT, shape_Nr;
+};
 #endif

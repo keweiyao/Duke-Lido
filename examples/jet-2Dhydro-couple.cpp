@@ -145,22 +145,31 @@ int main(int argc, char* argv[]){
         /// Initialize a simple hadronizer
         JetDenseMediumHadronize Hadronizer;
 
-        std::vector<double> pTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
+        /// all kinds of bins and cuts
+	std::vector<double> TriggerBin({
+         10,20,30,40,60,
+         80,100,120,
+         140,160,180,200,240,280,
+         320,360,400,500,
+         600,700,800,900,
+         1000,1200,1400,2000});
+
+        std::vector<double> Rs({.2,.4,.6,.8, 1.});
+
+        std::vector<double> ParticlepTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
                50,60,80,100,120,150,200,300,400,500,600,1000,2000});
-        LeadingParton dNdpT(pTbins);
+        std::vector<double> jetpTbins({10,15,20,30,40,
+               50,60,80,120,160,200,300,400,500,600,800,1000,1400,1800});
+	std::vector<double> shapepTbins({20,30,40,60,80,120,2000});
+        std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
+                          .35, .4, .45, .5,  .6, .7,  .8,
+                           1., 1.5, 2.0, 2.5, 3.0});
+
+	LeadingParton dNdpT(ParticlepTbins);
+	JetStatistics JetSample(jetpTbins, Rs, shapepTbins, shaperbins);
         // Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
                 
-    std::vector<double> TriggerBin({
-    2,4,6,8,10,12,16,
-    20,30,40,50,60,
-    70,80,90,100,120,
-    140,160,180,200,220,240,260,
-    300,340,380,420,460,500,
-    600,700,800,900,
-    1000,1200,1400});
-    
-
         /// Initialzie a hydro reader
         Medium<2> med1(args["hydro"].as<fs::path>().string());
         std::vector<event> events;
@@ -266,17 +275,14 @@ int main(int argc, char* argv[]){
          }
         LOG_INFO << "Jet finding, w/ medium excitation";
         for (auto & ie : events){
-            std::vector<double> Rs({.2,.4,.6,.8, 1.});
             dNdpT.add_event(ie.hlist, ie.sigma);
-            /*FindJetTower(
-                    ie.hlist, ie.clist, ie.slist,
-                    Rs, 10,
-                    -3, 3,
-                    fheader.str(), 
-                    sigma_gen
-            );*/
+	    auto jets = FindJetTower(
+                 ie.hlist, ie.clist, ie.slist, 
+	         Rs, shaperbins, 10, -3, 3, ie.sigma);
+	    JetSample.add_event(jets, ie.sigma);
         }
         dNdpT.write(fheader.str());
+	JetSample.write(fheader.str());
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

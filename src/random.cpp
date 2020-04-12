@@ -33,7 +33,10 @@ bool binary_choice(){
 }
 fourvec generate_thermal_parton_with_boost(double T, double vx, double vy, double vz){
     // randomly sample the four momentum
-    double se = T*Srandom::sample_E_over_T(Srandom::gen);
+    double se;
+    do {
+        se = T*Srandom::sample_E_over_T(Srandom::gen);
+    } while (se>5.*T);
     double phi = Srandom::dist_phi(Srandom::gen);
     double cos = Srandom::dist_costheta(Srandom::gen);
     double sin = std::sqrt(1.-cos*cos);

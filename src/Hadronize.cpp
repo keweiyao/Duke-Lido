@@ -98,15 +98,17 @@ void FormChain(particle pi, particle pf,
             particle th;
             th.col = 0;
             th.acol = pi.col;
+	    double vz = pi.x.z()/(1e-9+pi.x.t());
+            if (std::abs(vz)>.999) vz = vz/std::abs(vz)*.999;
             th.pid = -std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pi.Tf,.16), 0, 0, pi.x.z()/pi.x.t());
+                  std::max(pi.Tf,.16), 0, 0, vz);
             th.mass = 0.;
 	    th.x0 = pi.x;
             th.vcell.resize(3);
 	    th.vcell[0] = 0;
             th.vcell[1] = 0;
-            th.vcell[2] = pi.x.z()/pi.x.t();
+            th.vcell[2] = vz;
 	    th.x = pi.x;
 	    th.Tf = pi.Tf;
             th.Q0 = pi.Tf;
@@ -118,15 +120,17 @@ void FormChain(particle pi, particle pf,
             particle th;
             th.col = pf.acol;
             th.acol = 0;
+	    double vz = pf.x.z()/(1e-9+pf.x.t());
+	    if (std::abs(vz)>.999) vz = vz/std::abs(vz)*.999;
             th.pid = std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pf.Tf,.16), 0, 0, pf.x.z()/pf.x.t());
+                  std::max(pf.Tf,.16), 0, 0, vz);
             th.mass = 0.;
 	    th.x0 = pf.x;
             th.vcell.resize(3);
 	    th.vcell[0] = 0;
             th.vcell[1] = 0;
-            th.vcell[2] = pf.x.z()/pf.x.t();
+            th.vcell[2] = vz;
 	    th.x = pf.x;
 	    th.Tf = pf.Tf;
             th.Q0 = pi.Tf;

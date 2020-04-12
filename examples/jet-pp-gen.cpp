@@ -83,6 +83,30 @@ int main(int argc, char* argv[]){
             }
         }
 
+        /// all kinds of bins and cuts
+        std::vector<double> TriggerBin({
+         5,10,15,
+         20,30,40,50,60,
+         70,80,90,100,120,
+         140,160,180,200,220,240,260,
+         300,340,380,420,460,500,
+         600,700,800,900,
+         1000,1200,1400,2000});
+
+        std::vector<double> Rs({.2,.4,.6,.8, 1.});
+
+        std::vector<double> ParticlepTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
+               50,60,80,100,120,150,200,300,400,500,600,1000,2000});
+        std::vector<double> jetpTbins({10,15,20,30,40,
+               50,60,80,120,160,200,300,400,500,600,800,1000,1400,1800});
+        std::vector<double> shapepTbins({20,30,40,60,80,120,2000});
+        std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
+                          .35, .4, .45, .5,  .6, .7,  .8,
+                           1., 1.5, 2.0, 2.5, 3.0});
+
+        LeadingParton dNdpT(ParticlepTbins);
+        JetStatistics JetSample(jetpTbins, Rs, shapepTbins, shaperbins);
+
         // Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
         /// use process id to define filename
@@ -91,18 +115,7 @@ int main(int argc, char* argv[]){
         fheader << args["output"].as<fs::path>().string() 
                 << processid;
 
-        std::vector<double> pTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
-               50,60,80,100,120,150,200,300,400,500,600,1000,2000});
-        LeadingParton dNdpT(pTbins);
-        std::vector<double> TriggerBin({
-        //1,2,3,4,
-        5,10,15,20,25,30,40,50,60,80,100,
-	110,120,130,140,150,160,170,180,200,
-	220,240,260,280,300,
-	350,400,450,500,550,600,650,700,
-	750,800,900,1000,1200,1400,1600,
-	1800,2000});
-        for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
+	for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
             PythiaGen pythiagen(
                 args["pythia-setting"].as<fs::path>().string(),
@@ -116,8 +129,7 @@ int main(int argc, char* argv[]){
                      << TriggerBin[iBin] << " "
                      << TriggerBin[iBin];
             for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
-                std::vector<particle> plist, hlist, thermal_list,
-                                      new_plist, pOut_list;
+                std::vector<particle> plist;
                 std::vector<current> clist;
                 std::vector<HadronizeCurrent> slist;
                 // Initialize parton list from python
@@ -127,16 +139,14 @@ int main(int argc, char* argv[]){
                 
                 std::vector<double> Rs({.2,.4,.6,.8,1.});
                 dNdpT.add_event(plist, sigma_gen);
-                FindJetTower(
-                    plist, clist, slist,
-                    Rs, 10,
-                    -3, 3,
-                    fheader.str(), 
-                    sigma_gen
-                );
+                auto jets = FindJetTower(
+                     plist, clist, slist,
+                     Rs, shaperbins, 10, -3, 3, sigma_gen);
+                JetSample.add_event(jets, sigma_gen);
             }
         }
         dNdpT.write(fheader.str());
+	JetSample.write(fheader.str());
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";
