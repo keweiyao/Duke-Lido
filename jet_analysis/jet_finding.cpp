@@ -58,7 +58,7 @@ void redistribute(
     for (int iy=0; iy<_Ny; iy++){
         clist[iy].chetas = std::cosh(ymin+iy*dy/coarse_level);
         clist[iy].shetas = std::sinh(ymin+iy*dy/coarse_level);
-        clist[iy].cs = std::sqrt(.333);
+        clist[iy].cs = std::sqrt(.25);
         clist[iy].p.a[0] = 0.;
 	clist[iy].p.a[1] = 0.;
 	clist[iy].p.a[2] = 0.;
@@ -223,7 +223,6 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
         double phi = p.p.phi();
         int ieta = corp_index(eta, etamin, etamax, deta, Neta);
         if (ieta<0) continue;
-        if (p.p.xT()<.7) continue;
         int iphi = corp_index(phi, phimin, phimax, dphi, Nphi);
         Pmutowers[ieta][iphi] = Pmutowers[ieta][iphi] + p.p;
         PTtowers[ieta][iphi] += p.p.xT();
@@ -322,8 +321,6 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
             // label the jet flavor:
             // if heavy, label it by heavy quark id
             // else, label it by the hardest (pT) parton inside
-            int flavor=0;
-            fourvec pf{0,0,0,0};
             for (auto & p : plist){
                 int absid = std::abs(p.pid);
                 bool trigger = absid == 4 || 
@@ -336,33 +333,15 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
                     double eta = p.p.pseudorap();
                     double phi = p.p.phi();
                     if (std::sqrt(std::pow(eta-Jeta,2)
-                                 +std::pow(phi-Jphi,2)) < (jetRadius+.1)) { // for R jet , find heavy flavor in R+.1 bins
-                        flavor = std::abs(p.pid);
-                        pf = p.p;
-                        break;
+                        +std::pow(phi-Jphi,2)) < (jetRadius+.1)) { 
+			// for R jet , find heavy flavor in R+.1 bins
+			particle flavor_tag;
+			flavor_tag.p = p.p;
+                        flavor_tag.pid = std::abs(p.pid); 
+		        J.Ftags.push_back(flavor_tag);
                     }
                 }
-            }      
-            if (flavor==0)  {
-                for (auto & p : plist){
-                    double eta = p.p.pseudorap();
-                    double phi = p.p.phi();
-                    if (std::sqrt(std::pow(eta-Jeta,2)
-                                 +std::pow(phi-Jphi,2)) < jetRadius) {
-                        if ( p.p.xT()>pf.xT() ){
-                            flavor = std::abs(p.pid);
-                            pf = p.p;
-                        }
-                    }
-                }
-            }
-	    
-            J.LFlavor = flavor;
-            J.LpT = pf.xT();
-	    J.Ly = pf.rap();
-	    J.Leta = pf.pseudorap();
-	    J.Lphi = pf.phi();
-	    J.Lpmu = pf;
+            } 
 	    Results.push_back(J);
         }
 
@@ -479,8 +458,8 @@ void LeadingParton::add_event(std::vector<particle> plist, double sigma_gen){
         int pid = std::abs(p.pid);
         bool ispi = pid==111 || pid == 211;
         bool ischg = pid==211 || pid==321 || pid==2212;
-        bool isD = pid==411 || pid == 421 || pid == 413 || pid == 423;
-        bool isB = pid==511 || pid == 521 || pid == 513 || pid == 523;
+        bool isD = pid==411 || pid == 421 || pid == 413 || pid == 423 || pid ==4;
+        bool isB = pid==511 || pid == 521 || pid == 513 || pid == 523 || pid ==5;
         if (std::abs(p.p.rap()) < 1.) {
             double pT = p.p.xT();
             int ii=0;
@@ -547,6 +526,17 @@ JetStatistics::JetStatistics(std::vector<double> _pTbins, std::vector<double> _R
             it.resize(NpT);
         for (auto & iit : it ) iit=0.;
     }
+    dD0dpT.resize(Rs.size());
+    for (auto & it:dD0dpT) {
+            it.resize(NpT);
+        for (auto & iit : it ) iit=0.;
+    }
+    dB0dpT.resize(Rs.size());
+    for (auto & it:dB0dpT) {
+            it.resize(NpT);
+        for (auto & iit : it ) iit=0.;
+    }
+
 
     binwidth.resize(NpT);
     for (int i=0; i<NpT; i++)
@@ -595,6 +585,7 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
     }
 
     for (auto & J : jets){
+	// check jet R
 	int iR;
         for (int i=0; i<Rs.size(); i++){
             if ( ( (Rs[i]-.01)<J.R)
@@ -606,11 +597,24 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
         }
         if (iR==Rs.size()) continue;
 
-	int f = std::abs(J.LFlavor);
-	bool isD = (f==411)||(f==421)||(f==413)||(f==423)||(f==4); 
-   	bool isB = (f==511)||(f==521)||(f==513)||(f==523)||(f==5);
-        if (std::abs(J.eta) < 2.1 && isB && J.LpT>5.){
-	    // ATLAS cut
+        if (std::abs(J.eta) < 2.1){
+            // check flavor content
+            bool isD = false;
+	    bool isDpTcut = false;
+            bool isB = false;
+	    bool isBpTcut = false;
+	    for (auto & p : J.Ftags) {
+		int f = std::abs(p.pid);
+                isD = isD || ((f==411)||(f==421)||(f==413)||(f==423)||(f==4));
+                isB = isB || ((f==511)||(f==521)||(f==513)||(f==523)||(f==5));
+                isBpTcut = isBpTcut || (
+		 ((f==511)||(f==521)||(f==513)||(f==523)||(f==5))
+		 && (p.p.xT()>5.));
+                isDpTcut = isDpTcut || (
+                 ((f==411)||(f==421)||(f==413)||(f==423)||(f==4))
+                 && (p.p.xT()>5.));
+	    }
+	    // check jet pT cut
             int ii=0;
             for (int i=0; i<NpT; i++){
                 if ( (pTbins[i]<J.pT) && (J.pT<pTbins[i+1]) ) {
@@ -619,19 +623,10 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
                 }
             }
             if (ii==NpT) ii=NpT-1;
-            dBdpT[iR][ii] += sigma_gen;
-        }
-        if (std::abs(J.eta) < 2.1 && isD && J.LpT>5.){
-            // ATLAS cut
-            int ii=0;
-            for (int i=0; i<NpT; i++){
-                if ( (pTbins[i]<J.pT) && (J.pT<pTbins[i+1]) ) {
-                    ii = i;
-                    break;
-                }
-            }
-            if (ii==NpT) ii=NpT-1;
-            dDdpT[iR][ii] += sigma_gen;
+	    if (isB) dB0dpT[iR][ii] += sigma_gen;
+	    if (isBpTcut) dBdpT[iR][ii] += sigma_gen;
+	    if (isD) dD0dpT[iR][ii] += sigma_gen;
+            if (isDpTcut) dDdpT[iR][ii] += sigma_gen;
         }
     }     
 }
@@ -647,7 +642,9 @@ void JetStatistics::write(std::string fheader){
                  << pTbins[i+1] << " "
                  << dsigmadpT[iR][i]/binwidth[i] << " "
                  << dDdpT[iR][i]/binwidth[i] << " "
-                 << dBdpT[iR][i]/binwidth[i] << std::endl;
+                 << dBdpT[iR][i]/binwidth[i] << " "
+		 << dD0dpT[iR][i]/binwidth[i] << " "
+                 << dB0dpT[iR][i]/binwidth[i] << std::endl;
         }
         f.close();
     }

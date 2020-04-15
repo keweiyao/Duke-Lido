@@ -50,11 +50,10 @@ class MyInfo: public fastjet::PseudoJet::UserInfoBase {
 
 
 struct Fjet{
-    fourvec pmu, Lpmu;
+    fourvec pmu;
     double R, pT, M2, phi, eta;
     std::vector<double> shape;
-    int LFlavor;
-    double LpT, Lphi, Ly, Leta;
+    std::vector<particle> Ftags;
 };
 void TestSource(
              std::vector<current> jlist,
@@ -87,7 +86,7 @@ class JetStatistics{
    private:
    std::vector<double> pTbins, binwidth, shape_pTbins, shape_rbins;
    std::vector<double> shape_w, Rs;
-   std::vector<std::vector<double> > shapes, dsigmadpT, dBdpT, dDdpT;
+   std::vector<std::vector<double> > shapes, dsigmadpT, dBdpT, dDdpT, dB0dpT, dD0dpT;
    int NpT, shape_NpT, shape_Nr;
 };
 #endif

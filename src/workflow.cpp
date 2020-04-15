@@ -582,7 +582,8 @@ int update_particle_momentum_Lido(
                           it->p*(it->p0.t()/it->p.t())
                          ).pabs2();
                 
-                double Running = alpha_s(kt2n, it->T0) / alpha_s(kt20, it->T0);
+                double Running = std::min(
+			alpha_s(kt2n, it->T0) / alpha_s(kt20, it->T0), 1.);
                 // 2): a dead-cone approximation for massive particles
                 double theta2 = kt2n / std::pow(it->p.t(), 2);
                 double thetaM2 = std::pow(pIn.mass / it->mother_p.t(), 2);

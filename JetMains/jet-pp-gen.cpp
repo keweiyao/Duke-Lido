@@ -85,7 +85,7 @@ int main(int argc, char* argv[]){
 
         /// all kinds of bins and cuts
         std::vector<double> TriggerBin({
-         5,10,15,
+         1,2,4,6,10,15,
          20,30,40,50,60,
          70,80,90,100,120,
          140,160,180,200,220,240,260,

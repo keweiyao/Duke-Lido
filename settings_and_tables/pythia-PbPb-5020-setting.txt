@@ -27,11 +27,12 @@ HadronLevel:Decay = off
 
 ! 7) Decay
 4:m0 = 1.3
+4:mayDecay = off
 5:m0 = 4.2
+5:mayDecay = off
 
 ! 8) PDF
-# USE EPS09 LO settings, its pp baseline matches the one used in 
-# pp settings, which is CTEQ6L1
+PDF:pSet = 8
 PDF:useHard = on
 PDF:useHardNPDFA = on
 PDF:nPDFSetA = 1

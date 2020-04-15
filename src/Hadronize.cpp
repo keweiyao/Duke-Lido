@@ -27,14 +27,16 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("3:m0 = 0");
     pythia.readString("4:m0 = 1.3");
     pythia.readString("5:m0 = 4.2");
-    pythia.readString("PartonLevel:Remnants = off");
+    pythia.readString("PartonLevel:Remnants = on");
     pythia.readString("HadronLevel:all = on");
     pythia.readString("HadronLevel:Decay = on");
+    /*pythia.readString("4:mayDecay = off");
+    pythia.readString("5:mayDecay = off");
     pythia.readString("111:mayDecay = off");
     pythia.readString("211:mayDecay = off");
 pythia.readString("311:mayDecay = off");
 pythia.readString("321:mayDecay = off");
-pythia.readString("2212:mayDecay = off");
+pythia.readString("2212:mayDecay = off");*/
 pythia.readString("411:mayDecay = off");
 pythia.readString("421:mayDecay = off");
 pythia.readString("413:mayDecay = off");
@@ -98,16 +100,18 @@ void FormChain(particle pi, particle pf,
             particle th;
             th.col = 0;
             th.acol = pi.col;
-	    double vz = pi.x.z()/(1e-9+pi.x.t());
+	    double vx = pi.vcell[0];
+	    double vy = pi.vcell[1];
+	    double vz = pi.vcell[2];//pi.x.z()/(1e-9+pi.x.t());
             if (std::abs(vz)>.999) vz = vz/std::abs(vz)*.999;
             th.pid = -std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pi.Tf,.16), 0, 0, vz);
+                  std::max(pi.Tf,.16), vx, vy, vz);
             th.mass = 0.;
 	    th.x0 = pi.x;
             th.vcell.resize(3);
-	    th.vcell[0] = 0;
-            th.vcell[1] = 0;
+	    th.vcell[0] = vx;
+            th.vcell[1] = vy;
             th.vcell[2] = vz;
 	    th.x = pi.x;
 	    th.Tf = pi.Tf;
@@ -120,16 +124,18 @@ void FormChain(particle pi, particle pf,
             particle th;
             th.col = pf.acol;
             th.acol = 0;
-	    double vz = pf.x.z()/(1e-9+pf.x.t());
+	    double vx = pf.vcell[0];
+            double vy = pf.vcell[1];
+            double vz = pf.vcell[2];//pf.x.z()/(1e-9+pf.x.t());
 	    if (std::abs(vz)>.999) vz = vz/std::abs(vz)*.999;
             th.pid = std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pf.Tf,.16), 0, 0, vz);
+                  std::max(pf.Tf,.16), vx, vy, vz);
             th.mass = 0.;
 	    th.x0 = pf.x;
             th.vcell.resize(3);
-	    th.vcell[0] = 0;
-            th.vcell[1] = 0;
+	    th.vcell[0] = vx;
+            th.vcell[1] = vy;
             th.vcell[2] = vz;
 	    th.x = pf.x;
 	    th.Tf = pf.Tf;
@@ -179,9 +185,9 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
 		                 p.p.x(), p.p.y(), p.p.z(), p.p.t(), p.mass);
              pythia.event[count].scale(p.Q0);  
              count++;
-             maxQ0 = (p.Q0 > maxQ0) ? p.Q0 : maxQ0;
+             //maxQ0 = (p.Q0 > maxQ0) ? p.Q0 : maxQ0;
         }     
-        pythia.forceTimeShower(1,count-1,maxQ0);
+        pythia.forceTimeShower(1,count-1,Q0);
         pythia.next();
         int Nff=0;
         for (int i = 0; i < pythia.event.size(); ++i) {
@@ -209,8 +215,9 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
             }
             
             if (level==1 && ip.isFinal() && ip.isParton()){
-                LOG_INFO << "recombin needed";
-                break;
+                LOG_INFO << "recombin needed" << ip.id() << " " 
+			 << ip.e() << " " << ip.px() << " "
+			 << ip.py() << " " << ip.pz();
             }
         }
     }        

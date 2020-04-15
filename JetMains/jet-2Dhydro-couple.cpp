@@ -147,12 +147,12 @@ int main(int argc, char* argv[]){
 
         /// all kinds of bins and cuts
 	std::vector<double> TriggerBin({
-         10,20,30,40,60,
+         5,10,15,20,30,40,60,
          80,100,120,
          140,160,180,200,240,280,
-         320,360,400,500,
+         320,360,400,450,500,550,
          600,700,800,900,
-         1000,1200,1400,2000});
+         1000,1200,1400,1800,2500});
 
         std::vector<double> Rs({.2,.4,.6,.8, 1.});
 
@@ -237,6 +237,15 @@ int main(int argc, char* argv[]){
                             // particle lost to the medium, but we
                             // track its color
                             ie.colorlist.push_back(pOut_list[0]);
+			    current J;
+                            ploss = ploss - pOut_list[0].p;
+			    ploss = ploss.boost_to(0, 0, p.x.z()/p.x.t());
+			    J.p = ploss;
+                            J.chetas = std::cosh(p.x.rap());
+                            J.shetas = std::sinh(p.x.rap());
+                            J.cs = std::sqrt(.3333);
+                            ie.clist.push_back(J);
+
                         }
                         else {
                             for (auto & fp : pOut_list) {
