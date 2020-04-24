@@ -19,14 +19,14 @@ double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
         double CR = (pid==21) ? CA : CF;
         double mD2 = t_channel_mD2->get_mD2(T);
         double Q2cut = std::min(cut*mD2, 6*E*T);
-        return alpha_s(6*E*T, T) * CR * T * mD2 * std::log(1.+Q2cut/mD2);
+        return alpha_s(Q2cut*std::log(1+6*E*T/mD2), T) * CR * T * mD2 * std::log(1.+Q2cut/mD2);
 }
 
 double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
         double CR = (pid==21) ? CA : CF;
         double minf2 = .5*t_channel_mD2->get_mD2(T);
-        double Q2cut = std::min(cut*minf2, 3*E*T);
-        return alpha_s(6*E*T, T) * CR * T * minf2 * std::log(1.+Q2cut/minf2);
+        double Q2cut = std::min(cut*minf2, 6*E*T);
+        return alpha_s(Q2cut*std::log(1+6*E*T/minf2), T) * CR * T * minf2 * std::log(1.+Q2cut/minf2);
 }
 
 

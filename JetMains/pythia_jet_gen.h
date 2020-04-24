@@ -23,49 +23,27 @@ private:
     double sigma0, Q0;
 };
 
-void find_production_x(int i, fourvec & x, Event & event){
-    double tf;
+void reference_pmu(int i, fourvec & kmu, double & tau, Event & event){
     auto p = event[i];
     int im1 = p.mother1();
     int im2 = p.mother2();
     if (im1==im2 && im2 > 0){
         // simply recoil effect, go on
-        find_production_x(im1, x, event);
+        reference_pmu(im1, kmu, tau, event);
     }
     if (im1==0 && im2 ==0) {
-        return;
+        tau = 0.;
+	return;
     }
     if (im1>0 && im2==0){
-        auto m1 = event[im1];
-        // FSR or ISR
-
-        if (p.status() == 51) {
-             int d1 = m1.daughter1();
-             int d2 = m1.daughter2();
-             auto D1 = event[d1];
-             auto D2 = event[d2];
-             
-             double ME = D1.e()+D2.e();
-             double f = p.e()/ME;
-             double Mpx = D1.px()+D2.px(), Mpy = D1.py()+D2.py(), Mpz = D1.pz()+D2.pz();
-             double p2 = p.px()*p.px() + p.py()*p.py() + p.pz()*p.pz();
-             double Q2 = Mpx*Mpx + Mpy*Mpy + Mpz*Mpz;
-             double pdotQ = p.px()*Mpx + p.py()*Mpy + p.pz()*Mpz;
-             double pT2 = p2 - pdotQ*pdotQ/Q2;
-             tf = 2.*f*(1.-f)*ME/pT2;
-       
-            x.a[0] = x.t() + tf;
-            x.a[1] = x.x() + tf*Mpx/ME;
-            x.a[2] = x.y() + tf*Mpy/ME;
-            x.a[3] = x.z() + tf*Mpz/ME;
-            find_production_x(im1, x, event);
-        }
-        else{
-            find_production_x(im1, x, event);
-        }
+        reference_pmu(im1, kmu, tau, event);
     }
     if (im1 != im2 && im1 > 0 && im2 > 0){
-        // hard 2->n process, time scale is short, and we negelect
+        // hard products, reference particles
+	fourvec pmu{p.e(), p.px(), p.py(), p.pz()};
+	double x = std::min(kmu.t()/pmu.t(), 1.);
+	if (x>0.5) tau = 0.;
+	else tau = 2.*kmu.t()/measure_perp(pmu, kmu).pabs2();
         return;
     }
 }
@@ -101,6 +79,7 @@ TRENToSampler(f_trento, iev)
     s2 << "PhaseSpace:pTHatMax = " << pTHH;
     s3 << "Random:seed = " << processid;
     s4 << "TimeShower:pTmin = " << Q0;
+    std::cout<< s4.str();
     pythia.readString(s1.str());
     pythia.readString(s2.str());
     pythia.readString(s3.str());
@@ -128,7 +107,10 @@ void PythiaGen::Generate(std::vector<particle> & plist){
             _p.mass = std::abs(p.m());
             _p.x0 = fourvec{0,x,y,0};
             _p.x = _p.x0; 
-            _p.tau_i = 0.;
+	    double t0 =  0.;
+	    reference_pmu(i, p0, t0, event);
+            _p.tau_i = t0;
+	    LOG_INFO << p0 << " at " << t0/5.076 << " or " << t0/5.076*p0.xT()/p0.t();
             _p.p0 = p0;
             _p.Q0 = Q0;
             _p.Q00 = Q0;
@@ -151,7 +133,7 @@ void PythiaGen::Generate(std::vector<particle> & plist){
             _p.vcell[1] = 0.; 
             _p.vcell[2] = 0.; 
             _p.radlist.clear();
-            
+            _p.charged = p.isCharged(); 
             plist.push_back(_p);
         }
     }

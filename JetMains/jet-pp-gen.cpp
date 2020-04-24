@@ -139,14 +139,14 @@ int main(int argc, char* argv[]){
                 
                 std::vector<double> Rs({.2,.4,.6,.8,1.});
                 dNdpT.add_event(plist, sigma_gen);
-                auto jets = FindJetTower(
-                     plist, clist, slist,
-                     Rs, shaperbins, 10, -3, 3, sigma_gen);
-                JetSample.add_event(jets, sigma_gen);
+                //auto jets = FindJetTower(
+                //     plist, clist, slist,
+                //     Rs, shaperbins, 10, -3, 3, sigma_gen);
+                //JetSample.add_event(jets, sigma_gen);
             }
         }
         dNdpT.write(fheader.str());
-	JetSample.write(fheader.str());
+	//JetSample.write(fheader.str());
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

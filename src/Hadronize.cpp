@@ -30,9 +30,9 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("PartonLevel:Remnants = on");
     pythia.readString("HadronLevel:all = on");
     pythia.readString("HadronLevel:Decay = on");
-    /*pythia.readString("4:mayDecay = off");
+    pythia.readString("4:mayDecay = off");
     pythia.readString("5:mayDecay = off");
-    pythia.readString("111:mayDecay = off");
+    /*pythia.readString("111:mayDecay = off");
     pythia.readString("211:mayDecay = off");
 pythia.readString("311:mayDecay = off");
 pythia.readString("321:mayDecay = off");
@@ -185,7 +185,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
 		                 p.p.x(), p.p.y(), p.p.z(), p.p.t(), p.mass);
              pythia.event[count].scale(p.Q0);  
              count++;
-             //maxQ0 = (p.Q0 > maxQ0) ? p.Q0 : maxQ0;
+             maxQ0 = (p.Q0 > maxQ0) ? p.Q0 : maxQ0;
         }     
         pythia.forceTimeShower(1,count-1,Q0);
         pythia.next();
@@ -211,6 +211,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                 h.p.a[3] = ip.pz();
                 h.mass = std::sqrt(h.p.t()*h.p.t() - h.p.pabs2());
                 h.weight = 1;
+		h.charged = ip.isCharged();
                 hadrons.push_back(h);
             }
             

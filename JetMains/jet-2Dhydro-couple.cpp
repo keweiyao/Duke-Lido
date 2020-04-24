@@ -147,7 +147,7 @@ int main(int argc, char* argv[]){
 
         /// all kinds of bins and cuts
 	std::vector<double> TriggerBin({
-         5,10,15,20,30,40,60,
+         1,3,5,10,15,20,30,40,60,
          80,100,120,
          140,160,180,200,240,280,
          320,360,400,450,500,550,
@@ -236,7 +236,8 @@ int main(int argc, char* argv[]){
                         if (fs_size==-1){
                             // particle lost to the medium, but we
                             // track its color
-                            ie.colorlist.push_back(pOut_list[0]);
+                            //ie.colorlist.push_back(pOut_list[0]);
+			    new_plist.push_back(pOut_list[0]);
 			    current J;
                             ploss = ploss - pOut_list[0].p;
 			    ploss = ploss.boost_to(0, 0, p.x.z()/p.x.t());
@@ -245,7 +246,6 @@ int main(int argc, char* argv[]){
                             J.shetas = std::sinh(p.x.rap());
                             J.cs = std::sqrt(.3333);
                             ie.clist.push_back(J);
-
                         }
                         else {
                             for (auto & fp : pOut_list) {
@@ -285,13 +285,14 @@ int main(int argc, char* argv[]){
         LOG_INFO << "Jet finding, w/ medium excitation";
         for (auto & ie : events){
             dNdpT.add_event(ie.hlist, ie.sigma);
-	    auto jets = FindJetTower(
+            auto jets = FindJetTower(
                  ie.hlist, ie.clist, ie.slist, 
 	         Rs, shaperbins, 10, -3, 3, ie.sigma);
 	    JetSample.add_event(jets, ie.sigma);
         }
         dNdpT.write(fheader.str());
 	JetSample.write(fheader.str());
+	
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

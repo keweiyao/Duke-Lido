@@ -244,7 +244,7 @@ double compute_realtime_to_propagate(double dt, fourvec x, fourvec p){
 int update_particle_momentum_Lido(
     double dt_input, double temp, std::vector<double> v3cell,
     particle & pIn, std::vector<particle> & pOut_list){
-
+    double Emin = Lido_Ecut * temp;
     auto p00 = pIn.p;
     pOut_list.clear();
     pIn.Tf = temp;
@@ -261,9 +261,15 @@ int update_particle_momentum_Lido(
         return pOut_list.size();
     }
 
+    if (pIn.x.t()<pIn.tau_i){
+        pOut_list.push_back(pIn);
+        return pOut_list.size();
+    }
+
+
     // Delete soft partons below a energy cut from the hard parton list
     if ((!pIn.is_virtual) && 
-        pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Lido_Ecut*temp
+        pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Emin
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 
 	){
@@ -537,6 +543,9 @@ int update_particle_momentum_Lido(
         }
     }
 
+    // These interact can increase virtuality
+    pIn.Q0 = std::sqrt(pIn.Q00*pIn.Q00 + measure_perp(pIn.p0, pIn.p).pabs2());
+
     // Handle the virtual particle, (only for real mother parton)
     if ((!pIn.radlist.empty()) && (!pIn.is_virtual)){
         // loop over each virtual particles
@@ -587,7 +596,7 @@ int update_particle_momentum_Lido(
                 // 2): a dead-cone approximation for massive particles
                 double theta2 = kt2n / std::pow(it->p.t(), 2);
                 double thetaM2 = std::pow(pIn.mass / it->mother_p.t(), 2);
-                double DeadCone = std::min(
+		double DeadCone = std::min(
                        std::pow(theta2 / (theta2 + thetaM2), 2), 1.);
                 // 3): an NLL-inspired suppression factor for the LPM effect
                 double mD2 = t_channel_mD2->get_mD2(temp);
@@ -604,10 +613,11 @@ int update_particle_momentum_Lido(
                     it->p = it->p*(pIn.p.t()/it->p.t()
                                   *it->p0.t()/it->mother_p.t());
                     pIn.p = pIn.p - it->p;
-                    it->Q0 = std::sqrt(kt2n);
-                    pIn.Q0 = std::sqrt(pIn.Q00*pIn.Q00+kt2n);
-                    
-                    pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass + pIn.p.pabs2());
+                    it->p0 = it->p;                 
+                    pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass+pIn.p.pabs2());
+		    pIn.p0 = pIn.p;
+		    pIn.Q0 = std::sqrt(pIn.Q00*pIn.Q00+kt2n);
+		    it->Q0 = std::sqrt(kt2n);
                     // for g -> q + qbar, pid change
                     if (split_type == 3){
                         pIn.pid = -it->pid;

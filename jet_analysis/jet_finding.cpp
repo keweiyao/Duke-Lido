@@ -28,7 +28,9 @@ void redistribute(
           const int _Ny, const int _Nphi, 
           const double ymin, const double ymax,
           const double phimin, const double phimax,
-          int coarse_level, double pTmin=0.){
+          int coarse_level, double pTmin=0., bool charge=false){
+    double prefactor = 3*M_PI/std::pow(4.*M_PI,2);
+    if (charge) prefactor *= (2./3.);
     // use coarse grid
     int Ny = int(_Ny/coarse_level);
     int Nphi = int(_Nphi/coarse_level);
@@ -136,8 +138,7 @@ void redistribute(
                 return res;
             };
             double error;
-            double res = 3*M_PI/std::pow(4.*M_PI,2)*
-                         quad_1d(code, {-.99,.99}, error, 0, 0.1, 20);
+            double res = prefactor*quad_1d(code,{-.99,.99},error, 0, 0.1, 20);
             CoarsedPmu[iy][iphi] = CoarsedPmu[iy][iphi] + Nmu0*res;
             CoarsedPT[iy][iphi] += res;
             /// add hadronization contribution
@@ -147,6 +148,7 @@ void redistribute(
                 double dpT = 3/(4.*M_PI)
                             *(4./3.*sigma*p.UdotG - dot(Nmu0, p.G))
                             /std::pow(sigma, 4);
+		if (charge) dpT*=(2./3.);
                 CoarsedPT[iy][iphi] += dpT;
                 CoarsedPmu[iy][iphi] = CoarsedPmu[iy][iphi] + Nmu0*dpT;
             }
@@ -226,7 +228,7 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
         int iphi = corp_index(phi, phimin, phimax, dphi, Nphi);
         Pmutowers[ieta][iphi] = Pmutowers[ieta][iphi] + p.p;
         PTtowers[ieta][iphi] += p.p.xT();
-        if (p.p.xT()>0.7){
+        if (p.p.xT()>0.7 && p.charged){
  	    dummyPmu[ieta][iphi] = dummyPmu[ieta][iphi] + p.p;
             dummyPT[ieta][iphi] += p.p.xT();
 	}
@@ -241,7 +243,7 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
           Neta, Nphi,
           etamin, etamax,
           phimin, phimax,
-          10, 0.);
+          10, 0., false);
         redistribute(
           SourceList,
           HadronizeList,
@@ -250,7 +252,7 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
           Neta, Nphi,
           etamin, etamax,
           phimin, phimax,
-          10, .7);
+          10, .7, true);
     }
     // Use the towers to do jet finding: anti-kT
     int power = -1; 
@@ -348,9 +350,10 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
         for (auto & J : Results){
             double Jphi = J.phi;
             double Jeta = J.eta;
-            std::vector<double> hist;
-            hist.resize(rbins.size()-1);
-            for (auto & it : hist) it = 0.;
+
+	    // compute dpT/dr, makes sense for both pp and AA
+	    J.shape.resize(rbins.size()-1);
+            for (auto & it : J.shape) it = 0.;
             for (double eta=Jeta-3.; eta<=Jeta+3.; eta+=deta){
                 int ieta = corp_index(eta, etamin, etamax, deta, Neta);
                 if (ieta<0) continue;
@@ -360,18 +363,34 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
                     double dist = std::sqrt(std::pow(Jeta-eta,2)
                                           + std::pow(Jphi-phi,2));
                     int index = 0;
-                    for (index=0; index<hist.size(); index++){
+                    for (index=0; index<J.shape.size(); index++){
                         if (dist>=rbins[index] && dist<rbins[index+1]) break;
                     }
                     double newphi = phi;
                     if (phi<-M_PI) newphi+=2*M_PI;
                     if (phi>M_PI) newphi-=2*M_PI;
                     int iphi = corp_index(newphi, phimin, phimax, dphi, Nphi);
-                    hist[index] += dummyPT[ieta][iphi];
+                    J.shape[index] += dummyPT[ieta][iphi];
                 }  
             }
-            for (int i=0; i<hist.size(); i++) hist[i] /= (rbins[i+1]-rbins[i]); 
-	    J.shape = hist;
+            for (int i=0; i<J.shape.size(); i++) 
+                J.shape[i] /= (rbins[i+1]-rbins[i]);
+
+	    // compute dNch/dr, currently only makes sense to pp
+            J.dndr.resize(rbins.size()-1);
+            for (auto & it : J.dndr) it = 0.;
+	    for (auto & p : plist){
+		if ((!p.charged) || (p.p.xT()<.7)) continue;
+		double dist = std::sqrt(std::pow(J.phi-p.p.phi(), 2)
+                            + std::pow(J.eta-p.p.pseudorap(), 2) );
+		int index = 0;
+                for (index=0; index<J.dndr.size(); index++){
+                    if (dist>=rbins[index] && dist<rbins[index+1]) break;
+                }
+                J.dndr[index] += 1.;
+            }
+            for (int i=0; i<J.dndr.size(); i++)
+                J.dndr[i] /= (rbins[i+1]-rbins[i]);
         }
     }
     return Results; 
@@ -457,7 +476,7 @@ void LeadingParton::add_event(std::vector<particle> plist, double sigma_gen){
     for (auto & p : plist){
         int pid = std::abs(p.pid);
         bool ispi = pid==111 || pid == 211;
-        bool ischg = pid==211 || pid==321 || pid==2212;
+        bool ischg = p.charged;
         bool isD = pid==411 || pid == 421 || pid == 413 || pid == 423 || pid ==4;
         bool isB = pid==511 || pid == 521 || pid == 513 || pid == 523 || pid ==5;
         if (std::abs(p.p.rap()) < 1.) {
@@ -504,11 +523,16 @@ JetStatistics::JetStatistics(std::vector<double> _pTbins, std::vector<double> _R
     NpT = pTbins.size()-1;
     shape_NpT = shape_pTbins.size()-1;
     shape_Nr = shape_rbins.size()-1;
-    shape_w.resize(shape_NpT); 
+    shape_w.resize(shape_NpT);
     for (auto & it:shape_w) it=0.;
     shapes.resize(shape_NpT); 
     for (auto & it:shapes) {
 	    it.resize(_shape_rbins.size()-1);
+        for (auto & iit : it ) iit=0.;
+    }
+    dnchdr.resize(shape_NpT);
+    for (auto & it:dnchdr) {
+            it.resize(_shape_rbins.size()-1);
         for (auto & iit : it ) iit=0.;
     }
     dsigmadpT.resize(Rs.size());
@@ -579,8 +603,9 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
             if (ii==NpT) continue;
 	    for (int i=0; i<shape_Nr; i++){
                 shapes[ii][i] += sigma_gen*J.shape[i];
-		shape_w[ii] += sigma_gen;
+		dnchdr[ii][i] += sigma_gen*J.dndr[i];
 	    }
+            shape_w[ii] += sigma_gen;
         }
     }
 
@@ -665,5 +690,23 @@ void JetStatistics::write(std::string fheader){
 	f2 << std::endl;
     }
     f2.close();
+
+    std::stringstream filename3;
+    filename3 << fheader << "-jetdnchdr.dat";
+    std::ofstream f3(filename3.str());
+    f3 << "#";
+    for (auto it : shape_rbins) f3 << it << " ";
+    f3 << std::endl;
+    for (int i=0; i<shape_NpT; i++) {
+        f3   << (shape_pTbins[i]+shape_pTbins[i+1])/2. << " "
+             << shape_pTbins[i] << " "
+             << shape_pTbins[i+1] << " ";
+        for (int j=0; j<dnchdr[i].size(); j++){
+            f3 << dnchdr[i][j]/shape_w[i] << " ";
+        }
+        f3 << std::endl;
+    }
+    f3.close();
+
 }
 

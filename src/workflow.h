@@ -9,13 +9,14 @@
 struct particle{
 	// mass, x, p, t, all in units of [GeV^a]
 	int pid, col, acol;
+	bool charged;
 	double mass, weight, tau_i, Q0, Q00;
 	bool is_virtual;
 	
 	double T0, mfp0, Tf; // production temperature, local mfp
 	fourvec x0; // production location
 	fourvec x; // current location
-	fourvec p0; // production momentum
+	fourvec p0; // production momentum, after each radiation
 	fourvec p; // current momentum
         fourvec mother_p;
 
