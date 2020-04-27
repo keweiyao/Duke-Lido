@@ -1,0 +1,29 @@
+#!/bin/bash
+#SBATCH --qos regular
+#SBATCH --constraint haswell
+#SBATCH --nodes 2
+#SBATCH --cpus-per-task 1
+#SBATCH --time 02:00:00
+#SBATCH --license cscratch1
+#SBATCH --mail-type ALL
+#SBATCH --mail-user wk42@phy.duke.edu
+#DW jobdw capacity=10GB access_mode=striped type=scratch
+#DW stage_in source=/global/cscratch1/sd/wk42/NewHF/Forjet/LidoConfig/pythia-pp-5020-setting.txt destination=$DW_JOB_STRIPED/pythia.txt type=file
+#DW stage_in source=/global/cscratch1/sd/wk42/NewHF/Forjet/HicAvgEvents/0-10/ic.h5 destination=$DW_JOB_STRIPED/ic.h5 type=file
+#DW stage_out source=$DW_JOB_STRIPED/results destination=/global/cscratch1/sd/wk42/NewHF/Forjet/pp-Leading-decay-off type=directory
+ls ${DW_JOB_STRIPED}
+mkdir ${DW_JOB_STRIPED}/results/
+module load gcc cray-hdf5 gsl boost/1.69.0
+module list
+export HDF5_USE_FILE_LOCKING='FALSE'
+
+
+for i in {1..100}; do
+time srun jet-pp-gen -y ${DW_JOB_STRIPED}/pythia.txt\
+        --ic ${DW_JOB_STRIPED}/ic.h5\
+        --eid 0 -n 100 \
+        -o ${DW_JOB_STRIPED}/results/ \
+        --Q0 0.4 > out
+done
+
+

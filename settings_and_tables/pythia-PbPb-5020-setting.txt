@@ -26,6 +26,9 @@ HadronLevel:all = off
 HadronLevel:Decay = off
 
 ! 7) Decay
+1:m0 = 0
+2:m0 = 0
+3:m0 = 0
 4:m0 = 1.3
 4:mayDecay = off
 5:m0 = 4.2

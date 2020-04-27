@@ -66,6 +66,8 @@ int main(int argc, char* argv[]){
           ("Q0,q",
            po::value<double>()->value_name("DOUBLE")->default_value(.4,".4"),
            "Scale [GeV] to insert in-medium transport")
+	  ("jet", po::bool_switch(),
+           "Turn on to do jet finding (takes time)")
     ;
 
     po::variables_map args{};
@@ -285,14 +287,16 @@ int main(int argc, char* argv[]){
         LOG_INFO << "Jet finding, w/ medium excitation";
         for (auto & ie : events){
             dNdpT.add_event(ie.hlist, ie.sigma);
-            auto jets = FindJetTower(
-                 ie.hlist, ie.clist, ie.slist, 
-	         Rs, shaperbins, 10, -3, 3, ie.sigma);
-	    JetSample.add_event(jets, ie.sigma);
+	    if (args["jet"].as<bool>()) {
+                auto jets = FindJetTower(
+                     ie.hlist, ie.clist, ie.slist, 
+	             Rs, shaperbins, 10, -3, 3, ie.sigma);
+	        JetSample.add_event(jets, ie.sigma);
+	    }
         }
         dNdpT.write(fheader.str());
-	JetSample.write(fheader.str());
-	
+	if (args["jet"].as<bool>())
+            JetSample.write(fheader.str());
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";
