@@ -36,15 +36,25 @@ void reference_pmu(int i, fourvec & kmu, double & tau, Event & event){
 	return;
     }
     if (im1>0 && im2==0){
-        reference_pmu(im1, kmu, tau, event);
+	// radiation
+	fourvec pmu{p.e(), p.px(), p.py(), p.pz()};
+	double x = std::min(kmu.t()/pmu.t(), 1.);
+	if (x>0.5)
+            reference_pmu(im1, pmu, tau, event);
+	else {
+	    tau += 2*kmu.t()/measure_perp(pmu, kmu).pabs2();
+	    reference_pmu(im1, pmu, tau, event);
+	}
     }
     if (im1 != im2 && im1 > 0 && im2 > 0){
         // hard products, reference particles
 	fourvec pmu{p.e(), p.px(), p.py(), p.pz()};
 	double x = std::min(kmu.t()/pmu.t(), 1.);
-	if (x>0.5) tau = 0.;
-	else tau = 2.*kmu.t()/measure_perp(pmu, kmu).pabs2();
-        return;
+	if (x>0.5) return;
+	else {
+            tau += 2*kmu.t()/measure_perp(pmu, kmu).pabs2();
+            return;
+	}
     }
 }
 
