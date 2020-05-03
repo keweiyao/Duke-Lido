@@ -19,6 +19,7 @@ std::uniform_real_distribution<double> init_dis(0.0, 1.0);
 std::uniform_real_distribution<double> dist_phi(0.0, 2.0*M_PI);
 std::uniform_real_distribution<double> dist_costheta(-1.0, 1.0);
 std::gamma_distribution<double> sample_E_over_T(3.0, 1.0);
+std::gamma_distribution<double> exp_dist(1.0,1.0);
 std::normal_distribution<double> white_noise(0.0, 1.0);
 int sample_flavor(int Nf){
     int flavor = (gen()%Nf) + 1;

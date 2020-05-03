@@ -214,7 +214,7 @@ int main(int argc, char* argv[]){
             for (auto & ie : events){
                 std::vector<particle> new_plist, pOut_list;
                 for (auto & p : ie.plist){     
-                    if (p.Tf < 0.15 || std::abs(p.p.rap())>5.) {
+                    if (p.Tf < 0.16 || std::abs(p.p.rap())>5.) {
                         new_plist.push_back(p);
                         continue;       
                     }

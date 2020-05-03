@@ -6,6 +6,7 @@
 #include "workflow.h"
 #include <sstream>
 #include "predefine.h"
+#include "random.h"
 
 using namespace Pythia8;
 
@@ -23,13 +24,13 @@ private:
     double sigma0, Q0;
 };
 
-void reference_pmu(int i, fourvec & kmu, double & tau, Event & event){
+void reference_pmu(int i, double & tau, Event & event){
     auto p = event[i];
     int im1 = p.mother1();
     int im2 = p.mother2();
     if (im1==im2 && im2 > 0){
         // simply recoil effect, go on
-        reference_pmu(im1, kmu, tau, event);
+        reference_pmu(im1, tau, event);
     }
     if (im1==0 && im2 ==0) {
         tau = 0.;
@@ -37,31 +38,37 @@ void reference_pmu(int i, fourvec & kmu, double & tau, Event & event){
     }
     if (im1>0 && im2==0){
 	// radiation
-	fourvec pmu{p.e(), p.px(), p.py(), p.pz()};
-	double x = std::min(kmu.t()/pmu.t(), 1.);
-	if (x>0.5)
-            reference_pmu(im1, pmu, tau, event);
+	auto P = event[im1];
+	auto k = event[P.daughter1()];
+	auto q = event[P.daughter2()];
+	fourvec Pmu{P.e(), P.px(), P.py(), P.pz()};
+        fourvec kmu{k.e(), k.px(), k.py(), k.pz()};
+        fourvec qmu{q.e(), q.px(), q.py(), q.pz()};
+	double xk = kmu.t()/(kmu.t()+qmu.t());
+	double xq = 1.-xk;
+	double Mk2 = k.m()*k.m();
+	double Mq2 = q.m()*q.m();
+        double MP2 = P.m()*P.m();
+	double kT2 = measure_perp(kmu+qmu, kmu).pabs2();
+	double tauf = Srandom::exp_dist(Srandom::gen)*2*xq*xk*(kmu.t()+qmu.t())/(kT2 + xq*Mk2 + xk*Mq2 - xk*xq*MP2);
+	if (p.e() > 0.5*(kmu.t()+qmu.t())){
+            reference_pmu(im1, tau, event);
+	}
 	else {
-	    tau += 2*kmu.t()/measure_perp(pmu, kmu).pabs2();
-	    reference_pmu(im1, pmu, tau, event);
+	    tau += tauf;
+	    reference_pmu(im1, tau, event);
 	}
     }
     if (im1 != im2 && im1 > 0 && im2 > 0){
         // hard products, reference particles
-	fourvec pmu{p.e(), p.px(), p.py(), p.pz()};
-	double x = std::min(kmu.t()/pmu.t(), 1.);
-	if (x>0.5) return;
-	else {
-            tau += 2*kmu.t()/measure_perp(pmu, kmu).pabs2();
-            return;
-	}
+        return;
     }
 }
 
 PythiaGen::PythiaGen(std::string f_pythia, std::string f_trento,
                      int pTHL, int pTHH, int iev, double _Q0):
 TRENToSampler(f_trento, iev)
-{    
+{   
     Q0 = _Q0;
     // read pythia settings
     pythia.readFile(f_pythia);
@@ -118,7 +125,7 @@ void PythiaGen::Generate(std::vector<particle> & plist){
             _p.x0 = fourvec{0,x,y,0};
             _p.x = _p.x0; 
 	    double t0 =  0.;
-	    reference_pmu(i, p0, t0, event);
+	    reference_pmu(i, t0, event);
             _p.tau_i = t0;
 	    LOG_INFO << p0 << " at " << t0/5.076 << " or " << t0/5.076*p0.xT()/p0.t();
             _p.p0 = p0;

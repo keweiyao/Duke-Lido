@@ -56,6 +56,7 @@ extern const double LPM_prefactor; // to match analytic calculation, 0.7 -- 0.83
 extern double Lido_Ecut;
 extern int time_type;
 extern bool Adiabatic_LPM;
+extern bool Dead_cone_on;
 struct qhat_params_struct {
 	double K, a, b, p, q, gamma; // for qhat parametrization
 };

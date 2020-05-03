@@ -50,7 +50,7 @@ const double LPM_prefactor = 1.0; // to match analytic calculation, 0.75 by defa
 double Lido_Ecut;
 int time_type;
 bool Adiabatic_LPM;
-
+bool Dead_cone_on;
 qhat_params_struct qhat_params;
 
 void initialize_mD_and_scale(int _mD_type, double _scale, double _afix, double _cut, double _Rvac){

@@ -101,7 +101,7 @@ void redistribute(
                     double cosh_y_etas_yk = cosh_y_etas*coshyk
                                           - sinh_y_etas*sinhyk;
                     double D = gamma_radial * cosh_y_etas_yk;
-		    double D0 = gamma_radial * (cosh_y_etas_yk-vradial);
+		    double D0 = gamma_radial * (1. - vradial);
                     double alpha = vradial/cosh_y_etas_yk;
                     double alpha2 = std::pow(alpha,2);
                     double one_minus_alpha2 = 1. - alpha2;

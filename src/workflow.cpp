@@ -105,7 +105,8 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
     // 0: constant time step, 1: constant proper time step
     time_type = config.get("t_type", 0); 
     // 0: default, 1: local approxiamtion
-    bool Adiabatic_LPM = config.get("LPM_type", 0); 
+    bool Adiabatic_LPM = config.get("LPM_type", 0);
+    bool Dead_cone_on = config.get("Dead_cone", 1); 
     //alphas(max(Q, mu*pi*T)), active when afix < 0
     double mu=config.get("mu", 2.0); 
     // fixed coupling, negative value for running coupling
@@ -590,14 +591,13 @@ int update_particle_momentum_Lido(
                           pIn.p*(it->mother_p.t()/pIn.p.t()), 
                           it->p*(it->p0.t()/it->p.t())
                          ).pabs2();
-                
+                double xx = it->p0.t()/it->mother_p.t();
                 double Running = std::min(
-			alpha_s(kt2n, it->T0) / alpha_s(kt20, it->T0), 1.);
+			alpha_s(kt2n,it->T0)/alpha_s(kt20,it->T0), 1.);
                 // 2): a dead-cone approximation for massive particles
                 double theta2 = kt2n / std::pow(it->p.t(), 2);
                 double thetaM2 = std::pow(pIn.mass / it->mother_p.t(), 2);
-		double DeadCone = std::min(
-                       std::pow(theta2 / (theta2 + thetaM2), 2), 1.);
+		double DeadCone = std::pow(theta2/(theta2 + thetaM2), 2);
                 // 3): an NLL-inspired suppression factor for the LPM effect
                 double mD2 = t_channel_mD2->get_mD2(temp);
                 double lnQ2_1 = std::log(1. + taun / it->mfp0);
@@ -616,7 +616,7 @@ int update_particle_momentum_Lido(
                     it->p0 = it->p;                 
                     pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass+pIn.p.pabs2());
 		    pIn.p0 = pIn.p;
-		    pIn.Q0 = std::sqrt(pIn.Q00*pIn.Q00+kt2n);
+		    pIn.Q0 = kt2n;
 		    it->Q0 = std::sqrt(kt2n);
                     // for g -> q + qbar, pid change
                     if (split_type == 3){
