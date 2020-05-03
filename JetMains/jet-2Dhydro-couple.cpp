@@ -60,6 +60,9 @@ int main(int argc, char* argv[]){
           ("lido-table,t", 
             po::value<fs::path>()->value_name("PATH")->required(),
            "Lido table path to file")  
+          ("response-table,r", 
+            po::value<fs::path>()->value_name("PATH")->required(),
+           "response table path to file")  
            ("output,o",
            po::value<fs::path>()->value_name("PATH")->default_value("./"),
            "output file prefix or folder")
@@ -98,6 +101,16 @@ int main(int argc, char* argv[]){
         else{
             table_mode = (fs::exists(args["lido-table"].as<fs::path>())) ? 
                          "old" : "new";
+        }
+        // check lido-response table
+        bool need_response_table;
+        if (!args.count("response-table")){
+            throw po::required_option{"<response-table>"};
+            return 1;
+        }
+        else{
+            need_response_table = (fs::exists(args["response-table"].as<fs::path>())) ? 
+                         false : true;
         }
         // check trento event
         if (!args.count("ic")){
@@ -144,17 +157,18 @@ int main(int argc, char* argv[]){
             args["lido-setting"].as<fs::path>().string(),
             args["lido-table"].as<fs::path>().string()
         );
+        /// Initialize medium response function 
+        auto ReDistributer = MediumResponse("Gmu");
+        if (need_response_table) ReDistributer.init(args["response-table"].as<fs::path>().string());
+        else ReDistributer.load(args["response-table"].as<fs::path>().string());
         /// Initialize a simple hadronizer
         JetDenseMediumHadronize Hadronizer;
 
         /// all kinds of bins and cuts
 	std::vector<double> TriggerBin({
-         1,3,5,10,15,20,30,40,60,
-         80,100,120,
-         140,160,180,200,240,280,
-         320,360,400,450,500,550,
-         600,700,800,900,
-         1000,1200,1400,1800,2500});
+         60,80,90,100,110,120,130,
+         140,160,180,200,220,240,280,
+         320,360,400,450,500,1000});
 
         std::vector<double> Rs({.2,.4,.6,.8, 1.});
 
@@ -288,7 +302,7 @@ int main(int argc, char* argv[]){
         for (auto & ie : events){
             dNdpT.add_event(ie.hlist, ie.sigma);
 	    if (args["jet"].as<bool>()) {
-                auto jets = FindJetTower(
+                auto jets = FindJetTower(ReDistributer,
                      ie.hlist, ie.clist, ie.slist, 
 	             Rs, shaperbins, 10, -3, 3, ie.sigma);
 	        JetSample.add_event(jets, ie.sigma);

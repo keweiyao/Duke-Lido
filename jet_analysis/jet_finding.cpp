@@ -8,7 +8,100 @@
 #include "simpleLogger.h"
 #include "integrator.h"
 #include <sstream>
+#include <thread>
 #include <gsl/gsl_sf_gamma.h>
+
+MediumResponse::MediumResponse(std::string _name): name(_name){
+    std::vector<size_t> shape;
+    std::vector<double> low, high;
+    shape.resize(4);
+    low.resize(4);
+    high.resize(4);
+    low[0] = -3.; low[1] = -M_PI; low[2] = 0.; low[3] = 0.4;
+    high[0] = 3.; high[1] = M_PI; high[2] = 10.; low[3] = 0.7;
+    shape[0] = 20; shape[1] = 20; shape[2] = 11; shape[3] = 4;
+    Gmu = std::make_shared<TableBase<fourvec, 4>>(name, shape, low, high);
+}
+
+void MediumResponse::load(std::string fname){
+    Gmu->Load(fname);
+}
+
+void MediumResponse::init(std::string fname){
+    LOG_INFO << fname << " Generating tables for approx medium response functions";
+    auto code = [this](int start, int end) { this->compute(start, end); };
+    std::vector<std::thread> threads;
+    size_t nthreads = std::thread::hardware_concurrency();
+    size_t padding = size_t(std::ceil(Gmu->length()*1./nthreads));
+    for(auto i=0; i<nthreads; ++i) {
+        int start = i*padding;
+        int end = std::min(padding*(i+1), Gmu->length());
+        threads.push_back( std::thread(code, start, end) );
+    }
+    for(auto& t : threads) t.join();
+    Gmu->Save(fname);
+}
+
+void MediumResponse::compute(int start, int end){
+    std::vector<size_t> index;
+    index.resize(4);
+    for(auto i=start; i<end; ++i){
+        size_t q = i;
+        for(int d=4-1; d>=0; d--){
+            size_t dim = Gmu->shape(d);
+            size_t n = q%dim;
+            q = q/dim;
+            index[d] = n;
+        }
+        auto params = Gmu->parameters(index);
+        double rap = params[0];
+        double phi = params[1];
+        double pTmin_over_T = params[2];
+        double vperp = params[3];
+        double cs = 0.5;
+        double chrap = std::cosh(rap);
+        double shrap = std::sinh(rap);
+        auto code = [rap, chrap, shrap, phi, pTmin_over_T, vperp, cs]
+                 (const double * X){
+            double costhetak = X[0], phik = X[1];
+            double sinthetak = std::sqrt(1.-costhetak*costhetak);
+            double gamma_vperp = 1./std::sqrt(1.-vperp*vperp);
+            double yk = 0.5*std::log((1.+costhetak)/(1.-costhetak));
+            double chyk = std::cosh(yk), shyk = std::sinh(yk);
+            double sigma = gamma_vperp * (std::cosh(rap-yk)
+                               - vperp * std::cos(phi-phik) );
+            double GInc = gsl_sf_gamma_inc_Q(5., pTmin_over_T*sigma);
+            double sigma_3rd = std::pow(sigma, 3);
+            double sigma_4th = sigma_3rd * sigma;
+            double A = (
+                     4./3.*gamma_vperp/sigma_3rd * (
+                       chyk - 3*cs*(sinthetak*vperp + costhetak*shyk)
+                     )
+                   - 1./sigma_4th * (
+                       chrap - 3*cs*(std::cos(phi-phik)+ shrap*costhetak)
+                     )
+                  ) * GInc * 3. / std::pow(4.*M_PI, 2);
+            std::vector<double> res;
+            res.resize(4);
+            res[0] = A;
+            res[1] = -A*sinthetak*std::cos(phik)/cs;
+            res[2] = -A*sinthetak*std::sin(phik)/cs;
+            res[3] = -A*costhetak/cs;
+            return res;
+        };
+        double wmin[2] = {-.99, -M_PI};
+        double wmax[2] = {.99, M_PI};
+        double error;
+        std::vector<double> res = quad_nd(code, 2, 4, wmin, wmax, error);
+        fourvec gmu{res[0], res[1], res[2], res[3]};
+        Gmu->SetTableValue(index, gmu);
+    }
+}
+
+double MediumResponse::get_dpT_dydphi(double rap, double phi, fourvec Pmu, double vperp, double pTmin_over_T){
+    auto gmu = Gmu->InterpolateTable({rap, phi, pTmin_over_T, vperp});
+    return dot(gmu, Pmu);
+}
 
 inline int corp_index(double x, double xL, double xH, double dx, int Nx){
     if (x<xL || x>xH) return -1;
@@ -29,8 +122,8 @@ void redistribute(
           const double ymin, const double ymax,
           const double phimin, const double phimax,
           int coarse_level, double pTmin=0., bool charge=false){
-    double prefactor = 3*M_PI/std::pow(4.*M_PI,2);
-    if (charge) prefactor *= (2./3.);
+    //double prefactor = 3*M_PI/std::pow(4.*M_PI,2);
+    //if (charge) prefactor *= (2./3.);
     // use coarse grid
     int Ny = int(_Ny/coarse_level);
     int Nphi = int(_Nphi/coarse_level);
@@ -62,9 +155,9 @@ void redistribute(
         clist[iy].shetas = std::sinh(ymin+iy*dy/coarse_level);
         clist[iy].cs = std::sqrt(.25);
         clist[iy].p.a[0] = 0.;
-	clist[iy].p.a[1] = 0.;
-	clist[iy].p.a[2] = 0.;
-	clist[iy].p.a[3] = 0.;
+    clist[iy].p.a[1] = 0.;
+    clist[iy].p.a[2] = 0.;
+    clist[iy].p.a[3] = 0.;
     }
     for (auto & s: SourceList){
         int i = corp_index(std::atanh(s.shetas/s.chetas), ymin, ymax, dy/coarse_level, _Ny);
@@ -79,7 +172,7 @@ void redistribute(
             double phi = phimin+(iphi+.5)*dphi;
             double cphi = std::cos(phi), sphi = std::sin(phi);
             fourvec Nmu0{chy,cphi,sphi,shy};
-            auto code = [clist,
+            /*auto code = [clist,
                          cphi, sphi, 
                          chy, shy, 
                          vradial, gamma_radial, pTmin]
@@ -101,7 +194,7 @@ void redistribute(
                     double cosh_y_etas_yk = cosh_y_etas*coshyk
                                           - sinh_y_etas*sinhyk;
                     double D = gamma_radial * cosh_y_etas_yk;
-		    double D0 = gamma_radial * (1. - vradial);
+            double D0 = gamma_radial * (1. - vradial);
                     double alpha = vradial/cosh_y_etas_yk;
                     double alpha2 = std::pow(alpha,2);
                     double one_minus_alpha2 = 1. - alpha2;
@@ -138,20 +231,11 @@ void redistribute(
                 return res;
             };
             double error;
-            double res = prefactor*quad_1d(code,{-.99,.99},error, 0, 0.1, 20);
-            CoarsedPmu[iy][iphi] = CoarsedPmu[iy][iphi] + Nmu0*res;
-            CoarsedPT[iy][iphi] += res;
-            /// add hadronization contribution
-            for (auto & p : HadronizeList){
-                double sigma = p.gamma_perp*(std::cosh(y-p.etas)
-                               - p.v_perp*std::cos(phi-p.phiu) );
-                double dpT = 3/(4.*M_PI)
-                            *(4./3.*sigma*p.UdotG - dot(Nmu0, p.G))
-                            /std::pow(sigma, 4);
-		if (charge) dpT*=(2./3.);
-                CoarsedPT[iy][iphi] += dpT;
-                CoarsedPmu[iy][iphi] = CoarsedPmu[iy][iphi] + Nmu0*dpT;
-            }
+            double res = prefactor*quad_1d(code,{-.99,.99},error, 0, 0.1, 20);*/
+            double dpT = 0.;
+            if (charge) dpT *= (2./3.);
+            CoarsedPmu[iy][iphi] = CoarsedPmu[iy][iphi] + Nmu0*dpT;
+            CoarsedPT[iy][iphi] += dpT;
         }
     }
     // Interpolate the coarse grid to finer grid
@@ -182,7 +266,9 @@ void redistribute(
     }
 }
 
-std::vector<Fjet> FindJetTower(std::vector<particle> plist, 
+std::vector<Fjet> FindJetTower(
+             MediumResponse MR,
+             std::vector<particle> plist, 
              std::vector<current> SourceList,
              std::vector<HadronizeCurrent> HadronizeList,
              std::vector<double> Rs, std::vector<double> rbins,
@@ -190,33 +276,40 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
              double jetyMin, 
              double jetyMax,
              double sigma_gen) {
+    LOG_INFO << "do jet finding";
+    int coarse_level = 9;
     std::vector<Fjet> Results;
     // contruct four momentum tower in the eta-phi plane
-    int Neta = 300, Nphi = 300;
+    int Neta = 270, Nphi = 270;
+    int coarseNeta = int(Neta/coarse_level), 
+        coarseNphi = int(Nphi/coarse_level);
     double etamin = -3., etamax = 3.;
     double deta = (etamax-etamin)/(Neta-1); 
+    double coarsedeta = (etamax-etamin)/(coarseNeta-1); 
     // Phi range has to be the same as the range of std::atan2(*,*);
     double phimin = -M_PI, phimax = M_PI; 
     double dphi = (phimax-phimin)/Nphi;
-    std::vector<std::vector<fourvec> > Pmutowers, dummyPmu;
-    std::vector<std::vector<double> > PTtowers, dummyPT;
-    Pmutowers.resize(Neta); dummyPmu.resize(Neta);
+    double coarsedphi = (phimax-phimin)/coarseNphi;
+    std::vector<std::vector<fourvec> > Pmutowers;
+    Pmutowers.resize(Neta);
     for (auto & it : Pmutowers) {
         it.resize(Nphi);
         for (auto & iit: it) iit = fourvec{0.,0.,0.,0.};
     }
-    for (auto & it : dummyPmu) {
-        it.resize(Nphi);
-        for (auto & iit: it) iit = fourvec{0.,0.,0.,0.};
-    }
-    PTtowers.resize(Neta); dummyPT.resize(Neta);
+    std::vector<std::vector<double> > PTtowers;
+    PTtowers.resize(Neta); 
     for (auto & it : PTtowers) {
         it.resize(Nphi);
         for (auto & iit: it) iit = 0.;
     }
-    for (auto & it : dummyPT) {
-        it.resize(Nphi);
-        for (auto & iit: it) iit = 0.;
+    std::vector<std::vector<std::vector<double> > > coarsePT;
+    coarsePT.resize(2);
+    for (auto & t : coarsePT) {
+       t.resize(coarseNeta); 
+       for (auto & it : t) {
+            it.resize(coarseNphi);
+            for (auto & iit: it) iit = 0.;
+       }
     }
 
     // put hard particles into the towers
@@ -227,32 +320,64 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
         if (ieta<0) continue;
         int iphi = corp_index(phi, phimin, phimax, dphi, Nphi);
         Pmutowers[ieta][iphi] = Pmutowers[ieta][iphi] + p.p;
-        PTtowers[ieta][iphi] += p.p.xT();
-        if (p.p.xT()>0.7 && p.charged){
- 	    dummyPmu[ieta][iphi] = dummyPmu[ieta][iphi] + p.p;
-            dummyPT[ieta][iphi] += p.p.xT();
-	}
+        if (p.p.xT()>0.7 && p.charged)
+            PTtowers[ieta][iphi] += p.p.xT();
     }
     // put soft energy-momentum deposition into the towers
-    if (SourceList.size()>0){	
-        redistribute(
-          SourceList, 
-          HadronizeList,
-          Pmutowers,
-          PTtowers,
-          Neta, Nphi,
-          etamin, etamax,
-          phimin, phimax,
-          10, 0., false);
-        redistribute(
-          SourceList,
-          HadronizeList,
-          dummyPmu,
-          dummyPT,
-          Neta, Nphi,
-          etamin, etamax,
-          phimin, phimax,
-          10, .7, true);
+    std::vector<current> clist;
+    clist.resize(coarseNeta);
+    for (int ieta=0; ieta<coarseNeta; ieta++){
+        clist[ieta].chetas = std::cosh(etamin+ieta*coarsedeta);
+        clist[ieta].shetas = std::sinh(etamin+ieta*coarsedeta);
+        clist[ieta].p.a[0] = 0.;
+        clist[ieta].p.a[1] = 0.;
+        clist[ieta].p.a[2] = 0.;
+        clist[ieta].p.a[3] = 0.;
+    }
+    for (auto & s: SourceList){
+        int i = corp_index(std::atanh(s.shetas/s.chetas), etamin, etamax, coarsedeta, coarseNeta);
+        if (i<0) continue;
+        clist[i].p = clist[i].p + s.p;
+    }
+    for (int ieta=0; ieta<coarseNeta; ieta++) {
+        double eta = etamin+ieta*coarsedeta;
+        for (int iphi=0; iphi<coarseNphi; iphi++) {
+            double phi = phimin+iphi*coarsedphi;
+            double dpT = 0., dpTcut = 0.;
+            for (auto & s: clist){
+                double etas = std::atanh(s.shetas/s.chetas);
+                dpT += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.);
+                dpTcut += 2./3.*MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.7/0.16);
+            }
+            coarsePT[0][ieta][iphi] = dpT;
+            coarsePT[1][ieta][iphi] = dpTcut;
+        }
+    }
+    for (int ieta=0; ieta<Neta; ieta++) {
+        double eta = etamin+ieta*deta;
+        double chy = std::cosh(eta), shy = std::sinh(eta);
+        int ii = corp_index(eta, etamin, etamax, coarsedeta, coarseNeta);
+        if (ii<0) continue;
+        if (ii==coarseNeta-1) ii--;
+        double residue1 = (eta-(etamin+coarsedeta*ii))/coarsedeta;
+        double u[2] = {1.-residue1, residue1};
+        for (int iphi=0; iphi<Nphi; iphi++) {
+            double phi = phimin+iphi*dphi;
+            double cphi = std::cos(phi), sphi = std::sin(phi);
+            fourvec Nmu0{chy, cphi, sphi, shy};
+            int jj = corp_index(phi, phimin, phimax, coarsedphi, coarseNphi);
+            if (jj==coarseNphi-1) jj--;
+            double residue2 = (phi-(phimin+coarsedphi*(jj)))/coarsedphi;
+            double v[2] = {1.-residue2, residue2};
+            for (int k1=0; k1<2; k1++){
+                for (int k2=0; k2<2; k2++){
+                    Pmutowers[ieta][iphi] = Pmutowers[ieta][iphi] + 
+                        Nmu0*coarsePT[0][ii+k1][jj+k2]*deta*dphi*u[k1]*v[k2];
+                    PTtowers[ieta][iphi] += 
+                        coarsePT[1][ii+k1][jj+k2]*deta*dphi*u[k1]*v[k2];
+                }
+            }
+        }
     }
     // Use the towers to do jet finding: anti-kT
     int power = -1; 
@@ -292,7 +417,7 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
         // recombine all the bins with negative contribution
         
         for (auto & j : jets){
-	    Fjet J;
+        Fjet J;
             fourvec jetP{j.e(), j.px(), j.py(), j.pz()};
             fourvec newP{0., 0., 0., 0.};
             double Jphi = jetP.phi();
@@ -314,12 +439,12 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
                     newP = newP + Pmutowers[ieta][iphi];
                 }  
             }
-	    J.pmu = newP;
-	    J.R = jetRadius;
-	    J.pT = newP.xT();
-	    J.phi = newP.phi();
-	    J.eta = newP.pseudorap();
-	    J.M2 = newP.m2();
+        J.pmu = newP;
+        J.R = jetRadius;
+        J.pT = newP.xT();
+        J.phi = newP.phi();
+        J.eta = newP.pseudorap();
+        J.M2 = newP.m2();
             // label the jet flavor:
             // if heavy, label it by heavy quark id
             // else, label it by the hardest (pT) parton inside
@@ -336,23 +461,23 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
                     double phi = p.p.phi();
                     if (std::sqrt(std::pow(eta-Jeta,2)
                         +std::pow(phi-Jphi,2)) < (jetRadius+.1)) { 
-			// for R jet , find heavy flavor in R+.1 bins
-			particle flavor_tag;
-			flavor_tag.p = p.p;
+            // for R jet , find heavy flavor in R+.1 bins
+            particle flavor_tag;
+            flavor_tag.p = p.p;
                         flavor_tag.pid = std::abs(p.pid); 
-		        J.Ftags.push_back(flavor_tag);
+                J.Ftags.push_back(flavor_tag);
                     }
                 }
             } 
-	    Results.push_back(J);
+        Results.push_back(J);
         }
 
         for (auto & J : Results){
             double Jphi = J.phi;
             double Jeta = J.eta;
 
-	    // compute dpT/dr, makes sense for both pp and AA
-	    J.shape.resize(rbins.size()-1);
+        // compute dpT/dr, makes sense for both pp and AA
+        J.shape.resize(rbins.size()-1);
             for (auto & it : J.shape) it = 0.;
             for (double eta=Jeta-3.; eta<=Jeta+3.; eta+=deta){
                 int ieta = corp_index(eta, etamin, etamax, deta, Neta);
@@ -370,20 +495,20 @@ std::vector<Fjet> FindJetTower(std::vector<particle> plist,
                     if (phi<-M_PI) newphi+=2*M_PI;
                     if (phi>M_PI) newphi-=2*M_PI;
                     int iphi = corp_index(newphi, phimin, phimax, dphi, Nphi);
-                    J.shape[index] += dummyPT[ieta][iphi];
+                    J.shape[index] += PTtowers[ieta][iphi];
                 }  
             }
             for (int i=0; i<J.shape.size(); i++) 
                 J.shape[i] /= (rbins[i+1]-rbins[i]);
 
-	    // compute dNch/dr, currently only makes sense to pp
+        // compute dNch/dr, currently only makes sense to pp
             J.dndr.resize(rbins.size()-1);
             for (auto & it : J.dndr) it = 0.;
-	    for (auto & p : plist){
-		if ((!p.charged) || (p.p.xT()<.7)) continue;
-		double dist = std::sqrt(std::pow(J.phi-p.p.phi(), 2)
+        for (auto & p : plist){
+        if ((!p.charged) || (p.p.xT()<.7)) continue;
+        double dist = std::sqrt(std::pow(J.phi-p.p.phi(), 2)
                             + std::pow(J.eta-p.p.pseudorap(), 2) );
-		int index = 0;
+        int index = 0;
                 for (index=0; index<J.dndr.size(); index++){
                     if (dist>=rbins[index] && dist<rbins[index+1]) break;
                 }
@@ -491,7 +616,7 @@ void LeadingParton::add_event(std::vector<particle> plist, double sigma_gen){
             if (ii==NpT) ii=NpT-1;
             if (ispi) npi[ii] += sigma_gen;
             if (ischg) nchg[ii] += sigma_gen;
-	    if (isD) nD[ii] += sigma_gen;
+        if (isD) nD[ii] += sigma_gen;
             if (isB) nB[ii] += sigma_gen;
         }
     }
@@ -515,7 +640,7 @@ void LeadingParton::write(std::string fheader){
 
 
 JetStatistics::JetStatistics(std::vector<double> _pTbins, std::vector<double> _Rs,
-		             std::vector<double> _shape_pTbins, std::vector<double> _shape_rbins){
+                     std::vector<double> _shape_pTbins, std::vector<double> _shape_rbins){
     pTbins = _pTbins;
     Rs = _Rs;
     shape_pTbins = _shape_pTbins;
@@ -527,7 +652,7 @@ JetStatistics::JetStatistics(std::vector<double> _pTbins, std::vector<double> _R
     for (auto & it:shape_w) it=0.;
     shapes.resize(shape_NpT); 
     for (auto & it:shapes) {
-	    it.resize(_shape_rbins.size()-1);
+        it.resize(_shape_rbins.size()-1);
         for (auto & iit : it ) iit=0.;
     }
     dnchdr.resize(shape_NpT);
@@ -568,11 +693,11 @@ JetStatistics::JetStatistics(std::vector<double> _pTbins, std::vector<double> _R
 }
 void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
     for (auto & J : jets){
-	int iR;
+    int iR;
         for (int i=0; i<Rs.size(); i++){
             if ( ( (Rs[i]-.01)<J.R) 
-	        && (J.R< (Rs[i]+.01)) 
-	       ) {
+            && (J.R< (Rs[i]+.01)) 
+           ) {
                 iR = i;
                 break;
             }
@@ -592,7 +717,7 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
         }
     }
     for (auto & J:jets){
-	if ((J.R<0.41) && (J.R>0.39) && (std::abs(J.eta) < 1.6) ) { // CMS cut
+    if ((J.R<0.41) && (J.R>0.39) && (std::abs(J.eta) < 1.6) ) { // CMS cut
             int ii=0;
             for (int i=0; i<shape_NpT; i++){
                 if ( (shape_pTbins[i]<J.pT) && (J.pT<shape_pTbins[i+1]) ) {
@@ -601,17 +726,17 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
                 }
             }
             if (ii==NpT) continue;
-	    for (int i=0; i<shape_Nr; i++){
+        for (int i=0; i<shape_Nr; i++){
                 shapes[ii][i] += sigma_gen*J.shape[i];
-		dnchdr[ii][i] += sigma_gen*J.dndr[i];
-	    }
+        dnchdr[ii][i] += sigma_gen*J.dndr[i];
+        }
             shape_w[ii] += sigma_gen;
         }
     }
 
     for (auto & J : jets){
-	// check jet R
-	int iR;
+    // check jet R
+    int iR;
         for (int i=0; i<Rs.size(); i++){
             if ( ( (Rs[i]-.01)<J.R)
                 && (J.R< (Rs[i]+.01))
@@ -625,21 +750,21 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
         if (std::abs(J.eta) < 2.1){
             // check flavor content
             bool isD = false;
-	    bool isDpTcut = false;
+        bool isDpTcut = false;
             bool isB = false;
-	    bool isBpTcut = false;
-	    for (auto & p : J.Ftags) {
-		int f = std::abs(p.pid);
+        bool isBpTcut = false;
+        for (auto & p : J.Ftags) {
+        int f = std::abs(p.pid);
                 isD = isD || ((f==411)||(f==421)||(f==413)||(f==423)||(f==4));
                 isB = isB || ((f==511)||(f==521)||(f==513)||(f==523)||(f==5));
                 isBpTcut = isBpTcut || (
-		 ((f==511)||(f==521)||(f==513)||(f==523)||(f==5))
-		 && (p.p.xT()>5.));
+         ((f==511)||(f==521)||(f==513)||(f==523)||(f==5))
+         && (p.p.xT()>5.));
                 isDpTcut = isDpTcut || (
                  ((f==411)||(f==421)||(f==413)||(f==423)||(f==4))
                  && (p.p.xT()>5.));
-	    }
-	    // check jet pT cut
+        }
+        // check jet pT cut
             int ii=0;
             for (int i=0; i<NpT; i++){
                 if ( (pTbins[i]<J.pT) && (J.pT<pTbins[i+1]) ) {
@@ -648,9 +773,9 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
                 }
             }
             if (ii==NpT) ii=NpT-1;
-	    if (isB) dB0dpT[iR][ii] += sigma_gen;
-	    if (isBpTcut) dBdpT[iR][ii] += sigma_gen;
-	    if (isD) dD0dpT[iR][ii] += sigma_gen;
+        if (isB) dB0dpT[iR][ii] += sigma_gen;
+        if (isBpTcut) dBdpT[iR][ii] += sigma_gen;
+        if (isD) dD0dpT[iR][ii] += sigma_gen;
             if (isDpTcut) dDdpT[iR][ii] += sigma_gen;
         }
     }     
@@ -668,7 +793,7 @@ void JetStatistics::write(std::string fheader){
                  << dsigmadpT[iR][i]/binwidth[i] << " "
                  << dDdpT[iR][i]/binwidth[i] << " "
                  << dBdpT[iR][i]/binwidth[i] << " "
-		 << dD0dpT[iR][i]/binwidth[i] << " "
+         << dD0dpT[iR][i]/binwidth[i] << " "
                  << dB0dpT[iR][i]/binwidth[i] << std::endl;
         }
         f.close();
@@ -684,10 +809,10 @@ void JetStatistics::write(std::string fheader){
         f2   << (shape_pTbins[i]+shape_pTbins[i+1])/2. << " "
              << shape_pTbins[i] << " "
              << shape_pTbins[i+1] << " ";
-	for (int j=0; j<shapes[i].size(); j++){
-	    f2 << shapes[i][j]/shape_w[i] << " "; 
-	}
-	f2 << std::endl;
+    for (int j=0; j<shapes[i].size(); j++){
+        f2 << shapes[i][j]/shape_w[i] << " "; 
+    }
+    f2 << std::endl;
     }
     f2.close();
 

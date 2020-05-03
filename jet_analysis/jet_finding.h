@@ -8,6 +8,21 @@
 #include "Pythia8Plugins/FastJet3.h"
 #include "lorentz.h"
 #include "workflow.h"
+#include "TableBase.h"
+
+class MediumResponse{
+private:
+    // A table for response dot fucntion G^mu,
+    // the response is G \cdot Delta P
+    std::shared_ptr<TableBase<fourvec, 4>> Gmu;
+    std::string name;
+    void compute(int start, int end);
+public:
+    MediumResponse(std::string fname);
+    double get_dpT_dydphi(double y, double phi, fourvec Pmu, double vperp, double pTmin);
+    void init(std::string);
+    void load(std::string);
+};
 
 struct current{
     fourvec p;
@@ -47,8 +62,6 @@ class MyInfo: public fastjet::PseudoJet::UserInfoBase {
     int _pdg_id, _mc_origin;
     double _w;
 };
-
-
 struct Fjet{
     fourvec pmu;
     double R, pT, M2, phi, eta;
@@ -60,7 +73,8 @@ void TestSource(
              std::vector<HadronizeCurrent> slist,
              std::string fname
      );
-std::vector<Fjet> FindJetTower(std::vector<particle> plist,
+std::vector<Fjet> FindJetTower(MediumResponse MR,
+             std::vector<particle> plist,
              std::vector<current> SourceList,
              std::vector<HadronizeCurrent> HadronizeList,
              std::vector<double> Rs,
@@ -89,4 +103,6 @@ class JetStatistics{
    std::vector<std::vector<double> > shapes, dnchdr, dsigmadpT, dBdpT, dDdpT, dB0dpT, dD0dpT;
    int NpT, shape_NpT, shape_Nr;
 };
+
+
 #endif

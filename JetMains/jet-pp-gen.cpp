@@ -116,7 +116,7 @@ int main(int argc, char* argv[]){
         std::stringstream fheader;
         fheader << args["output"].as<fs::path>().string() 
                 << processid;
-
+        auto ReDistributer = MediumResponse("Gmu");
 	for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
             PythiaGen pythiagen(
@@ -143,6 +143,7 @@ int main(int argc, char* argv[]){
                 dNdpT.add_event(plist, sigma_gen);
 		if (args["jet"].as<bool>()) {
                     auto jets = FindJetTower(
+                         ReDistributer,
                          plist, clist, slist,
                          Rs, shaperbins, 10, -3, 3, sigma_gen);
                     JetSample.add_event(jets, sigma_gen);

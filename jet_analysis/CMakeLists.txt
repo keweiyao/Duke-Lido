@@ -5,6 +5,7 @@ jet_finding.cpp
 ../src/lorentz.cpp
 ../src/simpleLogger.cpp
 ../src/hcubature.cpp
+../src/TableBase.cpp
 )
 
 #set_target_properties(${LIBRARY_JETFIND} PROPERTIES PREFIX "")
