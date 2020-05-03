@@ -16,14 +16,16 @@ double delta_qhat(int pid, double E, double M, double T){
 double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
         double CR = (pid==21) ? CA : CF;
         double mD2 = t_channel_mD2->get_mD2(T);
-        double Q2cut = std::max(mD2, std::min(cut*mD2, 6*E*T));
+        double Q2cut = std::min(cut*mD2, 6*E*T);
+        if (Q2cut<mD2) return 0.;
         return alpha_s(Q2cut, T) * CR * T * mD2 * std::log(Q2cut/mD2);
 }
 
 double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
         double CR = (pid==21) ? CA : CF;
         double minf2 = .5*t_channel_mD2->get_mD2(T);
-        double Q2cut = std::max(minf2, std::min(2*cut*minf2, 6*E*T));
+        double Q2cut = std::min(2*cut*minf2, 6*E*T);
+        if (Q2cut<minf2) return 0.;
         return alpha_s(Q2cut, T) * CR * T * minf2 * std::log(Q2cut/minf2);
 }
 
@@ -62,7 +64,7 @@ void Ito_update(int pid, double dt_lab, double M, double T, std::vector<double> 
 	double kt = qhat(pid, E0, M, T)/2.;
         double kl = qhat_L(pid, E0, M, T);
 	double dkl_dp2 = dqhat_L_dp2(pid, E0, M, T);
-	double drag = kl/(2.*E0*T) - (kl - kt)/std::pow(p0, 2) - dkl_dp2;
+	double drag = kl/(2.*E0*T);//- (kl - kt)/std::pow(p0, 2) - dkl_dp2;
 		   
 	double Ct = std::sqrt(kt*dt);
 	double Cl = std::sqrt(kl*dt);

@@ -275,8 +275,8 @@ int update_particle_momentum_Lido(
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 
 	){
         pIn.radlist.clear();
-        pIn.p = pIn.p*(Srandom::generate_thermal_parton_with_boost(
-                    temp, v3cell[0], v3cell[1], v3cell[2]).t()/pIn.p.t());
+        pIn.p = Srandom::generate_thermal_parton_with_boost(
+                    temp, v3cell[0], v3cell[1], v3cell[2]);
         pOut_list.push_back(pIn);
         return -1;
     }

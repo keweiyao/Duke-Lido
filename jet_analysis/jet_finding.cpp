@@ -277,10 +277,10 @@ std::vector<Fjet> FindJetTower(
              double jetyMax,
              double sigma_gen) {
     LOG_INFO << "do jet finding";
-    int coarse_level = 9;
+    int coarse_level = 8;
     std::vector<Fjet> Results;
     // contruct four momentum tower in the eta-phi plane
-    int Neta = 270, Nphi = 270;
+    int Neta = 200, Nphi = 200;
     int coarseNeta = int(Neta/coarse_level), 
         coarseNphi = int(Nphi/coarse_level);
     double etamin = -3., etamax = 3.;
@@ -391,14 +391,12 @@ std::vector<Fjet> FindJetTower(
               fastjet::SelectorRapRange(jetyMin, jetyMax);
         for (int ieta=0; ieta<Neta; ieta++) {
             double eta = etamin+ieta*deta;
-            double chy = std::cosh(eta), shy = std::sinh(eta);
             for (int iphi=0; iphi<Nphi; iphi++) {
                 auto ipmu = Pmutowers[ieta][iphi];
                 double phi = phimin+iphi*dphi;
-                double cphi = std::cos(phi), sphi = std::sin(phi);
                 // when we do the first jet finding,
                 // only use towers with positive contribution
-                if (ipmu.t()>0){
+                if (ipmu.t()>0.){
                     fastjet::PseudoJet fp(ipmu.x(), ipmu.y(), 
                                           ipmu.z(), ipmu.t());
                     fp.set_user_info(new MyInfo(0, 0, 0));
