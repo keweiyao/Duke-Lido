@@ -187,7 +187,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
              count++;
              maxQ0 = (p.Q0 > maxQ0) ? p.Q0 : maxQ0;
         }     
-        pythia.forceTimeShower(1,count-1,Q0);
+        pythia.forceTimeShower(1,count-1,maxQ0);
         pythia.next();
         int Nff=0;
         for (int i = 0; i < pythia.event.size(); ++i) {

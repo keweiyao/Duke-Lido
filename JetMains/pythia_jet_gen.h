@@ -50,8 +50,9 @@ void reference_pmu(int i, double & tau, Event & event){
 	double Mq2 = q.m()*q.m();
         double MP2 = P.m()*P.m();
 	double kT2 = measure_perp(kmu+qmu, kmu).pabs2();
-	double tauf = Srandom::exp_dist(Srandom::gen)*2*xq*xk*(kmu.t()+qmu.t())/(kT2 + xq*Mk2 + xk*Mq2 - xk*xq*MP2);
+	double tauf = 2*xq*xk*(kmu.t()+qmu.t())/(kT2 + xq*Mk2 + xk*Mq2 - xk*xq*MP2);
 	if (p.e() > 0.5*(kmu.t()+qmu.t())){
+            tau += 0.;
             reference_pmu(im1, tau, event);
 	}
 	else {

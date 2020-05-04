@@ -94,14 +94,14 @@ int main(int argc, char* argv[]){
               
             if(make_source){
                 double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.0;
-                fourvec x{t*std::cosh(etas), xs, ys, t*std::sinh(etas)}; 
-                med1.interpolate(x, T, vx, vy, vz);
+                //fourvec x{t*std::cosh(etas), xs, ys, t*std::sinh(etas)}; 
+                //med1.interpolate(x, T, vx, vy, vz);
                 double vzgrid = vz;
                 current J; 
-                fourvec ploss{0,0,0,0};
+                fourvec ploss{1,1,-1,1};
                 ploss = ploss;//*(hydro_dtau/0.4/5.076);
                 total = total + ploss;
-                ploss = ploss.boost_to(0, 0, vzgrid);
+                //ploss = ploss.boost_to(0, 0, vzgrid);
                 J.p = ploss;              
                 J.chetas = 1.;
                 J.shetas = 0.;

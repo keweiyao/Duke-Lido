@@ -69,6 +69,7 @@ struct Fjet{
     std::vector<particle> Ftags;
 };
 void TestSource(
+             MediumResponse MR,
              std::vector<current> jlist,
              std::vector<HadronizeCurrent> slist,
              std::string fname

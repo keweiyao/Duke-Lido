@@ -616,7 +616,7 @@ int update_particle_momentum_Lido(
                     it->p0 = it->p;                 
                     pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass+pIn.p.pabs2());
 		    pIn.p0 = pIn.p;
-		    pIn.Q0 = kt2n;
+		    pIn.Q0 = pIn.Q00;
 		    it->Q0 = std::sqrt(kt2n);
                     // for g -> q + qbar, pid change
                     if (split_type == 3){
