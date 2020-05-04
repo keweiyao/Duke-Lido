@@ -17,9 +17,9 @@ MediumResponse::MediumResponse(std::string _name): name(_name){
     shape.resize(4);
     low.resize(4);
     high.resize(4);
-    low[0] = -3.; low[1] = -M_PI; low[2] = 0.; low[3] = 0.4;
-    high[0] = 3.; high[1] = M_PI; high[2] = 10.; low[3] = 0.7;
-    shape[0] = 20; shape[1] = 20; shape[2] = 11; shape[3] = 4;
+    low[0] = -3.; low[1] = -M_PI; low[2] = 0.; low[3] = 0.0;
+    high[0] = 3.; high[1] = M_PI; high[2] = 10.; high[3] = 0.9;
+    shape[0] = 30; shape[1] = 30; shape[2] = 11; shape[3] = 10;
     Gmu = std::make_shared<TableBase<fourvec, 4>>(name, shape, low, high);
 }
 
@@ -58,41 +58,42 @@ void MediumResponse::compute(int start, int end){
         double phi = params[1];
         double pTmin_over_T = params[2];
         double vperp = params[3];
-        double cs = 0.5;
+        double cs = std::sqrt(0.2);
         double chrap = std::cosh(rap);
         double shrap = std::sinh(rap);
         auto code = [rap, chrap, shrap, phi, pTmin_over_T, vperp, cs]
                  (const double * X){
-            double costhetak = X[0], phik = X[1];
+            double costhetak = X[0];
+            double phik = X[1];
+            double yk = 0.5*std::log((1./cs+costhetak)/(1./cs-costhetak));
             double sinthetak = std::sqrt(1.-costhetak*costhetak);
             double gamma_vperp = 1./std::sqrt(1.-vperp*vperp);
-            double yk = 0.5*std::log((1.+costhetak)/(1.-costhetak));
             double chyk = std::cosh(yk), shyk = std::sinh(yk);
-            double sigma = gamma_vperp * (std::cosh(rap-yk)
-                               - vperp * std::cos(phi-phik) );
+            double sigma = gamma_vperp * ( std::cosh(rap-yk)
+                                 - vperp * std::cos(phi-phik) );
             double GInc = gsl_sf_gamma_inc_Q(5., pTmin_over_T*sigma);
             double sigma_3rd = std::pow(sigma, 3);
-            double sigma_4th = sigma_3rd * sigma;
+            double sigma_4th = std::pow(sigma, 4);
             double A = (
                      4./3.*gamma_vperp/sigma_3rd * (
-                       chyk - 3*cs*(sinthetak*vperp + costhetak*shyk)
+                chyk/cs - 3*(sinthetak*vperp + costhetak*shyk)
                      )
                    - 1./sigma_4th * (
-                       chrap - 3*cs*(std::cos(phi-phik)+ shrap*costhetak)
+                chrap/cs - 3*(sinthetak*std::cos(phi-phik)+ shrap*costhetak)
                      )
                   ) * GInc * 3. / std::pow(4.*M_PI, 2);
             std::vector<double> res;
             res.resize(4);
-            res[0] = A;
-            res[1] = -A*sinthetak*std::cos(phik)/cs;
-            res[2] = -A*sinthetak*std::sin(phik)/cs;
-            res[3] = -A*costhetak/cs;
+            res[0] = A*cs;
+            res[1] = A*sinthetak*std::cos(phik);
+            res[2] = A*sinthetak*std::sin(phik);
+            res[3] = A*costhetak;
             return res;
         };
-        double wmin[2] = {-.99, -M_PI};
-        double wmax[2] = {.99, M_PI};
+        double wmin[2] = {-.999, -M_PI};
+        double wmax[2] = {.999, M_PI};
         double error;
-        std::vector<double> res = quad_nd(code, 2, 4, wmin, wmax, error);
+        std::vector<double> res = quad_nd(code, 2, 4, wmin, wmax, error, 1e-7);
         fourvec gmu{res[0], res[1], res[2], res[3]};
         Gmu->SetTableValue(index, gmu);
     }
@@ -100,7 +101,7 @@ void MediumResponse::compute(int start, int end){
 
 double MediumResponse::get_dpT_dydphi(double rap, double phi, fourvec Pmu, double vperp, double pTmin_over_T){
     auto gmu = Gmu->InterpolateTable({rap, phi, pTmin_over_T, vperp});
-    return dot(gmu, Pmu);
+    return gmu.t()*Pmu.t()+gmu.x()*Pmu.x()+gmu.y()*Pmu.y()+gmu.z()*Pmu.z();
 }
 
 inline int corp_index(double x, double xL, double xH, double dx, int Nx){
@@ -111,159 +112,6 @@ inline int corp_index(double x, double xL, double xH, double dx, int Nx){
 
 double inline F(double gamma_perp, double vperp, double dphi, double deta){
     return gamma_perp*(std::cosh(deta)-vperp*std::cos(dphi));
-}
-
-void redistribute(
-          std::vector<current> & SourceList, 
-          std::vector<HadronizeCurrent> & HadronizeList, 
-          std::vector<std::vector<fourvec> > & DeltaPmu,
-          std::vector<std::vector<double> > & DeltaPT,
-          const int _Ny, const int _Nphi, 
-          const double ymin, const double ymax,
-          const double phimin, const double phimax,
-          int coarse_level, double pTmin=0., bool charge=false){
-    //double prefactor = 3*M_PI/std::pow(4.*M_PI,2);
-    //if (charge) prefactor *= (2./3.);
-    // use coarse grid
-    int Ny = int(_Ny/coarse_level);
-    int Nphi = int(_Nphi/coarse_level);
-    const double dy = (ymax-ymin)/(Ny-1); 
-    const double dphi = (phimax-phimin)/Nphi;
-    const double vradial = 0.6;
-    const double gamma_radial = 1./std::sqrt(1-std::pow(vradial,2));
-
-    std::vector<std::vector<fourvec> > CoarsedPmu;
-    std::vector<std::vector<double> > CoarsedPT;
-    CoarsedPmu.resize(Ny);
-    for (auto & it : CoarsedPmu) {
-        it.resize(Nphi);
-        for (auto & iit: it) iit = fourvec{0.,0.,0.,0.};
-    }
-    CoarsedPT.resize(Ny);
-    for (auto & it : CoarsedPT) {
-        it.resize(Nphi);
-        for (auto & iit: it) iit = 0.;
-    }
-
-
-    LOG_INFO << SourceList.size() << " sources";
-    //organizes souce by rapidity
-    std::vector<current> clist;
-    clist.resize(_Ny);
-    for (int iy=0; iy<_Ny; iy++){
-        clist[iy].chetas = std::cosh(ymin+iy*dy/coarse_level);
-        clist[iy].shetas = std::sinh(ymin+iy*dy/coarse_level);
-        clist[iy].cs = std::sqrt(.25);
-        clist[iy].p.a[0] = 0.;
-    clist[iy].p.a[1] = 0.;
-    clist[iy].p.a[2] = 0.;
-    clist[iy].p.a[3] = 0.;
-    }
-    for (auto & s: SourceList){
-        int i = corp_index(std::atanh(s.shetas/s.chetas), ymin, ymax, dy/coarse_level, _Ny);
-        if (i<0) continue;
-        clist[i].p = clist[i].p + s.p;
-    }
-    for (int iy=0; iy<Ny; iy++){
-        double y = ymin+iy*dy;    
-        double chy = std::cosh(y), 
-               shy = std::sinh(y);
-        for (int iphi=0; iphi<Nphi; iphi++){
-            double phi = phimin+(iphi+.5)*dphi;
-            double cphi = std::cos(phi), sphi = std::sin(phi);
-            fourvec Nmu0{chy,cphi,sphi,shy};
-            /*auto code = [clist,
-                         cphi, sphi, 
-                         chy, shy, 
-                         vradial, gamma_radial, pTmin]
-                         (double costhetak){
-                double one_and_cs = 4./3.;
-                double res=0.;
-                double sinthetak = std::sqrt(1.-std::pow(costhetak,2)); 
-                double Tri_sinthetak= sinthetak*3.;
-                double Tri_costhetak = costhetak*3.;
-                for (auto & source : clist){
-                    double cs = source.cs;
-                    double chetas = source.chetas,
-                           shetas = source.shetas;
-                    double tauk = std::sqrt(1./cs/cs-costhetak*costhetak);
-                    double coshyk = 1./cs/tauk,
-                           sinhyk = costhetak/tauk;
-                    double cosh_y_etas = chy*chetas-shy*shetas,
-                           sinh_y_etas = shy*chetas-chy*shetas;
-                    double cosh_y_etas_yk = cosh_y_etas*coshyk
-                                          - sinh_y_etas*sinhyk;
-                    double D = gamma_radial * cosh_y_etas_yk;
-            double D0 = gamma_radial * (1. - vradial);
-                    double alpha = vradial/cosh_y_etas_yk;
-                    double alpha2 = std::pow(alpha,2);
-                    double one_minus_alpha2 = 1. - alpha2;
-                    double one_minus_alpha2_pow_n3d5 =
-                                 std::pow(one_minus_alpha2, -3.5);
-                    double one_minus_alpha2_pow_n2d5 = 
-                               one_minus_alpha2_pow_n3d5 * one_minus_alpha2;
-                          
-                    double E03 = cs*source.p.t()+costhetak*source.p.z();
-                    double E12 = cphi*source.p.x()+sphi*source.p.y();
-                    double UdotG_phikint = 
-                      gamma_radial*one_minus_alpha2_pow_n2d5* (
-                       ( (2.+alpha2)*E03 + alpha*E12*Tri_sinthetak)*(
-                              coshyk/cs
-                            - sinhyk*Tri_costhetak
-                            - Tri_sinthetak*vradial
-                         )
-                      );
-                    double NdotG_phikint = 
-                      one_minus_alpha2_pow_n3d5 * (
-                        ((2.+3.*alpha2)*E03
-                         +alpha*(4.+alpha2)*E12*sinthetak)*(
-                              cosh_y_etas/cs
-                            - sinh_y_etas*Tri_costhetak
-                         )
-                       - (alpha*(4.+alpha2)*E03
-                         + (1.+4.*alpha2)*sinthetak*E12)*Tri_sinthetak
-                      );
-                    res += gsl_sf_gamma_inc_Q(5., pTmin/0.16*D0)
-                           *(one_and_cs*UdotG_phikint*D
-                             - NdotG_phikint)/std::pow(D,4);    
-                                
-                }
-                return res;
-            };
-            double error;
-            double res = prefactor*quad_1d(code,{-.99,.99},error, 0, 0.1, 20);*/
-            double dpT = 0.;
-            if (charge) dpT *= (2./3.);
-            CoarsedPmu[iy][iphi] = CoarsedPmu[iy][iphi] + Nmu0*dpT;
-            CoarsedPT[iy][iphi] += dpT;
-        }
-    }
-    // Interpolate the coarse grid to finer grid
-    const double fine_dy = (ymax-ymin)/(_Ny-1); 
-    const double fine_dphi = (phimax-phimin)/_Nphi;
-    for (int i=0; i<_Ny; i++){
-        double y = ymin + fine_dy*i;
-        int ii = corp_index(y, ymin, ymax, dy, Ny);
-        if (ii<0) continue;
-        if (ii==Ny-1) ii--;
-        double residue1 = (y-(ymin+dy*ii))/dy;
-        double u[2] = {1.-residue1, residue1};
-        for (int j=0; j<_Nphi; j++){ 
-            double phi = phimin + fine_dphi*(j);
-            int jj = corp_index(phi, phimin, phimax, dphi, Nphi);
-            if (jj==Nphi-1) jj--;
-            double residue2 = (phi-(phimin+dphi*(jj)))/dphi;
-            double v[2] = {1.-residue2, residue2};
-            for (int k1=0; k1<2; k1++){
-                for (int k2=0; k2<2; k2++){
-                    DeltaPmu[i][j] = DeltaPmu[i][j] + 
-                        CoarsedPmu[ii+k1][jj+k2]*fine_dy*fine_dphi*u[k1]*v[k2];
-                    DeltaPT[i][j] += 
-                        u[k1]*v[k2]*CoarsedPT[ii+k1][jj+k2]*fine_dy*fine_dphi;
-                }
-            }
-        }
-    }
 }
 
 std::vector<Fjet> FindJetTower(
@@ -277,10 +125,10 @@ std::vector<Fjet> FindJetTower(
              double jetyMax,
              double sigma_gen) {
     LOG_INFO << "do jet finding";
-    int coarse_level = 8;
+    int coarse_level = 10;
     std::vector<Fjet> Results;
     // contruct four momentum tower in the eta-phi plane
-    int Neta = 200, Nphi = 200;
+    int Neta = 300, Nphi = 300;
     int coarseNeta = int(Neta/coarse_level), 
         coarseNphi = int(Nphi/coarse_level);
     double etamin = -3., etamax = 3.;
@@ -415,7 +263,7 @@ std::vector<Fjet> FindJetTower(
         // recombine all the bins with negative contribution
         
         for (auto & j : jets){
-        Fjet J;
+            Fjet J;
             fourvec jetP{j.e(), j.px(), j.py(), j.pz()};
             fourvec newP{0., 0., 0., 0.};
             double Jphi = jetP.phi();
@@ -520,12 +368,13 @@ std::vector<Fjet> FindJetTower(
 }
 
 void TestSource(
+             MediumResponse MR,
              std::vector<current> SourceList,
              std::vector<HadronizeCurrent> HadronizeList,
              std::string fname) {
     // contruct four momentum tower in the eta-phi plane
-    int Neta = 43, Nphi = 48;
-    double etamin = -3.15, etamax = 3.15;
+    int Neta = 100, Nphi = 101;
+    double etamin = -3, etamax = 3;
     double deta = (etamax-etamin)/(Neta-1); 
     // Phi range has to be the same as the range of std::atan2(*,*);
     double phimin = -M_PI, phimax = M_PI; 
@@ -544,22 +393,23 @@ void TestSource(
         for (auto & iit: it) iit = 0;
     }
 
-    fourvec T0{0,0,0,0};
-    for (auto& r : towers){
-        for (auto& it: r){
-            T0 = T0 + it;
+    for (int ieta=0; ieta<Neta; ieta++) {
+        double eta = etamin+ieta*deta;
+        double chy = std::cosh(eta), shy = std::sinh(eta);
+        for (int iphi=0; iphi<Nphi; iphi++) {
+            double phi = phimin+iphi*dphi;
+            double cphi = std::cos(phi), sphi = std::sin(phi);
+            fourvec Nmu0{chy, cphi, sphi, shy};
+            double dpT = 0.;
+            for (auto & s: SourceList){
+                double etas = std::atanh(s.shetas/s.chetas);
+                dpT += MR.get_dpT_dydphi(eta, phi, s.p, 0.0, 0.0)*dphi*deta;
+            }
+            dpTarray[ieta][iphi] = dpT;
+            towers[ieta][iphi] = Nmu0*dpT;
         }
     }
-    if (SourceList.size() >0){
-    redistribute(
-          SourceList, 
-          HadronizeList,
-          towers,
-          dpTarray,
-          Neta, Nphi,
-          etamin, etamax,
-          phimin, phimax, 1);
-    }
+
 
     fourvec T1{0,0,0,0};
     for (auto& r : towers){
@@ -567,14 +417,13 @@ void TestSource(
             T1 = T1 + it;
         }
     }
-    LOG_INFO << "total" << T1-T0;
+    LOG_INFO << "total " << T1;
 
     std::ofstream f(fname.c_str());
     for (int ieta=0; ieta<Neta; ieta++) {
         double eta = etamin+ieta*deta;
         for (int iphi=0; iphi<Nphi; iphi++){
             double phi = phimin+iphi*dphi;
-            double cphi = std::cos(phi), sphi = std::sin(phi);
             auto it = dpTarray[ieta][iphi];
             f << it << " ";
         }
