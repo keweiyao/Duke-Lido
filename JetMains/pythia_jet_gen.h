@@ -52,6 +52,7 @@ void reference_pmu(int i, double & tau, Event & event){
 	double kT2 = measure_perp(kmu+qmu, kmu).pabs2();
 	double tauf = 2*xq*xk*(kmu.t()+qmu.t())/(kT2 + xq*Mk2 + xk*Mq2 - xk*xq*MP2);
 	if (p.e() > 0.5*(kmu.t()+qmu.t())){
+	    tau += 0.;
             reference_pmu(im1, tau, event);
 	}
 	else {
@@ -128,7 +129,6 @@ void PythiaGen::Generate(std::vector<particle> & plist){
 	    double t0 =  0.;
 	    reference_pmu(i, t0, event);
             _p.tau_i = t0;
-	    LOG_INFO << p0 << " at " << t0/5.076 << " or " << t0/5.076*p0.xT()/p0.t();
             _p.p0 = p0;
             _p.Q0 = Q0;
             _p.Q00 = Q0;

@@ -224,7 +224,7 @@ int main(int argc, char* argv[]){
         while(med1.load_next()) {
             double current_hydro_clock = med1.get_tauL();
             double dtau = med1.get_hydro_time_step();
-            LOG_INFO << "Hydro t = " << current_hydro_clock/5.076 << " fm/c";
+            //LOG_INFO << "Hydro t = " << current_hydro_clock/5.076 << " fm/c";
             for (auto & ie : events){
                 std::vector<particle> new_plist, pOut_list;
                 for (auto & p : ie.plist){     

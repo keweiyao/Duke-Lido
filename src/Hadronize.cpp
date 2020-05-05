@@ -183,7 +183,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
         for (auto &p : c){
              pythia.event.append(p.pid, 23, p.col, p.acol, 
 		                 p.p.x(), p.p.y(), p.p.z(), p.p.t(), p.mass);
-             pythia.event[count].scale(p.Q0);  
+             pythia.event[count].scale(p.Q0);
              count++;
              maxQ0 = (p.Q0 > maxQ0) ? p.Q0 : maxQ0;
         }     
@@ -216,12 +216,12 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
             }
             
             if (level==1 && ip.isFinal() && ip.isParton()){
-                LOG_INFO << "recombin needed" << ip.id() << " " 
-			 << ip.e() << " " << ip.px() << " "
-			 << ip.py() << " " << ip.pz();
+                //LOG_INFO << "recombin needed" << ip.id() << " " 
+		//	 << ip.e() << " " << ip.px() << " "
+		//	 << ip.py() << " " << ip.pz();
             }
         }
     }        
-    LOG_INFO << Npartons << " to " << hadrons.size();
+    //LOG_INFO << Npartons << " to " << hadrons.size();
     return hadrons.size();
 }

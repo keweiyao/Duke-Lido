@@ -168,7 +168,7 @@ std::vector<Fjet> FindJetTower(
         if (ieta<0) continue;
         int iphi = corp_index(phi, phimin, phimax, dphi, Nphi);
         Pmutowers[ieta][iphi] = Pmutowers[ieta][iphi] + p.p;
-        if (p.p.xT()>0.7 && p.charged)
+        if (p.p.xT()>0.7)
             PTtowers[ieta][iphi] += p.p.xT();
     }
     // put soft energy-momentum deposition into the towers
@@ -195,7 +195,7 @@ std::vector<Fjet> FindJetTower(
             for (auto & s: clist){
                 double etas = std::atanh(s.shetas/s.chetas);
                 dpT += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.);
-                dpTcut += 2./3.*MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.7/0.16);
+                dpTcut += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.7/0.16);
             }
             coarsePT[0][ieta][iphi] = dpT;
             coarsePT[1][ieta][iphi] = dpTcut;

@@ -31,9 +31,6 @@ int main(int argc, char* argv[]){
     OptDesc options{};
     options.add_options()
           ("help", "show this help message and exit")         
-          ("hydro",
-           po::value<fs::path>()->value_name("PATH")->required(),
-           "hydro file")
           ("response-table,r", 
             po::value<fs::path>()->value_name("PATH")->required(),
            "response table path to file")  
@@ -47,17 +44,6 @@ int main(int argc, char* argv[]){
                 return 0;
         }    
        
-        // check hydro setting
-        if (!args.count("hydro")){
-            throw po::required_option{"<hydro>"};
-            return 1;
-        }
-        else{
-            if (!fs::exists(args["hydro"].as<fs::path>())) {
-                throw po::error{"<hydro> path does not exist"};
-                return 1;
-            }
-        }
         // check lido-response table
         bool need_response_table;
         if (!args.count("response-table")){
@@ -74,29 +60,13 @@ int main(int argc, char* argv[]){
         std::stringstream outputfilename2;
 
         std::vector<current> clist;
-        /// Initialzie a hydro reader
-        Medium<3> med1(args["hydro"].as<fs::path>().string());
         auto ReDistributer = MediumResponse("Gmu");
         if (need_response_table) ReDistributer.init(args["response-table"].as<fs::path>().string());
         else ReDistributer.load(args["response-table"].as<fs::path>().string());
 
         double xs=0, ys=0, etas=0; 
         fourvec total{0,0,0,0};
-        while(med1.load_next()){
-            double current_hydro_clock = med1.get_tauL();
-            double hydro_dtau = med1.get_hydro_time_step();
-           for(int it=0; it<1; it++){
-            double t = current_hydro_clock + it*hydro_dtau;
-           
-            bool make_source =  (.2*5.076<=t)&& (t <.21*5.076);
-            LOG_INFO << make_source <<" s"<< t;
-            //xs = t;
-              
-            if(make_source){
                 double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.0;
-                //fourvec x{t*std::cosh(etas), xs, ys, t*std::sinh(etas)}; 
-                //med1.interpolate(x, T, vx, vy, vz);
-                double vzgrid = vz;
                 current J; 
                 fourvec ploss{1,1,-1,1};
                 ploss = ploss;//*(hydro_dtau/0.4/5.076);
@@ -107,9 +77,6 @@ int main(int argc, char* argv[]){
                 J.shetas = 0.;
                 J.cs = std::sqrt(.333);
                 clist.push_back(J);  
-            }
-           }
-        }
         std::stringstream outputfilename1;
         outputfilename1 << "gT.dat";
         std::vector<HadronizeCurrent> slist;
