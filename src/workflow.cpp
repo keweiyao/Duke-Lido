@@ -275,8 +275,10 @@ int update_particle_momentum_Lido(
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 
 	){
         pIn.radlist.clear();
-        pIn.p = Srandom::generate_thermal_parton_with_boost(
-                    temp, v3cell[0], v3cell[1], v3cell[2]);
+        //pIn.p = Srandom::generate_thermal_parton_with_boost(
+        //            temp, v3cell[0], v3cell[1], v3cell[2]);
+	pIn.Q0 = 0.;
+	pIn.Q00 = 0.;
         pOut_list.push_back(pIn);
         return -1;
     }
@@ -295,10 +297,13 @@ int update_particle_momentum_Lido(
     int absid = std::abs(pIn.pid);
 
     // Apply diffusion and update particle momentum
-    fourvec pnew;
-    Ito_update(pIn.pid, dt_for_pIn, pIn.mass, temp, v3cell, pIn.p, pnew);
-    if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
-    else pIn.p = pnew;
+    // use small step
+    for (int i=0; i<5; i++){
+        fourvec pnew;
+        Ito_update(pIn.pid, dt_for_pIn/5., pIn.mass, temp, v3cell, pIn.p, pnew);
+        if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
+        else pIn.p = pnew;
+    }
     // Apply large angle scattering, and diffusion induced radiation
     auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
     double dt_cell = dt_for_pIn / pIn.p.t() * p_cell.t();
@@ -387,7 +392,7 @@ int update_particle_momentum_Lido(
             LOG_INFO << absid  <<" " << temp  << " " 
 		     << v3cell[0] << " " << v3cell[1] << " " << v3cell[2];
             LOG_INFO << x0;
-            LOG_INFO << " " <<p00 <<"//"<< pIn.p << "//" << pnew;
+            LOG_INFO << " " <<p00 <<"//"<< pIn.p ;
             LOG_FATAL << "3. Channel = " << channel << " not exists";
             exit(-1);
         }

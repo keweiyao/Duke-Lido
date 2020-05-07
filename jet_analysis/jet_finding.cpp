@@ -448,7 +448,7 @@ void LeadingParton::add_event(std::vector<particle> plist, double sigma_gen){
     for (auto & p : plist){
         int pid = std::abs(p.pid);
         bool ispi = pid==111 || pid == 211;
-        bool ischg = p.charged;
+        bool ischg = pid==111 || pid == 211 || pid == 311 || pid== 321 || pid==2212;
         bool isD = pid==411 || pid == 421 || pid == 413 || pid == 423 || pid ==4;
         bool isB = pid==511 || pid == 521 || pid == 513 || pid == 523 || pid ==5;
         if (std::abs(p.p.rap()) < 1.) {
@@ -539,8 +539,8 @@ JetStatistics::JetStatistics(std::vector<double> _pTbins, std::vector<double> _R
         binwidth[i]=pTbins[i+1]-pTbins[i];
 }
 void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
-    for (auto & J : jets){
-    int iR;
+    /*for (auto & J : jets){
+        int iR;
         for (int i=0; i<Rs.size(); i++){
             if ( ( (Rs[i]-.01)<J.R) 
             && (J.R< (Rs[i]+.01)) 
@@ -562,9 +562,9 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
             if (ii==NpT) continue;
             dsigmadpT[iR][ii] += sigma_gen;
         }
-    }
+    }*/
     for (auto & J:jets){
-    if ((J.R<0.41) && (J.R>0.39) && (std::abs(J.eta) < 1.6) ) { // CMS cut
+        if ((J.R<0.41) && (J.R>0.39) && (std::abs(J.eta) < 1.6) ) { // CMS cut
             int ii=0;
             for (int i=0; i<shape_NpT; i++){
                 if ( (shape_pTbins[i]<J.pT) && (J.pT<shape_pTbins[i+1]) ) {
@@ -573,10 +573,10 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
                 }
             }
             if (ii==NpT) continue;
-        for (int i=0; i<shape_Nr; i++){
+            for (int i=0; i<shape_Nr; i++){
                 shapes[ii][i] += sigma_gen*J.shape[i];
-        dnchdr[ii][i] += sigma_gen*J.dndr[i];
-        }
+                dnchdr[ii][i] += sigma_gen*J.dndr[i];
+            }
             shape_w[ii] += sigma_gen;
         }
     }
@@ -597,21 +597,21 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
         if (std::abs(J.eta) < 2.1){
             // check flavor content
             bool isD = false;
-        bool isDpTcut = false;
+            bool isDpTcut = false;
             bool isB = false;
-        bool isBpTcut = false;
-        for (auto & p : J.Ftags) {
-        int f = std::abs(p.pid);
+            bool isBpTcut = false;
+            for (auto & p : J.Ftags) {
+                int f = std::abs(p.pid);
                 isD = isD || ((f==411)||(f==421)||(f==413)||(f==423)||(f==4));
                 isB = isB || ((f==511)||(f==521)||(f==513)||(f==523)||(f==5));
                 isBpTcut = isBpTcut || (
-         ((f==511)||(f==521)||(f==513)||(f==523)||(f==5))
-         && (p.p.xT()>5.));
+                       ((f==511)||(f==521)||(f==513)||(f==523)||(f==5))
+                            && (p.p.xT()>5.));
                 isDpTcut = isDpTcut || (
-                 ((f==411)||(f==421)||(f==413)||(f==423)||(f==4))
-                 && (p.p.xT()>5.));
-        }
-        // check jet pT cut
+                       ((f==411)||(f==421)||(f==413)||(f==423)||(f==4))
+                         && (p.p.xT()>5.));
+            }
+            // check jet pT cut
             int ii=0;
             for (int i=0; i<NpT; i++){
                 if ( (pTbins[i]<J.pT) && (J.pT<pTbins[i+1]) ) {
@@ -619,11 +619,12 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
                     break;
                 }
             }
-            if (ii==NpT) ii=NpT-1;
-        if (isB) dB0dpT[iR][ii] += sigma_gen;
-        if (isBpTcut) dBdpT[iR][ii] += sigma_gen;
-        if (isD) dD0dpT[iR][ii] += sigma_gen;
-            if (isDpTcut) dDdpT[iR][ii] += sigma_gen;
+            if (ii==NpT) continue;
+            if (isB) dB0dpT[iR][ii] += sigma_gen;
+            if (isBpTcut) dBdpT[iR][ii] += sigma_gen;
+            if (isD && (!isB)) dD0dpT[iR][ii] += sigma_gen;
+            if (isDpTcut && (!isBpTcut)) dDdpT[iR][ii] += sigma_gen;
+	    if ((!isDpTcut)&&(!isBpTcut)) dsigmadpT[iR][ii] += sigma_gen;
         }
     }     
 }
