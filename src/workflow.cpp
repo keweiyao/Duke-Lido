@@ -275,8 +275,8 @@ int update_particle_momentum_Lido(
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 
 	){
         pIn.radlist.clear();
-        //pIn.p = Srandom::generate_thermal_parton_with_boost(
-        //            temp, v3cell[0], v3cell[1], v3cell[2]);
+        pIn.p = Srandom::generate_thermal_parton_with_boost(
+                    temp, v3cell[0], v3cell[1], v3cell[2]);
 	pIn.Q0 = 0.;
 	pIn.Q00 = 0.;
         pOut_list.push_back(pIn);
@@ -436,6 +436,7 @@ int update_particle_momentum_Lido(
 		        temp_pid, pIn.col, pIn.acol, channel,
 		        id, col, acol, mcol, macol);
 		    particle ep = produce_parton(id, FS[1], pIn, false);
+		    ep.origin = 2;
 		    ep.col = col; 
 		    ep.acol = acol;
 		    pIn.col = mcol;
@@ -640,6 +641,8 @@ int update_particle_momentum_Lido(
                     pIn.acol = macol;
                     // label it as real and put it in output particle list
                     it->is_virtual = false;
+		    if (pIn.origin == 2) it->origin=2;
+                    if (pIn.origin == 0 || pIn.origin==1) it->origin=1;
                     pOut_list.push_back(*it);
                 }
                 // remove it from the radlist

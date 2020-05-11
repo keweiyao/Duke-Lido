@@ -14,7 +14,7 @@
 #include "simpleLogger.h"
 #include "Medium_Reader.h"
 #include "workflow.h"
-#include "pythia_jet_gen.h"
+#include "PGunWithShower.h"
 #include "Hadronize.h"
 #include "jet_finding.h"
 
@@ -71,6 +71,10 @@ int main(int argc, char* argv[]){
            "Scale [GeV] to insert in-medium transport")
 	  ("jet", po::bool_switch(),
            "Turn on to do jet finding (takes time)")
+          ("origin",
+           po::value<int>()->value_name("INT")->default_value(0,"0"),
+           "jet component")
+
     ;
 
     po::variables_map args{};
@@ -166,11 +170,11 @@ int main(int argc, char* argv[]){
 
         /// all kinds of bins and cuts
 	std::vector<double> TriggerBin({
-         2,4,6,8,12,16,20,25,30,40,50,60,70,80,90,100,110,120,130,
+         60,70,80,90,100,110,120,130,
          140,150,160,170,180,200,220,240,260,280,
-         320,360,400,500,600,700,800,1000,1200,1600,2000,2500});
+         320,360,400,500,1000,2500});
 
-        std::vector<double> Rs({.2,.4});
+        std::vector<double> Rs({.2,.4,.6,.8, 1.});
 
         std::vector<double> ParticlepTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
                50,60,80,100,120,150,200,300,400,500,600,1000,2000});
@@ -191,43 +195,43 @@ int main(int argc, char* argv[]){
         std::vector<event> events;
         // Fill in all events
         LOG_INFO << "Events initialization";
-        for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++) {    
+        //for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++) {    
             /// Initialize a pythia generator for each pT trigger bin
-            PythiaGen pythiagen(
+            PGunWShower pythiagen(
                 args["pythia-setting"].as<fs::path>().string(),
                 args["ic"].as<fs::path>().string(),
-                TriggerBin[iBin],
-                TriggerBin[iBin+1],
                 args["eid"].as<int>(),
                 Q0
             );
-            LOG_INFO << " Generating " 
-                     << TriggerBin[iBin] << " < PT_hat <"
-                     << TriggerBin[iBin+1] << " GeV";
+            //LOG_INFO << " Generating " 
+            //         << TriggerBin[iBin] << " < PT_hat <"
+            //         << TriggerBin[iBin+1] << " GeV";
             for (int i=0; i<args["pythia-events"].as<int>(); i++){
                 event e1;
-                pythiagen.Generate(e1.plist);
-                e1.sigma = pythiagen.sigma_gen()
-                           /args["pythia-events"].as<int>();            
+                pythiagen.Generate(200., e1.plist);
+                e1.sigma = 1./args["pythia-events"].as<int>();            
                 // freestream form t=0 to tau=tau0
                 for (auto & p : e1.plist){
+		    p.origin=0;
                     p.Tf = 0.161;
+		    LOG_INFO << p.x << " " <<p.p;
                     if (p.x.tau() < med1.get_tauH())
                         p.freestream(compute_realtime_to_propagate(
                                    med1.get_tauH(), p.x, p.p)
                         );
                 }   
+		LOG_INFO << "# of particles " << e1.plist.size();
                 events.push_back(e1);
             }
-        }
+        //}
         LOG_INFO << "Start evolution of " << events.size() << " hard events";
-        while(med1.load_next()) {
+        /*while(med1.load_next()) {
             double current_hydro_clock = med1.get_tauL();
             double dtau = med1.get_hydro_time_step();
             //LOG_INFO << "Hydro t = " << current_hydro_clock/5.076 << " fm/c";
             for (auto & ie : events){
                 std::vector<particle> new_plist, pOut_list;
-                for (auto & p : ie.plist){     
+                for (auto & p : ie.plist){  
                     if (p.Tf < 0.16 || std::abs(p.p.rap())>5.) {
                         new_plist.push_back(p);
                         continue;       
@@ -280,14 +284,14 @@ int main(int argc, char* argv[]){
                 }
                 ie.plist = new_plist;
             }
-        }    
+        }   */ 
 
         // Hadronization
         // put back lost particles with their color
         LOG_INFO << "Hadronization";
         for (auto & ie : events){
-            for (auto & p : ie.colorlist) ie.plist.push_back(p);
-            Hadronizer.hadronize(ie.plist, ie.hlist, ie.thermal_list, Q0, 1);
+           // for (auto & p : ie.colorlist) ie.plist.push_back(p);
+           /* Hadronizer.hadronize(ie.plist, ie.hlist, ie.thermal_list, Q0, 1);
             for(auto & it : ie.thermal_list){
                 double vz = it.x.z()/it.x.t();
                 current J; 
@@ -296,15 +300,15 @@ int main(int argc, char* argv[]){
                 J.shetas = std::sinh(it.x.rap());
                 J.cs = std::sqrt(.3333);
                 ie.clist.push_back(J);  
-            }
+            }*/
          }
         LOG_INFO << "Jet finding, w/ medium excitation";
         for (auto & ie : events){
             dNdpT.add_event(ie.hlist, ie.sigma);
 	    if (args["jet"].as<bool>()) {
-                auto jets = FindJetTower(ReDistributer,
-                     ie.hlist, ie.clist, ie.slist, 
-	             Rs, shaperbins, 10, -3, 3, ie.sigma);
+                auto jets = FindJetDecompose(ReDistributer,
+                     ie.plist, ie.clist, ie.slist, 
+	             Rs, shaperbins, 10, -3, 3, ie.sigma, args["origin"].as<int>());
 	        JetSample.add_event(jets, ie.sigma);
 	    }
         }

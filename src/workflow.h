@@ -12,6 +12,7 @@ struct particle{
 	bool charged;
 	double mass, weight, tau_i, Q0, Q00;
 	bool is_virtual;
+	int origin;
 	
 	double T0, mfp0, Tf; // production temperature, local mfp
 	fourvec x0; // production location

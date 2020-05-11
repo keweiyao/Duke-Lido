@@ -99,11 +99,31 @@ class JetStatistics{
    void add_event(std::vector<Fjet> jets, double sigma_gen);
    void write(std::string fheader);
    private:
-   std::vector<double> pTbins, binwidth, shape_pTbins, shape_rbins;
-   std::vector<double> shape_w, Rs;
+   std::vector<double> pTbins, binwidth, shape_pTbins, shape_rbins, xJbins;
+   std::vector<double> shape_w, Rs, xJ;
    std::vector<std::vector<double> > shapes, dnchdr, dsigmadpT, dBdpT, dDdpT, dB0dpT, dD0dpT;
    int NpT, shape_NpT, shape_Nr;
 };
 
-
+std::vector<Fjet> FindJetDecompose(
+             MediumResponse MR,
+             std::vector<particle> plist,
+             std::vector<current> SourceList,
+             std::vector<HadronizeCurrent> HadronizeList,
+             std::vector<double> Rs, std::vector<double> rbins,
+             double jetpTMin,
+             double jetyMin,
+             double jetyMax,
+             double sigma_gen,
+             int origin);
+std::vector<Fjet> FindJetTowerWpT(
+             MediumResponse MR,
+             std::vector<particle> plist,
+             std::vector<current> SourceList,
+             std::vector<HadronizeCurrent> HadronizeList,
+             std::vector<double> Rs, std::vector<double> rbins,
+             double jetpTMin,
+             double jetyMin,
+             double jetyMax,
+             double sigma_gen, double pTmin);
 #endif
