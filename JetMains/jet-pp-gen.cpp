@@ -91,11 +91,10 @@ int main(int argc, char* argv[]){
 
         /// all kinds of bins and cuts
         std::vector<double> TriggerBin({
-         60,70,80,90,100,110,120,130,
-         140,150,160,170,180,200,220,240,260,280,
-         320,360,400,500,600,700,800,1000,1200,1600,2000,2500});
+         2,5,10,15,20,30,40,50,60,80,100,120,140,160,180,200,
+         240,280,320,360,400,500,600,700,800,1000,1200,1600,2000,2500});
 
-        std::vector<double> Rs({.3, .5});
+        std::vector<double> Rs({.2, .4});
 
         std::vector<double> ParticlepTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
                50,60,80,100,120,150,200,300,400,500,600,1000,2000});
@@ -146,7 +145,9 @@ int main(int argc, char* argv[]){
                     auto jets = FindJetTower(
                          ReDistributer,
                          plist, clist, slist,
-                         Rs, shaperbins, 10, -3, 3, sigma_gen);
+                         Rs, shaperbins, 10, -3, 3, 
+			 sigma_gen, 
+			 args["pTtrack"].as<double>());
                     JetSample.add_event(jets, sigma_gen);
 		}
             }

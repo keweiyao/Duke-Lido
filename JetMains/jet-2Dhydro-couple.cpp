@@ -71,6 +71,10 @@ int main(int argc, char* argv[]){
            "Scale [GeV] to insert in-medium transport")
 	  ("jet", po::bool_switch(),
            "Turn on to do jet finding (takes time)")
+	            ("pTtrack",
+           po::value<double>()->value_name("DOUBLE")->default_value(.7,".7"),
+           "minimum pT track in the jet shape reconstruction")
+
     ;
 
     po::variables_map args{};
@@ -170,7 +174,7 @@ int main(int argc, char* argv[]){
          140,150,160,170,180,200,220,240,260,280,
          320,360,400,500,600,700,800,1000,1200,1600,2000,2500});
 
-        std::vector<double> Rs({.2,.4,.5});
+        std::vector<double> Rs({.2,.4});
 
         std::vector<double> ParticlepTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
                50,60,80,100,120,150,200,300,400,500,600,1000,2000});
@@ -286,7 +290,9 @@ int main(int argc, char* argv[]){
 	    if (args["jet"].as<bool>()) {
                 auto jets = FindJetTower(ReDistributer,
                      ie.hlist, ie.clist, ie.slist, 
-	             Rs, shaperbins, 10, -3, 3, ie.sigma);
+	             Rs, shaperbins, 10, -3, 3, 
+		     ie.sigma, 
+		     args["pTtrack"].as<double>());
 	        JetSample.add_event(jets, ie.sigma);
 	    }
         }
