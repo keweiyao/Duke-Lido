@@ -100,13 +100,13 @@ void FormChain(particle pi, particle pf,
             particle th;
             th.col = 0;
             th.acol = pi.col;
-	    double vx = pi.vcell[0];
-	    double vy = pi.vcell[1];
-	    double vz = pi.vcell[2];//pi.x.z()/(1e-9+pi.x.t());
-            if (std::abs(vz)>.999) vz = vz/std::abs(vz)*.999;
+	    double vx = 0.;
+	    double vy = 0.;
+	    double vz = pi.x.z()/(1e-9+pi.x.t());
+            if (std::abs(vz)>.9999) vz = vz/std::abs(vz)*.9999;
             th.pid = -std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pi.Tf,.16), vx, vy, vz);
+                  std::max(pi.Tf,.165), vx, vy, vz);
             th.mass = 0.;
 	    th.x0 = pi.x;
             th.vcell.resize(3);
@@ -115,7 +115,7 @@ void FormChain(particle pi, particle pf,
             th.vcell[2] = vz;
 	    th.x = pi.x;
 	    th.Tf = pi.Tf;
-            th.Q0 = pi.Tf;
+            th.Q0 = 0.;
             thermal.push_back(th);
             chain.push_back(th);
         }
@@ -124,13 +124,13 @@ void FormChain(particle pi, particle pf,
             particle th;
             th.col = pf.acol;
             th.acol = 0;
-	    double vx = pf.vcell[0];
-            double vy = pf.vcell[1];
-            double vz = pf.vcell[2];//pf.x.z()/(1e-9+pf.x.t());
-	    if (std::abs(vz)>.999) vz = vz/std::abs(vz)*.999;
+	    double vx = 0.;
+            double vy = 0.;
+            double vz = pf.x.z()/(1e-9+pf.x.t());
+	    if (std::abs(vz)>.9999) vz = vz/std::abs(vz)*.9999;
             th.pid = std::abs(Srandom::sample_flavor(3));
 	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pf.Tf,.16), vx, vy, vz);
+                  std::max(pf.Tf,.165), vx, vy, vz);
             th.mass = 0.;
 	    th.x0 = pf.x;
             th.vcell.resize(3);
@@ -139,7 +139,7 @@ void FormChain(particle pi, particle pf,
             th.vcell[2] = vz;
 	    th.x = pf.x;
 	    th.Tf = pf.Tf;
-            th.Q0 = pi.Tf;
+            th.Q0 = 0.;
             thermal.push_back(th);
             chain.push_back(th);
         }

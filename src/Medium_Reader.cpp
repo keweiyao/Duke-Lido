@@ -295,8 +295,8 @@ void TransverPositionSampler::SampleXY(double & x, double & y){
     }
     int ix = PDF[mid].i;
     int iy = PDF[mid].j;
-    y = _x_min + _dx*(ix - 0.5 + Srandom::init_dis(Srandom::gen) );
-    x = _y_min + _dy*(iy - 0.5 + Srandom::init_dis(Srandom::gen) );
+    x = _x_min + _dx*(ix - 0.5 + Srandom::init_dis(Srandom::gen) );
+    y = _y_min + _dy*(iy - 0.5 + Srandom::init_dis(Srandom::gen) );
 }
 
 

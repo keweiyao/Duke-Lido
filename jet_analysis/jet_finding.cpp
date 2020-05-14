@@ -125,10 +125,10 @@ std::vector<Fjet> FindJetTower(
              double jetyMax,
              double sigma_gen) {
     LOG_INFO << "do jet finding";
-    int coarse_level = 10;
+    int coarse_level = 5;
     std::vector<Fjet> Results;
     // contruct four momentum tower in the eta-phi plane
-    int Neta = 200, Nphi = 200;
+    int Neta = 300, Nphi = 300;
     int coarseNeta = int(Neta/coarse_level), 
         coarseNphi = int(Nphi/coarse_level);
     double etamin = -3., etamax = 3.;
@@ -195,7 +195,7 @@ std::vector<Fjet> FindJetTower(
             for (auto & s: clist){
                 double etas = std::atanh(s.shetas/s.chetas);
                 dpT += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.);
-                dpTcut += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.7/0.16);
+                dpTcut += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.7/0.165);
             }
             coarsePT[0][ieta][iphi] = dpT;
             coarsePT[1][ieta][iphi] = dpTcut;
@@ -488,12 +488,8 @@ void LeadingParton::write(std::string fheader){
 
 JetStatistics::JetStatistics(std::vector<double> _pTbins, std::vector<double> _Rs,
                      std::vector<double> _shape_pTbins, std::vector<double> _shape_rbins){
-	std::vector<double> bb({0, .05, .1, .15, .2, 
-			        .25, .3, .35, .4, .45, 
-				.5, .55, .6, .65, .7,
-			       	.75,.8, .85, .9, .95,
-			       	1.});
-	xJbins = bb;
+    for (int i=0; i<11; i++)
+	xJbins.push_back(i*0.06);
     xJ.resize(xJbins.size()-1);
     for (auto & it : xJ) it = 0.;
     pTbins = _pTbins;
@@ -792,7 +788,7 @@ std::vector<Fjet> FindJetDecompose(
             for (auto & s: clist){
                 double etas = std::atanh(s.shetas/s.chetas);
                 dpT += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.);
-                dpTcut += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.0/0.16);
+                dpTcut += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.0);
             }
             coarsePT[0][ieta][iphi] = dpT;
             coarsePT[1][ieta][iphi] = dpTcut;
@@ -1048,7 +1044,7 @@ std::vector<Fjet> FindJetTowerWpT(
                 double etas = std::atanh(s.shetas/s.chetas);
                 dpT += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.);
 		if (pTmin<4.8);
-                    dpTcut += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, pTmin/0.16);
+                    dpTcut += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, pTmin/0.165);
             }
             coarsePT[0][ieta][iphi] = dpT;
             coarsePT[1][ieta][iphi] = dpTcut;

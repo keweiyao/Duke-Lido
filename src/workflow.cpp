@@ -261,31 +261,26 @@ int update_particle_momentum_Lido(
         pOut_list.push_back(pIn);
         return pOut_list.size();
     }
-
+    // Skip particles that are not formed yet
     if (pIn.x.t()<pIn.tau_i){
         pOut_list.push_back(pIn);
         return pOut_list.size();
     }
-
-
-    // Delete soft partons below a energy cut from the hard parton list
+    // Don't touch particles below Tc
+    if (temp < 0.155){
+        pIn.radlist.clear();
+        pOut_list.push_back(pIn);
+        return pOut_list.size();
+    }
+    // Don't touch particles already below soft cut
     if ((!pIn.is_virtual) && 
         pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Emin
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 
 	){
         pIn.radlist.clear();
-        pIn.p = Srandom::generate_thermal_parton_with_boost(
-                    temp, v3cell[0], v3cell[1], v3cell[2]);
-	pIn.Q0 = 0.;
-	pIn.Q00 = 0.;
-        pOut_list.push_back(pIn);
-        return -1;
-    }
-    // Freeze particles below Tc
-    if (temp < 0.16){
-        pIn.radlist.clear();
-        pOut_list.push_back(pIn);
+	if (pIn.origin==1 || pIn.origin==0) 
+            pOut_list.push_back(pIn);
         return pOut_list.size();
     }
         

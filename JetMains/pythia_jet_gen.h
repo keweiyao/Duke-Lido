@@ -33,7 +33,6 @@ void reference_pmu(int i, double & tau, Event & event){
         reference_pmu(im1, tau, event);
     }
     if (im1==0 && im2 ==0) {
-        tau = 0.;
 	return;
     }
     if (im1>0 && im2==0){
@@ -52,17 +51,14 @@ void reference_pmu(int i, double & tau, Event & event){
 	double kT2 = measure_perp(kmu+qmu, kmu).pabs2();
 	double tauf = 2*xq*xk*(kmu.t()+qmu.t())/(kT2 + xq*Mk2 + xk*Mq2 - xk*xq*MP2);
 	if (p.e() > 0.5*(kmu.t()+qmu.t())){
-	    tau += 0.;
             reference_pmu(im1, tau, event);
 	}
 	else {
 	    tau += tauf;
             reference_pmu(im1, tau, event);
-	}
-        
+	}      
     }
     if (im1 != im2 && im1 > 0 && im2 > 0){
-        // hard products, reference particles
         return;
     }
 }

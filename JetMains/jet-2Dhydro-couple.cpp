@@ -170,7 +170,7 @@ int main(int argc, char* argv[]){
          140,150,160,170,180,200,220,240,260,280,
          320,360,400,500,600,700,800,1000,1200,1600,2000,2500});
 
-        std::vector<double> Rs({.2,.4});
+        std::vector<double> Rs({.2,.5});
 
         std::vector<double> ParticlepTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
                50,60,80,100,120,150,200,300,400,500,600,1000,2000});
@@ -211,7 +211,8 @@ int main(int argc, char* argv[]){
                            /args["pythia-events"].as<int>();            
                 // freestream form t=0 to tau=tau0
                 for (auto & p : e1.plist){
-                    p.Tf = 0.161;
+                    p.Tf = 0.166;
+                    p.origin = 0;
                     if (p.x.tau() < med1.get_tauH())
                         p.freestream(compute_realtime_to_propagate(
                                    med1.get_tauH(), p.x, p.p)
@@ -228,7 +229,7 @@ int main(int argc, char* argv[]){
             for (auto & ie : events){
                 std::vector<particle> new_plist, pOut_list;
                 for (auto & p : ie.plist){     
-                    if (p.Tf < 0.16 || std::abs(p.p.rap())>5.) {
+                    if (p.Tf < 0.165 || std::abs(p.p.rap())>5.) {
                         new_plist.push_back(p);
                         continue;       
                     }
@@ -249,33 +250,15 @@ int main(int argc, char* argv[]){
                         fourvec ploss = p.p;
                         int fs_size = update_particle_momentum_Lido(
                                 DeltaTau, T, {vx, vy, vz}, p, pOut_list);     
-                        if (fs_size==-1){
-                            // particle lost to the medium, but we
-                            // track its color
-                            //ie.colorlist.push_back(pOut_list[0]);
-			    new_plist.push_back(pOut_list[0]);
-			    current J;
-                            ploss = ploss - pOut_list[0].p;
-			    ploss = ploss.boost_to(0, 0, p.x.z()/p.x.t());
-			    J.p = ploss;
-                            J.chetas = std::cosh(p.x.rap());
-                            J.shetas = std::sinh(p.x.rap());
-                            J.cs = std::sqrt(.3333);
-                            ie.clist.push_back(J);
-                        }
-                        else {
                             for (auto & fp : pOut_list) {
                                 ploss = ploss - fp.p;
                                 new_plist.push_back(fp);
                             }                           
                             current J; 
-                            ploss = ploss.boost_to(0, 0, p.x.z()/p.x.t());
-                            J.p = ploss;
+                            J.p = ploss.boost_to(0, 0, p.x.z()/p.x.t());
                             J.chetas = std::cosh(p.x.rap());
                             J.shetas = std::sinh(p.x.rap());
-                            J.cs = std::sqrt(.3333);
                             ie.clist.push_back(J);  
-                        }
                     }
                 }
                 ie.plist = new_plist;
@@ -294,7 +277,6 @@ int main(int argc, char* argv[]){
                 J.p = it.p.boost_to(0, 0, vz)*(-1.);
                 J.chetas = std::cosh(it.x.rap());
                 J.shetas = std::sinh(it.x.rap());
-                J.cs = std::sqrt(.3333);
                 ie.clist.push_back(J);  
             }
          }
