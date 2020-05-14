@@ -267,7 +267,7 @@ int update_particle_momentum_Lido(
         return pOut_list.size();
     }
     // Don't touch particles below Tc
-    if (temp < 0.155){
+    if (temp < 0.165){
         pIn.radlist.clear();
         pOut_list.push_back(pIn);
         return pOut_list.size();
