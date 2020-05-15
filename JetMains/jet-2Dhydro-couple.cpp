@@ -161,10 +161,9 @@ int main(int argc, char* argv[]){
             args["lido-setting"].as<fs::path>().string(),
             args["lido-table"].as<fs::path>().string()
         );
-        /// Initialize medium response function 
-        auto ReDistributer = MediumResponse("Gmu");
-        if (need_response_table) ReDistributer.init(args["response-table"].as<fs::path>().string());
-        else ReDistributer.load(args["response-table"].as<fs::path>().string());
+        /// Initialize jet finder with medium response
+        JetFinder jetfinder(300,300,3.,need_response_table, args["response-table"].as<fs::path>().string());
+
         /// Initialize a simple hadronizer
         JetDenseMediumHadronize Hadronizer;
 
@@ -174,12 +173,14 @@ int main(int argc, char* argv[]){
          140,150,160,170,180,200,220,240,260,280,
          320,360,400,500,600,700,800,1000,1200,1600,2000,2500});
 
-        std::vector<double> Rs({.2,.4});
+        std::vector<double> Rs({.2,.3,.4});
 
         std::vector<double> ParticlepTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
                50,60,80,100,120,150,200,300,400,500,600,1000,2000});
         std::vector<double> jetpTbins({10,15,20,30,40,
                50,60,80,100,120,160,200,300,400,500,600,800,1000,1400,1800});
+        std::vector<double> HFpTbins({4,20,1000});
+        std::vector<double> HFETbins({2,6,10,20,40,1000});
 	std::vector<double> shapepTbins({20,30,40,60,80,120,2000});
         std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
                           .35, .4, .45, .5,  .6, .7,  .8,
@@ -187,6 +188,8 @@ int main(int argc, char* argv[]){
 
 	LeadingParton dNdpT(ParticlepTbins);
 	JetStatistics JetSample(jetpTbins, Rs, shapepTbins, shaperbins);
+        JetHFCorr jet_HF_corr(HFpTbins, shaperbins);
+        HFETCorr  HF_ET_corr(HFETbins, shaperbins);
         // Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
                 
@@ -288,17 +291,27 @@ int main(int argc, char* argv[]){
         for (auto & ie : events){
             dNdpT.add_event(ie.hlist, ie.sigma);
 	    if (args["jet"].as<bool>()) {
-                auto jets = FindJetTower(ReDistributer,
-                     ie.hlist, ie.clist, ie.slist, 
-	             Rs, shaperbins, 10, -3, 3, 
-		     ie.sigma, 
-		     args["pTtrack"].as<double>());
-	        JetSample.add_event(jets, ie.sigma);
+                jetfinder.set_sigma(ie.sigma);
+                jetfinder.MakeETower(
+                     0.6, 0.165, args["pTtrack"].as<double>(),
+                     ie.hlist, ie.clist, ie.slist, 10);
+                jetfinder.FindJets(Rs, 10., -3., 3.);
+                jetfinder.FindHF(ie.hlist);
+                jetfinder.CorrHFET(shaperbins);
+                jetfinder.LabelFlavor();
+                jetfinder.CalcJetshape(shaperbins);
+	        JetSample.add_event(jetfinder.Jets, ie.sigma);
+                jet_HF_corr.add_event(jetfinder.Jets, jetfinder.HFs,
+                                          ie.sigma);
+                HF_ET_corr.add_event(jetfinder.HFaxis, ie.sigma);
 	    }
         }
         dNdpT.write(fheader.str());
-	if (args["jet"].as<bool>())
-            JetSample.write(fheader.str());
+	if (args["jet"].as<bool>()){
+	    JetSample.write(fheader.str());
+	    jet_HF_corr.write(fheader.str());
+	    HF_ET_corr.write(fheader.str());
+        }
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

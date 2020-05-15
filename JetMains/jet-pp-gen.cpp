@@ -94,12 +94,14 @@ int main(int argc, char* argv[]){
          2,5,10,15,20,30,40,50,60,80,100,120,140,160,180,200,
          240,280,320,360,400,500,600,700,800,1000,1200,1600,2000,2500});
 
-        std::vector<double> Rs({.2, .4});
+        std::vector<double> Rs({.2, .3, .4});
 
         std::vector<double> ParticlepTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
                50,60,80,100,120,150,200,300,400,500,600,1000,2000});
         std::vector<double> jetpTbins({10,15,20,30,40,
                50,60,80,100,120,160,200,300,400,500,600,800,1000,1400,1800});
+        std::vector<double> HFpTbins({4,20,1000});
+        std::vector<double> HFETbins({2,6,10,20,40,1000});
         std::vector<double> shapepTbins({20,30,40,60,80,120,2000});
         std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
                           .35, .4, .45, .5,  .6, .7,  .8,
@@ -109,6 +111,11 @@ int main(int argc, char* argv[]){
 
         LeadingParton dNdpT(ParticlepTbins);
         JetStatistics JetSample(jetpTbins, Rs, shapepTbins, shaperbins);
+        JetHFCorr jet_HF_corr(HFpTbins, shaperbins);
+        HFETCorr  HF_ET_corr(HFETbins, shaperbins);
+        /// Initialize jet finder with medium response
+        JetFinder jetfinder(300,300,3.);
+
 
         // Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
@@ -117,7 +124,6 @@ int main(int argc, char* argv[]){
         std::stringstream fheader;
         fheader << args["output"].as<fs::path>().string() 
                 << processid;
-        auto ReDistributer = MediumResponse("Gmu");
 	for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++){
             /// Initialize a pythia generator for each pT trigger bin
             PythiaGen pythiagen(
@@ -141,20 +147,29 @@ int main(int argc, char* argv[]){
                                   / args["pythia-events"].as<int>();
                 
                 dNdpT.add_event(plist, sigma_gen);
-		if (args["jet"].as<bool>()) {
-                    auto jets = FindJetTower(
-                         ReDistributer,
-                         plist, clist, slist,
-                         Rs, shaperbins, 10, -3, 3, 
-			 sigma_gen, 
-			 args["pTtrack"].as<double>());
-                    JetSample.add_event(jets, sigma_gen);
-		}
+	        if (args["jet"].as<bool>()) {
+                    jetfinder.set_sigma(sigma_gen);
+                    jetfinder.MakeETower(
+                         0.6, 0.165, args["pTtrack"].as<double>(),
+                         plist, clist, slist, 10);
+                    jetfinder.FindJets(Rs, 10., -3., 3.);
+                    jetfinder.FindHF(plist);
+                    jetfinder.CorrHFET(shaperbins);
+                    jetfinder.LabelFlavor();
+                    jetfinder.CalcJetshape(shaperbins);
+	            JetSample.add_event(jetfinder.Jets, sigma_gen);
+                    jet_HF_corr.add_event(jetfinder.Jets, jetfinder.HFs,
+                                          sigma_gen);
+                    HF_ET_corr.add_event(jetfinder.HFaxis, sigma_gen);
+	        }
             }
         }
         dNdpT.write(fheader.str());
-	if (args["jet"].as<bool>())
+	if (args["jet"].as<bool>()){
 	    JetSample.write(fheader.str());
+	    jet_HF_corr.write(fheader.str());
+	    HF_ET_corr.write(fheader.str());
+        }
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

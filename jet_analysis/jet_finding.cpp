@@ -108,49 +108,54 @@ double MediumResponse::get_dpT_dydphi(double rap, double phi, fourvec Pmu, doubl
     return gmu.t()*Pmu.t()+gmu.x()*Pmu.x()+gmu.y()*Pmu.y()+gmu.z()*Pmu.z();
 }
 
-inline int corp_index(double x, double xL, double xH, double dx, int Nx){
-    if (x<xL || x>xH) return -1;
-    else if (x==xH) return Nx-1;
-    else return int((x-xL)/dx);
+
+JetFinder::JetFinder(int _Neta, int _Nphi, double _etamax, bool need_response_table, std::string table_path)
+:Neta(_Neta), Nphi(_Nphi), 
+ etamax(_etamax), etamin(-_etamax), 
+ phimax(M_PI), phimin(-M_PI), 
+ deta((etamax-etamin)/(_Neta-1)), 
+ dphi((phimax-phimin)/Nphi),
+ MR("Gmu") {
+    if (need_response_table) MR.init(table_path);
+    else MR.load(table_path);    
 }
 
-std::vector<Fjet> FindJetTower(
-             MediumResponse MR,
-             std::vector<particle> plist, 
-             std::vector<current> SourceList,
-             std::vector<HadronizeCurrent> HadronizeList,
-             std::vector<double> Rs, std::vector<double> rbins,
-             double jetpTMin, 
-             double jetyMin, 
-             double jetyMax,
-             double sigma_gen, 
-	     double pTmin) {
+JetFinder::JetFinder(int _Neta, int _Nphi, double _etamax)
+:Neta(_Neta), Nphi(_Nphi), 
+ etamax(_etamax), etamin(-_etamax), 
+ phimax(M_PI), phimin(-M_PI), 
+ deta((etamax-etamin)/(_Neta-1)), 
+ dphi((phimax-phimin)/Nphi),
+ MR("Gmu") {
+}
+
+void JetFinder::MakeETower(double vradial, 
+                           double Tfreeze, 
+                           double pTmin,
+                           std::vector<particle> plist, 
+                           std::vector<current> TypeOneSources,
+                           std::vector<HadronizeCurrent> TypeTwoSources,
+                           int coarse_level){
+    // Initialzie empty towers
     LOG_INFO << "do jet finding";
-    int coarse_level = 5;
-    std::vector<Fjet> Results;
-    // contruct four momentum tower in the eta-phi plane
-    int Neta = 300, Nphi = 300;
-    int coarseNeta = int(Neta/coarse_level), 
-        coarseNphi = int(Nphi/coarse_level);
-    double etamin = -3., etamax = 3.;
-    double deta = (etamax-etamin)/(Neta-1); 
-    double coarsedeta = (etamax-etamin)/(coarseNeta-1); 
-    // Phi range has to be the same as the range of std::atan2(*,*);
-    double phimin = -M_PI, phimax = M_PI; 
-    double dphi = (phimax-phimin)/Nphi;
-    double coarsedphi = (phimax-phimin)/coarseNphi;
-    std::vector<std::vector<fourvec> > Pmutowers;
-    Pmutowers.resize(Neta);
-    for (auto & it : Pmutowers) {
-        it.resize(Nphi);
-        for (auto & iit: it) iit = fourvec{0.,0.,0.,0.};
-    }
-    std::vector<std::vector<double> > PTtowers;
-    PTtowers.resize(Neta); 
-    for (auto & it : PTtowers) {
+    PT.clear();
+    PT.resize(Neta); 
+    for (auto & it : PT) {
         it.resize(Nphi);
         for (auto & iit: it) iit = 0.;
-    }
+    }    
+    Pmu.clear();
+    Pmu.resize(Neta); 
+    fourvec azero{0., 0., 0., 0.};
+    for (auto & it : Pmu) {
+        it.resize(Nphi);
+        for (auto & iit: it) iit = azero;
+    }    
+    // Initialize coarse towerse for medium response contribution
+    int coarseNeta = int(Neta/coarse_level), 
+        coarseNphi = int(Nphi/coarse_level);    
+    double coarsedeta = (etamax-etamin)/(coarseNeta-1); 
+    double coarsedphi = (phimax-phimin)/coarseNphi;
     std::vector<std::vector<std::vector<double> > > coarsePT;
     coarsePT.resize(2);
     for (auto & t : coarsePT) {
@@ -160,7 +165,6 @@ std::vector<Fjet> FindJetTower(
             for (auto & iit: it) iit = 0.;
        }
     }
-
     // put hard particles into the towers
     for (auto & p : plist){
         double eta = p.p.pseudorap();
@@ -168,9 +172,8 @@ std::vector<Fjet> FindJetTower(
         int ieta = corp_index(eta, etamin, etamax, deta, Neta);
         if (ieta<0) continue;
         int iphi = corp_index(phi, phimin, phimax, dphi, Nphi);
-        Pmutowers[ieta][iphi] = Pmutowers[ieta][iphi] + p.p;
-        if (p.p.xT()>pTmin)
-            PTtowers[ieta][iphi] += p.p.xT();
+        Pmu[ieta][iphi] = Pmu[ieta][iphi] + p.p;
+        if (p.p.xT()>pTmin) PT[ieta][iphi] += p.p.xT();
     }
     // put soft energy-momentum deposition into the towers
     std::vector<current> clist;
@@ -178,15 +181,11 @@ std::vector<Fjet> FindJetTower(
     for (int ieta=0; ieta<coarseNeta; ieta++){
         clist[ieta].chetas = std::cosh(etamin+ieta*coarsedeta);
         clist[ieta].shetas = std::sinh(etamin+ieta*coarsedeta);
-        clist[ieta].p.a[0] = 0.;
-        clist[ieta].p.a[1] = 0.;
-        clist[ieta].p.a[2] = 0.;
-        clist[ieta].p.a[3] = 0.;
+        clist[ieta].p = azero;
     }
-    for (auto & s: SourceList){
+    for (auto & s: TypeOneSources){
         int i = corp_index(std::atanh(s.shetas/s.chetas), etamin, etamax, coarsedeta, coarseNeta);
-        if (i<0) continue;
-        clist[i].p = clist[i].p + s.p;
+        if (i>=0) clist[i].p = clist[i].p + s.p;
     }
     for (int ieta=0; ieta<coarseNeta; ieta++) {
         double eta = etamin+ieta*coarsedeta;
@@ -195,13 +194,14 @@ std::vector<Fjet> FindJetTower(
             double dpT = 0., dpTcut = 0.;
             for (auto & s: clist){
                 double etas = std::atanh(s.shetas/s.chetas);
-                dpT += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, 0.);
-                dpTcut += MR.get_dpT_dydphi(eta-etas, phi, s.p, 0.6, pTmin/0.165);
+                dpT += MR.get_dpT_dydphi(eta-etas, phi, s.p, vradial, 0.);
+                dpTcut += MR.get_dpT_dydphi(eta-etas, phi, s.p, vradial, pTmin/Tfreeze);
             }
             coarsePT[0][ieta][iphi] = dpT;
             coarsePT[1][ieta][iphi] = dpTcut;
         }
     }
+    // Interpolate the coarse grid into the finer grid for jet finding
     for (int ieta=0; ieta<Neta; ieta++) {
         double eta = etamin+ieta*deta;
         double chy = std::cosh(eta), shy = std::sinh(eta);
@@ -220,153 +220,657 @@ std::vector<Fjet> FindJetTower(
             double v[2] = {1.-residue2, residue2};
             for (int k1=0; k1<2; k1++){
                 for (int k2=0; k2<2; k2++){
-                    Pmutowers[ieta][iphi] = Pmutowers[ieta][iphi] + 
-                        Nmu0*coarsePT[0][ii+k1][jj+k2]*deta*dphi*u[k1]*v[k2];
-                    PTtowers[ieta][iphi] += 
-                        coarsePT[1][ii+k1][jj+k2]*deta*dphi*u[k1]*v[k2];
+                    Pmu[ieta][iphi] = Pmu[ieta][iphi] + 
+                                      Nmu0*coarsePT[0][ii+k1][jj+k2]*deta*dphi*u[k1]*v[k2];
+                    PT[ieta][iphi] += coarsePT[1][ii+k1][jj+k2]*deta*dphi*u[k1]*v[k2];
                 }
             }
         }
     }
+    // done
+}
+
+
+
+void JetFinder::FindJets(std::vector<double> Rs, 
+                         double jetpTMin, 
+                         double jetyMin, 
+                         double jetyMax) {
+    Jets.clear();
+    HFs.clear();
+    HFaxis.clear();
     // Use the towers to do jet finding: anti-kT
     int power = -1; 
     // loop over jetradius
     for (int iR=0; iR<Rs.size(); iR++){
         double jetRadius = Rs[iR];
-        fastjet::JetDefinition jetDef(
-                    fastjet::genkt_algorithm, jetRadius, power);
+        fastjet::JetDefinition jetDef(fastjet::genkt_algorithm, jetRadius, power);
         std::vector<fastjet::PseudoJet> fjInputs;
-        fastjet::Selector select_rapidity = 
-              fastjet::SelectorRapRange(jetyMin, jetyMax);
-        for (int ieta=0; ieta<Neta; ieta++) {
-            double eta = etamin+ieta*deta;
-            for (int iphi=0; iphi<Nphi; iphi++) {
-                auto ipmu = Pmutowers[ieta][iphi];
-                double phi = phimin+iphi*dphi;
+        fastjet::Selector select_rapidity = fastjet::SelectorRapRange(jetyMin, jetyMax);
+        for (auto & it : Pmu) {
+            for (auto & iit : it) {
                 // when we do the first jet finding,
                 // only use towers with positive contribution
-                if (ipmu.t()>0.){
-                    fastjet::PseudoJet fp(ipmu.x(), ipmu.y(), 
-                                          ipmu.z(), ipmu.t());
+                if (iit.t()>0.){
+                    fastjet::PseudoJet fp(iit.x(), iit.y(), 
+                                          iit.z(), iit.t());
                     fp.set_user_info(new MyInfo(0, 0, 0));
                     fjInputs.push_back(fp);
                 }
             }
         }
-        
         fastjet::ClusterSequence clustSeq(fjInputs, jetDef);
-        std::vector<fastjet::PseudoJet> AllJets = 
-                                clustSeq.inclusive_jets(jetpTMin);
-        std::vector<fastjet::PseudoJet> jets =
-                        fastjet::sorted_by_pt(select_rapidity(AllJets));
+        std::vector<fastjet::PseudoJet> AllJets = clustSeq.inclusive_jets(jetpTMin);
+        std::vector<fastjet::PseudoJet> jets = fastjet::sorted_by_pt(select_rapidity(AllJets));
 
         // once the jet is find, 
         // recombine all the bins with negative contribution
-        
         for (auto & j : jets){
             Fjet J;
-	    J.sigma = sigma_gen;
+            J.sigma = sigma;
             fourvec jetP{j.e(), j.px(), j.py(), j.pz()};
             fourvec newP{0., 0., 0., 0.};
             double Jphi = jetP.phi();
             double Jeta = jetP.pseudorap();
-
             for (double eta=Jeta-jetRadius; eta<=Jeta+jetRadius; eta+=deta){
                 int ieta = corp_index(eta, etamin, etamax, deta, Neta);
                 if (ieta<0) continue;
-                double Rp = std::sqrt(1e-9+std::pow(jetRadius,2)
-                                          -std::pow(Jeta-eta,2) ); 
-                double chy = std::cosh(eta), shy = std::sinh(eta);
+                double Rp = std::sqrt(1e-9+std::pow(jetRadius,2)-std::pow(Jeta-eta,2)); 
                 for (double phi=Jphi-Rp; phi<=Jphi+Rp; phi+=dphi){
                     double newphi = phi;
                     if (phi<-M_PI) newphi+=2*M_PI;
                     if (phi>M_PI) newphi-=2*M_PI;
-                    double cphi = std::cos(newphi), sphi = std::sin(newphi);
                     int iphi = corp_index(newphi, phimin, phimax, dphi, Nphi);
-                    fourvec Nmu0{chy,cphi,sphi,shy};
-                    newP = newP + Pmutowers[ieta][iphi];
+                    newP = newP + Pmu[ieta][iphi];
                 }  
-            }
-        J.pmu = newP;
-        J.R = jetRadius;
-        J.pT = newP.xT();
-        J.phi = newP.phi();
-        J.eta = newP.pseudorap();
-        J.M2 = newP.m2();
-            // label the jet flavor:
-            // if heavy, label it by heavy quark id
-            // else, label it by the hardest (pT) parton inside
-            for (auto & p : plist){
-                int absid = std::abs(p.pid);
-                bool trigger = absid == 4 || 
-                             absid == 411 || absid == 421 ||
-                             absid == 413 || absid == 423 ||
-                             absid == 5 || 
-                             absid == 511 || absid == 521 ||
-                             absid == 513 || absid == 523;
-                if (trigger){
-                    double eta = p.p.pseudorap();
-                    double phi = p.p.phi();
-                    if (std::sqrt(std::pow(eta-Jeta,2)
-                        +std::pow(phi-Jphi,2)) < 0.3) { 
-                       // for R jet , find heavy flavor in 0.3 bins
-                       particle flavor_tag;
-                       flavor_tag.p = p.p;
-                       flavor_tag.pid = std::abs(p.pid); 
-                       J.Ftags.push_back(flavor_tag);
-                    }
-                }
             } 
-        Results.push_back(J);
-        }
-
-        for (auto & J : Results){
-            double Jphi = J.phi;
-            double Jeta = J.eta;
-
-        // compute dpT/dr, makes sense for both pp and AA
-        J.shape.resize(rbins.size()-1);
-            for (auto & it : J.shape) it = 0.;
-            for (double eta=Jeta-3.; eta<=Jeta+3.; eta+=deta){
-                int ieta = corp_index(eta, etamin, etamax, deta, Neta);
-                if (ieta<0) continue;
-                double Rp = std::sqrt(1e-9+std::pow(3.,2)
-                                          -std::pow(Jeta-eta,2) ); 
-                for (double phi=Jphi-Rp; phi<=Jphi+Rp; phi+=dphi){
-                    double dist = std::sqrt(std::pow(Jeta-eta,2)
-                                          + std::pow(Jphi-phi,2));
-                    int index = 0;
-                    for (index=0; index<J.shape.size(); index++){
-                        if (dist>=rbins[index] && dist<rbins[index+1]) break;
-                    }
-                    double newphi = phi;
-                    if (phi<-M_PI) newphi+=2*M_PI;
-                    if (phi>M_PI) newphi-=2*M_PI;
-                    int iphi = corp_index(newphi, phimin, phimax, dphi, Nphi);
-                    J.shape[index] += PTtowers[ieta][iphi];
-                }  
-            }
-            for (int i=0; i<J.shape.size(); i++) 
-                J.shape[i] /= (rbins[i+1]-rbins[i]);
-
-        // compute dNch/dr, currently only makes sense to pp
-            J.dndr.resize(rbins.size()-1);
-            for (auto & it : J.dndr) it = 0.;
-        for (auto & p : plist){
-        if ((!p.charged) || (p.p.xT()<.7)) continue;
-        double dist = std::sqrt(std::pow(J.phi-p.p.phi(), 2)
-                            + std::pow(J.eta-p.p.pseudorap(), 2) );
-        int index = 0;
-                for (index=0; index<J.dndr.size(); index++){
-                    if (dist>=rbins[index] && dist<rbins[index+1]) break;
-                }
-                J.dndr[index] += 1.;
-            }
-            for (int i=0; i<J.dndr.size(); i++)
-                J.dndr[i] /= (rbins[i+1]-rbins[i]);
+            J.pmu = newP;
+            J.R = jetRadius;
+            J.pT = newP.xT();
+            J.phi = newP.phi();
+            J.eta = newP.pseudorap();
+            J.M2 = newP.m2();
+            Jets.push_back(J);   
         }
     }
-    return Results; 
+}
+
+
+void JetFinder::FindHF(std::vector<particle> plist) {
+    // Find all heavy flavor particles
+    for (auto & p : plist){
+        int absid = std::abs(p.pid);
+        if (absid == 4 || 
+            absid == 411 || absid == 421 ||
+            absid == 413 || absid == 423 ||
+            absid == 5 || 
+            absid == 511 || absid == 521 ||
+            absid == 513 || absid == 523) {
+            HFs.push_back(p);
+        }
+    }
+}
+void JetFinder::CorrHFET(std::vector<double> rbins){
+    // Correlate the energy production around each heavy flavor particles
+    for (auto & p : HFs){
+        int absid = std::abs(p.pid);
+        Fjet J;
+        if (absid == 4 || 
+            absid == 411 || absid == 421 ||
+            absid == 413 || absid == 423) J.flavor = 4;
+        if (absid == 5 || 
+            absid == 511 || absid == 521 ||
+            absid == 513 || absid == 523) J.flavor = 5;
+        J.R = 0.;
+        J.pmu = p.p;
+        J.pT = p.p.xT();
+        J.eta = p.p.pseudorap();
+        J.phi = p.p.phi();
+        J.M2 = dot(p.p, p.p);
+        J.sigma = sigma;
+        fourvec p00{0,0,0,0};
+        J.shape.resize(rbins.size()-1);
+        for (auto & it : J.shape) it = 0.;
+        for (double eta=J.eta-3.; eta<=J.eta+3.; eta+=deta){
+            int ieta = corp_index(eta, etamin, etamax, deta, Neta);
+            if (ieta<0) continue;
+            double Rp = std::sqrt(std::pow(3.,2)-std::pow(J.eta-eta,2) ); 
+            for (double phi=J.phi-Rp; phi<=J.phi+Rp; phi+=dphi){
+                double dist = std::sqrt(std::pow(J.eta-eta,2)
+                                      + std::pow(J.phi-phi,2));
+                int index = -1;
+                for (int i=0; i<J.shape.size(); i++){
+                    if (dist>=rbins[i] && dist<rbins[i+1]) {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index==-1) continue;
+                double newphi = phi;
+                if (phi<-M_PI) newphi+=2*M_PI;
+                if (phi>M_PI) newphi-=2*M_PI;
+                int iphi = corp_index(newphi, phimin, phimax, dphi, Nphi);
+                J.shape[index] += PT[ieta][iphi];
+                if (dist<.1)
+                     p00 = p00 + Pmu[ieta][iphi];
+            }  
+        }
+        LOG_INFO << p.p.xT() << " vs " << p00.xT();
+        LOG_INFO << p.p.pseudorap() << " " << p.p.phi() << " // "
+                 << p00.pseudorap() << " " << p00.phi() ;
+        // take out auto-correlation
+        J.shape[0] -= J.pT; 
+        for (int i=0; i<J.shape.size(); i++) 
+            J.shape[i] /= (rbins[i+1]-rbins[i]);
+        HFaxis.push_back(J);
+    }
+}
+
+void JetFinder::CalcJetshape(std::vector<double> rbins){
+    for (auto & J : Jets){
+        double Jphi = J.phi;
+        double Jeta = J.eta;
+        J.shape.resize(rbins.size()-1);
+        for (auto & it : J.shape) it = 0.;
+        for (double eta=Jeta-3.; eta<=Jeta+3.; eta+=deta){
+            int ieta = corp_index(eta, etamin, etamax, deta, Neta);
+            if (ieta<0) continue;
+            double Rp = std::sqrt(1e-9+std::pow(3.,2)-std::pow(Jeta-eta,2) ); 
+            for (double phi=Jphi-Rp; phi<=Jphi+Rp; phi+=dphi){
+                double dist = std::sqrt(std::pow(Jeta-eta,2) + std::pow(Jphi-phi,2));
+                int index = -1;
+                for (int i=0; i<J.shape.size(); i++){
+                    if (dist>=rbins[i] && dist<rbins[i+1]) {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index==-1) continue;
+                double newphi = phi;
+                if (phi<-M_PI) newphi+=2*M_PI;
+                if (phi>M_PI) newphi-=2*M_PI;
+                int iphi = corp_index(newphi, phimin, phimax, dphi, Nphi);
+                J.shape[index] += PT[ieta][iphi];
+            }  
+        }
+        for (int i=0; i<J.shape.size(); i++) 
+            J.shape[i] /= (rbins[i+1]-rbins[i]);
+    }
+}
+
+void JetFinder::LabelFlavor(){
+    for (auto & J : Jets){
+        double Jphi = J.phi;
+        double Jeta = J.eta;
+        bool isD = false;
+        bool isB = false;
+        for (auto & p : HFs){
+            double fphi = p.p.phi();
+            double feta = p.p.rap();
+            double absdphi = std::abs(Jphi - fphi);
+            if (absdphi>M_PI) absdphi = 2.*M_PI-absdphi;
+            double deta = Jeta-feta;
+            double dR = std::sqrt(absdphi*absdphi + deta*deta);
+            
+            if (dR<0.3) {
+                int absid = std::abs(p.pid);
+                isD = isD || 
+                   (absid == 4 || 
+                    absid == 411 || absid == 421 ||
+                    absid == 413 || absid == 423) 
+                    && (p.p.xT() > 5.);
+                isB = isB || 
+                   (absid == 5 || 
+                    absid == 511 || absid == 521 ||
+                    absid == 513 || absid == 523) 
+                    && (p.p.xT() > 5.);
+            }
+        }
+        if (isB) J.flavor = 5;
+        if (isD && (!isB)) J.flavor = 4;
+        if ((!isD) && (!isB)) J.flavor = -1;
+    }
+}
+
+LeadingParton::LeadingParton(std::vector<double> _pTbins){
+    pTbins = _pTbins;
+    NpT = pTbins.size()-1;
+    
+    nchg.resize(NpT); for (auto & it:nchg) it=0.;
+    npi.resize(NpT); for (auto & it:npi) it=0.;
+    nD.resize(NpT); for (auto & it:nD) it=0.;
+    nB.resize(NpT); for (auto & it:nB) it=0.;
+    binwidth.resize(NpT); 
+    for (int i=0; i<NpT; i++) 
+        binwidth[i]=pTbins[i+1]-pTbins[i];
+}
+void LeadingParton::add_event(std::vector<particle> plist, double sigma_gen){
+    for (auto & p : plist){
+        if (std::abs(p.p.rap()) < 1.) {
+            int pid = std::abs(p.pid);
+            if (pid<6 || pid==21) 
+                LOG_INFO << pid << " " 
+                         << p.p.xT() << " " << p.p.rap();
+            bool ispi = pid==111 || pid == 211;
+            bool ischg = pid==111 || pid == 211 || pid == 311 
+                 || pid== 321 || pid==2212;
+            bool isD = pid==411 || pid == 421 || pid == 413 
+                || pid == 423 || pid ==4;
+            bool isB = pid==511 || pid == 521 || pid == 513 || pid == 523 || pid ==5;
+            double pT = p.p.xT();
+            int ii=0;
+            for (int i=0; i<NpT; i++){
+                if ( (pTbins[i]<pT) && (pT<pTbins[i+1]) ) {
+                    ii = i;
+                    break;
+                }
+            }
+            if (ii==NpT) ii=NpT-1;
+            if (ispi) npi[ii] += sigma_gen;
+            if (ischg) nchg[ii] += sigma_gen;
+            if (isD) nD[ii] += sigma_gen;
+            if (isB) nB[ii] += sigma_gen;
+        }
+    }
+}
+void LeadingParton::write(std::string fheader){
+    std::stringstream filename;
+    filename << fheader << "-LeadingHadron.dat";
+    std::ofstream f(filename.str());
+
+    for (int i=0; i<NpT; i++) {
+        f    << (pTbins[i]+pTbins[i+1])/2. << " "
+             << pTbins[i] << " "
+             << pTbins[i+1] << " "
+             << nchg[i]/binwidth[i] << " "
+             << npi[i]/binwidth[i] << " " 
+             << nD[i]/binwidth[i] << " "
+             << nB[i]/binwidth[i] << std::endl;
+    }
+    f.close();
+}
+JetStatistics::JetStatistics(
+     std::vector<double> _pTbins, 
+     std::vector<double> _Rs,
+     std::vector<double> _shape_pTbins, 
+     std::vector<double> _shape_rbins){
+    for (int i=0; i<11; i++)
+    xJbins.push_back(i*0.06);
+    xJ.resize(xJbins.size()-1);
+    for (auto & it : xJ) it = 0.;
+    pTbins = _pTbins;
+    Rs = _Rs;
+    shape_pTbins = _shape_pTbins;
+    shape_rbins = _shape_rbins;
+    NpT = pTbins.size()-1;
+    shape_NpT = shape_pTbins.size()-1;
+    shape_Nr = shape_rbins.size()-1;
+
+    shapes.resize(shape_NpT); 
+    for (auto & it:shapes) {
+        it.resize(_shape_rbins.size()-1);
+        for (auto & iit : it ) iit=0.;
+    }
+    Dshapes.resize(shape_NpT); 
+    for (auto & it:Dshapes) {
+        it.resize(_shape_rbins.size()-1);
+        for (auto & iit : it ) iit=0.;
+    }
+    Bshapes.resize(shape_NpT); 
+    for (auto & it:Bshapes) {
+        it.resize(_shape_rbins.size()-1);
+        for (auto & iit : it ) iit=0.;
+    }
+    dsigmadpT.resize(Rs.size());
+    for (auto & it:dsigmadpT) {
+            it.resize(NpT);
+        for (auto & iit : it ) iit=0.;
+    }
+    dDdpT.resize(Rs.size());
+    for (auto & it:dDdpT) {
+            it.resize(NpT);
+        for (auto & iit : it ) iit=0.;
+    }
+    dBdpT.resize(Rs.size());
+    for (auto & it:dBdpT) {
+            it.resize(NpT);
+        for (auto & iit : it ) iit=0.;
+    }
+
+    binwidth.resize(NpT);
+    for (int i=0; i<NpT; i++)
+        binwidth[i]=pTbins[i+1]-pTbins[i];
+}
+void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
+    // di-jet asymmetry
+    std::vector<Fjet> jjs;
+    for (auto & J:jets){
+        if (J.R<0.51 && J.R>0.49){
+            jjs.push_back(J);
+        }
+    }
+    std::sort(jjs.begin(), jjs.end(), compare_jet);
+    if (jjs.size()>=2){
+        auto j1 = jjs[0], j2 = jjs[1];
+        if (j1.pT>120. && j2.pT>50. && 
+            std::abs(j1.eta)<2. && std::abs(j2.eta)<2.){
+            double dphi = j1.phi - j2.phi;
+            if (std::cos(dphi) < std::cos(2./3.*M_PI)) {
+                int index = 0;
+                double x = std::abs(j1.pT-j2.pT)/(j1.pT+j2.pT);
+                for (int i=0; i<xJbins.size()-1; i++){
+                    if (xJbins[i]<x && x< xJbins[i+1]) {
+                        index = i; 
+                        break;
+                    }
+                }
+                xJ[index] += sigma_gen;
+            }
+        }
+    }
+    // shape
+    for (auto & J:jets){
+        if ((J.R<0.41) && (J.R>0.39) && (std::abs(J.eta) < 1.6) ) { // CMS cut
+            int ii=0;
+            for (int i=0; i<shape_NpT; i++){
+                if ((shape_pTbins[i]<J.pT) && (J.pT<shape_pTbins[i+1])) {
+                    ii = i;
+                    break;
+                }
+            }
+            if (ii==NpT) continue;
+            for (int i=0; i<shape_Nr; i++){
+                shapes[ii][i] += sigma_gen*J.shape[i];
+                if (J.flavor==4) Dshapes[ii][i] += sigma_gen*J.shape[i];
+                if (J.flavor==5) Bshapes[ii][i] += sigma_gen*J.shape[i];
+            }
+        }
+    }
+
+    for (auto & J : jets){
+        // check jet R
+        int iR;
+        for (int i=0; i<Rs.size(); i++){
+            if ( ( (Rs[i]-.01)<J.R)
+                && (J.R< (Rs[i]+.01))
+               ) {
+                iR = i;
+                break;
+            }
+        }
+        if (iR==Rs.size()) continue;
+        if (std::abs(J.eta) < 2.1){
+            // check jet pT cut
+            int ii=0;
+            for (int i=0; i<NpT; i++){
+                if ( (pTbins[i]<J.pT) && (J.pT<pTbins[i+1]) ) {
+                    ii = i;
+                    break;
+                }
+            }
+            if (ii==NpT) continue;
+            if (J.flavor==4) dDdpT[iR][ii] += sigma_gen;
+            if (J.flavor==5) dBdpT[iR][ii] += sigma_gen;
+            if (J.flavor==-1) dsigmadpT[iR][ii] += sigma_gen;
+        }
+    }     
+}
+
+void JetStatistics::write(std::string fheader){
+    for (int iR=0; iR<Rs.size(); iR++){
+        std::stringstream filename;
+        filename << fheader << "-jet-R-"<<iR<<"-"<<"spectra.dat";
+        std::ofstream f(filename.str());
+        for (int i=0; i<NpT; i++) {
+            f    << (pTbins[i]+pTbins[i+1])/2. << " "
+                 << pTbins[i] << " "
+                 << pTbins[i+1] << " "
+                 << dsigmadpT[iR][i]/binwidth[i] << " "
+                 << dDdpT[iR][i]/binwidth[i] << " "
+                 << dBdpT[iR][i]/binwidth[i] <<  std::endl;
+        }
+        f.close();
+    }
+
+    std::stringstream filename2;
+    filename2 << fheader << "-jetshape.dat";
+    std::ofstream f2(filename2.str());
+    f2 << "#";
+    for (auto it : shape_rbins) f2 << it << " ";
+    f2 << std::endl;
+    for (int i=0; i<shape_NpT; i++) {
+        f2   << (shape_pTbins[i]+shape_pTbins[i+1])/2. << " "
+             << shape_pTbins[i] << " "
+             << shape_pTbins[i+1] << " ";
+        for (int j=0; j<shapes[i].size(); j++){
+            f2 << shapes[i][j] << " "; 
+        }
+        f2 << std::endl;
+    }
+    f2.close();
+
+    std::stringstream filename3;
+    filename3 << fheader << "-D-jetshape.dat";
+    std::ofstream f3(filename3.str());
+    f3 << "#";
+    for (auto it : shape_rbins) f3 << it << " ";
+    f3 << std::endl;
+    for (int i=0; i<shape_NpT; i++) {
+        f3   << (shape_pTbins[i]+shape_pTbins[i+1])/2. << " "
+             << shape_pTbins[i] << " "
+             << shape_pTbins[i+1] << " ";
+        for (int j=0; j<Dshapes[i].size(); j++){
+            f3 << Dshapes[i][j] << " "; 
+        }
+        f3 << std::endl;
+    }
+    f3.close();
+
+    std::stringstream filename4;
+    filename4 << fheader << "-B-jetshape.dat";
+    std::ofstream f4(filename4.str());
+    f4 << "#";
+    for (auto it : shape_rbins) f4 << it << " ";
+    f4 << std::endl;
+    for (int i=0; i<shape_NpT; i++) {
+        f4   << (shape_pTbins[i]+shape_pTbins[i+1])/2. << " "
+             << shape_pTbins[i] << " "
+             << shape_pTbins[i+1] << " ";
+        for (int j=0; j<Bshapes[i].size(); j++){
+            f4 << Bshapes[i][j] << " "; 
+        }
+        f4 << std::endl;
+    }
+    f4.close();
+
+    std::stringstream filename5;
+    filename5 << fheader << "-xJ.dat";
+    std::ofstream f5(filename5.str());
+    for (int i=0; i<xJbins.size()-1; i++) {
+        f5   << (xJbins[i]+xJbins[i+1])/2. << " "
+             << xJbins[i] << " "
+             << xJbins[i+1] << " "
+             << xJ[i] << std::endl;
+    }
+    f5.close();
+}
+
+JetHFCorr::JetHFCorr(std::vector<double> _pTHFbins, 
+                     std::vector<double> _rbins)
+:pTHFbins(_pTHFbins), rbins(_rbins){
+    dDdr.clear();
+    dDdr.resize(pTHFbins.size());
+    for (auto & it: dDdr){
+        it.resize(rbins.size());
+        for (auto & iit: it) iit = 0.;
+    }
+    dBdr.clear();
+    dBdr.resize(pTHFbins.size());
+    for (auto & it: dBdr){
+        it.resize(rbins.size());
+        for (auto & iit: it) iit = 0.;
+    }
+}
+
+void JetHFCorr::add_event(std::vector<Fjet> jets, 
+                  std::vector<particle> HFs, 
+                  double sigma_gen){
+    for (auto & J : jets){
+        if (std::abs(J.eta)<1.6 && std::abs(J.pT)>60. && J.R<0.31 && J.R>0.29){
+            for (auto & p : HFs) {
+                if (std::abs(p.p.rap())<2.){
+                    double absdphi = std::abs(J.phi - p.p.phi());
+                    if (absdphi>M_PI) absdphi = 2.*M_PI-absdphi;
+                    double deta = J.eta-p.p.rap();
+                    double dR = std::sqrt(absdphi*absdphi + deta*deta);
+                    // find r index
+                    int rindex = -1;
+                    for (int i=0; i<rbins.size()-1; i++){
+                        if (rbins[i]<dR && dR<rbins[i+1]){
+                            rindex = i;
+                            break;
+                        }
+                    }
+                    if (rindex==-1) continue;
+                    // find pT index
+                    int pTindex = -1;
+                    for (int i=0; i<pTHFbins.size()-1; i++){
+                        if (pTHFbins[i]<p.p.xT() && p.p.xT()<pTHFbins[i+1]){
+                            pTindex = i;
+                            break;
+                        }
+                    }
+                    if (pTindex==-1) continue;      
+                    int absid = std::abs(p.pid);
+                    if (absid == 4 || 
+                        absid == 411 || absid == 421 ||
+                        absid == 413 || absid == 423) {
+                        dDdr[pTindex][rindex] += sigma_gen;
+                    }    
+                    if (absid == 5 || 
+                        absid == 511 || absid == 521 ||
+                        absid == 513 || absid == 523) {
+                        dBdr[pTindex][rindex] += sigma_gen;
+                    }          
+                }
+            }
+        }
+    }
+}
+
+void JetHFCorr::write(std::string fheader){
+    std::stringstream filename1;
+    filename1 << fheader << "-dDdr.dat";
+    std::ofstream f1(filename1.str());
+    f1 << "#";
+    for (auto it : rbins) f1 << it << " ";
+    f1 << std::endl;
+    for (int i=0; i<pTHFbins.size()-1; i++) {
+        f1   << (pTHFbins[i]+pTHFbins[i+1])/2. << " "
+             << pTHFbins[i] << " "
+             << pTHFbins[i+1] << " ";
+        for (int j=0; j<rbins.size()-1; j++){
+            f1 << dDdr[i][j] << " "; 
+        }
+        f1 << std::endl;
+    }
+    f1.close();
+
+    std::stringstream filename2;
+    filename2 << fheader << "-dBdr.dat";
+    std::ofstream f2(filename2.str());
+    f2 << "#";
+    for (auto it : rbins) f2 << it << " ";
+    f2 << std::endl;
+    for (int i=0; i<pTHFbins.size()-1; i++) {
+        f2   << (pTHFbins[i]+pTHFbins[i+1])/2. << " "
+             << pTHFbins[i] << " "
+             << pTHFbins[i+1] << " ";
+        for (int j=0; j<rbins.size()-1; j++){
+            f2 << dBdr[i][j] << " "; 
+        }
+        f2 << std::endl;
+    }
+    f2.close();
+}
+
+
+HFETCorr::HFETCorr(std::vector<double> _pTHFbins, 
+                     std::vector<double> _rbins)
+:pTHFbins(_pTHFbins), rbins(_rbins){
+    D_dPTdr.clear();
+    D_dPTdr.resize(pTHFbins.size());
+    for (auto & it: D_dPTdr){
+        it.resize(rbins.size());
+        for (auto & iit: it) iit = 0.;
+    }
+    B_dPTdr.clear();
+    B_dPTdr.resize(pTHFbins.size());
+    for (auto & it: B_dPTdr){
+        it.resize(rbins.size());
+        for (auto & iit: it) iit = 0.;
+    }
+}
+
+void HFETCorr::add_event(
+                  std::vector<Fjet> HFaxis, 
+                  double sigma_gen){
+    for (auto & J : HFaxis){
+        if (std::abs(J.eta)>2.1) continue;
+        // find pT index
+        int pTindex = -1;
+        for (int i=0; i<pTHFbins.size()-1; i++){
+            if (pTHFbins[i]<J.pT && J.pT<pTHFbins[i+1]){
+                pTindex = i;
+                break;
+            }
+        }
+        if (pTindex==-1) continue;   
+        if (J.flavor==4) {
+            for (int j=0; j<rbins.size()-1; j++)
+                D_dPTdr[pTindex][j] += sigma_gen*J.shape[j];
+        }    
+        if (J.flavor==5) {
+            for (int j=0; j<rbins.size()-1; j++)
+                B_dPTdr[pTindex][j] += sigma_gen*J.shape[j];
+        } 
+    }
+}
+
+void HFETCorr::write(std::string fheader){
+    std::stringstream filename1;
+    filename1 << fheader << "-D-dpTdr.dat";
+    std::ofstream f1(filename1.str());
+    f1 << "#";
+    for (auto it : rbins) f1 << it << " ";
+    f1 << std::endl;
+    for (int i=0; i<pTHFbins.size()-1; i++) {
+        f1   << (pTHFbins[i]+pTHFbins[i+1])/2. << " "
+             << pTHFbins[i] << " "
+             << pTHFbins[i+1] << " ";
+        for (int j=0; j<rbins.size()-1; j++){
+            f1 << D_dPTdr[i][j] << " "; 
+        }
+        f1 << std::endl;
+    }
+    f1.close();
+
+    std::stringstream filename2;
+    filename2 << fheader << "-B-dpTdr.dat";
+    std::ofstream f2(filename2.str());
+    f2 << "#";
+    for (auto it : rbins) f2 << it << " ";
+    f2 << std::endl;
+    for (int i=0; i<pTHFbins.size()-1; i++) {
+        f2   << (pTHFbins[i]+pTHFbins[i+1])/2. << " "
+             << pTHFbins[i] << " "
+             << pTHFbins[i+1] << " ";
+        for (int j=0; j<rbins.size()-1; j++){
+            f2 << B_dPTdr[i][j] << " "; 
+        }
+        f2 << std::endl;
+    }
+    f2.close();
 }
 
 void TestSource(
@@ -431,307 +935,5 @@ void TestSource(
         }
         f << std::endl;
     }   
-}
-
-
-LeadingParton::LeadingParton(std::vector<double> _pTbins){
-    pTbins = _pTbins;
-    NpT = pTbins.size()-1;
-    
-    nchg.resize(NpT); for (auto & it:nchg) it=0.;
-    npi.resize(NpT); for (auto & it:npi) it=0.;
-    nD.resize(NpT); for (auto & it:nD) it=0.;
-    nB.resize(NpT); for (auto & it:nB) it=0.;
-    binwidth.resize(NpT); 
-    for (int i=0; i<NpT; i++) 
-        binwidth[i]=pTbins[i+1]-pTbins[i];
-}
-void LeadingParton::add_event(std::vector<particle> plist, double sigma_gen){
-    for (auto & p : plist){
-        int pid = std::abs(p.pid);
-        bool ispi = pid==111 || pid == 211;
-        bool ischg = pid==111 || pid == 211 || pid == 311 || pid== 321 || pid==2212;
-        bool isD = pid==411 || pid == 421 || pid == 413 || pid == 423 || pid ==4;
-        bool isB = pid==511 || pid == 521 || pid == 513 || pid == 523 || pid ==5;
-        if (std::abs(p.p.rap()) < 1.) {
-            double pT = p.p.xT();
-            int ii=0;
-            for (int i=0; i<NpT; i++){
-                if ( (pTbins[i]<pT) && (pT<pTbins[i+1]) ) {
-                    ii = i;
-                    break;
-                }
-            }
-            if (ii==NpT) ii=NpT-1;
-            if (ispi) npi[ii] += sigma_gen;
-            if (ischg) nchg[ii] += sigma_gen;
-        if (isD) nD[ii] += sigma_gen;
-            if (isB) nB[ii] += sigma_gen;
-        }
-    }
-}
-void LeadingParton::write(std::string fheader){
-    std::stringstream filename;
-    filename << fheader << "-LeadingHadron.dat";
-    std::ofstream f(filename.str());
-
-    for (int i=0; i<NpT; i++) {
-        f    << (pTbins[i]+pTbins[i+1])/2. << " "
-             << pTbins[i] << " "
-             << pTbins[i+1] << " "
-             << nchg[i]/binwidth[i] << " "
-             << npi[i]/binwidth[i] << " " 
-             << nD[i]/binwidth[i] << " "
-             << nB[i]/binwidth[i] << std::endl;
-    }
-    f.close();
-}
-
-
-JetStatistics::JetStatistics(std::vector<double> _pTbins, 
-		std::vector<double> _Rs,
-     std::vector<double> _shape_pTbins, 
-     std::vector<double> _shape_rbins){
-    AllJets.clear();
-    for (int i=0; i<11; i++)
-	xJbins.push_back(i*0.06);
-    xJ.resize(xJbins.size()-1);
-    for (auto & it : xJ) it = 0.;
-    pTbins = _pTbins;
-    Rs = _Rs;
-    shape_pTbins = _shape_pTbins;
-    shape_rbins = _shape_rbins;
-    NpT = pTbins.size()-1;
-    shape_NpT = shape_pTbins.size()-1;
-    shape_Nr = shape_rbins.size()-1;
-    shape_w.resize(shape_NpT);
-    for (auto & it:shape_w) it=0.;
-    shapes.resize(shape_NpT); 
-    for (auto & it:shapes) {
-        it.resize(_shape_rbins.size()-1);
-        for (auto & iit : it ) iit=0.;
-    }
-    dnchdr.resize(shape_NpT);
-    for (auto & it:dnchdr) {
-            it.resize(_shape_rbins.size()-1);
-        for (auto & iit : it ) iit=0.;
-    }
-    dsigmadpT.resize(Rs.size());
-    for (auto & it:dsigmadpT) {
-            it.resize(NpT);
-        for (auto & iit : it ) iit=0.;
-    }
-    dDdpT.resize(Rs.size());
-    for (auto & it:dDdpT) {
-            it.resize(NpT);
-        for (auto & iit : it ) iit=0.;
-    }
-    dBdpT.resize(Rs.size());
-    for (auto & it:dBdpT) {
-            it.resize(NpT);
-        for (auto & iit : it ) iit=0.;
-    }
-    dD0dpT.resize(Rs.size());
-    for (auto & it:dD0dpT) {
-            it.resize(NpT);
-        for (auto & iit : it ) iit=0.;
-    }
-    dB0dpT.resize(Rs.size());
-    for (auto & it:dB0dpT) {
-            it.resize(NpT);
-        for (auto & iit : it ) iit=0.;
-    }
-
-
-    binwidth.resize(NpT);
-    for (int i=0; i<NpT; i++)
-        binwidth[i]=pTbins[i+1]-pTbins[i];
-}
-void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
-    AllJets.insert( AllJets.end(), jets.begin(), jets.end() );
-    // di-jet asymmetry
-    std::vector<Fjet> jjs;
-    for (auto & J:jets){
-        if (J.R<0.51 && J.R>0.49){
-	    jjs.push_back(J);
-	}
-    }
-    std::sort(jjs.begin(), jjs.end(), compare_jet);
-    if (jjs.size()>=2){
-        auto j1 = jjs[0], j2 = jjs[1];
-	if (j1.pT>120. && j2.pT>50. && 
-	    std::abs(j1.eta)<2. && std::abs(j2.eta)<2.){
-	    double dphi = j1.phi - j2.phi;
-	    if (std::cos(dphi) < std::cos(2./3.*M_PI)) {
-                int index = 0;
-		double x = std::abs(j1.pT-j2.pT)/(j1.pT+j2.pT);
-		for (int i=0; i<xJbins.size()-1; i++){
-	            if (xJbins[i]<x && x< xJbins[i+1]) {
-	                index = i; 
-			break;
-		    }
-		}
-		xJ[index] += sigma_gen;
-            }
-	}
-    }
-    // shape
-    for (auto & J:jets){
-        if ((J.R<0.41) && (J.R>0.39) && (std::abs(J.eta) < 1.6) ) { // CMS cut
-            int ii=0;
-            for (int i=0; i<shape_NpT; i++){
-                if ((shape_pTbins[i]<J.pT) && (J.pT<shape_pTbins[i+1])) {
-                    ii = i;
-                    break;
-                }
-            }
-            if (ii==NpT) continue;
-            for (int i=0; i<shape_Nr; i++){
-                shapes[ii][i] += sigma_gen*J.shape[i];
-                dnchdr[ii][i] += sigma_gen*J.dndr[i];
-            }
-            shape_w[ii] += sigma_gen;
-        }
-    }
-
-    for (auto & J : jets){
-    // check jet R
-    int iR;
-        for (int i=0; i<Rs.size(); i++){
-            if ( ( (Rs[i]-.01)<J.R)
-                && (J.R< (Rs[i]+.01))
-               ) {
-                iR = i;
-                break;
-            }
-        }
-        if (iR==Rs.size()) continue;
-
-        if (std::abs(J.eta) < 2.1){
-            // check flavor content
-            bool isD = false;
-            bool isDpTcut = false;
-            bool isB = false;
-            bool isBpTcut = false;
-            for (auto & p : J.Ftags) {
-                int f = std::abs(p.pid);
-                isD = isD || ((f==411)||(f==421)||(f==413)||(f==423)||(f==4));
-                isB = isB || ((f==511)||(f==521)||(f==513)||(f==523)||(f==5));
-                isBpTcut = isBpTcut || (
-                       ((f==511)||(f==521)||(f==513)||(f==523)||(f==5))
-                            && (p.p.xT()>5.));
-                isDpTcut = isDpTcut || (
-                       ((f==411)||(f==421)||(f==413)||(f==423)||(f==4))
-                         && (p.p.xT()>5.));
-            }
-            // check jet pT cut
-            int ii=0;
-            for (int i=0; i<NpT; i++){
-                if ( (pTbins[i]<J.pT) && (J.pT<pTbins[i+1]) ) {
-                    ii = i;
-                    break;
-                }
-            }
-            if (ii==NpT) continue;
-            if (isB) dB0dpT[iR][ii] += sigma_gen;
-            if (isBpTcut) dBdpT[iR][ii] += sigma_gen;
-            if (isD && (!isB)) dD0dpT[iR][ii] += sigma_gen;
-            if (isDpTcut && (!isBpTcut)) dDdpT[iR][ii] += sigma_gen;
-	    if ((!isDpTcut)&&(!isBpTcut)) dsigmadpT[iR][ii] += sigma_gen;
-        }
-    }     
-}
-
-void JetStatistics::write(std::string fheader){
-    for (int iR=0; iR<Rs.size(); iR++){
-        std::stringstream filename;
-        filename << fheader << "-jet-R-"<<iR<<"-"<<"spectra.dat";
-        std::ofstream f(filename.str());
-        for (int i=0; i<NpT; i++) {
-            f    << (pTbins[i]+pTbins[i+1])/2. << " "
-                 << pTbins[i] << " "
-                 << pTbins[i+1] << " "
-                 << dsigmadpT[iR][i]/binwidth[i] << " "
-                 << dDdpT[iR][i]/binwidth[i] << " "
-                 << dBdpT[iR][i]/binwidth[i] << " "
-         << dD0dpT[iR][i]/binwidth[i] << " "
-                 << dB0dpT[iR][i]/binwidth[i] << std::endl;
-        }
-        f.close();
-    }
-
-    std::stringstream filename2;
-    filename2 << fheader << "-jetshape.dat";
-    std::ofstream f2(filename2.str());
-    f2 << "#";
-    for (auto it : shape_rbins) f2 << it << " ";
-    f2 << std::endl;
-    for (int i=0; i<shape_NpT; i++) {
-        f2   << (shape_pTbins[i]+shape_pTbins[i+1])/2. << " "
-             << shape_pTbins[i] << " "
-             << shape_pTbins[i+1] << " ";
-    for (int j=0; j<shapes[i].size(); j++){
-        f2 << shapes[i][j]/(shape_w[i]+1e-15) << " "; 
-    }
-    f2 << std::endl;
-    }
-    f2.close();
-
-    std::stringstream filename3;
-    filename3 << fheader << "-jetdnchdr.dat";
-    std::ofstream f3(filename3.str());
-    f3 << "#";
-    for (auto it : shape_rbins) f3 << it << " ";
-    f3 << std::endl;
-    for (int i=0; i<shape_NpT; i++) {
-        f3   << (shape_pTbins[i]+shape_pTbins[i+1])/2. << " "
-             << shape_pTbins[i] << " "
-             << shape_pTbins[i+1] << " ";
-        for (int j=0; j<dnchdr[i].size(); j++){
-            f3 << dnchdr[i][j]/(shape_w[i]+1e-15) << " ";
-        }
-        f3 << std::endl;
-    }
-    f3.close();
-
-    std::stringstream filename4;
-    filename4 << fheader << "-xJ.dat";
-    std::ofstream f4(filename4.str());
-    for (int i=0; i<xJbins.size()-1; i++) {
-        f4   << (xJbins[i]+xJbins[i+1])/2. << " "
-             << xJbins[i] << " "
-             << xJbins[i+1] << " "
-             << xJ[i] << std::endl;
-    }
-    f4.close();
-
-    std::stringstream filename5;
-    filename5 << fheader << "-allHF.dat";
-    std::ofstream f5(filename5.str());
-    for (auto & J: AllJets) {
-	if (J.Ftags.size()==0) continue;
-	double LpT = 0.; int index=-1;
-	for (int i=0; i<J.Ftags.size(); i++) {
-            auto p = J.Ftags[i];
-	    if (p.p.xT()>LpT) {
-		  LpT = p.p.xT();
-		  index = i;
-	    }
-	}
-	auto pf = J.Ftags[index];
-        int f = std::abs(pf.pid), ftag;
-        if ((f==411)||(f==421)||(f==413)||(f==423)||(f==4)) ftag=4;
-        if ((f==511)||(f==521)||(f==513)||(f==523)||(f==5)) ftag=5;
-        f5 << J.sigma << " " << J.R << " " 
-           << J.pT << " " << J.eta << " " << J.phi << " " << J.M2  << " " 
-           << f << " " << ftag << " " 
-	   << pf.p.xT() << " " << pf.p.rap() << " " << pf.p.phi() << " ";
-	for (auto & it : J.shape) {
-	    f5 << it << " ";
-	}
-	f5 << std::endl;
-    }
-    f5.close();
-
 }
 

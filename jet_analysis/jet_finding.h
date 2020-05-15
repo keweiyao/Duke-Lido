@@ -65,8 +65,8 @@ class MyInfo: public fastjet::PseudoJet::UserInfoBase {
 struct Fjet{
     fourvec pmu;
     double R, pT, M2, phi, eta;
-    std::vector<double> shape, Leadingshape, dndr;
-    std::vector<particle> Ftags;
+    std::vector<double> shape;
+    int flavor;
     double sigma;
 };
 void TestSource(
@@ -75,17 +75,47 @@ void TestSource(
              std::vector<HadronizeCurrent> slist,
              std::string fname
      );
-std::vector<Fjet> FindJetTower(MediumResponse MR,
-             std::vector<particle> plist,
-             std::vector<current> SourceList,
-             std::vector<HadronizeCurrent> HadronizeList,
-             std::vector<double> Rs,
-	     std::vector<double> rbins,
-             double jetpTMin,
-             double jetyMin,
-             double jetyMax,
-             double sigma_gen,
-	     double pTmin);
+
+class JetFinder{
+public:
+    JetFinder(int Neta, int Nphi, double etamax, bool read_table, std::string stable_path);
+    JetFinder(int Neta, int Nphi, double etamax);
+    void MakeETower(double vradial, 
+                   double Tfreeze, 
+                   double pTmin,
+                   std::vector<particle> plist, 
+                   std::vector<current> TypeOneSources,
+                   std::vector<HadronizeCurrent> TypeTwoSources,
+                   int coarse_level);
+    void set_sigma(double _sigma){
+        sigma = _sigma;
+    }
+    void FindJets(std::vector<double> Rs, 
+                  double jetpTMin, 
+                  double jetyMin, 
+                  double jetyMax);
+    void FindHF(std::vector<particle> plist);
+    void CalcJetshape(std::vector<double> rbins);
+    void LabelFlavor();
+    void CorrHFET(std::vector<double> rbins);
+    std::vector<Fjet> Jets;
+    std::vector<particle> HFs;
+    std::vector<Fjet> HFaxis;
+private:
+    int corp_index(double x, double xL, double xH, double dx, int Nx){
+        if (x<xL || x>xH) return -1;
+        else if (x==xH) return Nx-1;
+        else return int((x-xL)/dx);
+    };
+    const int Neta, Nphi;
+    const double etamax, etamin, phimax, phimin;
+    const double deta, dphi;
+    double sigma;
+    MediumResponse MR;
+    std::vector<std::vector<double> > PT;
+    std::vector<std::vector<fourvec> > Pmu;
+};
+
 class LeadingParton{
    public:
    LeadingParton(std::vector<double> _pTbins);
@@ -95,17 +125,39 @@ class LeadingParton{
    std::vector<double> pTbins, binwidth, nchg, npi, nD, nB;
    int NpT;
 };
+
 class JetStatistics{
    public:
    JetStatistics(std::vector<double> _pTbins, std::vector<double> Rs, std::vector<double> shapepTbins, std::vector<double> shaperbins);
    void add_event(std::vector<Fjet> jets, double sigma_gen);
    void write(std::string fheader);
    private:
-   std::vector<Fjet> AllJets;
    std::vector<double> pTbins, binwidth, shape_pTbins, shape_rbins, xJbins;
-   std::vector<double> shape_w, Rs, xJ;
-   std::vector<std::vector<double> > shapes, dnchdr, dsigmadpT, dBdpT, dDdpT, dB0dpT, dD0dpT;
+   std::vector<double> Rs, xJ;
+   std::vector<std::vector<double> > shapes, Dshapes, Bshapes, dsigmadpT, dBdpT, dDdpT;
    int NpT, shape_NpT, shape_Nr;
 };
+
+class JetHFCorr{
+   public:
+   JetHFCorr(std::vector<double> pTHFbins, std::vector<double> rbins);
+   void add_event(std::vector<Fjet> jets, std::vector<particle> HFs, 
+                  double sigma_gen);
+   void write(std::string fheader);
+   private:
+   std::vector<double> pTHFbins, rbins;
+   std::vector<std::vector<double> > dDdr, dBdr;
+};
+
+class HFETCorr{
+   public:
+   HFETCorr(std::vector<double> pTHFbins, std::vector<double> rbins);
+   void add_event(std::vector<Fjet> HFaxis, double sigma_gen);
+   void write(std::string fheader);
+   private:
+   std::vector<double> pTHFbins, rbins;
+   std::vector<std::vector<double> > D_dPTdr, B_dPTdr;
+};
+
 
 #endif
