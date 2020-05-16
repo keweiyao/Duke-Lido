@@ -494,8 +494,8 @@ JetStatistics::JetStatistics(
      std::vector<double> _Rs,
      std::vector<double> _shape_pTbins, 
      std::vector<double> _shape_rbins){
-    for (int i=0; i<11; i++)
-    xJbins.push_back(i*0.06);
+    for (int i=0; i<21; i++)
+    xJbins.push_back(i*0.05);
     xJ.resize(xJbins.size()-1);
     for (auto & it : xJ) it = 0.;
     pTbins = _pTbins;
@@ -545,19 +545,19 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
     // di-jet asymmetry
     std::vector<Fjet> jjs;
     for (auto & J:jets){
-        if (J.R<0.51 && J.R>0.49){
+        if (J.R<0.41 && J.R>0.39){
             jjs.push_back(J);
         }
     }
     std::sort(jjs.begin(), jjs.end(), compare_jet);
     if (jjs.size()>=2){
         auto j1 = jjs[0], j2 = jjs[1];
-        if (j1.pT>120. && j2.pT>50. && 
-            std::abs(j1.eta)<2. && std::abs(j2.eta)<2.){
+        if (j1.pT>100. && j1.pT<126. && j2.pT>25. &&
+            std::abs(j1.eta)<2.1 && std::abs(j2.eta)<2.1){
             double dphi = j1.phi - j2.phi;
-            if (std::cos(dphi) < std::cos(2./3.*M_PI)) {
+            if (std::cos(dphi) < std::cos(7./8.*M_PI)) {
                 int index = 0;
-                double x = std::abs(j1.pT-j2.pT)/(j1.pT+j2.pT);
+                double x = j2.pT/j1.pT;
                 for (int i=0; i<xJbins.size()-1; i++){
                     if (xJbins[i]<x && x< xJbins[i+1]) {
                         index = i; 
@@ -721,7 +721,7 @@ void JetHFCorr::add_event(std::vector<Fjet> jets,
                 if (std::abs(p.p.rap())<2.){
                     double absdphi = std::abs(J.phi - p.p.phi());
                     if (absdphi>M_PI) absdphi = 2.*M_PI-absdphi;
-                    double deta = J.eta-p.p.rap();
+                    double deta = J.eta-p.p.pseudorap();
                     double dR = std::sqrt(absdphi*absdphi + deta*deta);
                     // find r index
                     int rindex = -1;
