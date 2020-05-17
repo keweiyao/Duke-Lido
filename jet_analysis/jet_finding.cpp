@@ -497,7 +497,7 @@ JetStatistics::JetStatistics(
      std::vector<double> _xJ_pTbins){
     xJ_pTbins = _xJ_pTbins;
     for (int i=0; i<21; i++) xJbins.push_back(i*0.05);
-    xJ.resize(xJ_pTbins.size());
+    xJ.resize(xJ_pTbins.size()-1);
     for (auto & it: xJ) {
         it.resize(xJbins.size()-1);
         for (auto & iit : it) iit = 0.;
@@ -560,22 +560,24 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
             std::abs(j1.eta)<2.1 && std::abs(j2.eta)<2.1) {
             double dphi = j1.phi - j2.phi;
             if (std::cos(dphi) < std::cos(7./8.*M_PI)) {
-                int pTindex = 0;
+                int pTindex = -1;
                 for (int i=0; i<xJ_pTbins.size()-1; i++){
                     if (xJ_pTbins[i]<j1.pT && j1.pT< xJ_pTbins[i+1]) {
                         pTindex = i;
                         break;
                     }
                 }
-                int rindex = 0;
-                double x = j2.pT/j1.pT;
-                for (int i=0; i<xJbins.size()-1; i++){
-                    if (xJbins[i]<x && x< xJbins[i+1]) {
-                        rindex = i; 
-                        break;
+		if (pTindex>=0) {
+                    int rindex = 0;
+                    double x = j2.pT/j1.pT;
+                    for (int i=0; i<xJbins.size()-1; i++){
+                        if (xJbins[i]<x && x< xJbins[i+1]) {
+                            rindex = i; 
+                            break;
+                        }
                     }
-                }
-                xJ[pTindex][rindex] += sigma_gen;
+                    xJ[pTindex][rindex] += sigma_gen;
+		}
             }
         }
     }
@@ -704,7 +706,7 @@ void JetStatistics::write(std::string fheader){
         for (int j=0; j<xJ[i].size(); j++) {
             f5 << xJ[i][j] << " ";
         }
-	f5 << " ";
+	f5 << std::endl;
     }
     f5.close();
 }
