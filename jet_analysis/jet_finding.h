@@ -128,13 +128,13 @@ class LeadingParton{
 
 class JetStatistics{
    public:
-   JetStatistics(std::vector<double> _pTbins, std::vector<double> Rs, std::vector<double> shapepTbins, std::vector<double> shaperbins);
+   JetStatistics(std::vector<double> _pTbins, std::vector<double> Rs, std::vector<double> shapepTbins, std::vector<double> shaperbins, std::vector<double> xJ_pTbins);
    void add_event(std::vector<Fjet> jets, double sigma_gen);
    void write(std::string fheader);
    private:
-   std::vector<double> pTbins, binwidth, shape_pTbins, shape_rbins, xJbins;
-   std::vector<double> Rs, xJ;
-   std::vector<std::vector<double> > shapes, Dshapes, Bshapes, dsigmadpT, dBdpT, dDdpT;
+   std::vector<double> pTbins, binwidth, shape_pTbins, shape_rbins, xJbins, xJ_pTbins;
+   std::vector<double> Rs;
+   std::vector<std::vector<double> > shapes, xJ, Dshapes, Bshapes, dsigmadpT, dBdpT, dDdpT;
    int NpT, shape_NpT, shape_Nr;
 };
 

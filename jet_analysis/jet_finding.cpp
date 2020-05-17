@@ -493,11 +493,15 @@ JetStatistics::JetStatistics(
      std::vector<double> _pTbins, 
      std::vector<double> _Rs,
      std::vector<double> _shape_pTbins, 
-     std::vector<double> _shape_rbins){
-    for (int i=0; i<21; i++)
-    xJbins.push_back(i*0.05);
-    xJ.resize(xJbins.size()-1);
-    for (auto & it : xJ) it = 0.;
+     std::vector<double> _shape_rbins,
+     std::vector<double> _xJ_pTbins){
+    xJ_pTbins = _xJ_pTbins;
+    for (int i=0; i<21; i++) xJbins.push_back(i*0.05);
+    xJ.resize(xJ_pTbins.size());
+    for (auto & it: xJ) {
+        xJ.resize(xJbins.size()-1);
+        for (auto & iit : it) iit = 0.;
+    }
     pTbins = _pTbins;
     Rs = _Rs;
     shape_pTbins = _shape_pTbins;
@@ -552,19 +556,26 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
     std::sort(jjs.begin(), jjs.end(), compare_jet);
     if (jjs.size()>=2){
         auto j1 = jjs[0], j2 = jjs[1];
-        if (j1.pT>100. && j1.pT<126. && j2.pT>25. &&
-            std::abs(j1.eta)<2.1 && std::abs(j2.eta)<2.1){
+        if (j1.pT>25. && j2.pT>25. &&
+            std::abs(j1.eta)<2.1 && std::abs(j2.eta)<2.1) {
             double dphi = j1.phi - j2.phi;
             if (std::cos(dphi) < std::cos(7./8.*M_PI)) {
-                int index = 0;
-                double x = j2.pT/j1.pT;
-                for (int i=0; i<xJbins.size()-1; i++){
-                    if (xJbins[i]<x && x< xJbins[i+1]) {
-                        index = i; 
+                int pTindex = 0;
+                for (int i=0; i<xJ_pTbins.size()-1; i++){
+                    if (xJ_pTbins[i]<j1.pT && j1.pT< xJ_pTbins[i+1]) {
+                        pTindex = i;
                         break;
                     }
                 }
-                xJ[index] += sigma_gen;
+                int rindex = 0;
+                double x = j2.pT/j1.pT;
+                for (int i=0; i<xJbins.size()-1; i++){
+                    if (xJbins[i]<x && x< xJbins[i+1]) {
+                        rindex = i; 
+                        break;
+                    }
+                }
+                xJ[pTindex][rindex] += sigma_gen;
             }
         }
     }
@@ -686,11 +697,14 @@ void JetStatistics::write(std::string fheader){
     std::stringstream filename5;
     filename5 << fheader << "-xJ.dat";
     std::ofstream f5(filename5.str());
-    for (int i=0; i<xJbins.size()-1; i++) {
-        f5   << (xJbins[i]+xJbins[i+1])/2. << " "
-             << xJbins[i] << " "
-             << xJbins[i+1] << " "
-             << xJ[i] << std::endl;
+    for (int i=0; i<xJ.size(); i++){
+	f5 << (xJ_pTbins[i]+xJ_pTbins[i+1])/2. << " "
+	   << xJ_pTbins[i] << " "
+           << xJ_pTbins[i+1] << " ";
+        for (int j=0; j<xJ[i].size(); j++) {
+            f5 << xJ[i][j] << " ";
+        }
+	f5 << " ";
     }
     f5.close();
 }

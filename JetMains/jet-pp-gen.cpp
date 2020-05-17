@@ -106,11 +106,11 @@ int main(int argc, char* argv[]){
         std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
                           .35, .4, .45, .5,  .6, .7,  .8,
                            1., 1.5, 2.0, 2.5, 3.0});
-
+        std::vector<double> xJpTbins({100,126,158,200,2000});
 
 
         LeadingParton dNdpT(ParticlepTbins);
-        JetStatistics JetSample(jetpTbins, Rs, shapepTbins, shaperbins);
+        JetStatistics JetSample(jetpTbins, Rs, shapepTbins, shaperbins, xJpTbins);
         JetHFCorr jet_HF_corr(HFpTbins, shaperbins);
         HFETCorr  HF_ET_corr(HFETbins, shaperbins);
         /// Initialize jet finder with medium response

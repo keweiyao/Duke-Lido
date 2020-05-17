@@ -169,9 +169,9 @@ int main(int argc, char* argv[]){
 
         /// all kinds of bins and cuts
 	std::vector<double> TriggerBin({
-         2,4,6,8,12,16,20,25,30,40,50,60,70,80,90,100,110,120,130,
+         70,80,90,100,110,120,130,
          140,150,160,170,180,200,220,240,260,280,
-         320,360,400,500,600,700,800,1000,1200,1600,2000,2500});
+         320,400,600,800,1200,2500});
 
         std::vector<double> Rs({.4});
 
@@ -185,9 +185,10 @@ int main(int argc, char* argv[]){
         std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
                           .35, .4, .45, .5,  .6, .7,  .8,
                            1., 1.5, 2.0, 2.5, 3.0});
+        std::vector<double> xJpTbins({100,126,158,200,2000});
 
 	LeadingParton dNdpT(ParticlepTbins);
-	JetStatistics JetSample(jetpTbins, Rs, shapepTbins, shaperbins);
+	JetStatistics JetSample(jetpTbins, Rs, shapepTbins, shaperbins, xJpTbins);
         JetHFCorr jet_HF_corr(HFpTbins, shaperbins);
         HFETCorr  HF_ET_corr(HFETbins, shaperbins);
         // Scale to insert In medium transport
