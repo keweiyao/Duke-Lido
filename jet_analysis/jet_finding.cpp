@@ -499,7 +499,7 @@ JetStatistics::JetStatistics(
     for (int i=0; i<21; i++) xJbins.push_back(i*0.05);
     xJ.resize(xJ_pTbins.size());
     for (auto & it: xJ) {
-        xJ.resize(xJbins.size()-1);
+        it.resize(xJbins.size()-1);
         for (auto & iit : it) iit = 0.;
     }
     pTbins = _pTbins;

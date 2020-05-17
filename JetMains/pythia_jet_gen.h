@@ -122,7 +122,7 @@ void PythiaGen::Generate(std::vector<particle> & plist){
             _p.mass = std::abs(p.m());
             _p.x0 = fourvec{0,x,y,0};
             _p.x = _p.x0; 
-	    double t0 =  0.;
+	    double t0 = 0.;
 	    reference_pmu(i, t0, event);
             _p.tau_i = t0;
             _p.p0 = p0;
