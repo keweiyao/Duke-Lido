@@ -80,7 +80,7 @@ int main(int argc, char* argv[]){
             HQGenerator hardgen(args["pythia-setting"].as<fs::path>().string(),
                             args["ic"].as<fs::path>().string(),
                             args["eid"].as<int>(),
-                            pThatbins[i], pThatbins[i+1]
+                            pThatbins[i], pThatbins[i+1], 0.4
                             );
             dlist.clear();
             hardgen.Generate(dlist,

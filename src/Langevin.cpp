@@ -5,12 +5,16 @@
 double const tiny = 1e-10;
 
 double delta_qhat(int pid, double E, double M, double T){
-        double CR = (pid==21) ? CA : CF;
+	int abspid = std::abs(pid);
         double EM = 1. + std::log (1+ (E-M)/qhat_params.b/T );
-        double delta_qhat = CR/CF*qhat_params.K * std::pow(T, 3)
-                /(1. + std::pow(qhat_params.a*(T-Tc)/Tc, qhat_params.p))
-                /std::pow(EM, qhat_params.q);
-        return delta_qhat;
+        double delta_qhat = qhat_params.K * std::pow(T, 3)
+                    /(1. + std::pow(qhat_params.a*(T-Tc)/Tc, qhat_params.p))
+                    /std::pow(EM, qhat_params.q);
+            
+        if (abspid !=21) {;
+           return delta_qhat; 
+        }
+	else return delta_qhat*CA/CF;
 }
 
 double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){

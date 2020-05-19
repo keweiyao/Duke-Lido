@@ -122,7 +122,7 @@ class LeadingParton{
    void add_event(std::vector<particle> plist, double sigma_gen);
    void write(std::string fheader);
    private:
-   std::vector<double> pTbins, binwidth, nchg, npi, nD, nB;
+   std::vector<double> pTbins, binwidth, nchg, npi, nD, nB, v2chg, v2pi, v2D, v2B;
    int NpT;
 };
 

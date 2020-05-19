@@ -44,15 +44,12 @@ int main(int argc, char* argv[]){
           ("lido-table,t", 
             po::value<fs::path>()->value_name("PATH")->required(),
            "Lido table path to file")   
-	  ("cl",
-           po::value<int>()->value_name("INT")->default_value(0,"0"),
-           "cent low")
-	  ("ch",
-           po::value<int>()->value_name("INT")->default_value(0,"100"),
-           "cent high")
            ("output,o",
            po::value<fs::path>()->value_name("PATH")->default_value("./"),
            "output file prefix or folder")
+          ("Q0,q",
+           po::value<double>()->value_name("DOUBLE")->default_value(.4,".4"),
+           "Scale [GeV] to insert in-medium transport")
     ;
 
     po::variables_map args{};
@@ -132,12 +129,13 @@ int main(int argc, char* argv[]){
                 );
 
         /// generate events from pythia
-        std::vector<double> pThatbins({2,4,6,8,10,15,20,30,40,50,60,80,100,120,150,200,300,500});
+        std::vector<double> pThatbins({2,4,6,8,10,12,14,16,18,20,25,30,35,40,45,50,60,80,100,120,150,200,300,500});
         for (int i=0; i<pThatbins.size()-1; i++){
             HQGenerator hardgen(args["pythia-setting"].as<fs::path>().string(),
                             args["ic"].as<fs::path>().string(),
                             args["eid"].as<int>(),
-                            pThatbins[i], pThatbins[i+1]
+                            pThatbins[i], pThatbins[i+1],
+                            args["Q0"].as<double>()
                             );
             dlist.clear();
             hardgen.Generate(dlist,
@@ -200,6 +198,9 @@ int main(int argc, char* argv[]){
         outputfilename1 << args["output"].as<fs::path>().string()
                         << "c-quark-" << processid <<".dat";
         output_oscar(plist, 4, outputfilename1.str());
+        outputfilename1 << args["output"].as<fs::path>().string()
+                        << "b-quark-" << processid <<".dat";
+        output_oscar(plist, 5, outputfilename1.str());
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

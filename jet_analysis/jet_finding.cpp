@@ -440,6 +440,10 @@ LeadingParton::LeadingParton(std::vector<double> _pTbins){
     npi.resize(NpT); for (auto & it:npi) it=0.;
     nD.resize(NpT); for (auto & it:nD) it=0.;
     nB.resize(NpT); for (auto & it:nB) it=0.;
+    v2chg.resize(NpT); for (auto & it:v2chg) it=0.;
+    v2pi.resize(NpT); for (auto & it:v2pi) it=0.;
+    v2D.resize(NpT); for (auto & it:v2D) it=0.;
+    v2B.resize(NpT); for (auto & it:v2B) it=0.;
     binwidth.resize(NpT); 
     for (int i=0; i<NpT; i++) 
         binwidth[i]=pTbins[i+1]-pTbins[i];
@@ -466,10 +470,22 @@ void LeadingParton::add_event(std::vector<particle> plist, double sigma_gen){
                 }
             }
             if (ii==NpT) ii=NpT-1;
-            if (ispi) npi[ii] += sigma_gen;
-            if (ischg) nchg[ii] += sigma_gen;
-            if (isD) nD[ii] += sigma_gen;
-            if (isB) nB[ii] += sigma_gen;
+            if (ispi) {
+                npi[ii] += sigma_gen;
+                v2pi[ii] += sigma_gen*cos(2*p.p.phi());
+            }
+            if (ischg){
+                nchg[ii] += sigma_gen;
+                v2chg[ii] += sigma_gen*cos(2*p.p.phi());
+            }
+            if (isD) {
+                nD[ii] += sigma_gen;
+                v2D[ii] += sigma_gen*cos(2*p.p.phi());
+            }
+            if (isB) {
+                nB[ii] += sigma_gen;
+                v2B[ii] += sigma_gen*cos(2*p.p.phi());
+            }
         }
     }
 }
@@ -488,6 +504,21 @@ void LeadingParton::write(std::string fheader){
              << nB[i]/binwidth[i] << std::endl;
     }
     f.close();
+
+    std::stringstream filename2;
+    filename2 << fheader << "-LeadingV2.dat";
+    std::ofstream f2(filename2.str());
+
+    for (int i=0; i<NpT; i++) {
+        f2    << (pTbins[i]+pTbins[i+1])/2. << " "
+             << pTbins[i] << " "
+             << pTbins[i+1] << " "
+             << nchg[i] << " " << v2chg[i] << " "
+             << npi[i] << " " << v2pi[i] << " "
+             << nD[i] << " " << v2D[i] << " "
+             << nB[i] << " " << v2B[i] << std::endl;
+    }
+    f2.close();
 }
 JetStatistics::JetStatistics(
      std::vector<double> _pTbins, 
