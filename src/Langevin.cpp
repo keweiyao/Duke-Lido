@@ -68,7 +68,7 @@ void Ito_update(int pid, double dt_lab, double M, double T, std::vector<double> 
 	double kt = qhat(pid, E0, M, T)/2.;
         double kl = qhat_L(pid, E0, M, T);
 	double dkl_dp2 = dqhat_L_dp2(pid, E0, M, T);
-	double drag = kl/(2.*E0*T);//- (kl - kt)/std::pow(p0, 2) - dkl_dp2;
+	double drag = kl/(2.*E0*T);// - (kl - kt)/std::pow(p0, 2) - dkl_dp2;
 		   
 	double Ct = std::sqrt(kt*dt);
 	double Cl = std::sqrt(kl*dt);

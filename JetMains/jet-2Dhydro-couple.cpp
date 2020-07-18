@@ -28,7 +28,7 @@ void output_jet(std::string fname, std::vector<particle> plist){
 }
 
 struct event{
-std::vector<particle> plist, colorlist, thermal_list, hlist;
+std::vector<particle> plist, thermal_list, hlist;
 std::vector<current> clist;
 std::vector<HadronizeCurrent> slist;
 double sigma;
@@ -66,14 +66,28 @@ int main(int argc, char* argv[]){
            ("output,o",
            po::value<fs::path>()->value_name("PATH")->default_value("./"),
            "output file prefix or folder")
-          ("Q0,q",
-           po::value<double>()->value_name("DOUBLE")->default_value(.4,".4"),
-           "Scale [GeV] to insert in-medium transport")
 	  ("jet", po::bool_switch(),
            "Turn on to do jet finding (takes time)")
-	            ("pTtrack",
+	   ("pTtrack",
            po::value<double>()->value_name("DOUBLE")->default_value(.7,".7"),
            "minimum pT track in the jet shape reconstruction")
+           ("muT",
+           po::value<double>()->value_name("DOUBLE")->default_value(1.5,"1.5"),
+           "mu_min/piT")
+	   ("Q0,q",
+           po::value<double>()->value_name("DOUBLE")->default_value(.4,".4"),
+           "Scale [GeV] to insert in-medium transport")
+	   ("theta",
+           po::value<double>()->value_name("DOUBLE")->default_value(4.,"4."),
+           "Emin/T")
+	   ("afix",
+           po::value<double>()->value_name("DOUBLE")->default_value(-1.,"-1."),
+           "fixed alpha_s, <0 for running alphas")
+	   ("cut",
+           po::value<double>()->value_name("DOUBLE")->default_value(4.,"4."),
+           "cut between diffusion and scattering, Qc^2 = cut*mD^2")
+
+
 
     ;
 
@@ -157,9 +171,16 @@ int main(int argc, char* argv[]){
         fheader << args["output"].as<fs::path>().string() 
                 << processid;
         /// Initialize Lido in-medium transport
+	// Scale to insert In medium transport
+        double Q0 = args["Q0"].as<double>();
+        double muT = args["muT"].as<double>();
+        double theta = args["theta"].as<double>();
+	double cut = args["cut"].as<double>();
+	double afix = args["afix"].as<double>();
         initialize(table_mode,
             args["lido-setting"].as<fs::path>().string(),
-            args["lido-table"].as<fs::path>().string()
+            args["lido-table"].as<fs::path>().string(),
+	    muT, afix, theta, cut
         );
         /// Initialize jet finder with medium response
         JetFinder jetfinder(300,300,3.,need_response_table, args["response-table"].as<fs::path>().string());
@@ -167,32 +188,59 @@ int main(int argc, char* argv[]){
         /// Initialize a simple hadronizer
         JetDenseMediumHadronize Hadronizer;
 
-        /// all kinds of bins and cuts
-	std::vector<double> TriggerBin({
-         2,4,6,8,10,12,14,16,18,20,22,24,30,35,40,50,60,70,80,90,100,110,120,130,
-         140,150,160,170,180,200,220,240,260,280,
-         320,400,600,800,1200,2500});
-
-        std::vector<double> Rs({.4});
-
-        std::vector<double> ParticlepTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
-               50,60,80,100,120,150,200,300,400,500,600,1000,2000});
-        std::vector<double> jetpTbins({10,15,20,30,40,
-               50,60,80,100,120,160,200,300,400,500,600,800,1000,1400,1800});
-        std::vector<double> HFpTbins({4,20,1000});
-        std::vector<double> HFETbins({2,6,10,20,40,1000});
+        // all kinds of bins and cuts
+	// For RHIC 200 GeV
+        /*std::vector<double> TriggerBin({
+         2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,20,22,24,28,32,36,40,50,60,80,100});
+        std::vector<double> Rs({.2,.3,.4});
+        std::vector<double> ParticlepTbins({0,1,2,3,4,5,6,8,10,12,14,16,20,24,28,32,40,50,60,80,100});
+        std::vector<double> jetpTbins({4,6,8,10,12,15,18,21,24,28,32,36,40,45,50,60,70,80,90,100});
+	std::vector<double> HFpTbins({2,6,10,20,40,100});
+        std::vector<double> HFETbins({2,6,10,20,40,100});
 	std::vector<double> shapepTbins({20,30,40,60,80,120,2000});
         std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
                           .35, .4, .45, .5,  .6, .7,  .8,
                            1., 1.5, 2.0, 2.5, 3.0});
-        std::vector<double> xJpTbins({100,126,158,200,2000});
+	std::vector<double> xJpTbins({8,12,16,20,30,40,60});
+        */
+	
+
+	// For 5.02 TeV
+        std::vector<double> TriggerBin({
+         2,4,6,8,10,12,14,16,20,
+	 24,28,32,36,40,50,60,70,80,90,100,
+	 110,120,130,140,150,160,180,200,240,280,320,360,400,500,
+	 600,700,800,1000,1200,1500,2000,2500
+	 });
+        std::vector<double> Rs({.2,.4});
+        std::vector<double> ParticlepTbins({0,1,2,3,4,5,6,8,10,12,14,16,20,
+			24,28,32,40,50,60,80,100,
+			120,140,160,200,300,400,600,800,1000});
+        std::vector<double> jetpTbins({4,6,8,10,12,15,20,25,30,
+			40,50,60,70,80,100,120,140,160,180,200,
+			240,280,320,360,400,500,600,800,1000,
+			1200,1400,1600,2000,2500});
+        std::vector<double> HFpTbins({2,6,10,20,40,100});
+        std::vector<double> HFETbins({2,6,10,20,40,100});
+        std::vector<double> shapepTbins({20,30,40,60,80,120,2000});
+        std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
+                          .35, .4, .45, .5,  .6, .7,  .8,
+                           1., 1.5, 2.0, 2.5, 3.0});
+	std::vector<double> xJpTbins({100,126,158,178,200,224,251,282,316,398,562});
+        std::vector<double> FragpTbins({100,126,158,200,251,316,398});
+        std::vector<double> zbins({.005,.0065,.0085,.011,.015,
+                        .019,.025,.032,.042,.055,
+                        .071, .092, .120,.157, .204, 
+                        .266, .347, .452, .589, .767,
+                        1.});
 
 	LeadingParton dNdpT(ParticlepTbins);
-	JetStatistics JetSample(jetpTbins, Rs, shapepTbins, shaperbins, xJpTbins);
+	JetStatistics JetSample(jetpTbins, Rs, 
+			 shapepTbins, shaperbins, 
+			 FragpTbins, zbins,
+			 xJpTbins);
         JetHFCorr jet_HF_corr(HFpTbins, shaperbins);
         HFETCorr  HF_ET_corr(HFETbins, shaperbins);
-        // Scale to insert In medium transport
-        double Q0 = args["Q0"].as<double>();
                 
         /// Initialzie a hydro reader
         Medium<2> med1(args["hydro"].as<fs::path>().string());
@@ -219,7 +267,7 @@ int main(int argc, char* argv[]){
                            /args["pythia-events"].as<int>();            
                 // freestream form t=0 to tau=tau0
                 for (auto & p : e1.plist){
-                    p.Tf = 0.166;
+                    p.Tf = 0.161;
                     p.origin = 0;
                     if (p.x.tau() < med1.get_tauH())
                         p.freestream(compute_realtime_to_propagate(
@@ -237,7 +285,7 @@ int main(int argc, char* argv[]){
             for (auto & ie : events){
                 std::vector<particle> new_plist, pOut_list;
                 for (auto & p : ie.plist){     
-                    if (p.Tf < 0.165 || std::abs(p.p.rap())>5.) {
+                    if (p.Tf < 0.16 || std::abs(p.p.rap())>5.) {
                         new_plist.push_back(p);
                         continue;       
                     }
@@ -270,14 +318,13 @@ int main(int argc, char* argv[]){
                     }
                 }
                 ie.plist = new_plist;
-            }
-        }    
-
+	    }
+        } 
+        
         // Hadronization
         // put back lost particles with their color
         LOG_INFO << "Hadronization";
         for (auto & ie : events){
-            for (auto & p : ie.colorlist) ie.plist.push_back(p);
             Hadronizer.hadronize(ie.plist, ie.hlist, ie.thermal_list, Q0, 1);
             for(auto & it : ie.thermal_list){
                 double vz = it.x.z()/it.x.t();
@@ -296,11 +343,12 @@ int main(int argc, char* argv[]){
                 jetfinder.MakeETower(
                      0.6, 0.165, args["pTtrack"].as<double>(),
                      ie.hlist, ie.clist, ie.slist, 10);
-                jetfinder.FindJets(Rs, 10., -3., 3.);
+                jetfinder.FindJets(Rs, 5., -3., 3.);
                 jetfinder.FindHF(ie.hlist);
                 jetfinder.CorrHFET(shaperbins);
                 jetfinder.LabelFlavor();
                 jetfinder.CalcJetshape(shaperbins);
+		jetfinder.Frag(zbins);
 	        JetSample.add_event(jetfinder.Jets, ie.sigma);
                 jet_HF_corr.add_event(jetfinder.Jets, jetfinder.HFs,
                                           ie.sigma);

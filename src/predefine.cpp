@@ -43,21 +43,20 @@ const double Tc = 0.154;
 double cut;
 double scale;
 double afix;
-double Rvac;
-Debye_mass * t_channel_mD2;
-const double LPM_prefactor = 1.0; // to match analytic calculation, 0.75 by default
-
 double Lido_Ecut;
+
+Debye_mass * t_channel_mD2;
+const double LPM_prefactor = 1.0;
+
 int time_type;
 bool Adiabatic_LPM;
-bool Dead_cone_on;
 qhat_params_struct qhat_params;
 
-void initialize_mD_and_scale(int _mD_type, double _scale, double _afix, double _cut, double _Rvac){
+void initialize_mD_and_scale(int _mD_type, double _mu, double _afix, double _theta, double _cut){
         cut = _cut;
-        scale = _scale;
+        scale = _mu;
         afix = _afix;
-	Rvac = _Rvac;
+	Lido_Ecut = _theta;
         t_channel_mD2 = new Debye_mass(_mD_type);
 }
 
@@ -71,10 +70,10 @@ void initialize_transport_coeff(double _K, double _a, double _b, double _p, doub
 }
 
 void echo(void){
-	std::cout << "mu\tafix\tK\ta\tb\tp\tq\tgamma\tQcut\tRvac\n";
+	std::cout << "mu\tafix\tK\ta\tb\tp\tq\tgamma\tQcut\n";
 	std::cout <<scale<<"\t"<<afix<<"\t"<<qhat_params.K<<"\t"<<qhat_params.a
                <<"\t"<<qhat_params.b<<"\t"<<qhat_params.p<<"\t"<<qhat_params.q
-               <<"\t"<<qhat_params.gamma<<"\t"<<cut<<"\t"<<Rvac<<"\n";
+               <<"\t"<<qhat_params.gamma<<"\t"<<cut<<"\n";
 }
 
 Debye_mass::Debye_mass(const unsigned int _type):

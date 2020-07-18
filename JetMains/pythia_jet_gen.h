@@ -26,6 +26,7 @@ private:
 
 void reference_pmu(int i, double & tau, Event & event){
     auto p = event[i];
+    int absid = p.idAbs();
     int im1 = p.mother1();
     int im2 = p.mother2();
     if (im1==im2 && im2 > 0){
@@ -133,7 +134,8 @@ void PythiaGen::Generate(std::vector<particle> & plist){
                 std::abs(_p.pid) != 5 && p.isParton()) {
                 _p.mass = 0;
             }
-            _p.col = p.col();
+
+	    _p.col = p.col();
             _p.acol = p.acol();
             _p.p0.a[0] = std::sqrt(_p.p0.pabs2()+_p.mass*_p.mass);
             _p.p = _p.p0; 

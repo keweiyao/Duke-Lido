@@ -50,19 +50,18 @@ extern const double Tc;
 extern double scale; // mu*pi*T
 extern double afix; // fixed alphas, -1 is running
 extern double cut; // separation between diffusion and scattering
-extern double Rvac;
-extern const double LPM_prefactor; // to match analytic calculation, 0.7 -- 0.83.
-
+extern const double LPM_prefactor; 
 extern double Lido_Ecut;
+
 extern int time_type;
 extern bool Adiabatic_LPM;
-extern bool Dead_cone_on;
+
 struct qhat_params_struct {
 	double K, a, b, p, q, gamma; // for qhat parametrization
 };
 extern qhat_params_struct qhat_params;
 
-void initialize_mD_and_scale(int _mD_type, double _scale, double _afix, double _cut, double _Rvac);
+void initialize_mD_and_scale(int _mD_type, double _mu, double _afix, double _theta, double _cut);
 void initialize_transport_coeff(double K, double a, double b, double p, double q, double gamma);
 double alpha_s(double Q2, double T); //runing coupling
 void echo(void);

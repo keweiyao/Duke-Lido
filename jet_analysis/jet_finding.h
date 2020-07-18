@@ -53,19 +53,16 @@ std::string to_string_with_precision(const T a_value, const int n = 2)
 
 class MyInfo: public fastjet::PseudoJet::UserInfoBase {
     public:
-    MyInfo(int pid, int origin, double weight) : _pdg_id(pid), _mc_origin(origin), _w(weight) {};
-    
-    int pdg_id() const {return _pdg_id;}
-    int mc_origin() const {return _mc_origin;}
-    double w() const {return _w;}
+    MyInfo(int ieta, int iphi) : _ieta(ieta), _iphi(iphi) {}; 
+    int ieta() const {return _ieta;}
+    int iphi() const {return _iphi;}
     private:
-    int _pdg_id, _mc_origin;
-    double _w;
+    int _ieta, _iphi;
 };
 struct Fjet{
     fourvec pmu;
     double R, pT, M2, phi, eta;
-    std::vector<double> shape;
+    std::vector<double> shape, dNdz;
     int flavor;
     double sigma;
 };
@@ -96,6 +93,7 @@ public:
                   double jetyMax);
     void FindHF(std::vector<particle> plist);
     void CalcJetshape(std::vector<double> rbins);
+    void Frag(std::vector<double> zbins);
     void LabelFlavor();
     void CorrHFET(std::vector<double> rbins);
     std::vector<Fjet> Jets;
@@ -110,7 +108,9 @@ private:
     const int Neta, Nphi;
     const double etamax, etamin, phimax, phimin;
     const double deta, dphi;
-    double sigma;
+    double sigma, vradial, Tfreeze;
+    std::vector<particle> plist;
+    std::vector<current> clist;
     MediumResponse MR;
     std::vector<std::vector<double> > PT;
     std::vector<std::vector<fourvec> > Pmu;
@@ -128,13 +128,22 @@ class LeadingParton{
 
 class JetStatistics{
    public:
-   JetStatistics(std::vector<double> _pTbins, std::vector<double> Rs, std::vector<double> shapepTbins, std::vector<double> shaperbins, std::vector<double> xJ_pTbins);
+   JetStatistics(std::vector<double> _pTbins, std::vector<double> Rs, 
+      std::vector<double> shapepTbins, std::vector<double> shaperbins, 
+      std::vector<double> FragspTbins, std::vector<double> Fragszbins, 
+      std::vector<double> xJ_pTbins);
    void add_event(std::vector<Fjet> jets, double sigma_gen);
    void write(std::string fheader);
    private:
-   std::vector<double> pTbins, binwidth, shape_pTbins, shape_rbins, xJbins, xJ_pTbins;
+   std::vector<double> pTbins, binwidth, 
+	   shape_pTbins, shape_rbins, 
+	   xJbins, xJ_pTbins, 
+	   Frag_pTbins, Frag_zbins, Frags_W;
    std::vector<double> Rs;
-   std::vector<std::vector<double> > shapes, xJ, Dshapes, Bshapes, dsigmadpT, dBdpT, dDdpT;
+   std::vector<std::vector<double> > shapes, xJ, 
+	   Dshapes, Bshapes, 
+	   dsigmadpT, dBdpT, dDdpT,
+	   Frags;
    int NpT, shape_NpT, shape_Nr;
 };
 

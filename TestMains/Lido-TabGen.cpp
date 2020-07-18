@@ -21,8 +21,17 @@ int main(int argc, char* argv[]){
            "Lido table setting file")
           ("lido-table,t", 
             po::value<fs::path>()->value_name("PATH")->required(),
-           "Lido table path to file");
-
+           "Lido table path to file")
+	  ("muT",
+           po::value<double>()->value_name("DOUBLE")->default_value(1.5,"1.5"),
+	   "mu_min/piT")
+	  ("afix",
+           po::value<double>()->value_name("DOUBLE")->default_value(-1.,"-1."),
+           "fixed alpha_s, <0 for running alphas")
+           ("cut",
+           po::value<double>()->value_name("DOUBLE")->default_value(4.,"4."),
+           "cut between diffusion and scattering, Qc^2 = cut*mD^2")
+         ;
     po::variables_map args{};
     try{
         po::store(po::command_line_parser(argc, argv).options(options).run(), args);
@@ -45,10 +54,14 @@ int main(int argc, char* argv[]){
             throw po::required_option{"<lido-table>"};
             return 1;
         }
+        double muT = args["muT"].as<double>();
+        double cut = args["cut"].as<double>();
+        double afix = args["afix"].as<double>();
 
         initialize("new", 
             args["lido-setting"].as<fs::path>().string(), 
-            args["lido-table"].as<fs::path>().string());
+            args["lido-table"].as<fs::path>().string(), 
+	                muT, afix, 4, cut);
     } 
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

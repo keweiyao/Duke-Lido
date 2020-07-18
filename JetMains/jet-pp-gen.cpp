@@ -90,27 +90,54 @@ int main(int argc, char* argv[]){
         }
 
         /// all kinds of bins and cuts
-        std::vector<double> TriggerBin({
-         2,5,10,15,20,30,40,50,60,70,80,90,100,110,120,130,140,160,180,200,
-         240,280,320,360,400,500,600,700,800,1000,1200,1600,2000,2500});
+        // For RHIC 200 GeV
+        /*std::vector<double> TriggerBin({
+         2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,20,22,24,28,32,36,40,50,60,80,100});	
+	std::vector<double> Rs({.2,.3,.4});
+        std::vector<double> ParticlepTbins({0,1,2,3,4,5,6,8,10,12,14,16,20,24,28,32,40,50,60,80,100});
+        std::vector<double> jetpTbins({4,6,8,10,12,15,18,21,24,28,32,36,40,45,50,60,70,80,90,100});
 
-        std::vector<double> Rs({.4});
-
-        std::vector<double> ParticlepTbins({0,1,2,3,4,6,8,10,12,16,20,30,40,
-               50,60,80,100,120,150,200,300,400,500,600,1000,2000});
-        std::vector<double> jetpTbins({10,15,20,30,40,
-               50,60,80,100,120,160,200,300,400,500,600,800,1000,1400,1800});
-        std::vector<double> HFpTbins({4,20,1000});
-        std::vector<double> HFETbins({2,6,10,20,40,1000});
+        std::vector<double> HFpTbins({2,6,10,20,40,100});
+        std::vector<double> HFETbins({2,6,10,20,40,100});
         std::vector<double> shapepTbins({20,30,40,60,80,120,2000});
         std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
                           .35, .4, .45, .5,  .6, .7,  .8,
                            1., 1.5, 2.0, 2.5, 3.0});
-        std::vector<double> xJpTbins({100,126,158,200,2000});
-
+        std::vector<double> xJpTbins({8,12,16,20,30,40,60});
+        */
+	// For 5.02 TeV
+        std::vector<double> TriggerBin({
+         2,4,6,8,10,12,14,16,20,
+         24,28,32,36,40,50,60,70,80,90,100,
+         110,120,130,140,150,160,180,200,240,280,320,360,400,500,
+         600,700,800,1000,1200,1500,2000,2500});
+        std::vector<double> Rs({.2,.4});
+        std::vector<double> ParticlepTbins({0,1,2,3,4,5,6,8,10,12,14,16,20,
+                        24,28,32,40,50,60,80,100,
+                        120,140,160,200,300,400,600,800,1000});
+        std::vector<double> jetpTbins({4,6,8,10,12,15,20,25,30,
+                        40,50,60,70,80,100,120,140,160,180,200,
+                        240,280,320,360,400,500,600,800,1000,
+                        1200,1400,1600,2000,2500});
+        std::vector<double> HFpTbins({2,6,10,20,40,100});
+        std::vector<double> HFETbins({2,6,10,20,40,100});
+        std::vector<double> shapepTbins({20,30,40,60,80,120,2000});
+        std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
+                          .35, .4, .45, .5,  .6, .7,  .8,
+                           1., 1.5, 2.0, 2.5, 3.0});
+        std::vector<double> xJpTbins({100,126,158,178,200,224,251,282,316,398,562});
+        std::vector<double> FragpTbins({100,126,158,200,251,316,398});
+	std::vector<double> zbins({.005,.0065,.0085,.011,.015,
+			.019,.025,.032,.042,.055,
+			.071, .092, .120,.157, .204, 
+			.266, .347, .452, .589, .767,
+			1.});
 
         LeadingParton dNdpT(ParticlepTbins);
-        JetStatistics JetSample(jetpTbins, Rs, shapepTbins, shaperbins, xJpTbins);
+        JetStatistics JetSample(jetpTbins, Rs, 
+			shapepTbins, shaperbins, 
+			FragpTbins, zbins,
+			xJpTbins);
         JetHFCorr jet_HF_corr(HFpTbins, shaperbins);
         HFETCorr  HF_ET_corr(HFETbins, shaperbins);
         /// Initialize jet finder with medium response
@@ -152,11 +179,12 @@ int main(int argc, char* argv[]){
                     jetfinder.MakeETower(
                          0.6, 0.165, args["pTtrack"].as<double>(),
                          plist, clist, slist, 10);
-                    jetfinder.FindJets(Rs, 10., -3., 3.);
+                    jetfinder.FindJets(Rs, 5., -3., 3.);
                     jetfinder.FindHF(plist);
                     jetfinder.CorrHFET(shaperbins);
                     jetfinder.LabelFlavor();
                     jetfinder.CalcJetshape(shaperbins);
+		    jetfinder.Frag(zbins);
 	            JetSample.add_event(jetfinder.Jets, sigma_gen);
                     jet_HF_corr.add_event(jetfinder.Jets, jetfinder.HFs,
                                           sigma_gen);

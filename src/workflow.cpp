@@ -96,8 +96,8 @@ void init_process(Process &r, std::string mode, std::string table_path)
     }
 }
 
-void initialize(std::string mode, std::string setting_path, std::string table_path)
-{
+void initialize(std::string mode, std::string setting_path, std::string table_path,
+		double mu, double afix, double theta, double cut){
     print_logo();
     boost::property_tree::ptree config;
     std::ifstream input(setting_path);
@@ -106,30 +106,15 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
     time_type = config.get("t_type", 0); 
     // 0: default, 1: local approxiamtion
     bool Adiabatic_LPM = config.get("LPM_type", 0);
-    bool Dead_cone_on = config.get("Dead_cone", 1); 
     //alphas(max(Q, mu*pi*T)), active when afix < 0
-    double mu=config.get("mu", 2.0); 
-    // fixed coupling, negative value for running coupling
-    double afix=config.get("afix", -1.0);  
-    // K, a, b, p, q, gamma are used in non-pert. qhat parametrization
-    // Its effect is off when K = 0.
     double K=config.get("K", 0.0);
     double a=config.get("a", 1.0);
     double b=config.get("b", 1.0);
     double p=config.get("p", 1.0);
     double q=config.get("q", 1.0);
     double gamma=config.get("gamma", 1.0); 
-    // Separation scale between diffusion
-    // and scattering both at leading order (weak coupled)
-    // Qcut^2 = cut*mD^2
-    double cut=config.get("cut", 4.0); 
-    // Vaccum veto region parameter
-    double Rvac=config.get("Rvac", 1.0); 
-    // Minimal energy cut in local rest frame for LIDO to track the particle
-    // Emin = Ecut * T
-    Lido_Ecut = config.get("Ecut", 3.0);
     
-    initialize_mD_and_scale(0, mu, afix, cut, Rvac);
+    initialize_mD_and_scale(0, mu, afix, theta, cut);
     initialize_transport_coeff(K, a, b, p, q, gamma);
     echo();
 
@@ -246,6 +231,8 @@ int update_particle_momentum_Lido(
     double dt_input, double temp, std::vector<double> v3cell,
     particle & pIn, std::vector<particle> & pOut_list){
     double Emin = Lido_Ecut * temp;
+        // minimum rad energy
+    double Eradmin = 3*temp;
     auto p00 = pIn.p;
     pOut_list.clear();
     pIn.Tf = temp;
@@ -255,7 +242,8 @@ int update_particle_momentum_Lido(
     auto x0 = pIn.x;
     double dt_for_pIn = compute_realtime_to_propagate(dt_input, pIn.x, pIn.p);
     pIn.freestream(dt_for_pIn);
-
+    double mD2 = t_channel_mD2->get_mD2(temp);
+    double mD = std::sqrt(mD2);
     // we only handle u,d,s,c,b,g
     if (!((pIn.pid==21) || (std::abs(pIn.pid)<=5))){
         pOut_list.push_back(pIn);
@@ -273,14 +261,13 @@ int update_particle_momentum_Lido(
         return pOut_list.size();
     }
     // Don't touch particles already below soft cut
-    if ((!pIn.is_virtual) && 
-        pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Emin
+    if ((!pIn.is_virtual) 
+        && (pIn.Q0 < 0.4) 
+        && pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Emin
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 
 	){
         pIn.radlist.clear();
-	if (pIn.origin==1 || pIn.origin==0) 
-            pOut_list.push_back(pIn);
         return pOut_list.size();
     }
         
@@ -306,7 +293,6 @@ int update_particle_momentum_Lido(
 
     // For diffusion induced radiation, qhat_Soft is an input
     double qhatg = qhat(21, E_cell, 0., temp);
-
     // Total rate for the
     int channel = 0;
     std::vector<double> P_channels(AllProcesses[absid].size());
@@ -379,8 +365,6 @@ int update_particle_momentum_Lido(
             }
         }
     }
-    double mD2 = t_channel_mD2->get_mD2(temp);
-    double mD = std::sqrt(mD2);
     // If a scattering happens:
     if (channel >= 0){
         if (channel >= AllProcesses[absid].size()){
@@ -448,7 +432,7 @@ int update_particle_momentum_Lido(
             // dropped (suppressed) according to the LPM effect
             // only handle > mD particles
             
-            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > mD) { 
+            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Eradmin) { 
                 particle vp = produce_parton(21, FS[2], pIn, true);
                 // The local 2->2 mean-free-path is estimated with
                 // the qhat_hard integrate from the 2->2 rate
@@ -487,7 +471,7 @@ int update_particle_momentum_Lido(
             // given by the incoherent calculation, which will be
             // dropped (suppressed) according to the LPM effect
             // only for E>mD
-            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > mD) {
+            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Eradmin) {
                 particle vp = produce_parton(21, FS[1], pIn, true);
                 // estimate mfp in the lab frame
                 vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
@@ -503,7 +487,7 @@ int update_particle_momentum_Lido(
             // This should only happen for gluon
             // gluon splits to q+qbar, pid changing!!
             // only for E>mD
-            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > mD) {
+            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Eradmin) {
             particle vp = produce_parton(
                                Srandom::sample_flavor(3), FS[2], pIn, true);
             // The local 2->2 mean-free-path is estimated with
@@ -534,7 +518,7 @@ int update_particle_momentum_Lido(
             // This should only happen for gluon
             // gluon splits to q+qbar, pid changing!!
             // only for E>mD
-            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > mD) {
+            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Eradmin) {
                 particle vp = produce_parton(
                                 Srandom::sample_flavor(3), FS[1], pIn, true);
             
@@ -544,9 +528,6 @@ int update_particle_momentum_Lido(
             }
         }
     }
-
-    // These interact can increase virtuality
-    pIn.Q0 = std::sqrt(pIn.Q00*pIn.Q00 + measure_perp(pIn.p0, pIn.p).pabs2());
 
     // Handle the virtual particle, (only for real mother parton)
     if ((!pIn.radlist.empty()) && (!pIn.is_virtual)){
