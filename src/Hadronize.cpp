@@ -13,6 +13,7 @@
 #include "random.h"
 #include "simpleLogger.h"
 #include <fstream>
+#include <algorithm>
 using namespace Pythia8;
 
 
@@ -70,6 +71,7 @@ double GetThreshold(int pid){
 }
 
 void FormChain(particle pi, particle pf, 
+	       particle & front, particle & back,
                std::vector<particle> & chain, 
                std::vector<particle> & plist, 
                std::vector<particle> & thermal){
@@ -92,59 +94,11 @@ void FormChain(particle pi, particle pf,
     }
     int size1 = chain.size();
     if (size1==size0) {
-        // fill open end point with thermal particles
-        if (pi.col!=0){
-            particle th;
-            th.col = 0;
-            th.acol = pi.col;
-	    double vx = 0.;
-	    double vy = 0.;
-	    double vz = pi.x.z()/(1e-9+pi.x.t());
-            if (std::abs(vz)>.9999) vz = vz/std::abs(vz)*.9999;
-            th.pid = -std::abs(Srandom::sample_flavor(3));
-	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pi.Tf,.165), vx, vy, vz);
-            th.mass = 0.;
-	    th.x0 = pi.x;
-            th.vcell.resize(3);
-	    th.vcell[0] = vx;
-            th.vcell[1] = vy;
-            th.vcell[2] = vz;
-	    th.x = pi.x;
-	    th.Tf = pi.Tf;
-            th.Q0 = 0.;
-            thermal.push_back(th);
-            chain.push_back(th);
-        }
-        // fill open end point with thermal particles
-        if (pf.acol!=0){
-            particle th;
-            th.col = pf.acol;
-            th.acol = 0;
-	    double vx = 0.;
-            double vy = 0.;
-            double vz = pf.x.z()/(1e-9+pf.x.t());
-	    if (std::abs(vz)>.9999) vz = vz/std::abs(vz)*.9999;
-            th.pid = std::abs(Srandom::sample_flavor(3));
-	    th.p = Srandom::generate_thermal_parton_with_boost(
-                  std::max(pf.Tf,.165), vx, vy, vz);
-            th.mass = 0.;
-	    th.x0 = pf.x;
-            th.vcell.resize(3);
-	    th.vcell[0] = vx;
-            th.vcell[1] = vy;
-            th.vcell[2] = vz;
-	    th.x = pf.x;
-	    th.Tf = pf.Tf;
-            th.Q0 = 0.;
-            thermal.push_back(th);
-            chain.push_back(th);
-        }
+	front = pi;
+	back = pf;
         return;
     }
-    else {
-        FormChain(pi, pf, chain, plist, thermal);
-    }
+    else FormChain(pi, pf, front, back, chain, plist, thermal);
 }
 
 int JetDenseMediumHadronize::hadronize(std::vector<particle> partons, 
@@ -152,6 +106,8 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                                        std::vector<particle> & thermal_partons,
                                        double Q0,
                                        int level){
+    std::vector<particle> colorless_ensemble;
+    for(auto & p : partons) colorless_ensemble.push_back(p);
     int Npartons = partons.size();
     const int status = 23;
     hadrons.clear();
@@ -163,62 +119,130 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
     // step3: call pythia force-time-shower with hadronization
     // define a list of color chains
     std::vector<std::vector<particle> > chains;
+    std::vector<particle> endpoint_cols, endpoint_acols;
+    endpoint_cols.clear();
+    endpoint_acols.clear();
     while(!partons.empty()){
+	particle front, back;
         std::vector<particle> chain;
         chain.clear();
         chain.push_back(partons.back());
         partons.pop_back();
-        FormChain(chain.front(), chain.back(), chain, 
+        FormChain(chain.front(), chain.back(), 
+		  front, back,
+		  chain, 
                   partons, thermal_partons);
         chains.push_back(chain);
+	endpoint_cols.push_back(front);
+	endpoint_acols.push_back(back);
     }
-   
-    for (auto & c : chains){
-        double maxQ0 = Q0;
-        pythia.event.reset();
-        int count=1;
-        for (auto &p : c){
-             pythia.event.append(p.pid, 23, p.col, p.acol, 
-		                 p.p.x(), p.p.y(), p.p.z(), p.p.t(), p.mass);
-             pythia.event[count].scale(p.Q0);
-             count++;
-             maxQ0 = (p.Q0 > maxQ0) ? p.Q0 : maxQ0;
-        }     
-        pythia.forceTimeShower(1,count-1,maxQ0);
-	pythia.next();
-        int Nff=0;
-        for (int i = 0; i < pythia.event.size(); ++i) {
-            auto ip = pythia.event[i];
-            bool good = false;
-            if (level==1){
-                good = ip.isFinal();
-            }
-            if (level==0){
-                good = (ip.isParton() 
+    // Sort the endpoints by rapidty
+    std::sort(endpoint_cols.begin(), endpoint_cols.end(), 
+      [](const particle & a, const particle & b){
+          return a.x.rap()>b.x.rap();
+      }
+      );
+    std::sort(endpoint_acols.begin(), endpoint_acols.end(), 
+      [](const particle & a, const particle & b){
+          return a.x.rap()>b.x.rap();
+      }
+      );
+
+    // find out the endpoint that are not color neutral
+    // connect them randomly to thermal partons
+    for (int i=0; i<endpoint_cols.size();i++){
+	auto & p1 = endpoint_cols[i];
+	auto & p2 = endpoint_acols[i];
+	
+	int acol = p1.col;
+	int col = p2.acol;
+	int pid;
+	    if (col==0 && acol==0) continue;
+	    if (col==0 && acol!=0)
+                pid = -std::abs(Srandom::sample_flavor(3));
+	    if (col!=0 && acol==0)
+                pid = std::abs(Srandom::sample_flavor(3));
+            if (col!=0 && acol!=0)
+                pid = 21;
+            particle th;
+	    th.pid = pid;
+            th.col = col;
+            th.acol = acol;
+	    double tau = (p1.x.tau()+p2.x.tau())/2.;
+	    double rap = (p1.x.rap()+p2.x.rap())/2.;
+            th.x0 = fourvec{tau*std::cosh(rap),0.,0.,tau*std::sinh(rap)};
+	    th.x = th.x0;
+	    double vzgrid = th.x.z()/th.x.t();
+            th.p = Srandom::generate_thermal_parton_with_boost(
+                           .154, 0, 0, vzgrid);
+            th.mass = 0.;
+            th.vcell.resize(3);
+            th.vcell[0] = 0.;
+            th.vcell[1] = 0.;
+            th.vcell[2] = vzgrid;
+            th.Tf = 0.154;
+            th.Q0 = 0.4;
+            thermal_partons.push_back(th);
+	    colorless_ensemble.push_back(th);
+    }
+    /*for (int i=0; i<endpoint_acols.size();i++){
+        auto & p1 = endpoint_acols[i];
+        int acol = 0;
+        int col = p1.acol;
+            particle th;
+            th.x0 = p1.x;
+            th.x = th.x0;
+            th.col = col;
+            th.acol = acol;
+            th.pid = std::abs(Srandom::sample_flavor(3));
+            double vzgrid = p1.x.z()/p1.x.t();
+            th.p = Srandom::generate_thermal_parton_with_boost(
+                           .154, 0, 0, vzgrid);
+            th.mass = 0.;
+            th.vcell.resize(3);
+            th.vcell[0] = 0.;
+            th.vcell[1] = 0.;
+            th.vcell[2] = vzgrid;
+            th.Tf = 0.154;
+            th.Q0 = 0.;
+            thermal_partons.push_back(th);
+            colorless_ensemble.push_back(th);
+    }*/
+
+    double maxQ0 = Q0;
+    pythia.event.reset();
+    int count=1;
+    for (auto & p : colorless_ensemble){
+         pythia.event.append(p.pid, 23, p.col, p.acol, 
+			 p.p.x(), p.p.y(), p.p.z(), p.p.t(), p.mass);
+         pythia.event[count].scale(p.Q0);
+	 maxQ0 = (p.Q0>maxQ0) ? p.Q0 : maxQ0;
+         count++;
+    }     
+    pythia.forceTimeShower(1,count-1,maxQ0);
+    pythia.next();
+    int Nff=0;
+    for (int i = 0; i < pythia.event.size(); ++i) {
+        auto ip = pythia.event[i];
+        bool good = false;
+        if (level==1) good = ip.isFinal();
+        if (level==0) good = (ip.isParton() 
                         && pythia.event[ip.daughter1()].isHadron())
                       || (ip.isFinal() && ip.isParton());
-            }
-            if (good) {
-                Nff ++;
-                particle h;
-                h.pid = ip.id();
-                h.p.a[0] = ip.e();
-                h.p.a[1] = ip.px();
-                h.p.a[2] = ip.py();
-                h.p.a[3] = ip.pz();
-                h.mass = std::sqrt(h.p.t()*h.p.t() - h.p.pabs2());
-                h.weight = 1;
-		h.charged = ip.isCharged();
-                hadrons.push_back(h);
-            }
-            
-            if (level==1 && ip.isFinal() && ip.isParton()){
-                //LOG_INFO << "recombin needed" << ip.id() << " " 
-		//	 << ip.e() << " " << ip.px() << " "
-		//	 << ip.py() << " " << ip.pz();
-            }
+        if (good) {
+            Nff ++;
+            particle h;
+            h.pid = ip.id();
+            h.p.a[0] = ip.e();
+            h.p.a[1] = ip.px();
+            h.p.a[2] = ip.py();
+            h.p.a[3] = ip.pz();
+            h.mass = std::sqrt(h.p.t()*h.p.t() - h.p.pabs2());
+            h.weight = 1;
+            h.charged = ip.isCharged();
+            hadrons.push_back(h);
         }
-    }        
-    //LOG_INFO << Npartons << " to " << hadrons.size();
+            
+    } 
     return hadrons.size();
 }

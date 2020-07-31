@@ -55,7 +55,7 @@ void reference_pmu(int i, double & tau, Event & event){
             reference_pmu(im1, tau, event);
 	}
 	else {
-	    tau += tauf;
+	    tau += Srandom::exp_dist(Srandom::gen)*tauf;
             reference_pmu(im1, tau, event);
 	}      
     }

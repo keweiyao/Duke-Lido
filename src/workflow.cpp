@@ -106,7 +106,6 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
     time_type = config.get("t_type", 0); 
     // 0: default, 1: local approxiamtion
     bool Adiabatic_LPM = config.get("LPM_type", 0);
-    //alphas(max(Q, mu*pi*T)), active when afix < 0
     double K=config.get("K", 0.0);
     double a=config.get("a", 1.0);
     double b=config.get("b", 1.0);
@@ -232,7 +231,6 @@ int update_particle_momentum_Lido(
     particle & pIn, std::vector<particle> & pOut_list){
     double Emin = Lido_Ecut * temp;
         // minimum rad energy
-    double Eradmin = 3*temp;
     auto p00 = pIn.p;
     pOut_list.clear();
     pIn.Tf = temp;
@@ -244,6 +242,7 @@ int update_particle_momentum_Lido(
     pIn.freestream(dt_for_pIn);
     double mD2 = t_channel_mD2->get_mD2(temp);
     double mD = std::sqrt(mD2);
+    double Eradmin = mD;
     // we only handle u,d,s,c,b,g
     if (!((pIn.pid==21) || (std::abs(pIn.pid)<=5))){
         pOut_list.push_back(pIn);
@@ -255,15 +254,14 @@ int update_particle_momentum_Lido(
         return pOut_list.size();
     }
     // Don't touch particles below Tc
-    if (temp < 0.165){
+    if (temp < 0.154){
         pIn.radlist.clear();
         pOut_list.push_back(pIn);
         return pOut_list.size();
     }
     // Don't touch particles already below soft cut
-    if ((!pIn.is_virtual) 
-        && (pIn.Q0 < 0.4) 
-        && pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Emin
+    if ((!pIn.is_virtual) && (pIn.Q0<0.01) 
+        && (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Emin)
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 
 	){
@@ -278,14 +276,14 @@ int update_particle_momentum_Lido(
     if (std::abs(pIn.pid) <= 3) pIn.pid = 123;
     int absid = std::abs(pIn.pid);
 
-    // Apply diffusion and update particle momentum
-    // use small step
+
     for (int i=0; i<5; i++){
-        fourvec pnew;
-        Ito_update(pIn.pid, dt_for_pIn/5., pIn.mass, temp, v3cell, pIn.p, pnew);
-        if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
-        else pIn.p = pnew;
+    fourvec pnew;
+    Ito_update(pIn.pid, dt_for_pIn/5., pIn.mass, temp, v3cell, pIn.p, pnew);
+    if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
+    else pIn.p = pnew;
     }
+
     // Apply large angle scattering, and diffusion induced radiation
     auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
     double dt_cell = dt_for_pIn / pIn.p.t() * p_cell.t();
@@ -518,7 +516,7 @@ int update_particle_momentum_Lido(
             // This should only happen for gluon
             // gluon splits to q+qbar, pid changing!!
             // only for E>mD
-            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Eradmin) {
+            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Eradmin){
                 particle vp = produce_parton(
                                 Srandom::sample_flavor(3), FS[1], pIn, true);
             
@@ -570,10 +568,9 @@ int update_particle_momentum_Lido(
                 // 1): a change of running-coupling from elastic broadening
                 double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
                 double kt2n = measure_perp(
-                          pIn.p*(it->mother_p.t()/pIn.p.t()), 
-                          it->p*(it->p0.t()/it->p.t())
-                         ).pabs2();
-                double xx = it->p0.t()/it->mother_p.t();
+				pIn.p*(it->mother_p.t()/pIn.p.t()), 
+				it->p*(it->p0.t()/it->p.t())
+				).pabs2();
                 double Running = std::min(
 			alpha_s(kt2n,it->T0)/alpha_s(kt20,it->T0), 1.);
                 // 2): a dead-cone approximation for massive particles
@@ -583,7 +580,7 @@ int update_particle_momentum_Lido(
                 // 3): an NLL-inspired suppression factor for the LPM effect
                 double mD2 = t_channel_mD2->get_mD2(temp);
                 double lnQ2_1 = std::log(1. + taun / it->mfp0);
-                double lnQ2_0 = std::log(1. + 6 * it->p.t() * temp / mD2);
+                double lnQ2_0 = std::log(1. + 6 * it->p.t() * it->T0 / mD2);
                 double log_factor = std::sqrt(lnQ2_1 / lnQ2_0);
                 double LPM = std::min(it->mfp0 / taun * log_factor, 1.);
                 // The final rejection factor
@@ -600,7 +597,7 @@ int update_particle_momentum_Lido(
 		    pIn.p0 = pIn.p;
 		    pIn.Q0 = std::sqrt(kt2n);
 		    pIn.Q00 = pIn.Q0;
-		    it->Q0 = std::sqrt(kt2n);
+		    it->Q0 = pIn.Q0;
 		    it->Q00 = it->Q0;
                     // for g -> q + qbar, pid change
                     if (split_type == 3){
