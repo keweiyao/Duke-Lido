@@ -258,12 +258,12 @@ void JetFinder::FindJets(std::vector<double> Rs,
 		auto iit = Pmu[ieta][iphi];
                 // when we do the first jet finding,
                 // only use towers with positive contribution
-                if (iit.t()>0.){
+		if (iit.t()>0) {
                     fastjet::PseudoJet fp(iit.x(), iit.y(), 
                                           iit.z(), iit.t());
                     fp.set_user_info(new MyInfo(ieta, iphi));
                     fjInputs.push_back(fp);
-                }
+		}
             }
         }
         fastjet::ClusterSequence clustSeq(fjInputs, jetDef);
@@ -313,7 +313,7 @@ void JetFinder::FindJets(std::vector<double> Rs,
 	        }
             }
 	    if (triggered)*/
-		    Jets.push_back(J);   
+            Jets.push_back(J);   
         }
     }
 }
@@ -523,14 +523,13 @@ LeadingParton::LeadingParton(std::vector<double> _pTbins){
 }
 void LeadingParton::add_event(std::vector<particle> plist, double sigma_gen){
     for (auto & p : plist){
-        if (std::abs(p.p.rap()) < 1.) {
+        if (std::abs(p.p.pseudorap()) < 1.) {
             int pid = std::abs(p.pid);
             if (pid<6 || pid==21) 
                 LOG_INFO << "Parton in FS: "<< pid << " " 
                          << p.p.xT() << " " << p.p.rap();
             bool ispi = pid==111 || pid == 211;
-            bool ischg = pid==111 || pid == 211 || pid == 311 
-                 || pid== 321 || pid==2212;
+            bool ischg = pid==111 || pid==211 || pid == 311 || pid==321;
             bool isD = pid==411 || pid == 421 || pid == 413 
                 || pid == 423 || pid ==4;
             bool isB = pid==511 || pid == 521 || pid == 513 || pid == 523 || pid ==5;
@@ -577,7 +576,7 @@ void LeadingParton::write(std::string fheader){
              << nB[i]/binwidth[i] << std::endl;
     }
     f.close();
-
+/*
     std::stringstream filename2;
     filename2 << fheader << "-LeadingV2.dat";
     std::ofstream f2(filename2.str());
@@ -591,7 +590,7 @@ void LeadingParton::write(std::string fheader){
              << nD[i] << " " << v2D[i] << " "
              << nB[i] << " " << v2B[i] << std::endl;
     }
-    f2.close();
+    f2.close();*/
 }
 JetStatistics::JetStatistics(
      std::vector<double> _pTbins, 
@@ -699,7 +698,7 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
         }
     }
     // shape
-    for (auto & J:jets){
+   /* for (auto & J:jets){
         if ((J.R<0.41) && (J.R>0.39) && (std::abs(J.eta) < 2.1) ) {
             int ii=-1;
             for (int i=0; i<shape_NpT; i++){
@@ -745,7 +744,7 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
             for (int i=0; i<Frags[ii].size()-1; i++)
                 Frags[ii][i] += sigma_gen*J.dNdz[i];
         }
-    }
+    }*/
 
     // Yield
     for (auto & J : jets){
@@ -760,7 +759,7 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
             }
         }
         if (iR==Rs.size()) continue;
-        if (std::abs(J.eta) < 2.1){
+        if (std::abs(J.eta) < 2.8){
             // check jet pT cut
             int ii=-1;
             for (int i=0; i<NpT; i++){
@@ -793,7 +792,7 @@ void JetStatistics::write(std::string fheader){
         f.close();
     }
 
-    std::stringstream filename1;
+/*    std::stringstream filename1;
     filename1 << fheader << "-jetFrag.dat";
     std::ofstream f1(filename1.str());
     f1 << "#";
@@ -860,7 +859,7 @@ void JetStatistics::write(std::string fheader){
         }
         f4 << std::endl;
     }
-    f4.close();
+    f4.close();*/
 
     std::stringstream filename5;
     filename5 << fheader << "-xJ.dat";
@@ -875,6 +874,7 @@ void JetStatistics::write(std::string fheader){
 	f5 << std::endl;
     }
     f5.close();
+
 }
 
 JetHFCorr::JetHFCorr(std::vector<double> _pTHFbins, 

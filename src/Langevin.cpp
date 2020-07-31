@@ -5,6 +5,8 @@
 double const tiny = 1e-10;
 
 double delta_qhat(int pid, double E, double M, double T){
+	return 0.;
+	/*
 	int abspid = std::abs(pid);
         double EM = 1. + std::log (1+ (E-M)/qhat_params.b/T );
         double delta_qhat = qhat_params.K * std::pow(T, 3)
@@ -14,23 +16,21 @@ double delta_qhat(int pid, double E, double M, double T){
         if (abspid !=21) {;
            return delta_qhat; 
         }
-	else return delta_qhat*CA/CF;
+	else return delta_qhat*CA/CF;*/
 }
 
 double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
         double CR = (pid==21) ? CA : CF;
         double mD2 = t_channel_mD2->get_mD2(T);
-        double Q2cut = std::min(cut*mD2, 6*E*T);
-        if (Q2cut<mD2) return 0.;
+        double Q2cut = cut*mD2;
         return alpha_s(Q2cut, T) * CR * T * mD2 * std::log(Q2cut/mD2);
 }
 
 double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
         double CR = (pid==21) ? CA : CF;
-        double minf2 = .5*t_channel_mD2->get_mD2(T);
-        double Q2cut = std::min(2*cut*minf2, 6*E*T);
-        if (Q2cut<minf2) return 0.;
-        return alpha_s(Q2cut, T) * CR * T * minf2 * std::log(Q2cut/minf2);
+        double mD2 = t_channel_mD2->get_mD2(T);
+        double Q2cut = cut*mD2;
+        return alpha_s(Q2cut, T) * CR * T * .5*mD2 * std::log(Q2cut/mD2);
 }
 
 
