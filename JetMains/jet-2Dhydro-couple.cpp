@@ -275,7 +275,7 @@ int main(int argc, char* argv[]){
                            /args["pythia-events"].as<int>();            
                 // freestream form t=0 to tau=tau0
                 for (auto & p : e1.plist){
-                    p.Tf = 0.155;
+                    p.Tf = 0.161;
                     p.origin = 0;
                     if (p.x.tau() < med1.get_tauH())
                         p.freestream(compute_realtime_to_propagate(
@@ -293,7 +293,7 @@ int main(int argc, char* argv[]){
             for (auto & ie : events){
                 std::vector<particle> new_plist, pOut_list;
                 for (auto & p : ie.plist){     
-                    if (p.Tf < 0.154 || std::abs(p.p.rap())>5.) {
+                    if (p.Tf < 0.16 || std::abs(p.x.rap())>3.5) {
                         new_plist.push_back(p);
                         continue;       
                     }
@@ -349,7 +349,7 @@ int main(int argc, char* argv[]){
 	    if (args["jet"].as<bool>()) {
                 jetfinder.set_sigma(ie.sigma);
                 jetfinder.MakeETower(
-                     0.6, 0.154, args["pTtrack"].as<double>(),
+                     0.6, 0.16, args["pTtrack"].as<double>(),
                      ie.hlist, ie.clist, ie.slist, 10);
                 jetfinder.FindJets(Rs, 10., -3., 3.);
                 jetfinder.FindHF(ie.hlist);

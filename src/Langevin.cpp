@@ -41,11 +41,7 @@ double qhat(int pid, double E, double M, double T){
 
 
 double qhat_L(int pid, double E, double M, double T){
-	double m0;
-	double minf = std::sqrt(t_channel_mD2->get_mD2(T)/2.);
-    m0 = std::max(minf, M);
-    return  qhat_L_small_angle_LOpQCD(pid, E, M, T)
-              + delta_qhat(pid, E, m0, T)/2. * std::pow(E/m0, qhat_params.gamma);                       
+    return  qhat_L_small_angle_LOpQCD(pid, E, M, T);
 }
 
 double dqhat_L_dp2(int pid, double E, double M, double T){
@@ -67,15 +63,16 @@ void Ito_update(int pid, double dt_lab, double M, double T, std::vector<double> 
 
 	double kt = qhat(pid, E0, M, T)/2.;
         double kl = qhat_L(pid, E0, M, T);
-	double dkl_dp2 = dqhat_L_dp2(pid, E0, M, T);
-	double drag = kl/(2.*E0*T);// - (kl - kt)/std::pow(p0, 2) - dkl_dp2;
-		   
+	double minf = std::sqrt(t_channel_mD2->get_mD2(T)/2.);
+	double Ed = std::max(E0, minf);
+	double drag = kl/(2.*Ed*T);
+        double damp = 1.-drag*dt;		   
 	double Ct = std::sqrt(kt*dt);
 	double Cl = std::sqrt(kl*dt);
-
+   
         pOut.a[1] = Ct * Srandom::white_noise(Srandom::gen);
         pOut.a[2] = Ct * Srandom::white_noise(Srandom::gen);
-        pOut.a[3] = p0 * (1. - drag * dt) 
+        pOut.a[3] = p0 * damp 
                   + Cl * Srandom::white_noise(Srandom::gen);
         pOut.a[0] = std::sqrt(M*M + std::pow(pOut.x(),2) 
 		  	+ std::pow(pOut.y(),2) + std::pow(pOut.z(),2) );

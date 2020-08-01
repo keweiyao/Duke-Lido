@@ -174,13 +174,13 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
 	    th.x = th.x0;
 	    double vzgrid = th.x.z()/th.x.t();
             th.p = Srandom::generate_thermal_parton_with_boost(
-                           .154, 0, 0, vzgrid);
+                           .16, 0, 0, vzgrid);
             th.mass = 0.;
             th.vcell.resize(3);
             th.vcell[0] = 0.;
             th.vcell[1] = 0.;
             th.vcell[2] = vzgrid;
-            th.Tf = 0.154;
+            th.Tf = 0.16;
             th.Q0 = 0.4;
             thermal_partons.push_back(th);
 	    colorless_ensemble.push_back(th);
@@ -197,13 +197,13 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
             th.pid = std::abs(Srandom::sample_flavor(3));
             double vzgrid = p1.x.z()/p1.x.t();
             th.p = Srandom::generate_thermal_parton_with_boost(
-                           .154, 0, 0, vzgrid);
+                           .16, 0, 0, vzgrid);
             th.mass = 0.;
             th.vcell.resize(3);
             th.vcell[0] = 0.;
             th.vcell[1] = 0.;
             th.vcell[2] = vzgrid;
-            th.Tf = 0.154;
+            th.Tf = 0.16;
             th.Q0 = 0.;
             thermal_partons.push_back(th);
             colorless_ensemble.push_back(th);
