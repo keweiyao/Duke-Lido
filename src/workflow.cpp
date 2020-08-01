@@ -262,19 +262,15 @@ int update_particle_momentum_Lido(
         pOut_list.push_back(pIn);
         return pOut_list.size();
     }
-    // Skip particles that are not formed yet
-    if (pIn.x.t()<pIn.tau_i){
-        pOut_list.push_back(pIn);
-        return pOut_list.size();
-    }
+    bool formed_from_vac = (pIn.x.t()>pIn.tau_i);
     // Don't touch particles below Tc
-    if (temp < 0.154){
+    if (temp < 0.16){
         pIn.radlist.clear();
         pOut_list.push_back(pIn);
         return pOut_list.size();
     }
     // Don't touch particles already below soft cut
-    if ((!pIn.is_virtual) && (pIn.Q0<0.01) 
+    if ((!pIn.is_virtual) && (pIn.Q0<mD/1.414) && formed_from_vac
         && (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Emin)
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 
@@ -311,6 +307,7 @@ int update_particle_momentum_Lido(
 
     BOOST_FOREACH (Process &r, AllProcesses[channel_pid])
     {
+        bool can_rad = (!pIn.is_virtual) && formed_from_vac;
         switch (r.which())
         {
         case 0:
@@ -321,28 +318,28 @@ int update_particle_momentum_Lido(
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 1:
-            if (boost::get<Rate23>(r).IsActive() && (!pIn.is_virtual))
+            if (boost::get<Rate23>(r).IsActive() && can_rad)
                 dR = boost::get<Rate23>(r).GetZeroM({E_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 2:
-            if (boost::get<Rate32>(r).IsActive() && (!pIn.is_virtual))
+            if (boost::get<Rate32>(r).IsActive() && can_rad)
                 dR = boost::get<Rate32>(r).GetZeroM({E_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 3:
-            if (boost::get<Rate12>(r).IsActive() && (!pIn.is_virtual))
+            if (boost::get<Rate12>(r).IsActive() && can_rad)
                 dR = qhatg * boost::get<Rate12>(r).GetZeroM({E_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 4:
-            if (boost::get<Rate21>(r).IsActive() && (!pIn.is_virtual))
+            if (boost::get<Rate21>(r).IsActive() && can_rad)
                 dR = qhatg * boost::get<Rate21>(r).GetZeroM({E_cell, temp}).s;
             else
                 dR = 0.0;

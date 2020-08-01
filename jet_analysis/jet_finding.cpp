@@ -698,7 +698,7 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
         }
     }
     // shape
-   /* for (auto & J:jets){
+    for (auto & J:jets){
         if ((J.R<0.41) && (J.R>0.39) && (std::abs(J.eta) < 2.1) ) {
             int ii=-1;
             for (int i=0; i<shape_NpT; i++){
@@ -744,7 +744,7 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen){
             for (int i=0; i<Frags[ii].size()-1; i++)
                 Frags[ii][i] += sigma_gen*J.dNdz[i];
         }
-    }*/
+    }
 
     // Yield
     for (auto & J : jets){
@@ -792,7 +792,7 @@ void JetStatistics::write(std::string fheader){
         f.close();
     }
 
-/*    std::stringstream filename1;
+    std::stringstream filename1;
     filename1 << fheader << "-jetFrag.dat";
     std::ofstream f1(filename1.str());
     f1 << "#";
@@ -859,7 +859,7 @@ void JetStatistics::write(std::string fheader){
         }
         f4 << std::endl;
     }
-    f4.close();*/
+    f4.close();
 
     std::stringstream filename5;
     filename5 << fheader << "-xJ.dat";
