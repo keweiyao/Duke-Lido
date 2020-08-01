@@ -9,10 +9,10 @@
 #include <iostream>
 
 template <>
-Rate<LO, 2, 2, double(*)(const double, void *)>::
+Rate<HS2HS, 2, 2, double(*)(const double, void *)>::
 	Rate(std::string Name, std::string configfile, double(*f)(const double, void *)):
 StochasticBase<2>(Name+"/rate", configfile),
-X(std::make_shared<Xsection<LO, 2, double(*)(const double, void *)>>(Name, configfile, f) )
+X(std::make_shared<Xsection<HS2HS, 2, double(*)(const double, void *)>>(Name, configfile, f) )
 {
 	// read configfile
 	boost::property_tree::ptree config;
@@ -34,10 +34,10 @@ X(std::make_shared<Xsection<LO, 2, double(*)(const double, void *)>>(Name, confi
 }
 
 template <>
-Rate<GB, 2, 2, double(*)(const double*, void *)>::
-	Rate(std::string Name, std::string configfile, double(*f)(const double*, void *)):
+Rate<HS2QQbar, 2, 2, double(*)(const double, void *)>::
+	Rate(std::string Name, std::string configfile, double(*f)(const double, void *)):
 StochasticBase<2>(Name+"/rate", configfile),
-X(std::make_shared<Xsection<GB, 2, double(*)(const double*, void *)>>(Name, configfile, f) )
+X(std::make_shared<Xsection<HS2QQbar, 2, double(*)(const double, void *)>>(Name, configfile, f) )
 {
 	// read configfile
 	boost::property_tree::ptree config;
@@ -55,10 +55,31 @@ X(std::make_shared<Xsection<GB, 2, double(*)(const double*, void *)>>(Name, conf
 }
 
 template <>
-Rate<GB, 2, 4, double(*)(const double*, void *)>::
+Rate<HS2HHS, 2, 2, double(*)(const double*, void *)>::
 	Rate(std::string Name, std::string configfile, double(*f)(const double*, void *)):
 StochasticBase<2>(Name+"/rate", configfile),
-X(std::make_shared<Xsection<GB, 4, double(*)(const double*, void *)>>(Name, configfile, f) )
+X(std::make_shared<Xsection<HS2HHS, 2, double(*)(const double*, void *)>>(Name, configfile, f) )
+{
+	// read configfile
+	boost::property_tree::ptree config;
+	std::ifstream input(configfile);
+	read_xml(input, config);
+
+	std::vector<std::string> strs;
+	boost::split(strs, Name, boost::is_any_of("/"));
+	std::string model_name = strs[0];
+	std::string process_name = strs[1];
+	auto tree = config.get_child(model_name+"."+process_name);
+	_mass = tree.get<double>("mass");
+	_degen = tree.get<double>("degeneracy");
+	_active = (tree.get<std::string>("<xmlattr>.status")=="active")?true:false;
+}
+
+template <>
+Rate<HHS2HS, 2, 4, double(*)(const double*, void *)>::
+	Rate(std::string Name, std::string configfile, double(*f)(const double*, void *)):
+StochasticBase<2>(Name+"/rate", configfile),
+X(std::make_shared<Xsection<HHS2HS, 4, double(*)(const double*, void *)>>(Name, configfile, f) )
 {
 	// read configfile
 	boost::property_tree::ptree config;
@@ -80,7 +101,7 @@ X(std::make_shared<Xsection<GB, 4, double(*)(const double*, void *)>>(Name, conf
 /*****************************************************************/
 /*------------------Implementation for 2 -> 2--------------------*/
 template <>
-void Rate<LO, 2, 2, double(*)(const double, void *)>::
+void Rate<HS2HS, 2, 2, double(*)(const double, void *)>::
 		sample(std::vector<double> parameters,
 			std::vector< fourvec > & final_states){
 	double E = parameters[0];
@@ -97,7 +118,7 @@ void Rate<LO, 2, 2, double(*)(const double, void *)>::
     	return 1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
 	};
 	bool status = true;
-	auto res = sample_nd(dR_dxdy, 2, {{0., 2.}, {-1., 1.}},
+	auto res = sample_nd(dR_dxdy, 2, {{0., 4.}, {-1., 1.}},
 						std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
 	double E2 = T*(std::exp(res[0])-1.),
 		   costheta = res[1];
@@ -109,9 +130,9 @@ void Rate<LO, 2, 2, double(*)(const double, void *)>::
     // give incoming partilce a random phi angle
 	double phi = Srandom::dist_phi(Srandom::gen);
     // com velocity
-    double vcom[3] = { E2*sintheta/(E2+E)*cos(phi),
-						E2*sintheta/(E2+E)*sin(phi),
-						 (E2*costheta+v1*E)/(E2+E)	};
+    double vcom[3] = { E2*sintheta/(E2+E)*std::cos(phi),
+		       E2*sintheta/(E2+E)*std::sin(phi),
+		       (E2*costheta+v1*E)/(E2+E)	};
 	/*
 	FS now is in Z-oriented CoM frame
 	1) FS.rotate_back
@@ -124,9 +145,56 @@ void Rate<LO, 2, 2, double(*)(const double, void *)>::
 		p = p.boost_back(vcom[0], vcom[1], vcom[2]);
 	}
 }
+
+
+template <>
+void Rate<HS2QQbar, 2, 2, double(*)(const double, void *)>::
+		sample(std::vector<double> parameters,
+			std::vector< fourvec > & final_states){
+	double E = parameters[0];
+	double T = parameters[1];
+	auto dR_dxdy = [E, T, this](const double * x){
+		double M = this->_mass;
+		double E2 = T*(std::exp(x[0])-1.), costheta = x[1];
+		if (std::abs(costheta)>1.) return 0.;
+		double s = 2.*E2*E*(1. - costheta);
+                if (s<4*M*M) return 0.;
+		double sqrts = std::sqrt(s);
+		double Xtot = this->X->GetZeroM({sqrts,T}).s;
+		double Jacobian = E2 + T;
+    	        return 1./E*E2*std::exp(-E2/T)*s*2*Xtot/16./M_PI/M_PI*Jacobian;
+	};
+	bool status = true;
+	auto res = sample_nd(dR_dxdy, 2, {{0., 4.}, {-1., 1.}},
+		             std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
+	double E2 = T*(std::exp(res[0])-1.), costheta = res[1];
+	double sintheta = std::sqrt(1. - costheta*costheta);
+	double s = std::max(2.*E2*E*(1. - costheta), 4*_mass*_mass);
+	double sqrts = std::sqrt(s);
+	X->sample({sqrts, T}, final_states);
+
+        // give incoming partilce a random phi angle
+	double phi = Srandom::dist_phi(Srandom::gen);
+        // com velocity
+        double vcom[3] = { E2*sintheta/(E2+E)*std::cos(phi),
+			   E2*sintheta/(E2+E)*std::sin(phi),
+			  (E2*costheta+E)/(E2+E)	};
+	/*
+	FS now is in Z-oriented CoM frame
+	1) FS.rotate_back
+	2) FS.boost_back
+	*/
+	fourvec p1{E, 0, 0, E};
+	auto p1com = p1.boost_to(vcom[0], vcom[1], vcom[2]);
+	for(auto & p: final_states){
+		p = p.rotate_back(p1com);
+		p = p.boost_back(vcom[0], vcom[1], vcom[2]);
+	}
+}
+
 /*------------------Implementation for 2 -> 3--------------------*/
 template <>
-void Rate<GB, 2, 2, double(*)(const double*, void *)>::
+void Rate<HS2HHS, 2, 2, double(*)(const double*, void *)>::
 		sample(std::vector<double> parameters,
 			std::vector< fourvec > & final_states){
 	double E = parameters[0];
@@ -144,7 +212,7 @@ void Rate<GB, 2, 2, double(*)(const double*, void *)>::
     	return 1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
 	};
 	bool status = true;
-	auto res = sample_nd(dR_dxdy, 2, {{0., 3.}, {-1., 1.}}, std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
+	auto res = sample_nd(dR_dxdy, 2, {{0., 4.}, {-1., 1.}}, std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
 	double E2 = T*(std::exp(res[0])-1.), costheta = res[1];
 	double sintheta = std::sqrt(1. - costheta*costheta);
 	double phi = Srandom::dist_phi(Srandom::gen);
@@ -166,7 +234,7 @@ void Rate<GB, 2, 2, double(*)(const double*, void *)>::
 
 /*------------------Implementation for 3 -> 2--------------------*/
 template <>
-void Rate<GB, 2, 4, double(*)(const double*, void *)>::
+void Rate<HHS2HS, 2, 4, double(*)(const double*, void *)>::
 		sample(std::vector<double> parameters,
 			std::vector< fourvec > & final_states){
 	double E = parameters[0];
@@ -250,7 +318,7 @@ void Rate<GB, 2, 4, double(*)(const double*, void *)>::
 /*****************************************************************/
 /*------------------Implementation for 2 -> 2--------------------*/
 template <>
-scalar Rate<LO, 2, 2, double(*)(const double, void*)>::
+scalar Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
 		find_max(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];
@@ -272,9 +340,33 @@ scalar Rate<LO, 2, 2, double(*)(const double, void*)>::
 	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*1.5;
     return scalar{std::log(val)};
 }
+
+template <>
+scalar Rate<HS2QQbar, 2, 2, double(*)(const double, void*)>::
+		find_max(std::vector<double> parameters){
+	double E = parameters[0];
+	double T = parameters[1];
+	auto dR_dxdy = [E, T, this](const double * x){
+		double M = this->_mass;
+		double E2 = T*(std::exp(x[0])-1.), costheta = x[1];
+		if (E2 <= 0. || costheta >= 1. || costheta <= -1.) return 0.;
+		double s = 2.*E2*E*(1. - costheta);
+                if (s<=4.*M*M) return 0.;
+		double sqrts = std::sqrt(s);
+		double Xtot = this->X->GetZeroM({sqrts,T}).s;
+		double Jacobian = E2 + T;
+    	        return -1./E*E2*std::exp(-E2/T)*s*2*Xtot/16./M_PI/M_PI*Jacobian;
+	};
+	// use f(E(x), y)*dE/dx, x = log(1+E/T), y = costheta
+        // x start from 1, y start from 0
+        // x step 0.3, cosphi step 0.3
+        // save a slightly larger fmax
+	auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*1.5;
+    return scalar{std::log(val)};
+}
 /*------------------Implementation for 2 -> 3--------------------*/
 template <>
-scalar Rate<GB, 2, 2, double(*)(const double*, void*)>::
+scalar Rate<HS2HHS, 2, 2, double(*)(const double*, void*)>::
 		find_max(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];
@@ -299,7 +391,7 @@ scalar Rate<GB, 2, 2, double(*)(const double*, void*)>::
 }
 /*------------------Implementation for 3 -> 2--------------------*/
 template <>
-scalar Rate<GB, 2, 4, double(*)(const double*, void*)>::
+scalar Rate<HHS2HS, 2, 4, double(*)(const double*, void*)>::
 		find_max(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];
@@ -337,7 +429,7 @@ scalar Rate<GB, 2, 4, double(*)(const double*, void*)>::
 /*****************************************************************/
 /*------------------Implementation for 2 -> 2--------------------*/
 template <>
-scalar Rate<LO, 2, 2, double(*)(const double, void*)>::
+scalar Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
 		calculate_scalar(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];
@@ -357,10 +449,33 @@ scalar Rate<LO, 2, 2, double(*)(const double, void*)>::
 	auto val = quad_nd(code, 2, 1, xmin, xmax, err);
 	return scalar{_degen*val[0]};
 }
+
+template <>
+scalar Rate<HS2QQbar, 2, 2, double(*)(const double, void*)>::
+		calculate_scalar(std::vector<double> parameters){
+	double lnE = parameters[0];
+        double E = std::exp(lnE);
+	double T = parameters[1];
+	auto code = [E, T, this](const double * x){
+                double lnsqrts = x[0], costheta = x[1];
+		double sqrts = std::exp(lnsqrts);
+                double s = sqrts*sqrts;
+		double E2 = s/(2.*E*(1. - costheta));
+                double Jacobian = 2*E2;
+		double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
+    	        std::vector<double> res{Jacobian/E*E2*std::exp(-E2/T)*s*2*Xtot/16./M_PI/M_PI};
+		return res;
+	};
+	double xmin[2] = {std::log(2.*_mass), -1.};
+	double xmax[2] = {std::log(2.*_mass*100), 1.};
+	double err;
+	auto val = quad_nd(code, 2, 1, xmin, xmax, err);
+	return scalar{_degen*val[0]};
+}
 /*------------------Implementation for 2 -> 3--------------------*/
 // Pure Gunion bertsch
 template <>
-scalar Rate<GB, 2, 2, double(*)(const double*, void*)>::
+scalar Rate<HS2HHS, 2, 2, double(*)(const double*, void*)>::
 		calculate_scalar(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];
@@ -384,7 +499,7 @@ scalar Rate<GB, 2, 2, double(*)(const double*, void*)>::
 /*------------------Implementation for 3 -> 2--------------------*/
 
 template <>
-scalar Rate<GB, 2, 4, double(*)(const double*, void*)>::
+scalar Rate<HHS2HS, 2, 4, double(*)(const double*, void*)>::
 		calculate_scalar(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];
@@ -425,7 +540,7 @@ fourvec Rate<str, N1, N2, F>::calculate_fourvec(std::vector<double> parameters){
 }
 /*------------------Implementation for 2 -> 2--------------------*/
 template <>
-fourvec Rate<LO, 2, 2, double(*)(const double, void*)>::
+fourvec Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
 		calculate_fourvec(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];
@@ -467,7 +582,7 @@ tensor Rate<str, N1, N2, F>::calculate_tensor(std::vector<double> parameters){
 }
 /*------------------Implementation for 2 -> 2--------------------*/
 template <>
-tensor Rate<LO, 2, 2, double(*)(const double, void*)>::
+tensor Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
 		calculate_tensor(std::vector<double> parameters){
 	double E = parameters[0];
 	double T = parameters[1];
@@ -478,8 +593,9 @@ tensor Rate<LO, 2, 2, double(*)(const double, void*)>::
 		double s = 2.*E2*E*(1. - v1*costheta) + M*M;
 		double sintheta = std::sqrt(1. - costheta*costheta);
 		double sqrts = std::sqrt(s);
-		double vcom[3] = {E2*sintheta/(E2+E)*cos(phi), E2*sintheta/(E2+E)*sin(phi),
-						 (E2*costheta+v1*E)/(E2+E)};
+		double vcom[3] = {E2*sintheta/(E2+E)*std::cos(phi), 
+                                  E2*sintheta/(E2+E)*std::sin(phi),
+				 (E2*costheta+v1*E)/(E2+E)};
 		fourvec p1{E, 0, 0, v1*E};
 		// A vector in p1z(com)-oriented com frame
 		auto fmunu0 = this->X->GetSecondM({sqrts,T});
@@ -727,11 +843,9 @@ tensor EffRate21<N, F>::calculate_tensor(std::vector<double> parameters){
 
 
 // For 2->2 with leading order pQCD
-template class Rate<LO,2,2,double(*)(const double, void*)>; 
-// For 2->3 with Gunion-Bertsch w/o LPM
-template class Rate<GB,2,2,double(*)(const double*, void*)>; 
-// For 3->2 with Gunion-Bertsch w/o LPM
-template class Rate<GB,2,4,double(*)(const double*, void*)>;
-// For 1->2 and 2->1 induced by diffusion
+template class Rate<HS2HS,2,2,double(*)(const double, void*)>; 
+template class Rate<HS2QQbar,2,2,double(*)(const double, void*)>; 
+template class Rate<HS2HHS,2,2,double(*)(const double*, void*)>; 
+template class Rate<HHS2HS,2,4,double(*)(const double*, void*)>;
 template class EffRate12<2,double(*)(const double*, void*)>; // 1->2 
 template class EffRate21<2,double(*)(const double*, void*)>; // 2->1 

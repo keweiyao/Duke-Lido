@@ -34,12 +34,13 @@ struct particle{
 };
 
 
-typedef Rate<LO, 2, 2, double(*)(const double, void*)> Rate22;
-typedef Rate<GB, 2, 2, double(*)(const double*, void*)> Rate23;
-typedef Rate<GB, 2, 4, double(*)(const double*, void*)> Rate32;
+typedef Rate<HS2HS, 2, 2, double(*)(const double, void*)> Rate22;
+typedef Rate<HS2QQbar, 2, 2, double(*)(const double, void*)> Rate22QQbar;
+typedef Rate<HS2HHS, 2, 2, double(*)(const double*, void*)> Rate23;
+typedef Rate<HHS2HS, 2, 4, double(*)(const double*, void*)> Rate32;
 typedef EffRate12<2, double(*)(const double*, void*)> Rate12;
 typedef EffRate21<2, double(*)(const double*, void*)> Rate21;
-typedef boost::variant<Rate22, Rate23, Rate32, Rate12, Rate21> Process;
+typedef boost::variant<Rate22, Rate23, Rate32, Rate12, Rate21, Rate22QQbar> Process;
 extern std::map<int, std::vector<Process>> AllProcesses;
 
 void init_process(Process& r, std::string mode, std::string table_path);

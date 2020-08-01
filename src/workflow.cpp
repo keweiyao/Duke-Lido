@@ -90,6 +90,21 @@ void init_process(Process &r, std::string mode, std::string table_path)
         else
             return;
         break;
+    case 5:
+        if (boost::get<Rate22QQbar>(r).IsActive())
+            if (mode == "new")
+            {
+                boost::get<Rate22QQbar>(r).initX(table_path);
+                boost::get<Rate22QQbar>(r).init(table_path);
+            }
+            else
+            {
+                boost::get<Rate22QQbar>(r).loadX(table_path);
+                boost::get<Rate22QQbar>(r).load(table_path);
+            }
+        else
+            return;
+        break;
     default:
         exit(-1);
         break;
@@ -127,9 +142,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
     AllProcesses[21].push_back(Rate32("Boltzmann/ggg2gg", setting_path, M2_ggg2gg));       // 3->2, index = 5
     AllProcesses[21].push_back(Rate12("Boltzmann/g2gg", setting_path, LGV_g2gg));           // 1->2, index = 6
     AllProcesses[21].push_back(Rate21("Boltzmann/gg2g", setting_path, LGV_gg2g));           // 2->1, index = 7
-    AllProcesses[21].push_back(Rate23("Boltzmann/gq2qqqbar", setting_path, M2_gq2qqqbar)); // 2->3, index = 8
-    AllProcesses[21].push_back(Rate23("Boltzmann/gg2qgqbar", setting_path, M2_gg2qgqbar)); // 2->3, index = 9
-    AllProcesses[21].push_back(Rate12("Boltzmann/g2qqbar", setting_path, LGV_g2qqbar));    // 1->2, index = 10
+    AllProcesses[21].push_back(Rate22QQbar("Boltzmann/gg2ccbar", setting_path, dX_gg2QQbar_dt));    // 2->2, index = 8
 
     // for u, d, s flavor
     AllProcesses[123] = std::vector<Process>();
@@ -141,6 +154,7 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
     AllProcesses[123].push_back(Rate32("Boltzmann/qgg2qg", setting_path, M2_Qgg2Qg));  // 3->2, index = 5
     AllProcesses[123].push_back(Rate12("Boltzmann/q2qg", setting_path, LGV_q2qg));     // 1->2, index = 6
     AllProcesses[123].push_back(Rate21("Boltzmann/qg2q", setting_path, LGV_qg2q));     // 2->1, index = 7
+    AllProcesses[123].push_back(Rate22QQbar("Boltzmann/qqbar2ccbar", setting_path, dX_qqbar2QQbar_dt)); // 2->2, index = 8
 
     // for charm flavor
     AllProcesses[4] = std::vector<Process>();
@@ -270,11 +284,10 @@ int update_particle_momentum_Lido(
     }
         
 
-    //transform light quark pid to 123
-    //transform back at the end
-    int temp_pid = pIn.pid;
-    if (std::abs(pIn.pid) <= 3) pIn.pid = 123;
-    int absid = std::abs(pIn.pid);
+    int channel_pid;
+
+    if (std::abs(pIn.pid) <= 3) channel_pid = 123;
+    else channel_pid = std::abs(pIn.pid);
 
 
     for (int i=0; i<5; i++){
@@ -293,12 +306,11 @@ int update_particle_momentum_Lido(
     double qhatg = qhat(21, E_cell, 0., temp);
     // Total rate for the
     int channel = 0;
-    std::vector<double> P_channels(AllProcesses[absid].size());
+    std::vector<double> P_channels(AllProcesses[channel_pid].size());
     double P_total = 0., dR;
 
-    BOOST_FOREACH (Process &r, AllProcesses[absid])
+    BOOST_FOREACH (Process &r, AllProcesses[channel_pid])
     {
-        bool can_rad = (!pIn.is_virtual);
         switch (r.which())
         {
         case 0:
@@ -309,28 +321,35 @@ int update_particle_momentum_Lido(
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 1:
-            if (boost::get<Rate23>(r).IsActive() && can_rad)
+            if (boost::get<Rate23>(r).IsActive() && (!pIn.is_virtual))
                 dR = boost::get<Rate23>(r).GetZeroM({E_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 2:
-            if (boost::get<Rate32>(r).IsActive() && can_rad)
+            if (boost::get<Rate32>(r).IsActive() && (!pIn.is_virtual))
                 dR = boost::get<Rate32>(r).GetZeroM({E_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 3:
-            if (boost::get<Rate12>(r).IsActive() && can_rad)
+            if (boost::get<Rate12>(r).IsActive() && (!pIn.is_virtual))
                 dR = qhatg * boost::get<Rate12>(r).GetZeroM({E_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 4:
-            if (boost::get<Rate21>(r).IsActive() && can_rad)
+            if (boost::get<Rate21>(r).IsActive() && (!pIn.is_virtual))
+                dR = qhatg * boost::get<Rate21>(r).GetZeroM({E_cell, temp}).s;
+            else
+                dR = 0.0;
+            P_channels[channel] = P_total + dR * dt_cell;
+            break;
+        case 5:
+            if (boost::get<Rate22QQbar>(r).IsActive() && (!pIn.is_virtual))
                 dR = qhatg * boost::get<Rate21>(r).GetZeroM({E_cell, temp}).s;
             else
                 dR = 0.0;
@@ -365,8 +384,8 @@ int update_particle_momentum_Lido(
     }
     // If a scattering happens:
     if (channel >= 0){
-        if (channel >= AllProcesses[absid].size()){
-            LOG_INFO << absid  <<" " << temp  << " " 
+        if (channel >= AllProcesses[channel_pid].size()){
+            LOG_INFO << channel_pid  <<" " << temp  << " " 
 		     << v3cell[0] << " " << v3cell[1] << " " << v3cell[2];
             LOG_INFO << x0;
             LOG_INFO << " " <<p00 <<"//"<< pIn.p ;
@@ -376,21 +395,23 @@ int update_particle_momentum_Lido(
         // Final state holder FS
         std::vector<fourvec> FS;
         // Sampe its differential final state
-        switch (AllProcesses[absid][channel].which()){
+        switch (AllProcesses[channel_pid][channel].which()){
         case 0:
-            boost::get<Rate22>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
+            boost::get<Rate22>(AllProcesses[channel_pid][channel]).sample({E_cell, temp}, FS);
             break;
         case 1:
-            boost::get<Rate23>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
+            boost::get<Rate23>(AllProcesses[channel_pid][channel]).sample({E_cell, temp}, FS);
             break;
         case 2:
-            boost::get<Rate32>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
+            boost::get<Rate32>(AllProcesses[channel_pid][channel]).sample({E_cell, temp}, FS);
             break;
         case 3:
-            boost::get<Rate12>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
+            boost::get<Rate12>(AllProcesses[channel_pid][channel]).sample({E_cell, temp}, FS);
             break;
         case 4:
-            boost::get<Rate21>(AllProcesses[absid][channel]).sample({E_cell, temp}, FS);
+            boost::get<Rate21>(AllProcesses[channel_pid][channel]).sample({E_cell, temp}, FS);
+        case 5:
+            boost::get<Rate22QQbar>(AllProcesses[channel_pid][channel]).sample({E_cell, temp}, FS);
             break;
         default:
             LOG_FATAL << "2. Channel = " << channel << " not exists";
@@ -410,7 +431,7 @@ int update_particle_momentum_Lido(
 		    int id = (channel==0) ? (Srandom::sample_flavor(3)) : 21;
 		    int col=-100, acol=-100, mcol=-100, macol=-100;
 		    SampleFlavorAndColor(
-		        temp_pid, pIn.col, pIn.acol, channel,
+		        pIn.pid, pIn.col, pIn.acol, channel,
 		        id, col, acol, mcol, macol);
 		    particle ep = produce_parton(id, FS[1], pIn, false);
 		    ep.origin = 2;
@@ -480,50 +501,25 @@ int update_particle_momentum_Lido(
             // Absorption processes happens mostly for gluon energy ~ 3*T, therefore we negelected the LPM effect
             pIn.p = FS[0];
         }
-        // inelastic process takes a finite time to happen
-        if (channel == 8 || channel == 9){
-            // This should only happen for gluon
-            // gluon splits to q+qbar, pid changing!!
-            // only for E>mD
-            if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Eradmin) {
-            particle vp = produce_parton(
-                               Srandom::sample_flavor(3), FS[2], pIn, true);
-            // The local 2->2 mean-free-path is estimated with
-            // the qhat_hard integrate from the 2->2 rate
-            double xfrac = vp.p.t() / pIn.p.t();
-            double local_qhat = 0.;
-            double vp_cell = vp.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
-            double boost_factor = vp.p.t() / vp_cell;
-            BOOST_FOREACH (Process &r, AllProcesses[21]){
-                switch (r.which()){
-                case 0:
-                    if (boost::get<Rate22>(r).IsActive()){
-                        tensor A = boost::get<Rate22>(r).GetSecondM(
-                            {vp_cell, temp});
-                        local_qhat += A.T[1][1] + A.T[2][2];
-                    }
-                    break;
-                default:
-                    break;
-                }
-            }
-            // estimate mfp in the lab frame
-            vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
-            pIn.radlist.push_back(vp);
-            }
-        }
-        if (channel == 10){
-            // This should only happen for gluon
-            // gluon splits to q+qbar, pid changing!!
-            // only for E>mD
-            if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Eradmin){
-                particle vp = produce_parton(
-                                Srandom::sample_flavor(3), FS[1], pIn, true);
-            
-                // estimate mfp in the lab frame
-                vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
-                pIn.radlist.push_back(vp);
-            }
+        // elastic indued charm pair production
+        if (channel == 8){
+            // Two hard particle in final state;
+            // Change of pid! clear all radiaiton 
+            pIn.radlist.clear();
+            pIn.p = FS[0];
+            pIn.pid = 4;
+	    int id = -4;
+            int col=-100, acol=-100, mcol=-100, macol=-100;
+	    SampleFlavorAndColor(
+		pIn.pid, pIn.col, pIn.acol, channel,
+		id, col, acol, mcol, macol);
+	    particle ep = produce_parton(id, FS[1], pIn, false);
+	    ep.origin = 2;
+	    ep.col = col; 
+	    ep.acol = acol;
+	    pIn.col = mcol;
+	    pIn.acol = macol;
+            pOut_list.push_back(ep);
         }
     }
 
@@ -589,8 +585,7 @@ int update_particle_momentum_Lido(
                 if (Srandom::rejection(Srandom::gen) < Acceptance){
                     // accepted branching causes physical effects
                     // momentum change, and put back on shell
-                    it->p = it->p*(pIn.p.t()/it->p.t()
-                                  *it->p0.t()/it->mother_p.t());
+                    it->p = it->p*(pIn.p.t()/it->p.t()*it->p0.t()/it->mother_p.t());
                     pIn.p = pIn.p - it->p;
                     it->p0 = it->p;                 
                     pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass+pIn.p.pabs2());
@@ -599,13 +594,9 @@ int update_particle_momentum_Lido(
 		    pIn.Q00 = pIn.Q0;
 		    it->Q0 = pIn.Q0;
 		    it->Q00 = it->Q0;
-                    // for g -> q + qbar, pid change
-                    if (split_type == 3){
-                        pIn.pid = -it->pid;
-                        pIn.radlist.clear();
-                    }
+ 
                     int col=-100, acol=-100, mcol=-100, macol=-100;
-                    SampleFlavorAndColor(temp_pid, pIn.col,
+                    SampleFlavorAndColor(pIn.pid, pIn.col,
                                          pIn.acol, 2,
                                          21, col, acol, mcol, macol);
                     it->col = col; 
@@ -626,7 +617,6 @@ int update_particle_momentum_Lido(
 
     // Add the mother parton to the end of the output list
     //also transform back its pid
-    pIn.pid = temp_pid;
     pOut_list.push_back(pIn);
 
     // Compute energy source term using In and Out states of the hard-parton system
@@ -685,6 +675,22 @@ void SampleFlavorAndColor(int mother_id, int mother_col, int mother_acol,
                 new_mother_acol = mother_acol;
                 daughter_col = mother_col;;
                 daughter_acol = color;
+            }
+        }
+        if (channel == 8){
+            int color = color_count;
+            color_count++;
+            if (Srandom::binary_choice()) {
+                new_mother_col = mother_col;
+                new_mother_acol = 0;
+                daughter_col = 0;
+                daughter_acol = color;
+            }
+            else {
+                new_mother_col = color;
+                new_mother_acol = 0;
+                daughter_col = 0;
+                daughter_acol = mother_col;
             }
         }
     }
@@ -749,6 +755,22 @@ void SampleFlavorAndColor(int mother_id, int mother_col, int mother_acol,
                 daughter_col = mother_col;
                 daughter_acol = color;
             }
+        }
+        if (channel==8) {
+            int color = color_count;
+            color_count ++;
+            if (mother_id<0) {
+                new_mother_col = color;
+                new_mother_acol = 0;
+                daughter_col = 0;
+                daughter_acol = mother_acol;
+            }
+            else {
+                new_mother_col = mother_col;
+                new_mother_acol = 0;
+                daughter_col = 0;
+                daughter_acol = color;
+            }  
         }
     }
     

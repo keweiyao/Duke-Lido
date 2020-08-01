@@ -5,6 +5,7 @@
 
 // Xsection
 scalar approx_X22(std::vector<double> params);
+scalar approx_X22QQbar(std::vector<double> params);
 scalar approx_dX22_max(std::vector<double> params);
 scalar approx_X23(std::vector<double> params);
 scalar approx_dX23_max(std::vector<double> params);

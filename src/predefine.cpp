@@ -3,8 +3,10 @@
 #include <boost/math/tools/roots.hpp>
 #include "simpleLogger.h"
 
-char LO[] = "Leading-order";
-char GB[] = "Gunion-Bertsch";
+char HS2HS[] = "HS2HS"; // Hard+Soft <--> Hard+Soft
+char HS2QQbar[] = "HS2QQbar"; // hard+light --> heavy flavor pair
+char HS2HHS[] = "HS2HHS"; // hard+soft --> hard+hard+soft
+char HHS2HS[] = "HHS2HS"; // hard+soft --> hard+hard+soft
 
 bool type1_warned = false;
 bool type2_warned = false; 

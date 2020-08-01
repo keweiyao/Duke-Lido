@@ -9,7 +9,7 @@
 #include "approx_functions.h"
 
 template<>
-Xsection<LO, 2, double(*)(const double, void*)>::
+Xsection<HS2HS, 2, double(*)(const double, void*)>::
     Xsection(std::string Name, std::string configfile,
             double(*f)(const double, void*)):
 StochasticBase<2>(Name+"/xsection", configfile),
@@ -32,9 +32,33 @@ _f(f)
     StochasticBase<2>::_FunctionMax->SetApproximateFunction(approx_dX22_max);
 }
 
+template<>
+Xsection<HS2QQbar, 2, double(*)(const double, void*)>::
+    Xsection(std::string Name, std::string configfile,
+            double(*f)(const double, void*)):
+StochasticBase<2>(Name+"/xsection", configfile),
+_f(f)
+{
+    // read configfile
+    boost::property_tree::ptree config;
+    std::ifstream input(configfile);
+    read_xml(input, config);
+
+    std::vector<std::string> strs;
+    boost::split(strs, Name, boost::is_any_of("/"));
+    std::string model_name = strs[0];
+    std::string process_name = strs[1];
+    auto tree = config.get_child(model_name+"."+process_name);
+    _mass = tree.get<double>("mass");
+
+    // Set Approximate function for X and dX_max
+    StochasticBase<2>::_ZeroMoment->SetApproximateFunction(approx_X22QQbar);
+    //StochasticBase<2>::_FunctionMax->SetApproximateFunction(approx_QQbar_max);
+}
+
 
 template<>
-Xsection<GB, 2, double(*)(const double *, void*)>::
+Xsection<HS2HHS, 2, double(*)(const double *, void*)>::
     Xsection(std::string Name, std::string configfile,
             double(*f)(const double*, void*)):
 StochasticBase<2>(Name+"/xsection", configfile),
@@ -54,7 +78,7 @@ _f(f)
 }
 
 template<>
-Xsection<GB, 4, double(*)(const double *, void*)>::
+Xsection<HHS2HS, 4, double(*)(const double *, void*)>::
     Xsection(std::string Name, std::string configfile,
             double(*f)(const double*, void*)):
 StochasticBase<4>(Name+"/xsection", configfile),
@@ -79,7 +103,7 @@ _f(f)
 /*****************************************************************/
 /*------------------Implementation for 2 -> 2--------------------*/
 template<>
-void Xsection<LO, 2, double(*)(const double, void*)>::
+void Xsection<HS2HS, 2, double(*)(const double, void*)>::
         sample(std::vector<double> parameters,
                 std::vector< fourvec > & FS){
     double sqrts = std::max(parameters[0], _mass*1.01), temp = parameters[1];
@@ -112,9 +136,38 @@ void Xsection<LO, 2, double(*)(const double, void*)>::
     FS[1] = {p, -p*sintheta*cosphi, -p*sintheta*sinphi, -p*costheta};
 }
 
+template<>
+void Xsection<HS2QQbar, 2, double(*)(const double, void*)>::
+        sample(std::vector<double> parameters,
+                std::vector< fourvec > & FS){
+    double lnsqrts = parameters[0], temp = parameters[1];
+    double sqrts = std::exp(lnsqrts);
+    double s = std::pow(sqrts,2);
+    auto dXdt = [s, temp, this](double t) {
+        double params[3] = {s, temp, this->_mass};
+        return this->_f(t, params);
+    };
+    double M2 = _mass*_mass;
+    double tmin = -.5*((s-2.*M2)+std::sqrt(s*(s-4.*M2))),
+           tmax = -.5*((s-2.*M2)-std::sqrt(s*(s-4.*M2)));
+    double t = sample_1d(dXdt, {tmin, tmax}, StochasticBase<2>::GetFmax(parameters).s);
+    // sample phi
+    double phi = Srandom::dist_phi(Srandom::gen);
+    double cosphi = std::cos(phi), sinphi = std::sin(phi);
+    double E = sqrts/2.; 
+    double p = std::sqrt(E*E-M2); 
+    double costheta = 1. + (t-M2)/(.5*s); // deflection angle
+    double sintheta = std::sqrt(1.-costheta*costheta);
+    FS.clear();
+    FS.resize(2); // Q + Qbar
+    FS[0] = {E, p*sintheta*cosphi, p*sintheta*sinphi, p*costheta};
+    FS[1] = {FS[0].t(), -FS[0].x(), -FS[0].y(), -FS[0].z()};
+}
+
+
 /*------------------Implementation for 2 -> 3--------------------*/
 template<>
-void Xsection<GB, 2, double(*)(const double*, void*)>::
+void Xsection<HS2HHS, 2, double(*)(const double*, void*)>::
     sample(std::vector<double> parameters,
             std::vector< fourvec > & FS){
     double sqrts = std::max(parameters[0], _mass*1.01), temp = parameters[1];
@@ -179,7 +232,7 @@ void Xsection<GB, 2, double(*)(const double*, void*)>::
 
 /*------------------Implementation for 3 -> 2--------------------*/
 template<>
-void Xsection<GB, 4, double(*)(const double*, void*)>::
+void Xsection<HHS2HS, 4, double(*)(const double*, void*)>::
     sample(std::vector<double> parameters,
             std::vector< fourvec > & FS){
     double sqrts = parameters[0], temp = parameters[1],
@@ -226,7 +279,7 @@ void Xsection<GB, 4, double(*)(const double*, void*)>::
 /*****************************************************************/
 /*------------------Implementation for 2 -> 2--------------------*/
 template<>
-scalar Xsection<LO, 2, double(*)(const double, void*)>::
+scalar Xsection<HS2HS, 2, double(*)(const double, void*)>::
     find_max(std::vector<double> parameters){
     double s = std::pow(parameters[0],2), temp = parameters[1];
     // transform w = -log(1-t/Temp^2)
@@ -245,10 +298,28 @@ scalar Xsection<LO, 2, double(*)(const double, void*)>::
     double res = -minimize_1d(minus_dXdw, {wmin, wmax}, 1e-8, 100, 1000);
     return scalar{res*1.5};
 }
+
+template<>
+scalar Xsection<HS2QQbar, 2, double(*)(const double, void*)>::
+    find_max(std::vector<double> parameters){
+    double lnsqrts = parameters[0], temp = parameters[1];
+    double sqrts = std::exp(lnsqrts);
+    double s = std::pow(sqrts,2);
+    auto minus_dXdt = [s, temp, this](const double t) {
+        double params[3] = {s, temp, this->_mass};
+        return -(this->_f(t, params));
+    };
+    double M2 = _mass*_mass;
+    double tmin = -.5*((s-2.*M2)+std::sqrt(s*(s-4.*M2))),
+           tmax = -.5*((s-2.*M2)-std::sqrt(s*(s-4.*M2)));
+    double res = -minimize_1d(minus_dXdt, {tmin, tmax}, 1e-8, 100, 1000);
+    return scalar{res*1.5};
+}
+
 /*------------------Implementation for 2 -> 3--------------------*/
 // Only Gunion Bertsch
 template<>
-scalar Xsection<GB, 2, double(*)(const double*, void*)>::
+scalar Xsection<HS2HHS, 2, double(*)(const double*, void*)>::
     find_max(std::vector<double> parameters){
     double sqrts = parameters[0], temp = parameters[1],
            delta_t = parameters[2];
@@ -302,7 +373,7 @@ scalar Xsection<GB, 2, double(*)(const double*, void*)>::
 
 /*------------------Implementation for 3 -> 2--------------------*/
 template<>
-scalar Xsection<GB, 4, double(*)(const double*, void*)>::
+scalar Xsection<HHS2HS, 4, double(*)(const double*, void*)>::
     find_max(std::vector<double> parameters){
         double sqrts = parameters[0], temp = parameters[1],
                xinel = parameters[2], yinel = parameters[3];
@@ -338,7 +409,7 @@ scalar Xsection<GB, 4, double(*)(const double*, void*)>::
 /*****************************************************************/
 /*------------------Implementation for 2 -> 2--------------------*/
 template<>
-scalar Xsection<LO, 2, double(*)(const double, void*)>::
+scalar Xsection<HS2HS, 2, double(*)(const double, void*)>::
         calculate_scalar(std::vector<double> parameters){
     double s = std::pow(parameters[0],2), temp = parameters[1];
     // transform w = -log(1-t/Temp^2)
@@ -358,9 +429,28 @@ scalar Xsection<LO, 2, double(*)(const double, void*)>::
     double res = quad_1d(dXdw, {wmin, wmax}, error);
     return scalar{res};
 }
+
+template<>
+scalar Xsection<HS2QQbar, 2, double(*)(const double, void*)>::
+        calculate_scalar(std::vector<double> parameters){
+    double lnsqrts = parameters[0], temp = parameters[1];
+    double sqrts = std::exp(lnsqrts);
+    double s = std::pow(sqrts,2);
+    auto dXdt = [s, temp, this](const double t) {
+        double params[3] = {s, temp, this->_mass};
+        return this->_f(t, params);
+    };
+    double M2 = _mass*_mass, error;
+    double tmin = -.5*((s-2.*M2)+std::sqrt(s*(s-4.*M2))),
+           tmax = -.5*((s-2.*M2)-std::sqrt(s*(s-4.*M2)));
+           
+    double res = quad_1d(dXdt, {tmin, tmax}, error);
+    return scalar{res};
+}
+
 /*------------------Implementation for 2 -> 3--------------------*/
 template<>
-scalar Xsection<GB, 2, double(*)(const double*, void*)>::
+scalar Xsection<HS2HHS, 2, double(*)(const double*, void*)>::
                 calculate_scalar(std::vector<double> parameters){
     double sqrts = parameters[0], temp = parameters[1];
     double s = sqrts*sqrts;
@@ -380,7 +470,7 @@ scalar Xsection<GB, 2, double(*)(const double*, void*)>::
 }
 /*------------------Implementation for 3 -> 2--------------------*/
 template<>
-scalar Xsection<GB, 4, double(*)(const double*, void*)>::
+scalar Xsection<HHS2HS, 4, double(*)(const double*, void*)>::
                 calculate_scalar(std::vector<double> parameters){
 
     // xiel = s12/s
@@ -411,7 +501,7 @@ fourvec Xsection<str, N, F>::calculate_fourvec(std::vector<double> parameters){
 }
 /*------------------Implementation for 2 -> 2--------------------*/
 template<>
-fourvec Xsection<LO, 2, double(*)(const double, void*)>::
+fourvec Xsection<HS2HS, 2, double(*)(const double, void*)>::
         calculate_fourvec(std::vector<double> parameters){
     double sqrts = parameters[0], temp = parameters[1];
     double s = std::pow(sqrts,2);
@@ -445,7 +535,7 @@ tensor Xsection<str, N, F>::calculate_tensor(std::vector<double> parameters){
 }
 /*------------------Implementation for 2 -> 2--------------------*/
 template<>
-tensor Xsection<LO, 2, double(*)(const double, void*)>::
+tensor Xsection<HS2HS, 2, double(*)(const double, void*)>::
     calculate_tensor(std::vector<double> parameters){
     double sqrts = parameters[0], temp = parameters[1];
     double s = std::pow(sqrts,2);
@@ -484,6 +574,7 @@ tensor Xsection<LO, 2, double(*)(const double, void*)>::
                   0.,     0.,         0.,         dpzdpz};
 }
 // instance:
-template class Xsection<LO, 2, double(*)(const double, void*)>;
-template class Xsection<GB, 2, double(*)(const double*, void*)>;
-template class Xsection<GB, 4, double(*)(const double*, void*)>;
+template class Xsection<HS2HS, 2, double(*)(const double, void*)>;
+template class Xsection<HS2QQbar, 2, double(*)(const double, void*)>;
+template class Xsection<HS2HHS, 2, double(*)(const double*, void*)>;
+template class Xsection<HHS2HS, 4, double(*)(const double*, void*)>;

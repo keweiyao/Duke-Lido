@@ -9,8 +9,10 @@
 #include <sstream>
 #include <fstream>
 
-extern char LO[];
-extern char GB[];
+extern char HS2HS[];
+extern char HS2QQbar[];
+extern char HS2HHS[];
+extern char HHS2HS[];
 
 extern bool type1_warned;
 extern bool type2_warned;

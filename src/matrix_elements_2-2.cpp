@@ -134,5 +134,61 @@ double dX_Qg2Qg_dt_full(const double t, void * params){
 	return M2_Qg2Qg_full(t, params)/c16pi/std::pow(s-M2, 2);
 }
 
+// for hard jet parton induced heavy flavor pair production
+double M2_gg2QQbar(const double t, void * params){
+	// unpacking parameters
+	double * p = static_cast<double*>(params);
+	double s = p[0], Temp = p[1], M2 = p[2]*p[2];
+	// Deybe mass (t-channel)
+	double mt2 = t_channel_mD2->get_mD2(Temp);
+	// define energy scales for each channel
+	double S = s;
+        double T = t - M2;
+        double U = - S - T;
+	// define coupling constant for each channel
+	double As = alpha_s(S, Temp);
+	double At = alpha_s(T, Temp);
+	double Au = alpha_s(U, Temp);
+        return std::pow(M_PI,2) * (
+     12.*U*T/S/S*As*As 
+   + 8./3.*(U/T+T/U)*At*Au
+  - 16./3.*M2*((2*M2+T)/T/T*At*At + (2*M2+U)/U/U*Au*Au)
+    + 6.*(T+U)/S*As*As
+    + 6.*M2/S*std::pow(T-U,2)/T/U*At*Au 
+    -  2./3.*M2*(S-4.*M2)/T/U*At*Au
+              )	;
+}
+
+double dX_gg2QQbar_dt(const double t, void * params){
+	double * p = static_cast<double*>(params);
+	double s = p[0], M2 = p[2]*p[2];
+	return M2_gg2QQbar(t, params)/c16pi/std::pow(s, 2);
+}
+
+double M2_qqbar2QQbar(const double t, void * params){
+	// unpacking parameters
+	double * p = static_cast<double*>(params);
+	double s = p[0], Temp = p[1], M2 = p[2]*p[2];
+	// Deybe mass (t-channel)
+	double mt2 = t_channel_mD2->get_mD2(Temp);
+	// define energy scales for each channel
+	double S = s;
+        double T = t - M2;
+        double U = - S - T;
+	// define coupling constant for each channel
+	double As = alpha_s(S, Temp);
+        return 64./9.*std::pow(M_PI*As,2)*(
+                   T*T+U*U+2.*M2*S
+               )/S/S;
+}
+
+double dX_qqbar2QQbar_dt(const double t, void * params){
+	double * p = static_cast<double*>(params);
+	double s = p[0], M2 = p[2]*p[2];
+	return M2_qqbar2QQbar(t, params)/c16pi/std::pow(s, 2);
+}
+
+
+
 
 
