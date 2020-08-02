@@ -206,6 +206,7 @@ void Rate<HS2HHS, 2, 2, double(*)(const double*, void *)>::
         double E2 = T*(std::exp(x[0])-1.), costheta = x[1];
         if (costheta > 1. || costheta < -1.) return 0.;
         double s = 2.*E2*E*(1. - v1*costheta) + M*M;
+        if ( std::pow(s-M*M,2)/s < cut*t_channel_mD2->get_mD2(T)) return 0.;
         double lnsqrts = .5*std::log(s);
         // interp cross-section
         double Xtot = this->X->GetZeroM({lnsqrts, T}).s;
@@ -488,6 +489,7 @@ scalar Rate<HS2HHS, 2, 2, double(*)(const double*, void*)>::
         // interp Xsection
         double Xtot = this->X->GetZeroM({lnsqrts, T}).s;
         std::vector<double> res{1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI};
+        if ( std::pow(s-M*M,2)/s < cut*t_channel_mD2->get_mD2(T)) res[0]=0.;
         return res;
     };
     double xmin[2] = {0., -1.};

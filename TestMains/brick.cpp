@@ -124,7 +124,7 @@ int main(int argc, char* argv[]){
         for (double l=0; l<L0; l+=dL){
             LOG_INFO << l;
             for (auto & p : plist){
-                p.p = p0;
+                //p.p = p0;
                 int fs_size = update_particle_momentum_Lido(
                       dL, T0, {0,0,0}, p, pOut_list);       
             }
