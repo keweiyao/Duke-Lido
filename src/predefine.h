@@ -48,23 +48,16 @@ extern const double alpha_max; // alpha_s maximum cut
 extern const double Lambda; // [GeV] Lambda QCD = 0.2 GeV
 extern const double Lambda2; // [GeV^2] Lambda QCD squared
 extern const double mu2_NP; // minimum cut on Q2, where alpha = alpha_0
-extern const double Tc;
 extern double scale; // mu*pi*T
 extern double afix; // fixed alphas, -1 is running
 extern double cut; // separation between diffusion and scattering
-extern const double LPM_prefactor; 
 extern double Lido_Ecut;
+extern const double LPM_prefactor; 
 
 extern int time_type;
 extern bool Adiabatic_LPM;
 
-struct qhat_params_struct {
-	double K, a, b, p, q, gamma; // for qhat parametrization
-};
-extern qhat_params_struct qhat_params;
-
 void initialize_mD_and_scale(int _mD_type, double _mu, double _afix, double _theta, double _cut);
-void initialize_transport_coeff(double K, double a, double b, double p, double q, double gamma);
 double alpha_s(double Q2, double T); //runing coupling
 void echo(void);
 

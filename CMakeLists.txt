@@ -200,7 +200,7 @@ add_subdirectory(jet_analysis)
 include_directories(jet_analysis)
 
 
-foreach(App "Lido-TabGen")
+foreach(App "Lido-TabGen" "brick")
 	add_executable(${App} ./TestMains/${App}.cpp)
 	target_link_libraries(${App} ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
 	install(TARGETS ${App} DESTINATION bin)

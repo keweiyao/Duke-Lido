@@ -53,7 +53,6 @@ _f(f)
 
     // Set Approximate function for X and dX_max
     StochasticBase<2>::_ZeroMoment->SetApproximateFunction(approx_X22QQbar);
-    //StochasticBase<2>::_FunctionMax->SetApproximateFunction(approx_QQbar_max);
 }
 
 
@@ -106,23 +105,23 @@ template<>
 void Xsection<HS2HS, 2, double(*)(const double, void*)>::
         sample(std::vector<double> parameters,
                 std::vector< fourvec > & FS){
-    double sqrts = std::max(parameters[0], _mass*1.01), temp = parameters[1];
+    double lnsqrts = parameters[0], temp = parameters[1];
+    double sqrts = std::exp(lnsqrts);
     double s = std::pow(sqrts,2);
-    // transform w = -log(1-t/Temp^2)
-    // since nearly everything happens when t ~ T^2
+    // transform w = -1/t
     auto dXdw = [s, temp, this](double w) {
-        double T2 = temp*temp;
         double params[3] = {s, temp, this->_mass};
-        double t = T2*(1.-std::exp(-w));
-        double Jacobian = T2 - t;
+        double t = -1./w;
+        double Jacobian = t*t;
         return this->_f(t, params)*Jacobian;
     };
     double tmin = -std::pow(s-_mass*_mass, 2)/s, 
            tmax = std::max(-cut*t_channel_mD2->get_mD2(temp), tmin*.99);
-    double wmin = -std::log(1.-tmin/temp/temp),
-           wmax = -std::log(1.-tmax/temp/temp);
-    double w = sample_1d(dXdw, {wmin, wmax}, StochasticBase<2>::GetFmax(parameters).s);
-    double t = temp*temp*(1.-std::exp(-w));
+    double wmin = -1./tmin,
+           wmax = -1./tmax;
+    double w = sample_1d(dXdw, {wmin, wmax}, 
+                         StochasticBase<2>::GetFmax(parameters).s);
+    double t = -1./w;
     // sample phi
     double phi = Srandom::dist_phi(Srandom::gen);
     double cosphi = std::cos(phi), sinphi = std::sin(phi);
@@ -170,11 +169,15 @@ template<>
 void Xsection<HS2HHS, 2, double(*)(const double*, void*)>::
     sample(std::vector<double> parameters,
             std::vector< fourvec > & FS){
-    double sqrts = std::max(parameters[0], _mass*1.01), temp = parameters[1];
-    double s = sqrts*sqrts;
+    double lnsqrts = parameters[0], temp = parameters[1];
+    double sqrts = std::exp(lnsqrts);
+    double s = std::pow(sqrts,2);
     double Qmax = (s-_mass*_mass)/2./sqrts;
     double umax = std::log(1.+Qmax/temp);
-    // x0 = log(1+kt/T), x1 = y/ymax, x2 = -log(1+(1-costheta34)/(T/Qmax)^2), c3 = phi34
+    // x0 = log(1+kt/T), 
+    // x1 = y/ymax, 
+    // x2 = -log(1+(1-costheta34)/(T/Qmax)^2), 
+    // x3 = phi34
     double x2min = -std::log(1.+2./std::pow(temp/Qmax, 2));
     double tmax = -cut*t_channel_mD2->get_mD2(temp);
     double x2max = std::max(x2min*.99, 
@@ -235,8 +238,9 @@ template<>
 void Xsection<HHS2HS, 4, double(*)(const double*, void*)>::
     sample(std::vector<double> parameters,
             std::vector< fourvec > & FS){
-    double sqrts = parameters[0], temp = parameters[1],
+    double lnsqrts = parameters[0], temp = parameters[1],
            xinel = parameters[2], yinel = parameters[3];
+    double sqrts = std::exp(lnsqrts);
     double s = sqrts*sqrts;
     auto dXdPS = [s, temp, xinel, yinel, this](const double * PS){
         double M = this->_mass;
@@ -244,7 +248,7 @@ void Xsection<HHS2HS, 4, double(*)(const double*, void*)>::
         return this->_f(PS, params);
     };
     double fmax = std::exp(StochasticBase<4>::GetFmax(parameters).s);
-    //LOG_INFO << "dX(sqrts, T, x, y, dt) " << sqrts << " " << temp << " " << xinel << " " << yinel << " " << dt;
+
     bool status = true;
     auto res = sample_nd(dXdPS, 2, {{-1., 1.}, {0., 2.*M_PI}}, fmax, status);
     double costheta34 = res[0], phi34 = res[1];
@@ -281,20 +285,21 @@ void Xsection<HHS2HS, 4, double(*)(const double*, void*)>::
 template<>
 scalar Xsection<HS2HS, 2, double(*)(const double, void*)>::
     find_max(std::vector<double> parameters){
-    double s = std::pow(parameters[0],2), temp = parameters[1];
-    // transform w = -log(1-t/Temp^2)
-    // since nearly everything happens when t ~ T^2
+    double lnsqrts = parameters[0], temp = parameters[1];
+    double sqrts = std::exp(lnsqrts);
+    double s = std::pow(sqrts,2);
+    // transform w = -1/t
     auto minus_dXdw = [s, temp, this](const double w) {
-        double T2 = temp*temp;
         double params[3] = {s, temp, this->_mass};
-        double t = T2*(1.-std::exp(-w));
-        double Jacobian = T2 - t;
-        return -(this->_f(t, params)*Jacobian);
+        double t = -1./w;
+        double Jacobian = t*t;
+        return  -(this->_f(t, params)*Jacobian);
     };
+    double tcut = -cut*t_channel_mD2->get_mD2(temp);
     double tmin = -std::pow(s-_mass*_mass, 2)/s, 
-           tmax = std::max(-cut*t_channel_mD2->get_mD2(temp), tmin*.99);
-    double wmin = -std::log(1.-tmin/temp/temp),
-           wmax = -std::log(1.-tmax/temp/temp);
+           tmax = std::max(tcut, tmin);
+    double wmin = -1./tmin,
+           wmax = -1./tmax;
     double res = -minimize_1d(minus_dXdw, {wmin, wmax}, 1e-8, 100, 1000);
     return scalar{res*1.5};
 }
@@ -321,13 +326,16 @@ scalar Xsection<HS2QQbar, 2, double(*)(const double, void*)>::
 template<>
 scalar Xsection<HS2HHS, 2, double(*)(const double*, void*)>::
     find_max(std::vector<double> parameters){
-    double sqrts = parameters[0], temp = parameters[1],
-           delta_t = parameters[2];
-
-    double s = sqrts*sqrts;
+    double lnsqrts = parameters[0], temp = parameters[1];
+    double sqrts = std::exp(lnsqrts);
+    double s = std::pow(sqrts,2);
     double Qmax = (s-_mass*_mass)/2./sqrts;
+    if (Qmax*Qmax<cut*t_channel_mD2->get_mD2(temp)) return scalar{std::log(1e-10)};
     double umax = std::log(1.+Qmax/temp);
-    // x0 = log(1+kt/T), x1 = yk, x2 = -log(1+(1-costheta34)/(T/Qmax)^2), c3 = phi34
+    // x0 = log(1+kt/T), 
+    // x1 = y/ymax, 
+    // x2 = -log(1+(1-costheta34)/(T/Qmax)^2), 
+    // c3 = phi34
     double x2min = -std::log(1.+2./std::pow(temp/Qmax, 2));
     double tmax = -cut*t_channel_mD2->get_mD2(temp);
     double x2max = std::max(x2min*.99, 
@@ -375,8 +383,9 @@ scalar Xsection<HS2HHS, 2, double(*)(const double*, void*)>::
 template<>
 scalar Xsection<HHS2HS, 4, double(*)(const double*, void*)>::
     find_max(std::vector<double> parameters){
-        double sqrts = parameters[0], temp = parameters[1],
+        double lnsqrts = parameters[0], temp = parameters[1],
                xinel = parameters[2], yinel = parameters[3];
+        double sqrts = std::exp(lnsqrts);
         double s = sqrts*sqrts;
         auto dXdPS = [s, temp, xinel, yinel, this](const double * PS){
             double M = this->_mass;
@@ -411,28 +420,33 @@ scalar Xsection<HHS2HS, 4, double(*)(const double*, void*)>::
 template<>
 scalar Xsection<HS2HS, 2, double(*)(const double, void*)>::
         calculate_scalar(std::vector<double> parameters){
-    double s = std::pow(parameters[0],2), temp = parameters[1];
-    // transform w = -log(1-t/Temp^2)
-    // since nearly everything happens when t ~ T^2
+    double lnsqrts = parameters[0], temp = parameters[1];
+    double sqrts = std::exp(lnsqrts);
+    double s = std::pow(sqrts,2);
+    // transform w = -1/t
     auto dXdw = [s, temp, this](double w) {
-        double T2 = temp*temp;
         double params[3] = {s, temp, this->_mass};
-        double t = T2*(1.-std::exp(-w));
-        double Jacobian = T2 - t;
+        double t = -1./w;
+        double Jacobian = t*t;
         return this->_f(t, params)*Jacobian;
     };
-    double error, 
-           tmin = -std::pow(s-_mass*_mass, 2)/s, 
-           tmax = std::max(-cut*t_channel_mD2->get_mD2(temp), tmin*.99);
-    double wmin = -std::log(1.-tmin/temp/temp),
-           wmax = -std::log(1.-tmax/temp/temp+1e-9);
-    double res = quad_1d(dXdw, {wmin, wmax}, error);
+
+    double res;
+    double tmin = -std::pow(s-_mass*_mass, 2)/s, 
+           tmax = -cut*t_channel_mD2->get_mD2(temp);
+    if (tmin>=tmax) res=0.;
+    else {
+        double wmin = -1./tmin,
+               wmax = -1./tmax;
+        double error;
+        res = quad_1d(dXdw, {wmin,wmax}, error);
+    }
     return scalar{res};
 }
 
 template<>
 scalar Xsection<HS2QQbar, 2, double(*)(const double, void*)>::
-        calculate_scalar(std::vector<double> parameters){
+        calculate_scalar(std::vector<double> parameters){    
     double lnsqrts = parameters[0], temp = parameters[1];
     double sqrts = std::exp(lnsqrts);
     double s = std::pow(sqrts,2);
@@ -452,7 +466,8 @@ scalar Xsection<HS2QQbar, 2, double(*)(const double, void*)>::
 template<>
 scalar Xsection<HS2HHS, 2, double(*)(const double*, void*)>::
                 calculate_scalar(std::vector<double> parameters){
-    double sqrts = parameters[0], temp = parameters[1];
+    double lnsqrts = parameters[0], temp = parameters[1];
+    double sqrts = std::exp(lnsqrts);
     double s = sqrts*sqrts;
     auto dXdPS = [s, temp, this](const double * PS){
         double M = this->_mass;
@@ -461,11 +476,16 @@ scalar Xsection<HS2HHS, 2, double(*)(const double*, void*)>::
     };
     double Qmax = (s-_mass*_mass)/2./sqrts;
     double umax = std::log(1.+Qmax/temp);
-    double cosmax = std::max(-.99, 1.-cut*t_channel_mD2->get_mD2(temp)/Qmax/Qmax);
-    double xmin[4] = {0., -1., -1., 0.};
-    double xmax[4] = {umax, 1., cosmax, 2.*M_PI};
-    double error;
-    double res = vegas(dXdPS, 4, xmin, xmax, error);
+    double cosmax = 1.;
+
+    double res;
+    if (Qmax*Qmax<=cut*t_channel_mD2->get_mD2(temp)) res = 0.;
+    else{
+        double xmin[4] = {0., -1., -1., 0.};
+        double xmax[4] = {umax, 1., 1., 2.*M_PI};
+        double error;
+        res = vegas(dXdPS, 4, xmin, xmax, error);
+    }
     return scalar{res};
 }
 /*------------------Implementation for 3 -> 2--------------------*/
@@ -474,8 +494,9 @@ scalar Xsection<HHS2HS, 4, double(*)(const double*, void*)>::
                 calculate_scalar(std::vector<double> parameters){
 
     // xiel = s12/s
-    double sqrts = parameters[0], temp = parameters[1],
+    double lnsqrts = parameters[0], temp = parameters[1],
            xinel = parameters[2], yinel = parameters[3];
+    double sqrts = std::exp(lnsqrts);
     double s = sqrts*sqrts;
     auto dXdPS = [s, temp, xinel, yinel, this](const double * PS){
         double M = this->_mass;
@@ -503,25 +524,31 @@ fourvec Xsection<str, N, F>::calculate_fourvec(std::vector<double> parameters){
 template<>
 fourvec Xsection<HS2HS, 2, double(*)(const double, void*)>::
         calculate_fourvec(std::vector<double> parameters){
-    double sqrts = parameters[0], temp = parameters[1];
+    double lnsqrts = parameters[0], temp = parameters[1];
+    double sqrts = std::exp(lnsqrts);
     double s = std::pow(sqrts,2);
     double p0 = (s-_mass*_mass)/2./sqrts;
     // <dpz*X>
     auto dpz_dXdw = [s, temp, p0, this](double w) {
-        double T2 = temp*temp;
         double params[3] = {s, temp, this->_mass};
-        double t = T2*(1.-std::exp(-w));
-        double Jacobian = T2 - t;
+        double t = -1./w;
+        double Jacobian = t*t;
         double cos_theta13 = 1. + t/(2*p0*p0);
         double dpz = p0*(cos_theta13-1.);
         return this->_f(t, params)*dpz*Jacobian;
     };
-    double error, 
-           tmin = -std::pow(s-_mass*_mass, 2)/s, 
-           tmax = std::max(-cut*t_channel_mD2->get_mD2(temp), tmin*.99);
-    double wmin = -std::log(1.-tmin/temp/temp),
-           wmax = -std::log(1.-tmax/temp/temp+1e-9);
-    double dpz = quad_1d(dpz_dXdw, {wmin, wmax}, error);
+
+    double dpz; 
+    double tmin = -std::pow(s-_mass*_mass, 2)/s, 
+           tmax = -cut*t_channel_mD2->get_mD2(temp);
+    if (tmin>=tmax) dpz=0.;
+    else {
+        double wmin = -1./tmin,
+               wmax = -1./tmax;
+        double error;
+        dpz = quad_1d(dpz_dXdw, {wmin, wmax}, error);
+    }
+
     return fourvec{0., 0., 0., dpz};
 }
 
@@ -537,37 +564,43 @@ tensor Xsection<str, N, F>::calculate_tensor(std::vector<double> parameters){
 template<>
 tensor Xsection<HS2HS, 2, double(*)(const double, void*)>::
     calculate_tensor(std::vector<double> parameters){
-    double sqrts = parameters[0], temp = parameters[1];
+    double lnsqrts = parameters[0], temp = parameters[1];
+    double sqrts = std::exp(lnsqrts);
     double s = std::pow(sqrts,2);
     const double p0 = (s-_mass*_mass)/2./sqrts;
     // <dpz^2*X>
     auto dpzdpz_dXdw = [s, temp, p0, this](double w) {
-        double T2 = temp*temp;
         double params[3] = {s, temp, this->_mass};
-        double t = T2*(1.-std::exp(-w));
-        double Jacobian = T2 - t;
+        double t = -1./w;
+        double Jacobian = t*t;
         double cos_theta13 = 1. + t/(2*p0*p0);
         double dpz = p0*(cos_theta13-1.);
         return this->_f(t, params)*dpz*dpz*Jacobian;
     };
     // <dpt^2*X>
     auto dptdpt_dXdw = [s, temp, p0, this](double w) {
-        double T2 = temp*temp;
         double params[3] = {s, temp, this->_mass};
-        double t = T2*(1.-std::exp(-w));
-        double Jacobian = T2 - t;
+        double t = -1./w;
+        double Jacobian = t*t;
         double cos_theta13 = 1. + t/(2*p0*p0);
         double dptdpt = p0*p0*(1.-cos_theta13*cos_theta13);
         return this->_f(t, params)*dptdpt*Jacobian;
     };
 
-    double error, 
-           tmin = -std::pow(s-_mass*_mass, 2)/s, 
-           tmax = std::max(-cut*t_channel_mD2->get_mD2(temp), tmin*.99);
-    double wmin = -std::log(1.-tmin/temp/temp),
-           wmax = -std::log(1.-tmax/temp/temp+1e-9);
-    double dpzdpz = quad_1d(dpzdpz_dXdw, {wmin, wmax}, error);
-    double dptdpt = quad_1d(dptdpt_dXdw, {wmin, wmax}, error);
+    double dpzdpz, dptdpt;
+    double tmin = -std::pow(s-_mass*_mass, 2)/s, 
+           tmax = -cut*t_channel_mD2->get_mD2(temp);
+    if (tmin>tmax) {
+        dpzdpz=0.;
+        dptdpt=0.;
+    }
+    else{
+        double error;
+        double wmin = -1./tmin,
+               wmax = -1./tmax;
+        dpzdpz = quad_1d(dpzdpz_dXdw, {wmin, wmax}, error);
+        dptdpt = quad_1d(dptdpt_dXdw, {wmin, wmax}, error);
+    }
     return tensor{0.,     0.,         0.,         0.,
                   0.,     dptdpt/2.,     0.,         0.,
                   0.,     0.,         dptdpt/2.,    0.,

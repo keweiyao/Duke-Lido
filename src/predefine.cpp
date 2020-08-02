@@ -41,18 +41,17 @@ const double alpha_max = 1.0;
 const double Lambda = 0.2; // [GeV] Lambda QCD = 0.2 GeV
 const double Lambda2 = Lambda*Lambda; // [GeV^2] Lambda QCD squared
 const double mu2_NP = Lambda2*std::exp(alpha0/alpha_max); // minimum cut on Q2, where alpha = alpha_0
-const double Tc = 0.154;
+
 double cut;
 double scale;
 double afix;
 double Lido_Ecut;
 
 Debye_mass * t_channel_mD2;
-const double LPM_prefactor = 1.0;
+const double LPM_prefactor = 0.87;
 
 int time_type;
 bool Adiabatic_LPM;
-qhat_params_struct qhat_params;
 
 void initialize_mD_and_scale(int _mD_type, double _mu, double _afix, double _theta, double _cut){
         cut = _cut;
@@ -62,20 +61,10 @@ void initialize_mD_and_scale(int _mD_type, double _mu, double _afix, double _the
         t_channel_mD2 = new Debye_mass(_mD_type);
 }
 
-void initialize_transport_coeff(double _K, double _a, double _b, double _p, double _q, double _gamma){
-	qhat_params.K = _K;
-	qhat_params.a = _a;
-	qhat_params.b = _b;
-	qhat_params.p = _p;
-	qhat_params.q = _q;
-	qhat_params.gamma = _gamma;
-}
 
 void echo(void){
-	std::cout << "mu\tafix\tK\ta\tb\tp\tq\tgamma\tQcut\n";
-	std::cout <<scale<<"\t"<<afix<<"\t"<<qhat_params.K<<"\t"<<qhat_params.a
-               <<"\t"<<qhat_params.b<<"\t"<<qhat_params.p<<"\t"<<qhat_params.q
-               <<"\t"<<qhat_params.gamma<<"\t"<<cut<<"\n";
+	std::cout << "mu\tafix\tQcut\ttheta\n";
+	std::cout <<scale<<"\t"<<afix<<"\t"<<cut<<"\t"<<Lido_Ecut<<"\n";
 }
 
 Debye_mass::Debye_mass(const unsigned int _type):

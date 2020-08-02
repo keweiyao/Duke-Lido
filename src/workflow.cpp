@@ -121,15 +121,8 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
     time_type = config.get("t_type", 0); 
     // 0: default, 1: local approxiamtion
     bool Adiabatic_LPM = config.get("LPM_type", 0);
-    double K=config.get("K", 0.0);
-    double a=config.get("a", 1.0);
-    double b=config.get("b", 1.0);
-    double p=config.get("p", 1.0);
-    double q=config.get("q", 1.0);
-    double gamma=config.get("gamma", 1.0); 
     
     initialize_mD_and_scale(0, mu, afix, theta, cut);
-    initialize_transport_coeff(K, a, b, p, q, gamma);
     echo();
 
     // for gluon
@@ -297,6 +290,7 @@ int update_particle_momentum_Lido(
     auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
     double dt_cell = dt_for_pIn / pIn.p.t() * p_cell.t();
     double E_cell = p_cell.t();
+    double LnE_cell = std::log(E_cell);
 
     // For diffusion induced radiation, qhat_Soft is an input
     double qhatg = qhat(21, E_cell, 0., temp);
@@ -312,42 +306,42 @@ int update_particle_momentum_Lido(
         {
         case 0:
             if (boost::get<Rate22>(r).IsActive())
-                dR = boost::get<Rate22>(r).GetZeroM({E_cell, temp}).s;
+                dR = boost::get<Rate22>(r).GetZeroM({LnE_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 1:
             if (boost::get<Rate23>(r).IsActive() && can_rad)
-                dR = boost::get<Rate23>(r).GetZeroM({E_cell, temp}).s;
+                dR = boost::get<Rate23>(r).GetZeroM({LnE_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 2:
             if (boost::get<Rate32>(r).IsActive() && can_rad)
-                dR = boost::get<Rate32>(r).GetZeroM({E_cell, temp}).s;
+                dR = boost::get<Rate32>(r).GetZeroM({LnE_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 3:
             if (boost::get<Rate12>(r).IsActive() && can_rad)
-                dR = qhatg * boost::get<Rate12>(r).GetZeroM({E_cell, temp}).s;
+                dR = qhatg * boost::get<Rate12>(r).GetZeroM({LnE_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 4:
             if (boost::get<Rate21>(r).IsActive() && can_rad)
-                dR = qhatg * boost::get<Rate21>(r).GetZeroM({E_cell, temp}).s;
+                dR = qhatg * boost::get<Rate21>(r).GetZeroM({LnE_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 5:
             if (boost::get<Rate22QQbar>(r).IsActive() && (!pIn.is_virtual))
-                dR = qhatg * boost::get<Rate21>(r).GetZeroM({E_cell, temp}).s;
+                dR = qhatg * boost::get<Rate21>(r).GetZeroM({LnE_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
@@ -394,21 +388,21 @@ int update_particle_momentum_Lido(
         // Sampe its differential final state
         switch (AllProcesses[channel_pid][channel].which()){
         case 0:
-            boost::get<Rate22>(AllProcesses[channel_pid][channel]).sample({E_cell, temp}, FS);
+            boost::get<Rate22>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, FS);
             break;
         case 1:
-            boost::get<Rate23>(AllProcesses[channel_pid][channel]).sample({E_cell, temp}, FS);
+            boost::get<Rate23>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, FS);
             break;
         case 2:
-            boost::get<Rate32>(AllProcesses[channel_pid][channel]).sample({E_cell, temp}, FS);
+            boost::get<Rate32>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, FS);
             break;
         case 3:
-            boost::get<Rate12>(AllProcesses[channel_pid][channel]).sample({E_cell, temp}, FS);
+            boost::get<Rate12>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, FS);
             break;
         case 4:
-            boost::get<Rate21>(AllProcesses[channel_pid][channel]).sample({E_cell, temp}, FS);
+            boost::get<Rate21>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, FS);
         case 5:
-            boost::get<Rate22QQbar>(AllProcesses[channel_pid][channel]).sample({E_cell, temp}, FS);
+            boost::get<Rate22QQbar>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, FS);
             break;
         default:
             LOG_FATAL << "2. Channel = " << channel << " not exists";
@@ -454,27 +448,24 @@ int update_particle_momentum_Lido(
                 // the qhat_hard integrate from the 2->2 rate
                 double xfrac = vp.p.t() / pIn.p.t();
                 double local_qhat = 0.;
-                double vp_cell = vp.p.boost_to(v3cell[0], 
-                                           v3cell[1], v3cell[2]).t();
+                double vp_cell = vp.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
+                double Lnvp_cell = std::log(vp_cell);
                 double boost_factor = vp.p.t() / vp_cell;
                 BOOST_FOREACH (Process &r, AllProcesses[21]){
-                switch (r.which()){
-                case 0:
-                    if (boost::get<Rate22>(r).IsActive()){
-                        tensor A = boost::get<Rate22>(r).GetSecondM(
-                            {vp_cell, temp});
-                        local_qhat += A.T[1][1] + A.T[2][2];
+                    switch (r.which()){
+                    case 0:
+                        if (boost::get<Rate22>(r).IsActive()){
+                            tensor A = boost::get<Rate22>(r).GetSecondM({Lnvp_cell, temp});
+                            local_qhat += A.T[1][1] + A.T[2][2];
+                        }
+                        break;
+                    default:
+                        break;
                     }
-                    break;
-                default:
-                    break;
-                }
-            }
-            
-            // estimate mfp in the lab frame
-            vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
-
-            pIn.radlist.push_back(vp);
+                }  
+                // estimate mfp in the lab frame
+                vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
+                pIn.radlist.push_back(vp);
             }
         }
         if (channel == 4 || channel == 5){
@@ -591,6 +582,8 @@ int update_particle_momentum_Lido(
 		    pIn.Q00 = pIn.Q0;
 		    it->Q0 = pIn.Q0;
 		    it->Q00 = it->Q0;
+
+                    //f << pIn.x.t() << " " << it->p0.t() << " " << it->mother_p.t() << " " << kt2n<<std::endl;
  
                     int col=-100, acol=-100, mcol=-100, macol=-100;
                     SampleFlavorAndColor(pIn.pid, pIn.col,

@@ -46,6 +46,15 @@ int main(int argc, char* argv[]){
            ("pid,i",
            po::value<int>()->value_name("INT")->default_value(21),
            "initial parton pid")
+	  ("muT",
+           po::value<double>()->value_name("DOUBLE")->default_value(1.5,"1.5"),
+	   "mu_min/piT")
+	  ("afix",
+           po::value<double>()->value_name("DOUBLE")->default_value(-1.,"-1."),
+           "fixed alpha_s, <0 for running alphas")
+           ("cut",
+           po::value<double>()->value_name("DOUBLE")->default_value(4.,"4."),
+           "cut between diffusion and scattering, Qc^2 = cut*mD^2")
     ;
 
     po::variables_map args{};
@@ -81,10 +90,14 @@ int main(int argc, char* argv[]){
         /// use process id to define filename
         int processid = getpid();
         /// Initialize Lido in-medium transport
-        initialize(table_mode,
-            args["lido-setting"].as<fs::path>().string(),
-            args["lido-table"].as<fs::path>().string()
-        );
+        double muT = args["muT"].as<double>();
+        double cut = args["cut"].as<double>();
+        double afix = args["afix"].as<double>();
+
+        initialize(table_mode, 
+            args["lido-setting"].as<fs::path>().string(), 
+            args["lido-table"].as<fs::path>().string(), 
+	    muT, afix, 4, cut);
 
         int pid = args["pid"].as<int>();
         double T0 = args["temp"].as<double>();
@@ -102,6 +115,7 @@ int main(int argc, char* argv[]){
             p.Tf = T0;
             p.x0 = x0;
             p.x = x0;
+            p.tau_i = 0.;
             p.p0 = p0;
             p.p = p0;
             p.vcell.resize(3);
@@ -110,7 +124,7 @@ int main(int argc, char* argv[]){
         for (double l=0; l<L0; l+=dL){
             LOG_INFO << l;
             for (auto & p : plist){
-                p.p = p.p0;
+                p.p = p0;
                 int fs_size = update_particle_momentum_Lido(
                       dL, T0, {0,0,0}, p, pOut_list);       
             }
