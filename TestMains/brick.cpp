@@ -19,7 +19,7 @@ namespace fs = boost::filesystem;
 
 void output_jet(std::string fname, std::vector<particle> plist){
     std::ofstream f(fname);
-    for (auto & p : plist) f << p.pid << " " << p.p << " " << p.x << " " << p.Q0 << std::endl;
+    for (auto & p : plist) f << p.pid << " " << p.p<< std::endl;
     f.close();
 }
 
@@ -102,10 +102,11 @@ int main(int argc, char* argv[]){
         int pid = args["pid"].as<int>();
         double T0 = args["temp"].as<double>();
         double E0 = args["einit"].as<double>();
-        double L0 = 100*5.076;
-        double dL = L0/5000;
+        double L0 = 3*5.076;
+        double dL = L0/100;
         std::vector<particle> plist, new_plist, pOut_list;
-        plist.resize(200);
+        plist.resize(4000);
+        
         fourvec x0{0.,0.,0.,0.};
         fourvec p0{E0,0.,0.,E0};
 
@@ -123,12 +124,15 @@ int main(int argc, char* argv[]){
         }
         for (double l=0; l<L0; l+=dL){
             LOG_INFO << l;
+            new_plist.clear();
             for (auto & p : plist){
-                p.p = p0;
                 int fs_size = update_particle_momentum_Lido(
-                      dL, T0, {0,0,0}, p, pOut_list);       
+                      dL, T0, {0,0,0}, p, pOut_list);
+                for (auto & p : pOut_list) new_plist.push_back(p);
             }
+            plist=new_plist;
         }
+output_jet("out.dat",plist);
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

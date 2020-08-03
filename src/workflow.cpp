@@ -247,23 +247,22 @@ int update_particle_momentum_Lido(
     auto x0 = pIn.x;
     double dt_for_pIn = compute_realtime_to_propagate(dt_input, pIn.x, pIn.p);
     pIn.freestream(dt_for_pIn);
-    double mD2 = t_channel_mD2->get_mD2(temp);
-    double mD = std::sqrt(mD2);
-    double Eradmin = mD;
     // we only handle u,d,s,c,b,g
-    if (!((pIn.pid==21) || (std::abs(pIn.pid)<=5))){
-        pOut_list.push_back(pIn);
-        return pOut_list.size();
-    }
     bool formed_from_vac = (pIn.x.t()>pIn.tau_i);
-    // Don't touch particles below Tc
-    if (temp < 0.16){
+    if ( (!((pIn.pid==21) || (std::abs(pIn.pid)<=5)) )
+       || (!formed_from_vac)
+       || (temp<.16)){
         pIn.radlist.clear();
         pOut_list.push_back(pIn);
         return pOut_list.size();
     }
+
+    double mD2 = t_channel_mD2->get_mD2(temp);
+    double mD = std::sqrt(mD2);
+    double Eradmin = mD;
+
     // Don't touch particles already below soft cut
-    if ((!pIn.is_virtual) && (pIn.Q0<mD/1.414) && formed_from_vac
+    if ((!pIn.is_virtual) && (pIn.Q0<.01)
         && (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Emin)
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 

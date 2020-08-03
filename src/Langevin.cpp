@@ -7,14 +7,14 @@ double const tiny = 1e-10;
 double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
     double CR = (pid==21) ? CA : CF;
     double mD2 = t_channel_mD2->get_mD2(T);
-    double Q2cut = cut*mD2;
+    double Q2cut = std::max(std::min(cut*mD2, 6*E*T),mD2);
     return alpha_s(Q2cut, T) * CR * T * mD2 * std::log(Q2cut/mD2);
 }
 
 double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
     double CR = (pid==21) ? CA : CF;
     double mD2 = t_channel_mD2->get_mD2(T);
-    double Q2cut = cut*mD2;
+    double Q2cut = std::max(std::min(cut*mD2, 6*E*T),mD2);
     return alpha_s(Q2cut, T) * CR * T * .5*mD2 * std::log(Q2cut/mD2);
 }
 
@@ -50,7 +50,7 @@ void Ito_update(int pid, double dt_lab, double M, double T,
     double minf = std::sqrt(t_channel_mD2->get_mD2(T)/2.);
     double Ed = std::max(E0, minf);
     double drag = kl/(2.*Ed*T);
-    double damp = 1.-drag*dt;           
+    double damp = std::max(1.-drag*dt, 0.);           
     double Ct = std::sqrt(kt*dt);
     double Cl = std::sqrt(kl*dt);
    

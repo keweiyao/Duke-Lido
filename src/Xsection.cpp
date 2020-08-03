@@ -193,11 +193,12 @@ void Xsection<HS2HHS, 2, double(*)(const double*, void*)>::
         double params[3] = {s, temp, M};
         return this->_f(x, params)/2./(s-_mass*_mass)*Jacobian;
     };
-
+    
     double xmin[4] = {0., -1.,  x2min, 0.};
     double xmax[4] = {umax, 1., x2max, 2.*M_PI};
     double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
     bool status = true;
+    LOG_INFO << "here2";
     auto res = sample_nd(dXdPS, 4, {{xmin[0], xmax[0]}, {xmin[1], xmax[1]},
                                     {xmin[2], xmax[2]}, {xmin[3], xmax[3]}},
                                     fmax, status);

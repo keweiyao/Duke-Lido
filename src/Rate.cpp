@@ -121,7 +121,7 @@ void Rate<HS2HS, 2, 2, double(*)(const double, void *)>::
     bool status = true;
     double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
     auto res = sample_nd(dR_dxdy, 2, 
-                      {{lnsqrtsmin, std::log(sqrtsmin+100*E*T)}, {-1., 1.}},
+                      {{lnsqrtsmin, std::log(sqrtsmin*10)}, {-1., 1.}},
                       fmax, status);
     double lnsqrts = res[0], costheta = res[1];
     double s = std::exp(2.*lnsqrts);
@@ -223,10 +223,12 @@ void Rate<HS2HHS, 2, 2, double(*)(const double*, void *)>::
         return Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
     };
     bool status = true;
+    double fmax = StochasticBase<2>::GetFmax(parameters).s;
+    LOG_INFO << "here";
     auto res = sample_nd(dR_dxdy, 2, 
                {{std::log(sqrtsmin), std::log(sqrtsmin*10)}, 
                {-1., 1.}}, 
-               std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
+               fmax, status);
     double lnsqrts = res[0], costheta = res[1];
     double sintheta = std::sqrt(1. - costheta*costheta);
     double phi = Srandom::dist_phi(Srandom::gen);
@@ -399,8 +401,10 @@ scalar Rate<HS2HHS, 2, 2, double(*)(const double*, void*)>::
         double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
         return -Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
     };
-    auto val = -minimize_nd(dR_dxdy, 2, {lnsqrtsmin*2, 0.}, {lnsqrtsmin*.5, 0.2}, 1000, 1e-8)*3;
-    return scalar{std::log(val)};
+
+    auto val = -minimize_nd(dR_dxdy, 2, {lnsqrtsmin*2, 0.}, 
+                                        {lnsqrtsmin*.2, 0.2}, 1000, 1e-8);
+    return scalar{val*2};
 }
 /*------------------Implementation for 3 -> 2--------------------*/
 template <>
@@ -463,7 +467,7 @@ scalar Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         return res;
     };
     double xmin[2] = {std::log(sqrtsmin), -1.};
-    double xmax[2] = {std::log(sqrtsmin+100*E*T),1.};
+    double xmax[2] = {std::log(sqrtsmin*10),1.};
     double err;
     auto val = quad_nd(code, 2, 1, xmin, xmax, err);
     return scalar{_degen*val[0]};
@@ -591,8 +595,8 @@ fourvec Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         std::vector<double> res{fmu2.t(), fmu2.z()};
         return res;
     };
-    double xmin[2] = {0., -1.};
-    double xmax[2] = {10.*T, 1.};
+    double xmin[2] = {std::log(sqrtsmin), -1.};
+    double xmax[2] = {std::log(sqrtsmin*10), 1.};
     double err;
     auto val = quad_nd(code, 2, 2, xmin, xmax, err);
     return fourvec{_degen*val[0], 0.0, 0.0, _degen*val[1]};
@@ -641,7 +645,7 @@ tensor Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         return res;
     };
     double xmin[3] = {std::log(sqrtsmin), -1., -M_PI};
-    double xmax[3] = {std::log(sqrtsmin+6*E*T), 1., M_PI};
+    double xmax[3] = {std::log(sqrtsmin*10), 1., M_PI};
     double err;
     auto val = quad_nd(code, 3, 4, xmin, xmax, err);
     return tensor{_degen*val[0], 0., 0., 0.,
