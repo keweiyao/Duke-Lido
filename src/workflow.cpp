@@ -249,7 +249,7 @@ int update_particle_momentum_Lido(
     pIn.freestream(dt_for_pIn);
     double mD2 = t_channel_mD2->get_mD2(temp);
     double mD = std::sqrt(mD2);
-    double Eradmin = 3.*T;
+    double Eradmin = mD;
     // we only handle u,d,s,c,b,g
     if (!((pIn.pid==21) || (std::abs(pIn.pid)<=5))){
         pOut_list.push_back(pIn);
