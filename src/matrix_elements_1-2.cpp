@@ -29,8 +29,6 @@ double LGV_q2qg(const double * x_, void * params_){
     double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) * P_q2qg(x0)
                      * 1./std::pow(kT2+mg2, 2)
                      * Jacobian;
-    // a hard cut below threshold
-    if ( std::pow((1-x0)*E,2) < M*M + kT2) return 0.;
     return dR_dxdy;
 }
 
@@ -82,9 +80,6 @@ double LGV_g2qqbar(const double * x_, void * params_){
   double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) * P_g2qq(x0) * CF / 4.
                      * 1./std::pow(kT2+mg2, 2)
                      * Jacobian;
-  // a hard cut below threshold
-  if (std::pow(x0*E,2) < M*M + kT2 || std::pow((1-x0)*E,2) < M*M + kT2 ) 
-      return 0.;
   return dR_dxdy;
 }
 

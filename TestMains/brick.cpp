@@ -105,7 +105,7 @@ int main(int argc, char* argv[]){
         double L0 = 100*5.076;
         double dL = L0/5000;
         std::vector<particle> plist, new_plist, pOut_list;
-        plist.resize(1000);
+        plist.resize(200);
         fourvec x0{0.,0.,0.,0.};
         fourvec p0{E0,0.,0.,E0};
 
@@ -124,7 +124,7 @@ int main(int argc, char* argv[]){
         for (double l=0; l<L0; l+=dL){
             LOG_INFO << l;
             for (auto & p : plist){
-                //p.p = p0;
+                p.p = p0;
                 int fs_size = update_particle_momentum_Lido(
                       dL, T0, {0,0,0}, p, pOut_list);       
             }

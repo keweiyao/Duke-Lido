@@ -15,7 +15,7 @@ double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
     double CR = (pid==21) ? CA : CF;
     double mD2 = t_channel_mD2->get_mD2(T);
     double Q2cut = cut*mD2;
-    return alpha_s(Q2cut, T) * CR * T * .5*mD2 * std::log(2.*Q2cut/mD2);
+    return alpha_s(Q2cut, T) * CR * T * .5*mD2 * std::log(Q2cut/mD2);
 }
 
 
@@ -57,8 +57,7 @@ void Ito_update(int pid, double dt_lab, double M, double T,
     pOut.a[1] = Ct * Srandom::white_noise(Srandom::gen);
     pOut.a[2] = Ct * Srandom::white_noise(Srandom::gen);
     pOut.a[3] = p0 * damp + Cl * Srandom::white_noise(Srandom::gen);
-    pOut.a[0] = std::sqrt(M*M + std::pow(pOut.x(),2) 
-               + std::pow(pOut.y(),2) + std::pow(pOut.z(),2) );
+    pOut.a[0] = std::sqrt(M*M + pOut.pabs2() );
 
     // rotate back to the original frame
     pOut = pOut.rotate_back(pIn_cell);

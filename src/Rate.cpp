@@ -103,27 +103,34 @@ void Rate<HS2HS, 2, 2, double(*)(const double, void *)>::
             std::vector< fourvec > & final_states){
     double lnE = parameters[0], T = parameters[1];
     double E = std::exp(lnE);
-    double v1 = std::sqrt(1. - std::pow(_mass/E,2));
-    auto dR_dxdy = [E, T, v1, this](const double * x){
+    double M2 = _mass*_mass;
+    double v1 = std::sqrt(1. - M2/E/E);
+    double Q2 = cut*t_channel_mD2->get_mD2(T);
+    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
+    double lnsqrtsmin = std::log(sqrtsmin);
+    auto dR_dxdy = [E, T, lnsqrtsmin, v1, this](const double * x){
         double M = this->_mass;
-        double E2 = T*(std::exp(x[0])-1.), costheta = x[1];
-        if (costheta > 1. || costheta < -1.) return 0.;
-        double s = 2.*E2*E*(1. - v1*costheta) + M*M;
-        double lnsqrts = .5*std::log(s);
+        double lnsqrts = x[0], costheta = x[1];
+        if (lnsqrts<lnsqrtsmin||costheta>=1.||costheta<=-1.) return 0.;
+        double s = std::exp(2.*lnsqrts);
+        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
+        double Jacobian = 2.*E2;
         double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
-        double Jacobian = E2 + T;
-        return 1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
+        return Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
     };
     bool status = true;
-    auto res = sample_nd(dR_dxdy, 2, {{0., 4.}, {-1., 1.}},
-                        std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
-    double E2 = T*(std::exp(res[0])-1.),
-           costheta = res[1];
+    double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
+    auto res = sample_nd(dR_dxdy, 2, 
+                      {{lnsqrtsmin, std::log(sqrtsmin+100*E*T)}, {-1., 1.}},
+                      fmax, status);
+    double lnsqrts = res[0], costheta = res[1];
+    double s = std::exp(2.*lnsqrts);
+    double E2 = (s-_mass*_mass)/((1. - v1*costheta)*2.*E);
     double sintheta = std::sqrt(1. - costheta*costheta);
-    double s = 2.*E2*E*(1. - v1*costheta) + _mass*_mass;
-    double lnsqrts = .5*std::log(s);
-    X->sample({lnsqrts, T}, final_states);
 
+    double tmin = -std::pow(s-_mass*_mass, 2)/s, 
+           tmax = -cut*t_channel_mD2->get_mD2(T);
+    X->sample({lnsqrts, T}, final_states);
     // give incoming partilce a random phi angle
     double phi = Srandom::dist_phi(Srandom::gen);
     // com velocity
@@ -200,30 +207,35 @@ void Rate<HS2HHS, 2, 2, double(*)(const double*, void *)>::
             std::vector< fourvec > & final_states){
     double lnE = parameters[0], T = parameters[1];
     double E = std::exp(lnE);
-    double v1 = std::sqrt(1. - std::pow(_mass/E,2));
-    auto dR_dxdy = [E, T, v1, this](const double * x){
+    double M2 = _mass*_mass;
+    double v1 = std::sqrt(1. - M2/E/E);
+    double Q2 = cut*t_channel_mD2->get_mD2(T);
+    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
+    double lnsqrtsmin = std::log(sqrtsmin);
+    auto dR_dxdy = [E, T, lnsqrtsmin, v1, this](const double * x){
         double M = this->_mass;
-        double E2 = T*(std::exp(x[0])-1.), costheta = x[1];
-        if (costheta > 1. || costheta < -1.) return 0.;
-        double s = 2.*E2*E*(1. - v1*costheta) + M*M;
-        if ( std::pow(s-M*M,2)/s < cut*t_channel_mD2->get_mD2(T)) return 0.;
-        double lnsqrts = .5*std::log(s);
-        // interp cross-section
-        double Xtot = this->X->GetZeroM({lnsqrts, T}).s;
-        double Jacobian = E2 + T;
-        return 1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
+        double lnsqrts = x[0], costheta = x[1];
+        if (lnsqrts<lnsqrtsmin||costheta>=1.||costheta<=-1.) return 0.;
+        double s = std::exp(2.*lnsqrts);
+        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
+        double Jacobian = 2.*E2;
+        double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
+        return Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
     };
     bool status = true;
-    auto res = sample_nd(dR_dxdy, 2, {{0., 4.}, {-1., 1.}}, std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
-    double E2 = T*(std::exp(res[0])-1.), costheta = res[1];
+    auto res = sample_nd(dR_dxdy, 2, 
+               {{std::log(sqrtsmin), std::log(sqrtsmin*10)}, 
+               {-1., 1.}}, 
+               std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
+    double lnsqrts = res[0], costheta = res[1];
     double sintheta = std::sqrt(1. - costheta*costheta);
     double phi = Srandom::dist_phi(Srandom::gen);
     double cosphi = std::cos(phi), sinphi = std::sin(phi);
+    double s = std::exp(2.*lnsqrts);
+    double E2 = (s-M2)/((1. - v1*costheta)*2.*E);
     double vcom[3] = { E2*sintheta/(E2+E)*cosphi,
                         E2*sintheta/(E2+E)*sinphi,
                         (E2*costheta+v1*E)/(E2+E) };
-    double s = 2.*E2*E*(1. - v1*costheta) + _mass*_mass;
-    double lnsqrts = .5*std::log(s);
     X->sample({lnsqrts, T}, final_states);
 
     fourvec p1{E, 0, 0, v1*E};
@@ -326,23 +338,24 @@ scalar Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         find_max(std::vector<double> parameters){
     double lnE = parameters[0], T = parameters[1];
     double E = std::exp(lnE);
-    auto dR_dxdy = [E, T, this](const double * x){
+    double Q2 = cut*t_channel_mD2->get_mD2(T);
+    double M2 = _mass*_mass;
+    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
+    double lnsqrtsmin = std::log(sqrtsmin);
+    auto minus_dR_dxdy = [E, T, lnsqrtsmin, this](const double * x){
         double M = this->_mass;
         double v1 = std::sqrt(1. - M*M/E/E);
-        double E2 = T*(std::exp(x[0])-1.), costheta = x[1];
-        if (E2 <= 0. || costheta >= 1. || costheta <= -1.) return 0.;
-        double s = 2.*E2*E*(1. - v1*costheta) + M*M;
-        double lnsqrts = .5*std::log(s);
+        double lnsqrts = x[0], costheta = x[1];
+        if (lnsqrts<lnsqrtsmin||costheta>=1.||costheta<=-1.) return 0.;
+        double s = std::exp(2.*lnsqrts);
+        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
+        double Jacobian = 2.*E2;
         double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
-        double Jacobian = E2 + T;
-        return -1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
+        return -Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
     };
-    // use f(E(x), y)*dE/dx, x = log(1+E/T), y = costheta
-    // x start from 1, y start from 0
-    // x step 0.3, cosphi step 0.3
-    // save a slightly larger fmax
-    auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*1.5;
-    return scalar{std::log(val)};
+    auto val = -minimize_nd(minus_dR_dxdy, 2, 
+                            {lnsqrtsmin*2, 0.}, {lnsqrtsmin*.5, 0.2}, 1000, 1e-8);
+    return scalar{std::log(1.5*val)};
 }
 
 template <>
@@ -371,23 +384,22 @@ scalar Rate<HS2HHS, 2, 2, double(*)(const double*, void*)>::
         find_max(std::vector<double> parameters){
     double lnE = parameters[0], T = parameters[1];
     double E = std::exp(lnE);
-    auto dR_dxdy = [E, T, this](const double * x){
+    double M2 = _mass*_mass;
+    double v1 = std::sqrt(1. - M2/E/E);
+    double Q2 = cut*t_channel_mD2->get_mD2(T);
+    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
+    double lnsqrtsmin = std::log(sqrtsmin);
+    auto dR_dxdy = [E, T, lnsqrtsmin, v1, this](const double * x){
         double M = this->_mass;
-        double v1 = std::sqrt(1. - M*M/E/E);
-        double E2 = T*(std::exp(x[0])-1.), costheta = x[1];
-        if (E2 <= 0. || costheta >= 1. || costheta <= -1.) return 0.;
-        double s = 2.*E2*E*(1. - v1*costheta) + M*M;
-        double lnsqrts = .5*std::log(s);
-        // interp Xsection
-        double Xtot = this->X->GetZeroM({lnsqrts, T}).s;
-        double Jacobian = E2 + T;
-        return -1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI*Jacobian;
+        double lnsqrts = x[0], costheta = x[1];
+        if (lnsqrts<lnsqrtsmin||costheta>=1.||costheta<=-1.) return 0.;
+        double s = std::exp(2.*lnsqrts);
+        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
+        double Jacobian = 2.*E2;
+        double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
+        return -Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
     };
-    // use f(E(x), y)*dE/dx, x = log(1+E/T), y = costheta
-    // x start from 1, y start from 0
-    // x step 0.3, cosphi step 0.3
-    // save a slightly larger fmax
-    auto val = -minimize_nd(dR_dxdy, 2, {1., 0.}, {0.2, 0.2}, 1000, 1e-8)*3;
+    auto val = -minimize_nd(dR_dxdy, 2, {lnsqrtsmin*2, 0.}, {lnsqrtsmin*.5, 0.2}, 1000, 1e-8)*3;
     return scalar{std::log(val)};
 }
 /*------------------Implementation for 3 -> 2--------------------*/
@@ -435,18 +447,23 @@ scalar Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         calculate_scalar(std::vector<double> parameters){
     double lnE = parameters[0], T = parameters[1];
     double E = std::exp(lnE);
-    auto code = [E, T, this](const double * x){
+    double M2 = _mass*_mass;
+    double v1 = std::sqrt(1. - M2/E/E);
+    double Q2 = cut*t_channel_mD2->get_mD2(T);
+    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
+    auto code = [E, T, v1, this](const double * x){
         double M = this->_mass;
-        double v1 = std::sqrt(1. - M*M/E/E);
-        double E2 = x[0], costheta = x[1];
-        double s = 2.*E2*E*(1. - v1*costheta) + M*M;
-        double lnsqrts = .5*std::log(s);
+        double lnsqrts = x[0], costheta = x[1];
+        double s = std::exp(2.*lnsqrts);
+        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
+        double Jacobian = 2.*E2;
+        std::vector<double> res{0.};
         double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
-        std::vector<double> res{1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI};
+        res[0] = Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
         return res;
     };
-    double xmin[2] = {0., -1.};
-    double xmax[2] = {10.*T,1.};
+    double xmin[2] = {std::log(sqrtsmin), -1.};
+    double xmax[2] = {std::log(sqrtsmin+100*E*T),1.};
     double err;
     auto val = quad_nd(code, 2, 1, xmin, xmax, err);
     return scalar{_degen*val[0]};
@@ -474,32 +491,34 @@ scalar Rate<HS2QQbar, 2, 2, double(*)(const double, void*)>::
     return scalar{_degen*val[0]};
 }
 /*------------------Implementation for 2 -> 3--------------------*/
-// Pure Gunion bertsch
 template <>
 scalar Rate<HS2HHS, 2, 2, double(*)(const double*, void*)>::
         calculate_scalar(std::vector<double> parameters){
     double lnE = parameters[0], T = parameters[1];
     double E = std::exp(lnE);
-    auto code = [E, T, this](const double * x){
+    double M2 = _mass*_mass;
+    double v1 = std::sqrt(1. - M2/E/E);
+    double Q2 = cut*t_channel_mD2->get_mD2(T);
+    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
+    double lnsqrtsmin = std::log(sqrtsmin);
+    auto dR_dxdy = [E, T, lnsqrtsmin, v1, this](const double * x){
         double M = this->_mass;
-        double v1 = std::sqrt(1. - M*M/E/E);
-        double E2 = x[0], costheta = x[1];
-        double s = 2.*E2*E*(1. - v1*costheta) + M*M;
-        double lnsqrts = .5*std::log(s);
-        // interp Xsection
-        double Xtot = this->X->GetZeroM({lnsqrts, T}).s;
-        std::vector<double> res{1./E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI};
-        if ( std::pow(s-M*M,2)/s < cut*t_channel_mD2->get_mD2(T)) res[0]=0.;
+        double lnsqrts = x[0], costheta = x[1];
+        double s = std::exp(2.*lnsqrts);
+        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
+        double Jacobian = 2.*E2;
+        double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
+        std::vector<double> res{Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI};
         return res;
     };
-    double xmin[2] = {0., -1.};
-    double xmax[2] = {10.*T,1.};
+    double xmin[2] = {std::log(sqrtsmin), -1.};
+    double xmax[2] = {std::log(sqrtsmin*10),1.};
     double err;
-    auto val = quad_nd(code, 2, 1, xmin, xmax, err);
+    auto val = quad_nd(dR_dxdy, 2, 1, xmin, xmax, err);
     return scalar{_degen*val[0]};
 }
-/*------------------Implementation for 3 -> 2--------------------*/
 
+/*------------------Implementation for 3 -> 2--------------------*/
 template <>
 scalar Rate<HHS2HS, 2, 4, double(*)(const double*, void*)>::
         calculate_scalar(std::vector<double> parameters){
@@ -547,13 +566,17 @@ fourvec Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         calculate_fourvec(std::vector<double> parameters){
     double lnE = parameters[0], T = parameters[1];
     double E = std::exp(lnE);
-    auto code = [E, T, this](const double * x){
+    double Q2 = cut*t_channel_mD2->get_mD2(T);
+    double M2 = _mass*_mass;
+    double v1 = std::sqrt(1. - M2/E/E);
+    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
+    auto code = [E, T, v1,this](const double * x){
         double M = this->_mass;
-        double v1 = std::sqrt(1. - M*M/E/E);
-        double E2 = x[0], costheta = x[1];
-        double s = 2.*E2*E*(1. - v1*costheta) + M*M;
-        double sintheta = std::sqrt(1. - costheta*costheta);
-        double lnsqrts = .5*std::log(s);
+        double lnsqrts = x[0], costheta = x[1];
+        double sintheta = std::sqrt(1.-costheta*costheta);
+        double s = std::exp(2.*lnsqrts);
+        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
+        double Jacobian = 2.*E2;
         double vcom[3] = {E2*sintheta/(E2+E), 0., (E2*costheta+v1*E)/(E2+E)};
         fourvec p1{E, 0, 0, v1*E};
         // A vector in p1z(com)-oriented com frame
@@ -562,7 +585,7 @@ fourvec Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         auto fmu1 = fmu0.rotate_back(p1.boost_to(vcom[0], vcom[1], vcom[2]));
         // boost back to the matter frame
         auto fmu2 = fmu1.boost_back(vcom[0], vcom[1], vcom[2]);
-        double common = 1./E*E2*std::exp(-E2/T)*(s-M*M)*2./16./M_PI/M_PI;
+        double common = Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2./16./M_PI/M_PI;
         fmu2 = fmu2 * common;
         // Set tranverse to zero due to azimuthal symmetry;
         std::vector<double> res{fmu2.t(), fmu2.z()};
@@ -589,15 +612,19 @@ tensor Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         calculate_tensor(std::vector<double> parameters){
     double lnE = parameters[0], T = parameters[1];
     double E = std::exp(lnE);
-    auto code = [E, T, this](const double * x){
+    double M2 = _mass*_mass;
+    double v1 = std::sqrt(1. - M2/E/E);
+    double Q2 = cut*t_channel_mD2->get_mD2(T);
+    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
+    auto code = [E, T, v1,this](const double * x){
         double M = this->_mass;
-        double v1 = std::sqrt(1. - M*M/E/E);
-        double E2 = x[0], costheta = x[1], phi = x[2];
-        double s = 2.*E2*E*(1. - v1*costheta) + M*M;
+        double lnsqrts = x[0], costheta = x[1], phi=x[2];
+        double s = std::exp(2.*lnsqrts);
+        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
+        double Jacobian = 2.*E2;
         double sintheta = std::sqrt(1. - costheta*costheta);
-        double lnsqrts = .5*std::log(s);
         double vcom[3] = {E2*sintheta/(E2+E)*std::cos(phi), 
-                                  E2*sintheta/(E2+E)*std::sin(phi),
+                    E2*sintheta/(E2+E)*std::sin(phi),
                  (E2*costheta+v1*E)/(E2+E)};
         fourvec p1{E, 0, 0, v1*E};
         // A vector in p1z(com)-oriented com frame
@@ -606,15 +633,15 @@ tensor Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         auto fmunu1 = fmunu0.rotate_back(p1.boost_to(vcom[0], vcom[1], vcom[2]));
         // boost back to the matter frame
         auto fmunu2 = fmunu1.boost_back(vcom[0], vcom[1], vcom[2]);
-        double common = 1./E*E2*std::exp(-E2/T)*(s-M*M)*2./32./std::pow(M_PI, 3);
+        double common = Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2./32./std::pow(M_PI, 3);
         fmunu2 = fmunu2 * common;
         // Set tranverse to zero due to azimuthal symmetry;
         std::vector<double> res{fmunu2.T[0][0], fmunu2.T[1][1],
                                 fmunu2.T[2][2], fmunu2.T[3][3]};
         return res;
     };
-    double xmin[3] = {0., -1., -M_PI};
-    double xmax[3] = {10.*T, 1., M_PI};
+    double xmin[3] = {std::log(sqrtsmin), -1., -M_PI};
+    double xmax[3] = {std::log(sqrtsmin+6*E*T), 1., M_PI};
     double err;
     auto val = quad_nd(code, 3, 4, xmin, xmax, err);
     return tensor{_degen*val[0], 0., 0., 0.,
@@ -653,18 +680,21 @@ void EffRate12<2, double(*)(const double*, void *)>::
     double E = std::exp(lnE);
     double pabs = std::sqrt(E*E - _mass*_mass);
 
-    auto dR_dxdy = [E, T, this](const double *x){
+    auto dR_dlnxdlny = [E, T, this](const double *x){
+        double X[2] = {std::exp(x[0]), x[1]};
+        double Jacobian = X[0];
         double params[3] = {E, T, this->_mass};
-        double result = this->_f(x, params);
-        return result;
+        return this->_f(X, params)*Jacobian;
     };
-
     bool status=true;
-    auto res = sample_nd(dR_dxdy, 2, {{0.,1.},{0.,1.}}, std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
+    double fmax = StochasticBase<2>::GetFmax(parameters).s;
+    auto res = sample_nd(dR_dlnxdlny, 2, 
+                        {{-9. ,0.}, {0., 1.}}, 
+                         fmax,
+                         status);
 
-    
-    double x = res[0], y = res[1];
-    double k0 = x*E;
+    double x = std::exp(res[0]), y = res[1];
+    double k0 = x*pabs;
     double kT = x*y*E;
     double phi = Srandom::dist_phi(Srandom::gen);
     double kx = kT*std::cos(phi), ky = kT*std::sin(phi);
@@ -675,8 +705,6 @@ void EffRate12<2, double(*)(const double*, void *)>::
     final_states.resize(2);
     final_states[0] = fourvec{Enew, -kx, -ky, pznew};
     final_states[1] = fourvec{k0, kx, ky, kz};
-
-    return;
 }
 
 // Find the max of dR/dx/dy
@@ -685,19 +713,19 @@ scalar EffRate12<2, double(*)(const double*, void*)>::
         find_max(std::vector<double> parameters){
     double lnE = parameters[0], T = parameters[1];
     double E = std::exp(lnE);
-    // First, use Monte Carlo to find local maxima region (kind of crucial here)
-    auto dR_dxdy = [E, T, this](const double * x){
-        // if out of physics range, please return 0.
-        if (x[0] <= 0 || x[0] >= 1  || x[1] <=0 || x[1] >= 1)
-            return 0.;
+    double pabs = std::sqrt(E*E-_mass*_mass);
+    auto dR_dlnxdlny = [E, T, this](const double * x){
+        double X[2] = {std::exp(x[0]), x[1]};
+        if (X[0]<=0.||X[0]>=1.||X[1]<=0.||X[1]>=1.) return 0.;
+        double Jacobian = X[0];
         double params[3] = {E, T, this->_mass};
-        double result = this->_f(x, params);
-        return result;
+        return this->_f(X, params)*Jacobian;
     };
-    auto loc = MC_maximize(dR_dxdy, 2, {{0,1}, {0,1}}, 2000);
+    auto loc = MC_maximize(dR_dlnxdlny, 2, 
+                               {{-9.,0.}, {0,1}}, 
+                               2000);
     double xloc[2] = {loc[0],loc[1]};
-   
-    return scalar{std::log(dR_dxdy(xloc)*2)};
+    return scalar{dR_dlnxdlny(xloc)*1.1};
 }
 
 
@@ -707,17 +735,21 @@ scalar EffRate12<2, double(*)(const double*, void*)>::
         calculate_scalar(std::vector<double> parameters){
     double lnE = parameters[0], T = parameters[1];
     double E = std::exp(lnE);
+    double pabs = std::sqrt(E*E-_mass*_mass);
     // dR/dx/dy to be intergated
-    auto dR_dxdy = [E, T, this](const double * x){
+    auto dR_dlnxdlny = [E, T, this](const double * x){
+        double X[2] = {std::exp(x[0]), x[1]};
+        if (X[0]<=0.||X[0]>=1.||X[1]<=0.||X[1]>=1.) return 0.;
+        double Jacobian = X[0];
         double params[3] = {E, T, this->_mass};
-        double result = this->_f(x, params);
-        std::vector<double> res{result};
-        return result;
+        return this->_f(X, params)*Jacobian;
     };
-    double xmin[2] = {0., 0.};
-    double xmax[2] = {1., 1.};
+    double val;
+
+    double xmin[2] = {-9., 0.};
+    double xmax[2] = {0., 1.};
     double err;
-    auto val = vegas(dR_dxdy, 2, xmin, xmax, err, 5000); 
+    val = vegas(dR_dlnxdlny, 2, xmin, xmax, err, 3000); 
     return scalar{val};
 }
 

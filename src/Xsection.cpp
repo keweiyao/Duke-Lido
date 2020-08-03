@@ -116,11 +116,11 @@ void Xsection<HS2HS, 2, double(*)(const double, void*)>::
         return this->_f(t, params)*Jacobian;
     };
     double tmin = -std::pow(s-_mass*_mass, 2)/s, 
-           tmax = std::max(-cut*t_channel_mD2->get_mD2(temp), tmin*.99);
+           tmax = -cut*t_channel_mD2->get_mD2(temp);
     double wmin = -1./tmin,
            wmax = -1./tmax;
-    double w = sample_1d(dXdw, {wmin, wmax}, 
-                         StochasticBase<2>::GetFmax(parameters).s);
+    double fmax = StochasticBase<2>::GetFmax(parameters).s;
+    double w = sample_1d(dXdw, {wmin, wmax}, fmax);
     double t = -1./w;
     // sample phi
     double phi = Srandom::dist_phi(Srandom::gen);
@@ -149,7 +149,8 @@ void Xsection<HS2QQbar, 2, double(*)(const double, void*)>::
     double M2 = _mass*_mass;
     double tmin = -.5*((s-2.*M2)+std::sqrt(s*(s-4.*M2))),
            tmax = -.5*((s-2.*M2)-std::sqrt(s*(s-4.*M2)));
-    double t = sample_1d(dXdt, {tmin, tmax}, StochasticBase<2>::GetFmax(parameters).s);
+    double t = sample_1d(dXdt, {tmin, tmax},
+std::exp(StochasticBase<2>::GetFmax(parameters).s));
     // sample phi
     double phi = Srandom::dist_phi(Srandom::gen);
     double cosphi = std::cos(phi), sinphi = std::sin(phi);
@@ -295,13 +296,17 @@ scalar Xsection<HS2HS, 2, double(*)(const double, void*)>::
         double Jacobian = t*t;
         return  -(this->_f(t, params)*Jacobian);
     };
-    double tcut = -cut*t_channel_mD2->get_mD2(temp);
     double tmin = -std::pow(s-_mass*_mass, 2)/s, 
-           tmax = std::max(tcut, tmin);
-    double wmin = -1./tmin,
-           wmax = -1./tmax;
-    double res = -minimize_1d(minus_dXdw, {wmin, wmax}, 1e-8, 100, 1000);
-    return scalar{res*1.5};
+           tmax = -cut*t_channel_mD2->get_mD2(temp);
+    if (tmin >= tmax) {
+        return scalar{0.};
+    } 
+    else{
+        double wmin = -1./tmin,
+               wmax = -1./tmax;
+        double res = -minimize_1d(minus_dXdw, {wmin, wmax}, 1e-8, 100, 1000);
+        return scalar{res*1.5};
+    }
 }
 
 template<>
@@ -318,7 +323,7 @@ scalar Xsection<HS2QQbar, 2, double(*)(const double, void*)>::
     double tmin = -.5*((s-2.*M2)+std::sqrt(s*(s-4.*M2))),
            tmax = -.5*((s-2.*M2)-std::sqrt(s*(s-4.*M2)));
     double res = -minimize_1d(minus_dXdt, {tmin, tmax}, 1e-8, 100, 1000);
-    return scalar{res*1.5};
+    return scalar{std::log(res*1.5)};
 }
 
 /*------------------Implementation for 2 -> 3--------------------*/

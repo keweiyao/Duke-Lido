@@ -232,7 +232,7 @@ double compute_realtime_to_propagate(double dt, fourvec x, fourvec p){
       exit(-1);
     }
 }
-//std::ofstream f("stat.dat");
+std::ofstream f("stat.dat");
 int update_particle_momentum_Lido(
     double dt_input, double temp, std::vector<double> v3cell,
     particle & pIn, std::vector<particle> & pOut_list){
@@ -249,7 +249,7 @@ int update_particle_momentum_Lido(
     pIn.freestream(dt_for_pIn);
     double mD2 = t_channel_mD2->get_mD2(temp);
     double mD = std::sqrt(mD2);
-    double Eradmin = mD;
+    double Eradmin = 3.*T;
     // we only handle u,d,s,c,b,g
     if (!((pIn.pid==21) || (std::abs(pIn.pid)<=5))){
         pOut_list.push_back(pIn);
@@ -274,16 +274,15 @@ int update_particle_momentum_Lido(
         
 
     int channel_pid;
-
     if (std::abs(pIn.pid) <= 3) channel_pid = 123;
     else channel_pid = std::abs(pIn.pid);
 
 
     for (int i=0; i<5; i++){
-    fourvec pnew;
-    Ito_update(pIn.pid, dt_for_pIn/5., pIn.mass, temp, v3cell, pIn.p, pnew);
-    if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
-    else pIn.p = pnew;
+        fourvec pnew;
+        Ito_update(pIn.pid, dt_for_pIn/5., pIn.mass, temp, v3cell, pIn.p, pnew);
+        if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
+        else pIn.p = pnew;
     }
 
     // Apply large angle scattering, and diffusion induced radiation
@@ -359,12 +358,14 @@ int update_particle_momentum_Lido(
         LOG_WARNING << "P(dt) = " << P_total << " may be too large";
         type2_warned = true;
     }
+
+    
     if (Srandom::init_dis(Srandom::gen) > P_total){
         channel = -1;
     }
     else{
         // Normalize P_channels using P_total to sample
-        for (auto &item : P_channels)    item /= P_total;
+        for (auto &item : P_channels) item /= P_total;
         double p = Srandom::init_dis(Srandom::gen);
         for (int i = 0; i < P_channels.size(); ++i){
             if (P_channels[i] > p){
@@ -373,6 +374,7 @@ int update_particle_momentum_Lido(
             }
         }
     }
+
     // If a scattering happens:
     if (channel >= 0){
         if (channel >= AllProcesses[channel_pid].size()){
@@ -473,11 +475,6 @@ int update_particle_momentum_Lido(
             pIn.p = FS[0];
         }
         if (channel == 6){
-            // add the radiating daughters as ``virtual" particles
-            // these are virtual particles, that pops out at a rate
-            // given by the incoherent calculation, which will be
-            // dropped (suppressed) according to the LPM effect
-            // only for E>mD
             if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Eradmin) {
                 particle vp = produce_parton(21, FS[1], pIn, true);
                 // estimate mfp in the lab frame
@@ -583,7 +580,7 @@ int update_particle_momentum_Lido(
 		    it->Q0 = pIn.Q0;
 		    it->Q00 = it->Q0;
 
-                    //f << pIn.x.t() << " " << it->p0.t() << " " << it->mother_p.t() << " " << kt2n<<std::endl;
+                    f << pIn.x.t() << " " << it->p0.t() << " " << it->mother_p.t() << " " << kt2n<<std::endl;
  
                     int col=-100, acol=-100, mcol=-100, macol=-100;
                     SampleFlavorAndColor(pIn.pid, pIn.col,

@@ -48,7 +48,7 @@ double afix;
 double Lido_Ecut;
 
 Debye_mass * t_channel_mD2;
-const double LPM_prefactor = 0.87;
+const double LPM_prefactor = 1.0;
 
 int time_type;
 bool Adiabatic_LPM;
