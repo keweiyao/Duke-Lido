@@ -285,7 +285,7 @@
 
     <!-- Charm quark -->
     <!--   charm/elastic/Q+q=Q+q  -->
-    <cq2cq status="active" moments="on">
+    <cq2cq status="inactive" moments="on">
     <mass>1.3</mass>
     <degeneracy>36</degeneracy>
     <xsection slots="lnsqrts,temp">
@@ -299,7 +299,7 @@
     </cq2cq>
 
     <!--   charm/elastic/Q+g=Q+g  -->
-    <cg2cg status="active" moments="on">
+    <cg2cg status="inactive" moments="on">
     <mass>1.3</mass>
     <degeneracy>16</degeneracy>
     <xsection slots="lnsqrts,temp">
@@ -313,7 +313,7 @@
     </cg2cg>
 
     <!--   charm/inelastic/Q+q=Q+q+G  -->
-    <cq2cqg status="active" moments="off">
+    <cq2cqg status="inactive" moments="off">
     <mass>1.3</mass>
     <degeneracy>36</degeneracy>
     <xsection slots="lnsqrts,temp">
@@ -327,7 +327,7 @@
     </cq2cqg>
 
     <!--   charm/inelastic/Q+g=Q+g+G  -->
-    <cg2cgg status="active" moments="off">
+    <cg2cgg status="inactive" moments="off">
     <mass>1.3</mass>
     <degeneracy>16</degeneracy>
     <xsection slots="lnsqrts,temp">
@@ -373,7 +373,7 @@
     </cgg2cg>
 
     <!--   charm/inelastic/Q+diffusion=Q+g  -->
-    <c2cg status="active" moments="off">
+    <c2cg status="inactive" moments="off">
     <mass>1.3</mass>
     <rate slots="lnE,temp">
     <NlnE>100</NlnE> <LlnE>.27</LlnE> <HlnE>8.</HlnE>
@@ -392,7 +392,7 @@
 
     <!-- Bottom quark -->
     <!--   bottom/elastic/Q+q=Q+q  -->
-    <bq2bq status="active" moments="on">
+    <bq2bq status="inactive" moments="on">
     <mass>4.2</mass>
     <degeneracy>36</degeneracy>
     <xsection slots="lnsqrts,temp">
@@ -406,7 +406,7 @@
     </bq2bq>
 
     <!--   Bottom/elastic/Q+g=Q+g  -->
-    <bg2bg status="active" moments="on">
+    <bg2bg status="inactive" moments="on">
     <mass>4.2</mass>
     <degeneracy>16</degeneracy>
     <xsection slots="lnsqrts,temp">
@@ -420,7 +420,7 @@
     </bg2bg>
 
     <!--   Bottom/inelastic/Q+q=Q+q+G  -->
-    <bq2bqg status="active" moments="off">
+    <bq2bqg status="inactive" moments="off">
     <mass>4.2</mass>
     <degeneracy>36</degeneracy>
     <xsection slots="lnsqrts,temp">
@@ -434,7 +434,7 @@
     </bq2bqg>
 
     <!--   Bottom/inelastic/Q+g=Q+g+G  -->
-    <bg2bgg status="active" moments="off">
+    <bg2bgg status="inactive" moments="off">
     <mass>4.2</mass>
     <degeneracy>16</degeneracy>
     <xsection slots="lnsqrts,temp">
@@ -480,7 +480,7 @@
     </bgg2bg>
 
     <!--   Bottom/inelastic/Q+diffusion=Q+g  -->
-    <b2bg status="active" moments="off">
+    <b2bg status="inactive" moments="off">
     <mass>4.2</mass>
     <rate slots="lnE,temp">
     <NlnE>100</NlnE> <LlnE>1.44</LlnE> <HlnE>8.</HlnE>

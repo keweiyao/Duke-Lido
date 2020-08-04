@@ -119,7 +119,7 @@ void Rate<HS2HS, 2, 2, double(*)(const double, void *)>::
         return Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
     };
     bool status = true;
-    double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
+    double fmax = StochasticBase<2>::GetFmax(parameters).s;
     auto res = sample_nd(dR_dxdy, 2, 
                       {{lnsqrtsmin, std::log(sqrtsmin*10)}, {-1., 1.}},
                       fmax, status);
@@ -173,7 +173,7 @@ void Rate<HS2QQbar, 2, 2, double(*)(const double, void *)>::
     auto res = sample_nd(dR_dlnsqrts_dcostheta, 2, 
                {{std::log(2.*_mass), std::log(100.*2.*_mass)}, 
                 {-1., 1.}},
-               std::exp(StochasticBase<2>::GetFmax(parameters).s), 
+               StochasticBase<2>::GetFmax(parameters).s, 
                status);
 
     double lnsqrts = res[0], costheta = res[1];
@@ -224,7 +224,6 @@ void Rate<HS2HHS, 2, 2, double(*)(const double*, void *)>::
     };
     bool status = true;
     double fmax = StochasticBase<2>::GetFmax(parameters).s;
-    LOG_INFO << "here";
     auto res = sample_nd(dR_dxdy, 2, 
                {{std::log(sqrtsmin), std::log(sqrtsmin*10)}, 
                {-1., 1.}}, 
@@ -280,7 +279,7 @@ void Rate<HHS2HS, 2, 4, double(*)(const double*, void *)>::
         return std::exp(-(k+E2)/T)*k*E2*Xtot/E/8./std::pow(2.*M_PI, 5);
     };
     bool status = true;
-    auto res = sample_nd(code, 5, {{0.0*T, 10.0*T}, {0.0*T, 10.0*T}, {-1., 1.}, {-1., 1.}, {0., 2.*M_PI}}, std::exp(StochasticBase<2>::GetFmax(parameters).s), status);
+    auto res = sample_nd(code, 5, {{0.0*T, 10.0*T}, {0.0*T, 10.0*T}, {-1., 1.}, {-1., 1.}, {0., 2.*M_PI}}, StochasticBase<2>::GetFmax(parameters).s, status);
     // sample Xsection
     double k = res[0];
     double E2 = res[1];
@@ -356,8 +355,8 @@ scalar Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         return -Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
     };
     auto val = -minimize_nd(minus_dR_dxdy, 2, 
-                            {lnsqrtsmin*2, 0.}, {lnsqrtsmin*.5, 0.2}, 1000, 1e-8);
-    return scalar{std::log(1.5*val)};
+                            {lnsqrtsmin+T, 0.}, {T*.5, 0.2}, 1000, 1e-8);
+    return scalar{2*val};
 }
 
 template <>
@@ -377,8 +376,8 @@ scalar Rate<HS2QQbar, 2, 2, double(*)(const double, void*)>::
         return -Jacobian/E*E2*std::exp(-E2/T)*s*2*Xtot/16./M_PI/M_PI;
     };
     auto val = -minimize_nd(dR_dxdy, 2, {std::log(3.*_mass), 0.}, 
-                            {0.2, 0.2}, 1000, 1e-8)*1.5;
-    return scalar{std::log(val)};
+                            {0.2, 0.2}, 1000, 1e-8);
+    return scalar{val*2};
 }
 /*------------------Implementation for 2 -> 3--------------------*/
 template <>
@@ -402,8 +401,8 @@ scalar Rate<HS2HHS, 2, 2, double(*)(const double*, void*)>::
         return -Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
     };
 
-    auto val = -minimize_nd(dR_dxdy, 2, {lnsqrtsmin*2, 0.}, 
-                                        {lnsqrtsmin*.2, 0.2}, 1000, 1e-8);
+    auto val = -minimize_nd(dR_dxdy, 2, {lnsqrtsmin+T, 0.}, 
+                                        {T*.5, 0.2}, 1000, 1e-8);
     return scalar{val*2};
 }
 /*------------------Implementation for 3 -> 2--------------------*/
@@ -437,8 +436,8 @@ scalar Rate<HHS2HS, 2, 4, double(*)(const double*, void*)>::
     auto loc = MC_maximize(code, 5,
                 {{T, T*2}, {T, T*2},{-.5, .5}, {-0.5, 0.5}, {1.5,2.}}, 500);
     double xloc[5] = {loc[0],loc[1],loc[2],loc[3],loc[4]};
-    auto val = code(xloc)*2.;
-    return scalar{std::log(val)};
+    auto val = code(xloc);
+    return scalar{2*val};
 }
 
 
@@ -685,19 +684,19 @@ void EffRate12<2, double(*)(const double*, void *)>::
     double pabs = std::sqrt(E*E - _mass*_mass);
 
     auto dR_dlnxdlny = [E, T, this](const double *x){
-        double X[2] = {std::exp(x[0]), x[1]};
-        double Jacobian = X[0];
+        double X[2] = {std::exp(x[0]), std::exp(x[1])};
+        double Jacobian = X[0]* X[1];
         double params[3] = {E, T, this->_mass};
         return this->_f(X, params)*Jacobian;
     };
     bool status=true;
     double fmax = StochasticBase<2>::GetFmax(parameters).s;
     auto res = sample_nd(dR_dlnxdlny, 2, 
-                        {{-9. ,0.}, {0., 1.}}, 
+                        {{-9. ,0.}, {-9.,0.}}, 
                          fmax,
                          status);
 
-    double x = std::exp(res[0]), y = res[1];
+    double x = std::exp(res[0]), y = std::exp(res[1]);
     double k0 = x*pabs;
     double kT = x*y*E;
     double phi = Srandom::dist_phi(Srandom::gen);
@@ -719,17 +718,17 @@ scalar EffRate12<2, double(*)(const double*, void*)>::
     double E = std::exp(lnE);
     double pabs = std::sqrt(E*E-_mass*_mass);
     auto dR_dlnxdlny = [E, T, this](const double * x){
-        double X[2] = {std::exp(x[0]), x[1]};
+        double X[2] = {std::exp(x[0]), std::exp(x[1])};
         if (X[0]<=0.||X[0]>=1.||X[1]<=0.||X[1]>=1.) return 0.;
-        double Jacobian = X[0];
+        double Jacobian = X[0]* X[1];
         double params[3] = {E, T, this->_mass};
         return this->_f(X, params)*Jacobian;
     };
     auto loc = MC_maximize(dR_dlnxdlny, 2, 
-                               {{-9.,0.}, {0,1}}, 
+                               {{-9.,0.}, {-9.,0.}}, 
                                2000);
     double xloc[2] = {loc[0],loc[1]};
-    return scalar{dR_dlnxdlny(xloc)*1.1};
+    return scalar{dR_dlnxdlny(xloc)*2.};
 }
 
 
@@ -742,16 +741,16 @@ scalar EffRate12<2, double(*)(const double*, void*)>::
     double pabs = std::sqrt(E*E-_mass*_mass);
     // dR/dx/dy to be intergated
     auto dR_dlnxdlny = [E, T, this](const double * x){
-        double X[2] = {std::exp(x[0]), x[1]};
+        double X[2] = {std::exp(x[0]), std::exp(x[1])};
         if (X[0]<=0.||X[0]>=1.||X[1]<=0.||X[1]>=1.) return 0.;
-        double Jacobian = X[0];
+        double Jacobian = X[0]* X[1];
         double params[3] = {E, T, this->_mass};
         return this->_f(X, params)*Jacobian;
     };
     double val;
 
-    double xmin[2] = {-9., 0.};
-    double xmax[2] = {0., 1.};
+    double xmin[2] = {-9., -9.};
+    double xmax[2] = {0., 0.};
     double err;
     val = vegas(dR_dlnxdlny, 2, xmin, xmax, err, 3000); 
     return scalar{val};
@@ -832,7 +831,7 @@ scalar EffRate21<2, double(*)(const double*, void*)>::
     double E = std::exp(lnE);
     auto dR_dxdy = [E, T, this](const double * x){
         // if out of physics range, please return 0.
-        if (x[0] >= .99999 || x[0] <= 0. || x[1] <=0 || x[1] >= 1)
+        if (x[0] >= 1. || x[0] <= 0. || x[1] <=0 || x[1] >= 1)
             return 0.;
         double params[4] = {E, T, this->_mass};
         double result = this->_f(x, params);
