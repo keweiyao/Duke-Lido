@@ -238,6 +238,7 @@ void Rate<HS2HHS, 2, 2, double(*)(const double*, void *)>::
                {{std::log(sqrtsmin), std::log(sqrtsmin*10)}, 
                {-1., 1.}}, 
                fmax, status);
+    if (status==true){
     double lnsqrts = res[0], costheta = res[1];
     double sintheta = std::sqrt(1. - costheta*costheta);
     double phi = Srandom::dist_phi(Srandom::gen);
@@ -254,6 +255,13 @@ void Rate<HS2HHS, 2, 2, double(*)(const double*, void *)>::
     for(auto & p: final_states){
         p = p.rotate_back(p1com);
         p = p.boost_back(vcom[0], vcom[1], vcom[2]);
+    }
+    }
+    else{
+        final_states.resize(3);
+        final_states[0] = fourvec{E, 0, 0, v1*E};
+        final_states[1] = fourvec{0, 0, 0, 0};
+        final_states[2] = fourvec{0, 0, 0, 0};    
     }
 }
 
