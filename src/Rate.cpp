@@ -108,22 +108,28 @@ void Rate<HS2HS, 2, 2, double(*)(const double, void *)>::
     double Q2 = cut*t_channel_mD2->get_mD2(T);
     double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
     double lnsqrtsmin = std::log(sqrtsmin);
-    auto dR_dxdy = [E, T, lnsqrtsmin, v1, this](const double * x){
-        double M = this->_mass;
+    auto dR_dxdy = [E, T, lnsqrtsmin, v1, M2, this](const double * x){
         double lnsqrts = x[0], costheta = x[1];
         if (lnsqrts<lnsqrtsmin||costheta>=1.||costheta<=-1.) return 0.;
         double s = std::exp(2.*lnsqrts);
-        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
+        double E2 = (s-M2)/((1. - v1*costheta)*2.*E);
         double Jacobian = 2.*E2;
         double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
-        return Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
+        return Jacobian/E*E2*std::exp(-E2/T)*(s-M2)*2*Xtot/16./M_PI/M_PI;
     };
     bool status = true;
     double fmax = StochasticBase<2>::GetFmax(parameters).s;
     auto res = sample_nd(dR_dxdy, 2, 
                       {{lnsqrtsmin, std::log(sqrtsmin*10)}, {-1., 1.}},
                       fmax, status);
-    double lnsqrts = res[0], costheta = res[1];
+    double lnsqrts, costheta;
+    if (status == true){
+        lnsqrts = res[0];
+        costheta = res[1];
+    } 
+    else {
+        lnsqrts = lnsqrtsmin*1.01, costheta = 0.;
+    }
     double s = std::exp(2.*lnsqrts);
     double E2 = (s-_mass*_mass)/((1. - v1*costheta)*2.*E);
     double sintheta = std::sqrt(1. - costheta*costheta);
@@ -355,7 +361,7 @@ scalar Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         return -Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
     };
     auto val = -minimize_nd(minus_dR_dxdy, 2, 
-                            {lnsqrtsmin+T, 0.}, {T*.5, 0.2}, 1000, 1e-8);
+                            {lnsqrtsmin+std::log(1.1), 0.}, {lnsqrtsmin*.05, 0.2}, 1000, 1e-8);
     return scalar{2*val};
 }
 

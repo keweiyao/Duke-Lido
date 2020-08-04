@@ -232,7 +232,7 @@ double compute_realtime_to_propagate(double dt, fourvec x, fourvec p){
       exit(-1);
     }
 }
-std::ofstream f("stat.dat");
+//std::ofstream f("stat.dat");
 int update_particle_momentum_Lido(
     double dt_input, double temp, std::vector<double> v3cell,
     particle & pIn, std::vector<particle> & pOut_list){
@@ -277,9 +277,9 @@ int update_particle_momentum_Lido(
     else channel_pid = std::abs(pIn.pid);
 
 
-    for (int i=0; i<5; i++){
+    for (int i=0; i<10; i++){
         fourvec pnew;
-        Ito_update(pIn.pid, dt_for_pIn/5., pIn.mass, temp, v3cell, pIn.p, pnew);
+        Ito_update(pIn.pid, dt_for_pIn/10., pIn.mass, temp, v3cell, pIn.p, pnew);
         if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
         else pIn.p = pnew;
     }
@@ -579,7 +579,7 @@ int update_particle_momentum_Lido(
 		    it->Q0 = pIn.Q0;
 		    it->Q00 = it->Q0;
 
-                    f << pIn.x.t() << " " << it->p0.t() << " " << it->mother_p.t() << " " << kt2n<<std::endl;
+                    //f << pIn.x.t() << " " << it->p0.t() << " " << it->mother_p.t() << " " << kt2n<<std::endl;
  
                     int col=-100, acol=-100, mcol=-100, macol=-100;
                     SampleFlavorAndColor(pIn.pid, pIn.col,
