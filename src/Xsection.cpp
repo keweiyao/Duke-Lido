@@ -120,8 +120,12 @@ void Xsection<HS2HS, 2, double(*)(const double, void*)>::
     double wmin = -1./tmin,
            wmax = -1./tmax;
     double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
-    double w = sample_1d(dXdw, {wmin, wmax}, fmax);
-    double t = -1./w;
+    bool status=true;
+    double w = sample_1d(dXdw, {wmin, wmax}, fmax, status);
+    double t;
+    if (status==true){
+        t = -1./w;
+    }else t=0.;
     // sample phi
     double phi = Srandom::dist_phi(Srandom::gen);
     double cosphi = std::cos(phi), sinphi = std::sin(phi);
@@ -133,6 +137,7 @@ void Xsection<HS2HS, 2, double(*)(const double, void*)>::
     FS.resize(2); // HQ + light parton
     FS[0] = {E, p*sintheta*cosphi, p*sintheta*sinphi, p*costheta};
     FS[1] = {p, -p*sintheta*cosphi, -p*sintheta*sinphi, -p*costheta};
+   
 }
 
 template<>
@@ -150,7 +155,8 @@ void Xsection<HS2QQbar, 2, double(*)(const double, void*)>::
     double tmin = -.5*((s-2.*M2)+std::sqrt(s*(s-4.*M2))),
            tmax = -.5*((s-2.*M2)-std::sqrt(s*(s-4.*M2)));
     double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
-    double t = sample_1d(dXdt, {tmin, tmax}, fmax);
+    bool status=true;
+    double t = sample_1d(dXdt, {tmin, tmax}, fmax, status);
     // sample phi
     double phi = Srandom::dist_phi(Srandom::gen);
     double cosphi = std::cos(phi), sinphi = std::sin(phi);
@@ -206,6 +212,7 @@ void Xsection<HS2HHS, 2, double(*)(const double*, void*)>::
     auto res = sample_nd(dXdPS, 4, {{xmin[0], xmax[0]}, {xmin[1], xmax[1]},
                                     {xmin[2], xmax[2]}, {xmin[3], xmax[3]}},
                                     fmax, status);
+    if (status==true) {
     // deconvolve parameter
     double kt = temp*(std::exp(res[0])-1.);
     double yk = res[1]*std::acosh(Qmax/kt);
@@ -236,6 +243,16 @@ void Xsection<HS2HHS, 2, double(*)(const double*, void*)>::
     FS.push_back(p3mu);
     FS.push_back(p4mu);
     FS.push_back(kmu);
+    } 
+    else{
+	double E = (s+M2)/2./sqrts;
+        double p = (s-M2)/2./sqrts;
+	FS.clear();
+        FS.resize(3);
+	FS[0] = fourvec{E,0,0,p};
+	FS[1] = fourvec{p,0,0,-p};
+	FS[2] = fourvec{0,0,0,0};
+    }
 }
 
 /*------------------Implementation for 3 -> 2--------------------*/

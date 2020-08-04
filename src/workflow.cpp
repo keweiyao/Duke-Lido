@@ -262,7 +262,7 @@ int update_particle_momentum_Lido(
     double Eradmin = mD;
 
     // Don't touch particles already below soft cut
-    if ((!pIn.is_virtual) && (pIn.Q0<.01)
+    if ((!pIn.is_virtual) && (pIn.Q0<mD) && (formed_from_vac)
         && (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Emin)
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 
@@ -288,7 +288,7 @@ int update_particle_momentum_Lido(
     auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
     double dt_cell = dt_for_pIn / pIn.p.t() * p_cell.t();
     double E_cell = p_cell.t();
-    double LnE_cell = std::log(E_cell);
+    double LnE_cell = std::log(std::max(E_cell,.4));
 
     // For diffusion induced radiation, qhat_Soft is an input
     double qhatg = qhat(21, E_cell, 0., temp);
