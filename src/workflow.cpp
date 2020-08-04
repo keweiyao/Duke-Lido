@@ -232,7 +232,7 @@ double compute_realtime_to_propagate(double dt, fourvec x, fourvec p){
       exit(-1);
     }
 }
-std::ofstream f("stat.dat");
+//std::ofstream f("stat.dat");
 int update_particle_momentum_Lido(
     double dt_input, double temp, std::vector<double> v3cell,
     particle & pIn, std::vector<particle> & pOut_list){
@@ -441,7 +441,7 @@ int update_particle_momentum_Lido(
             // given by the incoherent calculation, which will be
             // dropped (suppressed) according to the LPM effect
             // only handle > mD particles
-            
+            if (FS.size()==3){
             if (FS[2].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Eradmin) { 
                 particle vp = produce_parton(21, FS[2], pIn, true);
                 // The local 2->2 mean-free-path is estimated with
@@ -467,17 +467,20 @@ int update_particle_momentum_Lido(
                 vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
                 pIn.radlist.push_back(vp);
             }
+            }
         }
         if (channel == 4 || channel == 5){
             // Absorption processes happens mostly for gluon energy ~ 3*T, therefore we negelected the LPM effect
             pIn.p = FS[0];
         }
         if (channel == 6){
+            if (FS.size()==2){
             if (FS[1].boost_to(v3cell[0], v3cell[1], v3cell[2]).t() > Eradmin) {
                 particle vp = produce_parton(21, FS[1], pIn, true);
                 // estimate mfp in the lab frame
                 vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
                 pIn.radlist.push_back(vp);
+            }
             }
         }
         if (channel == 7){
@@ -578,7 +581,7 @@ int update_particle_momentum_Lido(
 		    it->Q0 = pIn.Q0;
 		    it->Q00 = it->Q0;
 
-                    f << pIn.x.t() << " " << it->p0.t() << " " << it->mother_p.t() << " " << kt2n<<std::endl;
+                    //f << pIn.x.t() << " " << it->p0.t() << " " << it->mother_p.t() << " " << kt2n<<std::endl;
  
                     int col=-100, acol=-100, mcol=-100, macol=-100;
                     SampleFlavorAndColor(pIn.pid, pIn.col,

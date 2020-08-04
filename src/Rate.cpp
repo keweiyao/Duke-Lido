@@ -118,7 +118,7 @@ void Rate<HS2HS, 2, 2, double(*)(const double, void *)>::
     double E2min = (smin-M2)/(2.*E*(1.+v1));
     double E2max = E2min+5.*T;
     bool status = true;
-    double fmax = StochasticBase<2>::GetFmax(parameters).s;
+    double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
     auto res = sample_nd(dR_dxdy, 2, 
                       {{E2min, E2max}, {-1., 1.}},
                       fmax, status);
@@ -152,9 +152,9 @@ void Rate<HS2HS, 2, 2, double(*)(const double, void *)>::
     else{
         // sample failed, return original particle and a e->0 parton as 
         // place holder
-        final_states.resize(2);
+        LOG_INFO << "sample rate failed, 2->2";
+        final_states.resize(1);
         final_states[0] = fourvec{E, 0, 0, v1*E};
-        final_states[1] = fourvec{0,0,0,0};
     }
 }
 
@@ -183,7 +183,6 @@ void Rate<HS2QQbar, 2, 2, double(*)(const double, void *)>::
                 {-1., 1.}},
                StochasticBase<2>::GetFmax(parameters).s, 
                status);
-
     double lnsqrts = res[0], costheta = res[1];
     double E2 = std::exp(2.*lnsqrts)/(2.*E*(1. - costheta));
     double sintheta = std::sqrt(1. - costheta*costheta);
@@ -206,6 +205,7 @@ void Rate<HS2QQbar, 2, 2, double(*)(const double, void *)>::
         p = p.rotate_back(p1com);
         p = p.boost_back(vcom[0], vcom[1], vcom[2]);
     }
+
 }
 
 /*------------------Implementation for 2 -> 3--------------------*/
@@ -257,10 +257,9 @@ void Rate<HS2HHS, 2, 2, double(*)(const double*, void *)>::
         }
     }
     else{
-        final_states.resize(3);
-        final_states[0] = fourvec{E, 0, 0, v1*E};
-        final_states[1] = fourvec{0, 0, 0, 0};
-        final_states[2] = fourvec{0, 0, 0, 0};    
+        LOG_INFO << "sample rate failed 2->3";
+        final_states.resize(1);
+        final_states[0] = fourvec{E, 0, 0, v1*E};  
     }
 }
 
@@ -371,9 +370,9 @@ scalar Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
     double E2min = (smin-M2)/(2.*E*(1.+v1));
     double E2max = E2min+5.*T;
     auto val = -minimize_nd(minus_dR_dxdy, 2, 
-                        {(E2min+E2max)/2., 0.}, {(E2max-E2min)/10., 0.2}, 
+                        {(E2min+E2max)/2., -1.}, {(E2max-E2min)/10., 0.2}, 
                           1000, 1e-8);
-    return scalar{2*val};
+    return scalar{std::log(2*val)};
 }
 
 template <>
@@ -418,7 +417,7 @@ scalar Rate<HS2HHS, 2, 2, double(*)(const double*, void*)>::
     double E2min = (smin-M2)/(2.*E*(1.+v1));
     double E2max = E2min+5.*T;
 
-    auto val = -minimize_nd(minus_dR_dxdy, 2, {(E2min+E2max)/2., 0.}, 
+    auto val = -minimize_nd(minus_dR_dxdy, 2, {(E2min+E2max)/2., -1,}, 
                                         {(E2max-E2min)/10., 0.2}, 1000, 1e-8);
     return scalar{val*2};
 }
@@ -732,6 +731,7 @@ void EffRate12<2, double(*)(const double*, void *)>::
                         {{-9. ,0.}, {-9.,0.}}, 
                          fmax,
                          status);
+    if (status==true){
 
     double x = std::exp(res[0]), y = std::exp(res[1]);
     double k0 = x*pabs;
@@ -745,6 +745,12 @@ void EffRate12<2, double(*)(const double*, void *)>::
     final_states.resize(2);
     final_states[0] = fourvec{Enew, -kx, -ky, pznew};
     final_states[1] = fourvec{k0, kx, ky, kz};
+    }
+    else{
+       LOG_INFO << "sample rate failed, 1->2";
+       final_states.resize(1);
+       final_states[0] = fourvec{E,0,0,pabs};
+    }
 }
 
 // Find the max of dR/dx/dy

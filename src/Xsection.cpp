@@ -108,24 +108,31 @@ void Xsection<HS2HS, 2, double(*)(const double, void*)>::
     double lnsqrts = parameters[0], temp = parameters[1];
     double sqrts = std::exp(lnsqrts);
     double s = std::pow(sqrts,2);
-    // transform w = -1/t
-    auto dXdw = [s, temp, this](double w) {
-        double params[3] = {s, temp, this->_mass};
-        double t = -1./w;
-        double Jacobian = t*t;
-        return this->_f(t, params)*Jacobian;
-    };
     double tmin = -std::pow(s-_mass*_mass, 2)/s, 
            tmax = -cut*t_channel_mD2->get_mD2(temp);
-    double wmin = -1./tmin,
-           wmax = -1./tmax;
+    // transform w = -log(1+t/tmax)
+    // t = tmax*(exp(-w)-1)
+    // dw/dt = -1/(tmax+t)
+    // dt = (dw/dt)^{-1} * dw = -(tmax+t) * dw
+    auto dXdw = [s, temp, tmax, this](double w) {
+        double params[3] = {s, temp, this->_mass};
+        double t = tmax*(std::exp(-w)-1.);
+        double Jacobian = -(tmax+t);
+        return this->_f(t, params)*Jacobian;
+    };
+
+    double wmin = -std::log(1.+tmin/tmax),
+           wmax = -std::log(1.+tmax/tmax);
     double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
     bool status=true;
     double w = sample_1d(dXdw, {wmin, wmax}, fmax, status);
     double t;
     if (status==true){
-        t = -1./w;
-    }else t=0.;
+        t = tmax*(std::exp(-w)-1.);
+    }else{
+        LOG_INFO << "sample failed in 2->2 X";
+        t=0.;
+    }
     // sample phi
     double phi = Srandom::dist_phi(Srandom::gen);
     double cosphi = std::cos(phi), sinphi = std::sin(phi);
@@ -137,7 +144,6 @@ void Xsection<HS2HS, 2, double(*)(const double, void*)>::
     FS.resize(2); // HQ + light parton
     FS[0] = {E, p*sintheta*cosphi, p*sintheta*sinphi, p*costheta};
     FS[1] = {p, -p*sintheta*cosphi, -p*sintheta*sinphi, -p*costheta};
-   
 }
 
 template<>
@@ -244,14 +250,13 @@ void Xsection<HS2HHS, 2, double(*)(const double*, void*)>::
     FS.push_back(p4mu);
     FS.push_back(kmu);
     } 
-    else{
+    else{        LOG_INFO << "sample failed in 2->3 X";
 	double E = (s+M2)/2./sqrts;
         double p = (s-M2)/2./sqrts;
 	FS.clear();
-        FS.resize(3);
+        FS.resize(2);
 	FS[0] = fourvec{E,0,0,p};
 	FS[1] = fourvec{p,0,0,-p};
-	FS[2] = fourvec{0,0,0,0};
     }
 }
 
@@ -313,17 +318,21 @@ scalar Xsection<HS2HS, 2, double(*)(const double, void*)>::
     double Q2 = cut*t_channel_mD2->get_mD2(temp);
     double smin = M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2);
     double s = std::max(std::pow(sqrts,2), 1.01*smin);
-    double tmin = -std::pow(s-M2, 2)/s, 
+    double tmin = -std::pow(s-_mass*_mass, 2)/s, 
            tmax = -cut*t_channel_mD2->get_mD2(temp);
-    // transform w = -1/t
-    auto minus_dXdw = [s, temp, this](const double w) {
+    // transform w = -log(1+t/tmax)
+    // t = tmax*(exp(-w)-1)
+    // dw/dt = -1/(tmax+t)
+    // dt = (dw/dt)^{-1} * dw = -(tmax+t) * dw
+    auto minus_dXdw = [s, temp, tmax, this](double w) {
         double params[3] = {s, temp, this->_mass};
-        double t = -1./w;
-        double Jacobian = t*t;
-        return  -(this->_f(t, params)*Jacobian);
+        double t = tmax*(std::exp(-w)-1.);
+        double Jacobian = -(tmax+t);
+        return -this->_f(t, params)*Jacobian;
     };
-    double wmin = -1./tmin,
-	   wmax = -1./tmax; 
+
+    double wmin = -std::log(1.+tmin/tmax),
+           wmax = -std::log(1.+tmax/tmax);
     double res = -minimize_1d(minus_dXdw, {wmin, wmax}, 1e-8, 100, 1000);
     return scalar{std::log(res*2)};
 }
@@ -457,21 +466,23 @@ scalar Xsection<HS2HS, 2, double(*)(const double, void*)>::
     double lnsqrts = parameters[0], temp = parameters[1];
     double sqrts = std::exp(lnsqrts);
     double s = std::pow(sqrts,2);
-    // transform w = -1/t
-    auto dXdw = [s, temp, this](double w) {
-        double params[3] = {s, temp, this->_mass};
-        double t = -1./w;
-        double Jacobian = t*t;
-        return this->_f(t, params)*Jacobian;
-    };
-
-    double res;
     double tmin = -std::pow(s-_mass*_mass, 2)/s, 
            tmax = -cut*t_channel_mD2->get_mD2(temp);
+    // transform w = -log(1+t/tmax)
+    // t = tmax*(exp(-w)-1)
+    // dw/dt = -1/(tmax+t)
+    // dt = (dw/dt)^{-1} * dw = -(tmax+t) * dw
+    auto dXdw = [s, temp, tmax, this](double w) {
+        double params[3] = {s, temp, this->_mass};
+        double t = tmax*(std::exp(-w)-1.);
+        double Jacobian = -(tmax+t);
+        return this->_f(t, params)*Jacobian;
+    };
+    double res;
     if (tmin>=tmax) res=0.;
     else {
-        double wmin = -1./tmin,
-               wmax = -1./tmax;
+        double wmin = -std::log(1.+tmin/tmax),
+           wmax = -std::log(1.+tmax/tmax);
         double error;
         res = quad_1d(dXdw, {wmin,wmax}, error);
     }
@@ -565,24 +576,28 @@ fourvec Xsection<HS2HS, 2, double(*)(const double, void*)>::
     double lnsqrts = parameters[0], temp = parameters[1];
     double sqrts = std::exp(lnsqrts);
     double s = std::pow(sqrts,2);
+    double tmin = -std::pow(s-_mass*_mass, 2)/s, 
+           tmax = -cut*t_channel_mD2->get_mD2(temp);
     double p0 = (s-_mass*_mass)/2./sqrts;
+    // transform w = -log(1+t/tmax)
+    // t = tmax*(exp(-w)-1)
+    // dw/dt = -1/(tmax+t)
+    // dt = (dw/dt)^{-1} * dw = -(tmax+t) * dw
     // <dpz*X>
-    auto dpz_dXdw = [s, temp, p0, this](double w) {
+    auto dpz_dXdw = [s, temp, tmax, p0, this](double w) {
         double params[3] = {s, temp, this->_mass};
-        double t = -1./w;
-        double Jacobian = t*t;
+        double t = tmax*(std::exp(-w)-1.);
+        double Jacobian = -(tmax+t);
         double cos_theta13 = 1. + t/(2*p0*p0);
         double dpz = p0*(cos_theta13-1.);
         return this->_f(t, params)*dpz*Jacobian;
     };
 
     double dpz; 
-    double tmin = -std::pow(s-_mass*_mass, 2)/s, 
-           tmax = -cut*t_channel_mD2->get_mD2(temp);
     if (tmin>=tmax) dpz=0.;
     else {
-        double wmin = -1./tmin,
-               wmax = -1./tmax;
+        double wmin = -std::log(1+tmin/tmax),
+               wmax = -std::log(1+tmax/tmax);
         double error;
         dpz = quad_1d(dpz_dXdw, {wmin, wmax}, error);
     }
@@ -605,37 +620,41 @@ tensor Xsection<HS2HS, 2, double(*)(const double, void*)>::
     double lnsqrts = parameters[0], temp = parameters[1];
     double sqrts = std::exp(lnsqrts);
     double s = std::pow(sqrts,2);
-    const double p0 = (s-_mass*_mass)/2./sqrts;
+    double tmin = -std::pow(s-_mass*_mass, 2)/s, 
+           tmax = -cut*t_channel_mD2->get_mD2(temp);
+    double p0 = (s-_mass*_mass)/2./sqrts;
+    // transform w = -log(1+t/tmax)
+    // t = tmax*(exp(-w)-1)
+    // dw/dt = -1/(tmax+t)
+    // dt = (dw/dt)^{-1} * dw = -(tmax+t) * dw
     // <dpz^2*X>
-    auto dpzdpz_dXdw = [s, temp, p0, this](double w) {
+    auto dpzdpz_dXdw = [s, temp, tmax, p0, this](double w) {
         double params[3] = {s, temp, this->_mass};
-        double t = -1./w;
-        double Jacobian = t*t;
+        double t = tmax*(std::exp(-w)-1.);
+        double Jacobian = -(tmax+t);
         double cos_theta13 = 1. + t/(2*p0*p0);
         double dpz = p0*(cos_theta13-1.);
         return this->_f(t, params)*dpz*dpz*Jacobian;
     };
     // <dpt^2*X>
-    auto dptdpt_dXdw = [s, temp, p0, this](double w) {
+    auto dptdpt_dXdw = [s, temp, tmax, p0, this](double w) {
         double params[3] = {s, temp, this->_mass};
-        double t = -1./w;
-        double Jacobian = t*t;
+        double t = tmax*(std::exp(-w)-1.);
+        double Jacobian = -(tmax+t);
         double cos_theta13 = 1. + t/(2*p0*p0);
         double dptdpt = p0*p0*(1.-cos_theta13*cos_theta13);
         return this->_f(t, params)*dptdpt*Jacobian;
     };
 
     double dpzdpz, dptdpt;
-    double tmin = -std::pow(s-_mass*_mass, 2)/s, 
-           tmax = -cut*t_channel_mD2->get_mD2(temp);
     if (tmin>tmax) {
         dpzdpz=0.;
         dptdpt=0.;
     }
     else{
         double error;
-        double wmin = -1./tmin,
-               wmax = -1./tmax;
+        double wmin = -std::log(1.+tmin/tmax),
+               wmax = -std::log(1.+tmax/tmax);
         dpzdpz = quad_1d(dpzdpz_dXdw, {wmin, wmax}, error);
         dptdpt = quad_1d(dptdpt_dXdw, {wmin, wmax}, error);
     }
