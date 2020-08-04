@@ -126,33 +126,37 @@ void Rate<HS2HS, 2, 2, double(*)(const double, void *)>::
     if (status == true){
         lnsqrts = res[0];
         costheta = res[1];
-    } 
-    else {
-        lnsqrts = lnsqrtsmin*1.01, costheta = 0.;
-    }
-    double s = std::exp(2.*lnsqrts);
-    double E2 = (s-_mass*_mass)/((1. - v1*costheta)*2.*E);
-    double sintheta = std::sqrt(1. - costheta*costheta);
+        double s = std::exp(2.*lnsqrts);
+        double E2 = (s-_mass*_mass)/((1. - v1*costheta)*2.*E);
+        double sintheta = std::sqrt(1. - costheta*costheta);
 
-    double tmin = -std::pow(s-_mass*_mass, 2)/s, 
-           tmax = -cut*t_channel_mD2->get_mD2(T);
-    X->sample({lnsqrts, T}, final_states);
-    // give incoming partilce a random phi angle
-    double phi = Srandom::dist_phi(Srandom::gen);
-    // com velocity
-    double vcom[3] = { E2*sintheta/(E2+E)*std::cos(phi),
+        double tmin = -std::pow(s-_mass*_mass, 2)/s, 
+               tmax = -cut*t_channel_mD2->get_mD2(T);
+        X->sample({lnsqrts, T}, final_states);
+        // give incoming partilce a random phi angle
+        double phi = Srandom::dist_phi(Srandom::gen);
+        // com velocity
+        double vcom[3] = { E2*sintheta/(E2+E)*std::cos(phi),
                E2*sintheta/(E2+E)*std::sin(phi),
                (E2*costheta+v1*E)/(E2+E)    };
-    /*
-    FS now is in Z-oriented CoM frame
-    1) FS.rotate_back
-    2) FS.boost_back
-    */
-    fourvec p1{E, 0, 0, v1*E};
-    auto p1com = p1.boost_to(vcom[0], vcom[1], vcom[2]);
-    for(auto & p: final_states){
-        p = p.rotate_back(p1com);
-        p = p.boost_back(vcom[0], vcom[1], vcom[2]);
+        /*
+        FS now is in Z-oriented CoM frame
+        1) FS.rotate_back
+        2) FS.boost_back
+        */
+        fourvec p1{E, 0, 0, v1*E};
+        auto p1com = p1.boost_to(vcom[0], vcom[1], vcom[2]);
+        for(auto & p: final_states){
+            p = p.rotate_back(p1com);
+            p = p.boost_back(vcom[0], vcom[1], vcom[2]);
+        }
+    }
+    else{
+        // sample failed, return original particle and a e->0 parton as 
+        // place holder
+        final_states.resize(2);
+        final_states[0] = fourvec{E, 0, 0, v1*E};
+        final_states[1] = fourvec{0,0,0,0};
     }
 }
 
