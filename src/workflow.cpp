@@ -232,7 +232,7 @@ double compute_realtime_to_propagate(double dt, fourvec x, fourvec p){
       exit(-1);
     }
 }
-//std::ofstream f("stat.dat");
+std::ofstream f("stat.dat");
 int update_particle_momentum_Lido(
     double dt_input, double temp, std::vector<double> v3cell,
     particle & pIn, std::vector<particle> & pOut_list){
@@ -250,8 +250,7 @@ int update_particle_momentum_Lido(
     // we only handle u,d,s,c,b,g
     bool formed_from_vac = (pIn.x.t()>pIn.tau_i);
     if ( (!((pIn.pid==21) || (std::abs(pIn.pid)<=5)) )
-       || (!formed_from_vac)
-       || (temp<.16)){
+       || (temp<.16) || (!formed_from_vac)){
         pIn.radlist.clear();
         pOut_list.push_back(pIn);
         return pOut_list.size();
@@ -262,7 +261,7 @@ int update_particle_momentum_Lido(
     double Eradmin = mD;
 
     // Don't touch particles already below soft cut
-    if ((!pIn.is_virtual) && (pIn.Q0<mD) && (formed_from_vac)
+    if ((!pIn.is_virtual) && (p.Q0<mD)
         && (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Emin)
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 
@@ -288,7 +287,7 @@ int update_particle_momentum_Lido(
     auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
     double dt_cell = dt_for_pIn / pIn.p.t() * p_cell.t();
     double E_cell = p_cell.t();
-    double LnE_cell = std::log(std::max(E_cell,.4));
+    double LnE_cell = std::log(E_cell);
 
     // For diffusion induced radiation, qhat_Soft is an input
     double qhatg = qhat(21, E_cell, 0., temp);
@@ -299,7 +298,7 @@ int update_particle_momentum_Lido(
 
     BOOST_FOREACH (Process &r, AllProcesses[channel_pid])
     {
-        bool can_rad = (!pIn.is_virtual) && formed_from_vac;
+        bool can_rad = !pIn.is_virtual;
         switch (r.which())
         {
         case 0:
@@ -548,7 +547,7 @@ int update_particle_momentum_Lido(
                 // 1): a change of running-coupling from elastic broadening
                 double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
                 double kt2n = measure_perp(
-				pIn.p*(it->mother_p.t()/pIn.p.t()), 
+				it->mother_p, 
 				it->p*(it->p0.t()/it->p.t())
 				).pabs2();
                 double Running = std::min(
@@ -579,7 +578,7 @@ int update_particle_momentum_Lido(
 		    it->Q0 = pIn.Q0;
 		    it->Q00 = it->Q0;
 
-                    //f << pIn.x.t() << " " << it->p0.t() << " " << it->mother_p.t() << " " << kt2n<<std::endl;
+                    f << pIn.x.t() << " " << it->p0.t() << " " << it->mother_p.t() << " " << kt2n<<std::endl;
  
                     int col=-100, acol=-100, mcol=-100, macol=-100;
                     SampleFlavorAndColor(pIn.pid, pIn.col,

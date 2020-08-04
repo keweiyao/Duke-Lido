@@ -102,10 +102,10 @@ int main(int argc, char* argv[]){
         int pid = args["pid"].as<int>();
         double T0 = args["temp"].as<double>();
         double E0 = args["einit"].as<double>();
-        double L0 = 3*5.076;
-        double dL = L0/100;
+        double L0 = 5*5.076;
+        double dL = L0/200;
         std::vector<particle> plist, new_plist, pOut_list;
-        plist.resize(4000);
+        plist.resize(10000);
         
         fourvec x0{0.,0.,0.,0.};
         fourvec p0{E0,0.,0.,E0};
@@ -126,7 +126,8 @@ int main(int argc, char* argv[]){
             LOG_INFO << l;
             new_plist.clear();
             for (auto & p : plist){
-                int fs_size = update_particle_momentum_Lido(
+         //p.p=p0        ;
+        int fs_size = update_particle_momentum_Lido(
                       dL, T0, {0,0,0}, p, pOut_list);
                 for (auto & p : pOut_list) new_plist.push_back(p);
             }

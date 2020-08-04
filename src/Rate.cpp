@@ -106,31 +106,29 @@ void Rate<HS2HS, 2, 2, double(*)(const double, void *)>::
     double M2 = _mass*_mass;
     double v1 = std::sqrt(1. - M2/E/E);
     double Q2 = cut*t_channel_mD2->get_mD2(T);
-    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
-    double lnsqrtsmin = std::log(sqrtsmin);
-    auto dR_dxdy = [E, T, lnsqrtsmin, v1, M2, this](const double * x){
-        double lnsqrts = x[0], costheta = x[1];
-        if (lnsqrts<lnsqrtsmin||costheta>=1.||costheta<=-1.) return 0.;
-        double s = std::exp(2.*lnsqrts);
-        double E2 = (s-M2)/((1. - v1*costheta)*2.*E);
-        double Jacobian = 2.*E2;
+    double smin = M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2);
+    auto dR_dxdy = [E, T, smin, v1, M2, this](const double * x){
+        double E2 = x[0], costheta = x[1];
+        double s = M2 + 2.*E*E2*(1. - v1*costheta);
+        if (s<smin||costheta>=1.||costheta<=-1.) return 0.;
+        double lnsqrts = .5*std::log(s);
         double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
-        return Jacobian/E*E2*std::exp(-E2/T)*(s-M2)*2*Xtot/16./M_PI/M_PI;
+        return 1./E*E2*std::exp(-E2/T)*(s-M2)*2*Xtot/16./M_PI/M_PI;
     };
+    double E2min = (smin-M2)/(2.*E*(1.+v1));
+    double E2max = E2min+5.*T;
     bool status = true;
     double fmax = StochasticBase<2>::GetFmax(parameters).s;
     auto res = sample_nd(dR_dxdy, 2, 
-                      {{lnsqrtsmin, std::log(sqrtsmin*10)}, {-1., 1.}},
+                      {{E2min, E2max}, {-1., 1.}},
                       fmax, status);
-    double lnsqrts, costheta;
     if (status == true){
-        lnsqrts = res[0];
-        costheta = res[1];
-        double s = std::exp(2.*lnsqrts);
-        double E2 = (s-_mass*_mass)/((1. - v1*costheta)*2.*E);
+        double E2 = res[0];
+        double costheta = res[1];
+        double s = M2 + 2.*E*E2*(1. - v1*costheta);
+        double lnsqrts = .5*std::log(s);
         double sintheta = std::sqrt(1. - costheta*costheta);
-
-        double tmin = -std::pow(s-_mass*_mass, 2)/s, 
+        double tmin = -std::pow(s-M2, 2)/s, 
                tmax = -cut*t_channel_mD2->get_mD2(T);
         X->sample({lnsqrts, T}, final_states);
         // give incoming partilce a random phi angle
@@ -220,42 +218,43 @@ void Rate<HS2HHS, 2, 2, double(*)(const double*, void *)>::
     double M2 = _mass*_mass;
     double v1 = std::sqrt(1. - M2/E/E);
     double Q2 = cut*t_channel_mD2->get_mD2(T);
-    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
-    double lnsqrtsmin = std::log(sqrtsmin);
-    auto dR_dxdy = [E, T, lnsqrtsmin, v1, this](const double * x){
-        double M = this->_mass;
-        double lnsqrts = x[0], costheta = x[1];
-        if (lnsqrts<lnsqrtsmin||costheta>=1.||costheta<=-1.) return 0.;
-        double s = std::exp(2.*lnsqrts);
-        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
-        double Jacobian = 2.*E2;
+    double smin = M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2);
+
+    auto dR_dxdy = [E, T, smin, v1, M2, this](const double * x){
+        double E2 = x[0], costheta = x[1];
+        double s = M2 + 2.*E*E2*(1. - v1*costheta);
+        if (s<smin||costheta>=1.||costheta<=-1.) return 0.;
+        double lnsqrts = .5*std::log(s);
         double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
-        return Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
+        return 1./E*E2*std::exp(-E2/T)*(s-M2)*2*Xtot/16./M_PI/M_PI;
     };
+    double E2min = (smin-M2)/(2.*E*(1.+v1));
+    double E2max = E2min+5.*T;
     bool status = true;
     double fmax = StochasticBase<2>::GetFmax(parameters).s;
     auto res = sample_nd(dR_dxdy, 2, 
-               {{std::log(sqrtsmin), std::log(sqrtsmin*10)}, 
+               {{E2min, E2max}, 
                {-1., 1.}}, 
                fmax, status);
     if (status==true){
-    double lnsqrts = res[0], costheta = res[1];
-    double sintheta = std::sqrt(1. - costheta*costheta);
-    double phi = Srandom::dist_phi(Srandom::gen);
-    double cosphi = std::cos(phi), sinphi = std::sin(phi);
-    double s = std::exp(2.*lnsqrts);
-    double E2 = (s-M2)/((1. - v1*costheta)*2.*E);
-    double vcom[3] = { E2*sintheta/(E2+E)*cosphi,
+        double E2 = res[0];
+        double costheta = res[1];
+        double s = M2 + 2.*E*E2*(1. - v1*costheta);
+        double lnsqrts = .5*std::log(s);
+        double sintheta = std::sqrt(1. - costheta*costheta);
+        double phi = Srandom::dist_phi(Srandom::gen);
+        double cosphi = std::cos(phi), sinphi = std::sin(phi);
+        double vcom[3] = { E2*sintheta/(E2+E)*cosphi,
                         E2*sintheta/(E2+E)*sinphi,
                         (E2*costheta+v1*E)/(E2+E) };
-    X->sample({lnsqrts, T}, final_states);
+        X->sample({lnsqrts, T}, final_states);
 
-    fourvec p1{E, 0, 0, v1*E};
-    auto p1com = p1.boost_to(vcom[0], vcom[1], vcom[2]);
-    for(auto & p: final_states){
-        p = p.rotate_back(p1com);
-        p = p.boost_back(vcom[0], vcom[1], vcom[2]);
-    }
+        fourvec p1{E, 0, 0, v1*E};
+        auto p1com = p1.boost_to(vcom[0], vcom[1], vcom[2]);
+        for(auto & p: final_states){
+            p = p.rotate_back(p1com);
+            p = p.boost_back(vcom[0], vcom[1], vcom[2]);
+        }
     }
     else{
         final_states.resize(3);
@@ -357,23 +356,23 @@ scalar Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         find_max(std::vector<double> parameters){
     double lnE = parameters[0], T = parameters[1];
     double E = std::exp(lnE);
-    double Q2 = cut*t_channel_mD2->get_mD2(T);
     double M2 = _mass*_mass;
-    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
-    double lnsqrtsmin = std::log(sqrtsmin);
-    auto minus_dR_dxdy = [E, T, lnsqrtsmin, this](const double * x){
-        double M = this->_mass;
-        double v1 = std::sqrt(1. - M*M/E/E);
-        double lnsqrts = x[0], costheta = x[1];
-        if (lnsqrts<lnsqrtsmin||costheta>=1.||costheta<=-1.) return 0.;
-        double s = std::exp(2.*lnsqrts);
-        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
-        double Jacobian = 2.*E2;
+    double v1 = std::sqrt(1. - M2/E/E);
+    double Q2 = cut*t_channel_mD2->get_mD2(T);
+    double smin = M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2);
+    auto minus_dR_dxdy = [E, T, smin, v1, M2, this](const double * x){
+        double E2 = x[0], costheta = x[1];
+        double s = M2 + 2.*E*E2*(1. - v1*costheta);
+        if (s<smin||costheta>=1.||costheta<=-1.) return 0.;
+        double lnsqrts = .5*std::log(s);
         double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
-        return -Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
+        return -1./E*E2*std::exp(-E2/T)*(s-M2)*2*Xtot/16./M_PI/M_PI;
     };
+    double E2min = (smin-M2)/(2.*E*(1.+v1));
+    double E2max = E2min+5.*T;
     auto val = -minimize_nd(minus_dR_dxdy, 2, 
-                            {lnsqrtsmin+std::log(1.1), 0.}, {lnsqrtsmin*.05, 0.2}, 1000, 1e-8);
+                        {(E2min+E2max)/2., 0.}, {(E2max-E2min)/10., 0.2}, 
+                          1000, 1e-8);
     return scalar{2*val};
 }
 
@@ -406,21 +405,21 @@ scalar Rate<HS2HHS, 2, 2, double(*)(const double*, void*)>::
     double M2 = _mass*_mass;
     double v1 = std::sqrt(1. - M2/E/E);
     double Q2 = cut*t_channel_mD2->get_mD2(T);
-    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
-    double lnsqrtsmin = std::log(sqrtsmin);
-    auto dR_dxdy = [E, T, lnsqrtsmin, v1, this](const double * x){
-        double M = this->_mass;
-        double lnsqrts = x[0], costheta = x[1];
-        if (lnsqrts<lnsqrtsmin||costheta>=1.||costheta<=-1.) return 0.;
-        double s = std::exp(2.*lnsqrts);
-        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
-        double Jacobian = 2.*E2;
-        double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
-        return -Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
-    };
+    double smin = M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2);
 
-    auto val = -minimize_nd(dR_dxdy, 2, {lnsqrtsmin+T, 0.}, 
-                                        {T*.5, 0.2}, 1000, 1e-8);
+    auto minus_dR_dxdy = [E, T, smin, v1, M2, this](const double * x){
+        double E2 = x[0], costheta = x[1];
+        double s = M2 + 2.*E*E2*(1. - v1*costheta);
+        if (s<smin||costheta>=1.||costheta<=-1.) return 0.;
+        double lnsqrts = .5*std::log(s);
+        double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
+        return -1./E*E2*std::exp(-E2/T)*(s-M2)*2*Xtot/16./M_PI/M_PI;
+    };
+    double E2min = (smin-M2)/(2.*E*(1.+v1));
+    double E2max = E2min+5.*T;
+
+    auto val = -minimize_nd(minus_dR_dxdy, 2, {(E2min+E2max)/2., 0.}, 
+                                        {(E2max-E2min)/10., 0.2}, 1000, 1e-8);
     return scalar{val*2};
 }
 /*------------------Implementation for 3 -> 2--------------------*/
@@ -471,22 +470,26 @@ scalar Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
     double M2 = _mass*_mass;
     double v1 = std::sqrt(1. - M2/E/E);
     double Q2 = cut*t_channel_mD2->get_mD2(T);
-    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
-    auto code = [E, T, v1, this](const double * x){
-        double M = this->_mass;
-        double lnsqrts = x[0], costheta = x[1];
-        double s = std::exp(2.*lnsqrts);
-        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
-        double Jacobian = 2.*E2;
-        std::vector<double> res{0.};
-        double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
-        res[0] = Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI;
-        return res;
+    double smin = M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2);
+    auto dR_dxdy = [E, T, smin, v1, M2, this](const double * x){
+        double E2 = x[0], costheta = x[1];
+        double s = M2 + 2.*E*E2*(1. - v1*costheta);
+        double res;
+        if (s<smin||costheta>=1.||costheta<=-1.) res=0.;
+        else {
+            double lnsqrts = .5*std::log(s);
+            double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
+            res = 1./E*E2*std::exp(-E2/T)*(s-M2)*2*Xtot/16./M_PI/M_PI;
+        }
+        std::vector<double> results{res};
+        return results;
     };
-    double xmin[2] = {std::log(sqrtsmin), -1.};
-    double xmax[2] = {std::log(sqrtsmin*10),1.};
+    double E2min = (smin-M2)/(2.*E*(1.+v1));
+    double E2max = E2min+5.*T;
+    double xmin[2] = {E2min, -1.};
+    double xmax[2] = {E2max,1.};
     double err;
-    auto val = quad_nd(code, 2, 1, xmin, xmax, err);
+    auto val = quad_nd(dR_dxdy, 2, 1, xmin, xmax, err);
     return scalar{_degen*val[0]};
 }
 
@@ -520,20 +523,25 @@ scalar Rate<HS2HHS, 2, 2, double(*)(const double*, void*)>::
     double M2 = _mass*_mass;
     double v1 = std::sqrt(1. - M2/E/E);
     double Q2 = cut*t_channel_mD2->get_mD2(T);
-    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
-    double lnsqrtsmin = std::log(sqrtsmin);
-    auto dR_dxdy = [E, T, lnsqrtsmin, v1, this](const double * x){
-        double M = this->_mass;
-        double lnsqrts = x[0], costheta = x[1];
-        double s = std::exp(2.*lnsqrts);
-        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
-        double Jacobian = 2.*E2;
-        double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
-        std::vector<double> res{Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2*Xtot/16./M_PI/M_PI};
-        return res;
+    double smin = M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2);
+
+    auto dR_dxdy = [E, T, smin, v1, M2, this](const double * x){
+        double E2 = x[0], costheta = x[1];
+        double s = M2 + 2.*E*E2*(1. - v1*costheta);
+        double res;
+        if (s<smin||costheta>=1.||costheta<=-1.) res=0.;
+        else {
+            double lnsqrts = .5*std::log(s);
+            double Xtot = this->X->GetZeroM({lnsqrts,T}).s;
+            res = 1./E*E2*std::exp(-E2/T)*(s-M2)*2*Xtot/16./M_PI/M_PI;
+        }
+        std::vector<double> results{res};
+        return results;
     };
-    double xmin[2] = {std::log(sqrtsmin), -1.};
-    double xmax[2] = {std::log(sqrtsmin*10),1.};
+    double E2min = (smin-M2)/(2.*E*(1.+v1));
+    double E2max = E2min+5.*T;
+    double xmin[2] = {E2min, -1.};
+    double xmax[2] = {E2max, 1.};
     double err;
     auto val = quad_nd(dR_dxdy, 2, 1, xmin, xmax, err);
     return scalar{_degen*val[0]};
@@ -587,17 +595,20 @@ fourvec Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         calculate_fourvec(std::vector<double> parameters){
     double lnE = parameters[0], T = parameters[1];
     double E = std::exp(lnE);
-    double Q2 = cut*t_channel_mD2->get_mD2(T);
     double M2 = _mass*_mass;
     double v1 = std::sqrt(1. - M2/E/E);
-    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
-    auto code = [E, T, v1,this](const double * x){
-        double M = this->_mass;
-        double lnsqrts = x[0], costheta = x[1];
-        double sintheta = std::sqrt(1.-costheta*costheta);
-        double s = std::exp(2.*lnsqrts);
-        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
-        double Jacobian = 2.*E2;
+    double Q2 = cut*t_channel_mD2->get_mD2(T);
+    double smin = M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2);
+
+    auto code = [E, T, smin, v1, M2, this](const double * x){
+        double E2 = x[0], costheta = x[1];
+        double s = M2 + 2.*E*E2*(1. - v1*costheta);
+        if (s<smin||costheta>=1.||costheta<=-1.) {
+            std::vector<double> res{0., 0.};
+            return res;
+        }
+        double lnsqrts = .5*std::log(s);
+        double sintheta = std::sqrt(1. - costheta*costheta);
         double vcom[3] = {E2*sintheta/(E2+E), 0., (E2*costheta+v1*E)/(E2+E)};
         fourvec p1{E, 0, 0, v1*E};
         // A vector in p1z(com)-oriented com frame
@@ -606,14 +617,17 @@ fourvec Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         auto fmu1 = fmu0.rotate_back(p1.boost_to(vcom[0], vcom[1], vcom[2]));
         // boost back to the matter frame
         auto fmu2 = fmu1.boost_back(vcom[0], vcom[1], vcom[2]);
-        double common = Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2./16./M_PI/M_PI;
+        double common = 1./E*E2*std::exp(-E2/T)*2.*(s-M2)/16./M_PI/M_PI;
         fmu2 = fmu2 * common;
         // Set tranverse to zero due to azimuthal symmetry;
         std::vector<double> res{fmu2.t(), fmu2.z()};
         return res;
     };
-    double xmin[2] = {std::log(sqrtsmin), -1.};
-    double xmax[2] = {std::log(sqrtsmin*10), 1.};
+
+    double E2min = (smin-M2)/(2.*E*(1.+v1));
+    double E2max = E2min+5.*T;
+    double xmin[2] = {E2min, -1.};
+    double xmax[2] = {E2max, 1.};
     double err;
     auto val = quad_nd(code, 2, 2, xmin, xmax, err);
     return fourvec{_degen*val[0], 0.0, 0.0, _degen*val[1]};
@@ -636,13 +650,16 @@ tensor Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
     double M2 = _mass*_mass;
     double v1 = std::sqrt(1. - M2/E/E);
     double Q2 = cut*t_channel_mD2->get_mD2(T);
-    double sqrtsmin = std::sqrt(M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2));
-    auto code = [E, T, v1,this](const double * x){
-        double M = this->_mass;
-        double lnsqrts = x[0], costheta = x[1], phi=x[2];
-        double s = std::exp(2.*lnsqrts);
-        double E2 = (s-M*M)/((1. - v1*costheta)*2.*E);
-        double Jacobian = 2.*E2;
+    double smin = M2+.5*Q2 + std::sqrt(M2*Q2+.25*Q2*Q2);
+
+    auto code = [E, T, smin, v1, M2, this](const double * x){
+        double E2 = x[0], costheta = x[1], phi=x[2];
+        double s = M2 + 2.*E*E2*(1. - v1*costheta);
+        if (s<smin||costheta>=1.||costheta<=-1.||phi<=0.||phi>2.*M_PI) {
+            std::vector<double> res{0., 0., 0., 0.};
+            return res;
+        }
+        double lnsqrts = .5*std::log(s);
         double sintheta = std::sqrt(1. - costheta*costheta);
         double vcom[3] = {E2*sintheta/(E2+E)*std::cos(phi), 
                     E2*sintheta/(E2+E)*std::sin(phi),
@@ -654,15 +671,17 @@ tensor Rate<HS2HS, 2, 2, double(*)(const double, void*)>::
         auto fmunu1 = fmunu0.rotate_back(p1.boost_to(vcom[0], vcom[1], vcom[2]));
         // boost back to the matter frame
         auto fmunu2 = fmunu1.boost_back(vcom[0], vcom[1], vcom[2]);
-        double common = Jacobian/E*E2*std::exp(-E2/T)*(s-M*M)*2./32./std::pow(M_PI, 3);
+        double common = 1./E*E2*std::exp(-E2/T)*(s-M2)*2./32./std::pow(M_PI, 3);
         fmunu2 = fmunu2 * common;
         // Set tranverse to zero due to azimuthal symmetry;
         std::vector<double> res{fmunu2.T[0][0], fmunu2.T[1][1],
                                 fmunu2.T[2][2], fmunu2.T[3][3]};
         return res;
     };
-    double xmin[3] = {std::log(sqrtsmin), -1., -M_PI};
-    double xmax[3] = {std::log(sqrtsmin*10), 1., M_PI};
+    double E2min = (smin-M2)/(2.*E*(1.+v1));
+    double E2max = E2min+5.*T;
+    double xmin[3] = {E2min, -1., -M_PI};
+    double xmax[3] = {E2max, 1., M_PI};
     double err;
     auto val = quad_nd(code, 3, 4, xmin, xmax, err);
     return tensor{_degen*val[0], 0., 0., 0.,
