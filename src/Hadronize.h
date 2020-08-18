@@ -18,7 +18,7 @@ public:
    int hadronize(std::vector<particle> partons, 
                  std::vector<particle> & hadrons, 
                  std::vector<particle> & thermal_partons,
-                 double Q0, int level);
+                 double Q0, double Tf, int level, int oversamples);
 private:
    Pythia pythia;
 };

@@ -104,8 +104,8 @@ void FormChain(particle pi, particle pf,
 int JetDenseMediumHadronize::hadronize(std::vector<particle> partons, 
                                        std::vector<particle> & hadrons, 
                                        std::vector<particle> & thermal_partons,
-                                       double Q0,
-                                       int level){
+                                       double Q0, double Tf,
+                                       int level, int Nos){
     std::vector<particle> colorless_ensemble;
     for(auto & p : partons) colorless_ensemble.push_back(p);
     int Npartons = partons.size();
@@ -157,58 +157,45 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
 	int acol = p1.col;
 	int col = p2.acol;
 	int pid;
+	double tau, rap;
 	    if (col==0 && acol==0) continue;
-	    if (col==0 && acol!=0)
+	    if (col==0 && acol!=0){
                 pid = -std::abs(Srandom::sample_flavor(3));
-	    if (col!=0 && acol==0)
+		tau = p1.x.tau();
+                rap = p1.x.rap();
+	    }
+	    if (col!=0 && acol==0){
                 pid = std::abs(Srandom::sample_flavor(3));
-            if (col!=0 && acol!=0)
+                tau = p2.x.tau();
+                rap = p2.x.rap();
+	    }
+            if (col!=0 && acol!=0){
                 pid = 21;
+		tau = (p1.x.tau()+p2.x.tau())/2.;
+                rap = (p1.x.rap()+p2.x.rap())/2.;
+	    }
             particle th;
 	    th.pid = pid;
             th.col = col;
             th.acol = acol;
-	    double tau = (p1.x.tau()+p2.x.tau())/2.;
-	    double rap = (p1.x.rap()+p2.x.rap())/2.;
             th.x0 = fourvec{tau*std::cosh(rap),0.,0.,tau*std::sinh(rap)};
 	    th.x = th.x0;
 	    double vzgrid = th.x.z()/th.x.t();
+	    do{
             th.p = Srandom::generate_thermal_parton_with_boost(
-                           .16, 0, 0, vzgrid);
+                           Tf, 0, 0, vzgrid);
+	    }while(th.p.xT()>.4);
             th.mass = 0.;
             th.vcell.resize(3);
             th.vcell[0] = 0.;
             th.vcell[1] = 0.;
             th.vcell[2] = vzgrid;
-            th.Tf = 0.16;
+            th.Tf = Tf;
             th.Q0 = 0.4;
             thermal_partons.push_back(th);
 	    colorless_ensemble.push_back(th);
     }
-    /*for (int i=0; i<endpoint_acols.size();i++){
-        auto & p1 = endpoint_acols[i];
-        int acol = 0;
-        int col = p1.acol;
-            particle th;
-            th.x0 = p1.x;
-            th.x = th.x0;
-            th.col = col;
-            th.acol = acol;
-            th.pid = std::abs(Srandom::sample_flavor(3));
-            double vzgrid = p1.x.z()/p1.x.t();
-            th.p = Srandom::generate_thermal_parton_with_boost(
-                           .16, 0, 0, vzgrid);
-            th.mass = 0.;
-            th.vcell.resize(3);
-            th.vcell[0] = 0.;
-            th.vcell[1] = 0.;
-            th.vcell[2] = vzgrid;
-            th.Tf = 0.16;
-            th.Q0 = 0.;
-            thermal_partons.push_back(th);
-            colorless_ensemble.push_back(th);
-    }*/
-
+    for (int i=0; i<Nos; i++){
     double maxQ0 = Q0;
     pythia.event.reset();
     int count=1;
@@ -243,6 +230,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
             hadrons.push_back(h);
         }
             
-    } 
+       } 
+    }
     return hadrons.size();
 }

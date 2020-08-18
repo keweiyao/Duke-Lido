@@ -93,7 +93,7 @@ int main(int argc, char* argv[]){
         // For RHIC 200 GeV
                 std::vector<double> TriggerBin({
          2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,20,22,24,28,32,36,40,45,50,55,60,70,80,90,100});
-        std::vector<double> Rs({.4});
+        std::vector<double> Rs({.2,.3,.4});
         std::vector<double> ParticlepTbins({0,1,2,3,4,5,6,8,10,12,14,16,18,20,22,24,26,30,40,60,100});
         std::vector<double> jetpTbins({3,4,5,6,7,10,12,14,16,18,20,24,28,32,36,40,50,60,100});
         std::vector<double> HFpTbins({2,6,10,20,40,100});
@@ -118,27 +118,37 @@ int main(int argc, char* argv[]){
          24,28,32,36,40,50,60,70,80,90,100,
          110,120,130,140,150,160,180,200,240,280,320,360,400,500,
          600,700,800,1000,1200,1500,2000,2500});
-        std::vector<double> Rs({.4});
+        std::vector<double> Rs({.2,.3,.4});
         std::vector<double> ParticlepTbins({0,1,2,3,4,5,6,8,10,12,14,16,20,
-                        24,28,32,40,50,60,80,100,
-                        120,140,160,200,300,400,600,800,1000});
+                        24,28,32,40,50,60,70,80,90,100,110,
+                        120,130,140,150,160,180,200,250,300,350,400,600,800,1000});
         std::vector<double> jetpTbins({4,6,8,10,12,15,20,25,30,
                         40,50,60,70,80,100,120,140,160,180,200,
                         240,280,320,360,400,500,600,800,1000,
                         1200,1400,1600,2000,2500});
-        std::vector<double> HFpTbins({2,6,10,20,40,100});
+        std::vector<double> HFpTbins({4,20,200});
         std::vector<double> HFETbins({2,6,10,20,40,100});
         std::vector<double> shapepTbins({20,30,40,60,80,120,2000});
         std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
                           .35, .4, .45, .5,  .6, .7,  .8,
                            1., 1.5, 2.0, 2.5, 3.0});
         std::vector<double> xJpTbins({100,126,158,178,200,224,251,282,316,398,562});
-        std::vector<double> FragpTbins({100,126,158,200,251,316,398});
-	std::vector<double> zbins({.005,.0065,.0085,.011,.015,
-			.019,.025,.032,.042,.055,
-			.071, .092, .120,.157, .204, 
-			.266, .347, .452, .589, .767,
-			1.});
+        //std::vector<double> FragpTbins({100,126,158,200,251,316,398,600,800});
+        std::vector<double> FragpTbins({20,40,60,80,100,150,200,250,300});
+        std::vector<double> zbins({.005,.0065,.0085,.011,.015,
+                        .019,.025,.032,.042,.055,
+                        .071, .092, .120,.157, .204, 
+                        .266, .347, .452, .589, .767,
+                        1.});
+	std::vector<double> zbins;
+	zbins.clear();
+	double zmin = std::log(.001);
+	double zmax = std::log(1);
+	double dz = (zmax-zmin)/30.;
+	for (int i=0; i<31; i++){
+		zbins.push_back(std::exp(zmin+dz*i));
+	}
+
 */
         LeadingParton dNdpT(ParticlepTbins);
         JetStatistics JetSample(jetpTbins, Rs, 
@@ -168,9 +178,9 @@ int main(int argc, char* argv[]){
                 args["eid"].as<int>(),
                 Q0
             );
-            LOG_INFO << pythiagen.sigma_gen() << " "
-                     << TriggerBin[iBin] << " "
-                     << TriggerBin[iBin];
+            //LOG_INFO << pythiagen.sigma_gen() << " "
+            //         << TriggerBin[iBin] << " "
+            //         << TriggerBin[iBin];
             for (int ie=0; ie<args["pythia-events"].as<int>(); ie++){
                 std::vector<particle> plist;
                 std::vector<current> clist;
@@ -180,13 +190,13 @@ int main(int argc, char* argv[]){
                 double sigma_gen = pythiagen.sigma_gen()
                                   / args["pythia-events"].as<int>();
                 
-                dNdpT.add_event(plist, sigma_gen);
+                dNdpT.add_event(plist, sigma_gen, pythiagen.maxPT());
 	        if (args["jet"].as<bool>()) {
                     jetfinder.set_sigma(sigma_gen);
                     jetfinder.MakeETower(
                          0.6, 0.165, args["pTtrack"].as<double>(),
                          plist, clist, slist, 10);
-                    jetfinder.FindJets(Rs, 5., -3., 3.);
+                    jetfinder.FindJets(Rs, 2., -3., 3.);
                     jetfinder.FindHF(plist);
                     jetfinder.CorrHFET(shaperbins);
                     jetfinder.LabelFlavor();

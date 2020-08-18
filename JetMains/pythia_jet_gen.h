@@ -13,13 +13,16 @@ using namespace Pythia8;
 class PythiaGen{
 public: 
     PythiaGen(std::string f_pythia, std::string f_trento, 
-              int pTHL, int pTHH, int iev, double _Q0);
+              double pTHL, double pTHH, int iev, double _Q0);
     void Generate(std::vector<particle> & plist);
     double sigma_gen(void){
         return sigma0;
     }
+    double maxPT(void){
+	return pythia.event.scale();
+    }
 private:
-    Pythia pythia, pythia2;
+    Pythia pythia;
     TransverPositionSampler TRENToSampler;
     double sigma0, Q0;
 };
@@ -65,14 +68,14 @@ void reference_pmu(int i, double & tau, Event & event){
 }
 
 PythiaGen::PythiaGen(std::string f_pythia, std::string f_trento,
-                     int pTHL, int pTHH, int iev, double _Q0):
+                     double pTHL, double pTHH, int iev, double _Q0):
 TRENToSampler(f_trento, iev)
 {   
     Q0 = _Q0;
     // read pythia settings
     pythia.readFile(f_pythia);
     // suppress output
-    pythia.readString("Print:quiet = off");
+    pythia.readString("Print:quiet = on");
     pythia.readString("SoftQCD:all = off");
     pythia.readString("PromptPhoton:all=off");
     pythia.readString("WeakSingleBoson:all=off");
@@ -102,8 +105,8 @@ TRENToSampler(f_trento, iev)
     pythia.readString(s4.str());
     // Init
     pythia.init();
-    for (int i=0; i<1000; i++) pythia.next();
-    sigma0 = pythia.info.sigmaGen();
+    for (int i=0; i<100; i++) pythia.next();
+        sigma0 = pythia.info.sigmaGen();
 }
 
 void PythiaGen::Generate(std::vector<particle> & plist){

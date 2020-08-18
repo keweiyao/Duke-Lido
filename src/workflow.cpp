@@ -235,7 +235,7 @@ double compute_realtime_to_propagate(double dt, fourvec x, fourvec p){
 //std::ofstream f("stat.dat");
 int update_particle_momentum_Lido(
     double dt_input, double temp, std::vector<double> v3cell,
-    particle & pIn, std::vector<particle> & pOut_list){
+    particle & pIn, std::vector<particle> & pOut_list, double Tf){
     double Emin = Lido_Ecut * temp;
         // minimum rad energy
     auto p00 = pIn.p;
@@ -250,7 +250,7 @@ int update_particle_momentum_Lido(
     // we only handle u,d,s,c,b,g
     bool formed_from_vac = (pIn.x.t()>pIn.tau_i);
     if ( (!((pIn.pid==21) || (std::abs(pIn.pid)<=5)) )
-       || (temp<.16) || (!formed_from_vac)){
+       || (temp<Tf) || (!formed_from_vac) ){
         pIn.radlist.clear();
         pOut_list.push_back(pIn);
         return pOut_list.size();
@@ -258,30 +258,39 @@ int update_particle_momentum_Lido(
 
     double mD2 = t_channel_mD2->get_mD2(temp);
     double mD = std::sqrt(mD2);
-    double Eradmin = mD;
+    double minf = mD/1.414;
+    double Eradmin = minf;
 
     // Don't touch particles already below soft cut
-    if ((!pIn.is_virtual) && (pIn.Q0<mD)
-        && (pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() < Emin)
+    double E0_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
+    if ((!pIn.is_virtual) && (pIn.Q0<minf)
+        && (E0_cell < Emin)
         && (std::abs(pIn.pid)==1 || std::abs(pIn.pid)==2 || 
             std::abs(pIn.pid)==3 || std::abs(pIn.pid)==21) 
 	){
         pIn.radlist.clear();
         return pOut_list.size();
     }
-        
+
 
     int channel_pid;
     if (std::abs(pIn.pid) <= 3) channel_pid = 123;
     else channel_pid = std::abs(pIn.pid);
 
+    if (E0_cell<Emin){
+        pIn.radlist.clear();
+        pOut_list.push_back(pIn);
+        return pOut_list.size();
+    }
+
 
     for (int i=0; i<10; i++){
         fourvec pnew;
-        Ito_update(pIn.pid, dt_for_pIn/10., pIn.mass, temp, v3cell, pIn.p, pnew);
-        if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
-        else pIn.p = pnew;
+        Ito_update(pIn.pid, dt_for_pIn/10, pIn.mass, temp, v3cell, pIn.p, pnew, pIn.is_virtual);
+	if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
+	else pIn.p = pnew;
     }
+
 
     // Apply large angle scattering, and diffusion induced radiation
     auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
@@ -298,7 +307,7 @@ int update_particle_momentum_Lido(
 
     BOOST_FOREACH (Process &r, AllProcesses[channel_pid])
     {
-        bool can_rad = !pIn.is_virtual;
+        bool can_rad = (!pIn.is_virtual);
         switch (r.which())
         {
         case 0:
@@ -410,6 +419,9 @@ int update_particle_momentum_Lido(
             break;
         }
         // rotate the final state back and boost it back to the lab frame
+	if (pIn.is_virtual){
+	    FS[0] = FS[0]*(p_cell.t()/FS[0].t());
+	}
         for (auto &pmu : FS){
             pmu = pmu.rotate_back(p_cell);
             pmu = pmu.boost_back(v3cell[0], v3cell[1], v3cell[2]);
@@ -417,8 +429,8 @@ int update_particle_momentum_Lido(
 
         // elastic process changes the momentum immediately
         if (channel == 0 || channel == 1){
+	    pIn.p = FS[0];
             if (!pIn.is_virtual){  
-                 pIn.p = FS[0];
 		    int id = (channel==0) ? (Srandom::sample_flavor(3)) : 21;
 		    int col=-100, acol=-100, mcol=-100, macol=-100;
 		    SampleFlavorAndColor(
@@ -432,7 +444,6 @@ int update_particle_momentum_Lido(
 		    pIn.acol = macol;
 		    pOut_list.push_back(ep);
            }
-           else pIn.p = FS[0]*(pIn.p.t()/FS[0].t());;
         }
         // inelastic process takes a finite time to happen
         if (channel == 2 || channel == 3){
@@ -509,6 +520,7 @@ int update_particle_momentum_Lido(
         }
     }
 
+    bool has_rad = false;
     // Handle the virtual particle, (only for real mother parton)
     if ((!pIn.radlist.empty()) && (!pIn.is_virtual)){
         // loop over each virtual particles
@@ -529,7 +541,7 @@ int update_particle_momentum_Lido(
             if (Adiabatic_LPM){
                 do{
                    update_particle_momentum_Lido(
-                           dt_input, temp, v3cell, *it, pnew_Out);
+                           dt_input, temp, v3cell, *it, pnew_Out, Tf);
                    taun = formation_time(
                            it->mother_p, it->p, temp, split_type);
                 }while(it->x.t() - it->x0.t() <= taun);
@@ -538,8 +550,7 @@ int update_particle_momentum_Lido(
             }
             // update the partilce for this time step
             update_particle_momentum_Lido(
-                           dt_input, temp, v3cell, *it, pnew_Out);
-
+                           dt_input, temp, v3cell, *it, pnew_Out, Tf);
             if (it->x.t() - it->x0.t() <= taun && !Adiabatic_LPM ) {
                 it++;
             }
@@ -549,10 +560,7 @@ int update_particle_momentum_Lido(
                 // for medium-induced radiation
                 // 1): a change of running-coupling from elastic broadening
                 double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
-                double kt2n = measure_perp(
-				it->mother_p, 
-				it->p*(it->p0.t()/it->p.t())
-				).pabs2();
+                double kt2n = measure_perp(pIn.p, it->p).pabs2();
                 double Running = std::min(
 			alpha_s(kt2n,it->T0)/alpha_s(kt20,it->T0), 1.);
                 // 2): a dead-cone approximation for massive particles
@@ -562,7 +570,7 @@ int update_particle_momentum_Lido(
                 // 3): an NLL-inspired suppression factor for the LPM effect
                 double mD2 = t_channel_mD2->get_mD2(temp);
                 double lnQ2_1 = std::log(1. + taun / it->mfp0);
-                double lnQ2_0 = std::log(1. + 6 * it->p.t() * it->T0 / mD2);
+                double lnQ2_0 = std::log(1. + 6 * it->p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t() * temp / mD2);
                 double log_factor = std::sqrt(lnQ2_1 / lnQ2_0);
                 double LPM = std::min(it->mfp0 / taun * log_factor, 1.);
                 // The final rejection factor
@@ -571,17 +579,16 @@ int update_particle_momentum_Lido(
                 if (Srandom::rejection(Srandom::gen) < Acceptance){
                     // accepted branching causes physical effects
                     // momentum change, and put back on shell
-                    it->p = it->p*(pIn.p.t()/it->p.t()*it->p0.t()/it->mother_p.t());
                     pIn.p = pIn.p - it->p;
                     it->p0 = it->p;                 
                     pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass+pIn.p.pabs2());
 		    pIn.p0 = pIn.p;
-		    pIn.Q0 = std::sqrt(kt2n);
+		    pIn.Q0 = std::sqrt(kt2n+mD2);
 		    pIn.Q00 = pIn.Q0;
 		    it->Q0 = pIn.Q0;
 		    it->Q00 = it->Q0;
 
-                    //f << pIn.x.t() << " " << it->p0.t() << " " << it->mother_p.t() << " " << kt2n<<std::endl;
+		    has_rad = true;
  
                     int col=-100, acol=-100, mcol=-100, macol=-100;
                     SampleFlavorAndColor(pIn.pid, pIn.col,
@@ -601,7 +608,14 @@ int update_particle_momentum_Lido(
                 it = pIn.radlist.erase(it);
             }
         }
+
     }
+
+    for (std::vector<particle>::iterator it = pIn.radlist.begin(); it != pIn.radlist.end();){
+            if(it->p.t()>=pIn.p.t()) it = pIn.radlist.erase(it);
+            else it++;
+    }
+
 
     // Add the mother parton to the end of the output list
     //also transform back its pid

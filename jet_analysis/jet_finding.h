@@ -62,7 +62,7 @@ class MyInfo: public fastjet::PseudoJet::UserInfoBase {
 struct Fjet{
     fourvec pmu;
     double R, pT, M2, phi, eta;
-    std::vector<double> shape, dNdz;
+    std::vector<double> shape, dNdz, dDdz, dBdz;
     int flavor;
     double sigma;
 };
@@ -119,7 +119,7 @@ private:
 class LeadingParton{
    public:
    LeadingParton(std::vector<double> _pTbins);
-   void add_event(std::vector<particle> plist, double sigma_gen);
+   void add_event(std::vector<particle> plist, double sigma_gen, double maxPT);
    void write(std::string fheader);
    private:
    std::vector<double> pTbins, binwidth, nchg, npi, nD, nB, v2chg, v2pi, v2D, v2B;
@@ -138,12 +138,12 @@ class JetStatistics{
    std::vector<double> pTbins, binwidth, 
 	   shape_pTbins, shape_rbins, 
 	   xJbins, xJ_pTbins, 
-	   Frag_pTbins, Frag_zbins, Frags_W;
+	   Frag_pTbins, Frag_zbins, Frags_W, Frags_D_W, Frags_B_W;
    std::vector<double> Rs;
    std::vector<std::vector<double> > shapes, xJ, 
 	   Dshapes, Bshapes, 
 	   dsigmadpT, dBdpT, dDdpT,
-	   Frags;
+	   Frags, Frags_D, Frags_B;
    int NpT, shape_NpT, shape_Nr;
 };
 

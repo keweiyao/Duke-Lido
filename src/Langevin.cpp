@@ -8,14 +8,14 @@ double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
     double CR = (pid==21) ? CA : CF;
     double mD2 = t_channel_mD2->get_mD2(T);
     double Q2cut = std::max(std::min(cut*mD2, 6*E*T),mD2);
-    return alpha_s(Q2cut, T) * CR * T * mD2 * std::log(Q2cut/mD2);
+    return alpha_s(Q2cut, T) * CR * T * mD2 * std::log(1.+Q2cut/mD2);
 }
 
 double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
     double CR = (pid==21) ? CA : CF;
     double mD2 = t_channel_mD2->get_mD2(T);
     double Q2cut = std::max(std::min(cut*mD2, 6*E*T),mD2);
-    return alpha_s(Q2cut, T) * CR * T * .5*mD2 * std::log(Q2cut/mD2);
+    return alpha_s(Q2cut, T) * CR * T * .5*mD2 * std::log(1.+Q2cut/mD2);
 }
 
 
@@ -36,7 +36,7 @@ double dqhat_L_dp2(int pid, double E, double M, double T){
 }
 
 void Ito_update(int pid, double dt_lab, double M, double T, 
-    std::vector<double> v, const fourvec & pIn, fourvec & pOut){
+    std::vector<double> v, const fourvec & pIn, fourvec & pOut, bool is_virtual){
     // Boost pIn to medium frame
     auto pIn_cell = pIn.boost_to(v[0], v[1], v[2]);
     // Boost dt to medium frame
@@ -47,8 +47,7 @@ void Ito_update(int pid, double dt_lab, double M, double T,
 
     double kt = qhat(pid, E0, M, T)/2.;
     double kl = qhat_L(pid, E0, M, T);
-    double minf = std::sqrt(t_channel_mD2->get_mD2(T)/2.);
-    double Ed = std::max(E0, minf);
+    double Ed = std::max(E0, 3.*T);
     double drag = kl/(2.*Ed*T);
     double damp = std::max(1.-drag*dt, 0.);           
     double Ct = std::sqrt(kt*dt);
