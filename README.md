@@ -27,28 +27,29 @@ If the table does not exist, it will first take a few minutes to generate. The s
 Install with Pythia8
 --------------------
 
-Some examples require Pythia8 (prefer pythia8235). If you already have Pythia8 installed and have environment variables set in ``$HOME/.bashrc``, e.g,
+Some examples require Pythia8. If you already have Pythia8 installed and have environment variables set in ``$HOME/.bashrc``, e.g,
 
 ```bash
    export PYTHIA8DATA=`pythia8-config --xmldoc`
    export PYTHIA8_DIR=`pythia8-config --prefix`
 ```
-
-Then run cmake with the ``pythia8`` option turned on and then compile and install
+Then,
 
 ```bash
    mkdir build && cd build
-   cmake -Dpythia8=on ..
+   cmake ..
    make -j$(nproc) install
 ```
 
 Otherwise please download [pythia8235](http://home.thep.lu.se/~torbjorn/pythiaaux/present.html) and install accordingly.
 
-Couple to hydrodynamic output
------------------------------
+To build without pythia8,
 
-The ``hydro-couple`` example (currently requires Pythia8) runs the transport model in a medium background provided by the ``hdf5`` format output of the [TRENTo initial condition](https://github.com/keweiyao/trento3d/tree/master) with the ``--ncoll`` option on and the ``hdf5`` format output of [OSU-hydro](https://github.com/chunshen1987/VISHNew). Final states of partons are wrote to an ``OSCAR`` formatted file. 
-
+```bash
+   mkdir build && cd build
+   cmake -Dpythia8=off ..
+   make -j$(nproc) install
+```
 
 
 
