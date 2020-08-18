@@ -3,10 +3,10 @@
 #include <boost/math/tools/roots.hpp>
 #include "simpleLogger.h"
 
-
-char LO[] = "Leading-order";
-char GB[] = "Gunion-Bertsch";
-char GBHT[] = "Gunion-Bertsch-higher-twist";
+char HS2HS[] = "HS2HS"; // Hard+Soft <--> Hard+Soft
+char HS2QQbar[] = "HS2QQbar"; // hard+light --> heavy flavor pair
+char HS2HHS[] = "HS2HHS"; // hard+soft --> hard+hard+soft
+char HHS2HS[] = "HHS2HS"; // hard+soft --> hard+hard+soft
 
 bool type1_warned = false;
 bool type2_warned = false; 
@@ -19,8 +19,8 @@ const double c48pi = 48.*M_PI;
 const double c16pi2 = 16.*M_PI*M_PI;
 const double c64d9pi2 = 64./9.*M_PI*M_PI;
 const double c256pi4 = 256.*std::pow(M_PI, 4);
-const double fmc_to_GeV_m1 = 5.026;
-
+const double fmc_to_GeV_m1 = 5.076;
+int color_count = -1;
 // number of color=3 (3*3-1 = 8 gluons), number of flavor=3, (u,d,s quark)
 const int Nc = 3, nf = 3;
 const double CF = 4./3.;
@@ -41,40 +41,30 @@ const double alpha_max = 1.0;
 const double Lambda = 0.2; // [GeV] Lambda QCD = 0.2 GeV
 const double Lambda2 = Lambda*Lambda; // [GeV^2] Lambda QCD squared
 const double mu2_NP = Lambda2*std::exp(alpha0/alpha_max); // minimum cut on Q2, where alpha = alpha_0
-const double Tc = 0.154;
+
 double cut;
 double scale;
 double afix;
-double Rvac;
-Debye_mass * t_channel_mD2;
-const double LPM_prefactor = 0.75; // to match analytic calculation, 0.75 by default
-
 double Lido_Ecut;
 
-qhat_params_struct qhat_params;
+Debye_mass * t_channel_mD2;
+const double LPM_prefactor = .79;
 
-void initialize_mD_and_scale(int _mD_type, double _scale, double _afix, double _cut, double _Rvac){
+int time_type;
+bool Adiabatic_LPM;
+
+void initialize_mD_and_scale(int _mD_type, double _mu, double _afix, double _theta, double _cut){
         cut = _cut;
-        scale = _scale;
+        scale = _mu;
         afix = _afix;
-	Rvac = _Rvac;
+	Lido_Ecut = _theta;
         t_channel_mD2 = new Debye_mass(_mD_type);
 }
 
-void initialize_transport_coeff(double _K, double _a, double _b, double _p, double _q, double _gamma){
-	qhat_params.K = _K;
-	qhat_params.a = _a;
-	qhat_params.b = _b;
-	qhat_params.p = _p;
-	qhat_params.q = _q;
-	qhat_params.gamma = _gamma;
-}
 
 void echo(void){
-	std::cout << "mu\tafix\tK\ta\tb\tp\tq\tgamma\tQcut\tRvac\n";
-	std::cout <<scale<<"\t"<<afix<<"\t"<<qhat_params.K<<"\t"<<qhat_params.a
-               <<"\t"<<qhat_params.b<<"\t"<<qhat_params.p<<"\t"<<qhat_params.q
-               <<"\t"<<qhat_params.gamma<<"\t"<<cut<<"\t"<<Rvac<<"\n";
+	std::cout << "mu\tafix\tQcut\ttheta\n";
+	std::cout <<scale<<"\t"<<afix<<"\t"<<cut<<"\t"<<Lido_Ecut<<"\n";
 }
 
 Debye_mass::Debye_mass(const unsigned int _type):
@@ -144,8 +134,7 @@ double alpha_s(double Q2, double T){
         else{
                 double screen_scale2 = std::pow(scale*M_PI*T, 2);
                 double mu2;
-                if (Q2 < 0.) mu2 = std::max(-Q2, screen_scale2);
-                else mu2 = std::max(Q2, screen_scale2);
+                mu2 = std::max(std::abs(Q2), screen_scale2);
 
                 if (mu2 <= mu2_NP) return 1.0;
                 else return alpha0 / std::log(mu2/Lambda2);

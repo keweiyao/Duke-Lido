@@ -26,10 +26,18 @@ double dX_Qq2Qq_dt(const double t, void * params);
 
 double M2_Qg2Qg(const double t, void * params);
 double dX_Qg2Qg_dt(const double t, void * params);
-double dX_Qg2Qg_dt_full(const double t, void * params);
 
 // *** this one includes s, t, u channels and interferences
+// *** it is not used by default, 
 double M2_Qg2Qg_full(const double t, void * params);
+double dX_Qg2Qg_dt_full(const double t, void * params);
+
+// for hard jet parton induced heavy flavor pair production
+double M2_gg2QQbar(const double t, void * params);
+double dX_gg2QQbar_dt(const double t, void * params);
+
+double M2_qqbar2QQbar(const double t, void * params);
+double dX_qqbar2QQbar_dt(const double t, void * params);
 
 ////////// 2 <--> 3 //////////////////
 double M2_Qq2Qqg(const double * x_, void * params_);

@@ -8,16 +8,18 @@
 
 struct particle{
 	// mass, x, p, t, all in units of [GeV^a]
-	int pid;
-	double mass, weight;
-	bool is_vac, is_virtual, is_recoil;
+	int pid, col, acol;
+	bool charged;
+	double mass, weight, tau_i, Q0, Q00;
+	bool is_virtual;
+	int origin;
 	
 	double T0, mfp0, Tf; // production temperature, local mfp
 	fourvec x0; // production location
 	fourvec x; // current location
-	fourvec p0; // production momentum
+	fourvec p0; // production momentum, after each radiation
 	fourvec p; // current momentum
-    fourvec mother_p;
+        fourvec mother_p;
 
 	std::vector<particle> radlist;
 	std::vector<double> vcell;
@@ -31,24 +33,28 @@ struct particle{
 	}
 };
 
-typedef Rate<LO, 2, 2, double(*)(const double, void*)> Rate22;
-typedef Rate<GB, 2, 2, double(*)(const double*, void*)> Rate23;
-typedef Rate<GB, 2, 4, double(*)(const double*, void*)> Rate32;
+
+typedef Rate<HS2HS, 2, 2, double(*)(const double, void*)> Rate22;
+typedef Rate<HS2QQbar, 2, 2, double(*)(const double, void*)> Rate22QQbar;
+typedef Rate<HS2HHS, 2, 2, double(*)(const double*, void*)> Rate23;
+typedef Rate<HHS2HS, 2, 4, double(*)(const double*, void*)> Rate32;
 typedef EffRate12<2, double(*)(const double*, void*)> Rate12;
 typedef EffRate21<2, double(*)(const double*, void*)> Rate21;
-typedef boost::variant<Rate22, Rate23, Rate32, Rate12, Rate21> Process;
+typedef boost::variant<Rate22, Rate23, Rate32, Rate12, Rate21, Rate22QQbar> Process;
 extern std::map<int, std::vector<Process>> AllProcesses;
 
 void init_process(Process& r, std::string mode, std::string table_path);
-void initialize(std::string mode, std::string setting_path, std::string table_path);
+void initialize(std::string mode, std::string setting_path, std::string table_path,
+	double mu, double afix, double theta, double cut);
 
-int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn, std::vector<particle> & pOut_list);
+int update_particle_momentum_Lido(double dt, double temp, std::vector<double> v3cell, particle & pIn, std::vector<particle> & pOut_list, double Tf);
 
 double formation_time(fourvec p, fourvec k, double T, int split);
-double calcualte_dt_from_dtau(fourvec x, fourvec p, double tau, double dtau);
-void output(const std::vector<particle> plist, std::string fname);
+double compute_realtime_to_propagate(double dt, fourvec x, fourvec p);
 void output_oscar(const std::vector<particle> plist, int abspid, std::string fname);
-double mean_pT(const std::vector<particle> plist);
-double mean_E(const std::vector<particle> plist);
-particle produce_parton(int pid, particle & mother_parton, fourvec vp0, fourvec vx0, double T, std::vector<double> & v3cell, bool is_virtual = true, bool is_recoil = false);
+particle produce_parton(int pid, fourvec pmu, particle & mother, bool is_virtual);
+void SampleFlavorAndColor(int mother_id, int mother_col, int mother_acol, 
+                int channel, int daughter_id, 
+                int & daughter_col, int & daughter_acol,
+                int & new_mother_col, int & new_mother_acol);
 #endif

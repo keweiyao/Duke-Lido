@@ -34,6 +34,12 @@ if(pythia8)
 	endif()
 endif(pythia8)
 
+find_package(FastJet)
+if (${FASTJET_FOUND})
+  include_directories(${FASTJET_INCLUDE_DIR})
+  Message(STATUS "FastJet Include dir : " ${FASTJET_INCLUDE_DIR})
+endif()
+
 # Find the HDF5 C++ library.  The CMake FindHDF5 module does not work reliably,
 # e.g. sometimes it links unnecessary libraries, other times it fails to include
 # libz.  The following works on all systems Jonah Bernhard has tested 
@@ -138,9 +144,9 @@ if(NATIVE)
   endif()
 endif()
 
-string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
+#string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
 
-option(MORE_WARNINGS "enable more compiler warnings" ON)
+option(MORE_WARNINGS "enable more compiler warnings" OFF)
 if(MORE_WARNINGS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   # adapted from http://stackoverflow.com/a/9862800
   string(APPEND CMAKE_CXX_FLAGS " -Wpedantic -Wcast-align -Wcast-qual -Wdisabled-optimization -Wformat=2 -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wsign-conversion -Wsign-promo -Wstrict-overflow=2 -Wundef")
@@ -189,40 +195,30 @@ set(LIBRARY_NAME "lib${PROJECT_NAME}")
 add_subdirectory(src)
 include_directories(src)
 
+set(LIBRARY_JETFIND "libjetfind")
+add_subdirectory(jet_analysis)
+include_directories(jet_analysis)
 
-add_executable(Lido-TabGen ./examples/Lido-TabGen.cpp)
-target_link_libraries(Lido-TabGen ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
-install(TARGETS Lido-TabGen DESTINATION bin)
 
-add_executable(analytic-medium ./examples/analytic-medium.cpp)
-target_link_libraries(analytic-medium ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
-install(TARGETS analytic-medium DESTINATION bin)
+foreach(App "Lido-TabGen" "brick")
+	add_executable(${App} ./TestMains/${App}.cpp)
+	target_link_libraries(${App} ${LIBRARY_NAME} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -lpthread)
+	install(TARGETS ${App} DESTINATION bin)
+endforeach()
 
 if(pythia8)
-	add_executable(brick-pythia ./examples/brick-pythia.cpp)
-	target_link_libraries(brick-pythia ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
-	install(TARGETS brick-pythia DESTINATION bin)
+foreach(App "jet-2Dhydro-couple" "jet-pp-gen")
+	add_executable(${App} ./JetMains/${App}.cpp)
+	target_link_libraries(${App} ${LIBRARY_NAME} ${LIBRARY_JETFIND} ${PYTHIA8_LIBRARIES} ${FASTJET_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+	install(TARGETS ${App} DESTINATION bin)
+endforeach()
 
-	add_executable(hydro-couple ./examples/hydro-couple.cpp)
-	target_link_libraries(hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
-	install(TARGETS hydro-couple DESTINATION bin)
-
-	add_executable(jet-hydro-couple ./examples/jet-hydro-couple.cpp)
-	target_link_libraries(jet-hydro-couple ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
-	install(TARGETS jet-hydro-couple DESTINATION bin)
-
-	add_executable(pythia-pp ./examples/pythia-pp.cpp)
-	target_link_libraries(pythia-pp ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
-	install(TARGETS pythia-pp DESTINATION bin)
+#foreach(App "HQ-2Dhydro-couple" "pythia_HQ_baseline")
+#	add_executable(${App} ./HeavyQuarkMains/${App}.cpp)
+#	target_link_libraries(${App} ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
+#	install(TARGETS ${App} DESTINATION bin)
+#endforeach()
 endif(pythia8)
 
-
-install(FILES ./examples/lido_settings.xml DESTINATION share)
-if(pythia8)
-install(FILES ./examples/pythia-pp-200-setting.txt DESTINATION share)
-install(FILES ./examples/pythia-pp-5020-setting.txt DESTINATION share)
-install(FILES ./examples/pythia-PbPb-5020-setting.txt DESTINATION share)
-install(FILES ./examples/pythia-AuAu-200-setting.txt DESTINATION share)
-install(FILES ./examples/pythia-jet-setting.txt DESTINATION share)
-endif(pythia8)
+#install(FILES ./settings/lido_settings.xml DESTINATION share)
 

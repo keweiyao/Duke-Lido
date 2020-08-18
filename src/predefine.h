@@ -9,8 +9,10 @@
 #include <sstream>
 #include <fstream>
 
-extern char LO[];
-extern char GB[];
+extern char HS2HS[];
+extern char HS2QQbar[];
+extern char HS2HHS[];
+extern char HHS2HS[];
 
 extern bool type1_warned;
 extern bool type2_warned;
@@ -31,6 +33,7 @@ extern const double CF;
 extern const double CA;
 extern const double CF_over_CA;
 extern const double TR;
+extern int color_count;
 
 // the prefractor for gluon debye mass with Boltzmann statistics
 // mD^2 = 8\pi*(Nc+nf)*alpha_s*T^2 ~ 15*alpha_s*T^2
@@ -45,22 +48,16 @@ extern const double alpha_max; // alpha_s maximum cut
 extern const double Lambda; // [GeV] Lambda QCD = 0.2 GeV
 extern const double Lambda2; // [GeV^2] Lambda QCD squared
 extern const double mu2_NP; // minimum cut on Q2, where alpha = alpha_0
-extern const double Tc;
 extern double scale; // mu*pi*T
 extern double afix; // fixed alphas, -1 is running
 extern double cut; // separation between diffusion and scattering
-extern double Rvac;
-extern const double LPM_prefactor; // to match analytic calculation, 0.7 -- 0.83.
-
 extern double Lido_Ecut;
+extern const double LPM_prefactor; 
 
-struct qhat_params_struct {
-	double K, a, b, p, q, gamma; // for qhat parametrization
-};
-extern qhat_params_struct qhat_params;
+extern int time_type;
+extern bool Adiabatic_LPM;
 
-void initialize_mD_and_scale(int _mD_type, double _scale, double _afix, double _cut, double _Rvac);
-void initialize_transport_coeff(double K, double a, double b, double p, double q, double gamma);
+void initialize_mD_and_scale(int _mD_type, double _mu, double _afix, double _theta, double _cut);
 double alpha_s(double Q2, double T); //runing coupling
 void echo(void);
 
@@ -116,7 +113,7 @@ public:
 	friend std::ostream & operator<< (std::ostream & stream, const ff & x) {
 		// So that the log does not scream
 		if (x.value == 0.) {
-		    stream << "0.000000D+00";
+		    stream << "0.000000E+00";
 		    return stream;
 		}
 		int exponent = floor(log10(std::abs(x.value)));
@@ -139,8 +136,8 @@ public:
 			stream << std::setw(8) << newbase;
 		}
 		
-		if (exponent >= 0) stream << "D+" << std::setw(2) << std::setfill('0') << exponent;
-		else stream << "D-" << std::setw(2) << std::setfill('0') << std::abs(exponent);
+		if (exponent >= 0) stream << "E+" << std::setw(2) << std::setfill('0') << exponent;
+		else stream << "E-" << std::setw(2) << std::setfill('0') << std::abs(exponent);
 		return stream;
 	}
 };

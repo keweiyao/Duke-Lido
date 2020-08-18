@@ -18,7 +18,7 @@ double M2_Qq2Qqg(const double * x_, void * params_){
 	double M2 = params[2]*params[2];
 	double Qmax = (s-M2)/2./sqrts;
 	double log_1_ktT = x_[0], y_norm = x_[1], // in 3-body com frame---(1)
-		   costheta34 = x_[2], phi34 =x_[3]; // in p3-p4 com frame---(2)
+	       costheta34 = x_[2], phi34 =x_[3]; // in p3-p4 com frame---(2)
 		   // (1) and (2) share the same z-direction, and are related by a boost
 	// check bounds
 	double kt = T*(std::exp(log_1_ktT)-1.);

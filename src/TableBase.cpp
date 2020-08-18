@@ -18,7 +18,7 @@ TableBase<T, N>::TableBase(std::string Name, Svec shape, Dvec low, Dvec high):
 _Name(Name), _rank(N), _power_rank(std::pow(2, _rank)),
 _shape(shape), _low(low), _high(high),_table(_shape)
 {
-	LOG_INFO<<_Name << " dim=" << _rank;
+	//LOG_INFO<<_Name << " dim=" << _rank;
 	for(auto i=0; i<_rank; ++i){
 		_step.push_back((high[i]-low[i])/(shape[i]-1));
 	}
@@ -75,7 +75,8 @@ bool TableBase<T, N>::Save(std::string fname){
 		prefix += ("/"+v);
   		try{
     		group = file.openGroup(prefix.c_str());
-			if (prefix == "/"+_Name) {	// if the last group existed before
+			if (prefix == "/"+_Name) {	
+                                // if the last group existed before
 				// It need to be deleted and rebuild
 				H5Ldelete(file.getId(), prefix.c_str(), H5P_DEFAULT);
 				LOG_WARNING<<"old data deleted and will be overwirtten";
@@ -127,7 +128,7 @@ bool TableBase<T, N>::Load(std::string fname){
 		return false;
 	}
 	else{
-		LOG_INFO<< "Rank compitable, loading table";
+		//LOG_INFO<< "Rank compitable, loading table";
 		for (auto i=0; i<_rank; ++i){
 			hdf5_read_scalar_attr(group, "shape-"+std::to_string(i), _shape[i]);
 			hdf5_read_scalar_attr(group, "low-"+std::to_string(i), _low[i]);

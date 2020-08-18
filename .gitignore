@@ -1,11 +1,8 @@
 build/
 test/
 *~
+weak_decay/
 Tables/
 *.h5
 *.log
-*results*
-jet_analysis/
-table.h5
-logfile.log
-
+Work/

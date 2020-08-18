@@ -12,7 +12,7 @@
 #include "predefine.h"
 
 template < typename F >
-double sample_1d(F f, std::pair<double,double> const& range, double fmax){
+double sample_1d(F f, std::pair<double,double> const& range, double fmax, bool & status){
 	int limit = 10000;
   	double y, x, xlow=range.first, xhigh=range.second;
   	double interval = xhigh-xlow;
@@ -20,10 +20,16 @@ double sample_1d(F f, std::pair<double,double> const& range, double fmax){
 	do{
 		x = xlow+Srandom::init_dis(Srandom::gen)*interval;
 		y = f(x)/fmax;
-		if (y > 1.0) LOG_WARNING << "1d rejection, f/fmax = " << y << " > 1";
+		if (y > 1.0) {
+		     status = false;
+		     LOG_WARNING << "1d rejection, f/fmax = " << y << " > 1";
+		}
 		counter ++;
 	}while(Srandom::rejection(Srandom::gen)>y && counter < limit);
-	if(counter==limit) LOG_WARNING <<  "1d rejection, too many tries = " << limit;
+	if(counter==limit) {
+		LOG_WARNING <<  "1d rejection, too many tries = " << limit;
+		status=false;
+	}
 	SamplerStat::count_1d ++; SamplerStat::total_1d += counter;
 	return x;
 }
@@ -41,11 +47,10 @@ std::vector<double> sample_nd(F f, int dim, std::vector<std::pair<double,double>
 		for(int i=0; i<dim; i++) 
 			x[i] = range[i].first+Srandom::init_dis(Srandom::gen)*interval[i];
 		y = f(x)/fmax;
-		if (y > 1.0 && !type3_warned) {
+		if (y > 1.0) {
 			LOG_WARNING << "nd rejection, f/fmax = " << y << " > 1";
-			type3_warned = true;
+		      status = false;
 		}
-		if (y > 1.0) status = false;
 		counter ++;
 	}while(Srandom::rejection(Srandom::gen)>y && counter < limit);
 	std::vector<double> res(dim);
