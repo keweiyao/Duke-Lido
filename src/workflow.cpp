@@ -296,7 +296,7 @@ int update_particle_momentum_Lido(
     auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
     double dt_cell = dt_for_pIn / pIn.p.t() * p_cell.t();
     double E_cell = p_cell.t();
-    double LnE_cell = std::log(std::max(E_cell, .4));
+    double LnE_cell = std::log(std::max(E_cell, .5));
 
     // For diffusion induced radiation, qhat_Soft is an input
     double qhatg = qhat(21, E_cell, 0., temp);

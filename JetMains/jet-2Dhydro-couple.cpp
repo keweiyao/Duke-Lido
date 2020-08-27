@@ -32,6 +32,7 @@ std::vector<particle> plist, thermal_list, hlist;
 std::vector<current> clist;
 std::vector<HadronizeCurrent> slist;
 double sigma, Q0, maxPT;
+fourvec x0;
 };
 
 int main(int argc, char* argv[]){
@@ -185,17 +186,17 @@ int main(int argc, char* argv[]){
 	    muT, afix, theta, cut
         );
         /// Initialize jet finder with medium response
-        JetFinder jetfinder(300,300,3.,need_response_table, args["response-table"].as<fs::path>().string());
+        JetFinder jetfinder(150,150,3.,need_response_table, args["response-table"].as<fs::path>().string());
 
         /// Initialize a simple hadronizer
         JetDenseMediumHadronize Hadronizer;
 
-/*	
+	
         // all kinds of bins and cuts
 	// For RHIC 200 GeV
-        std::vector<double> TriggerBin({
+        /*std::vector<double> TriggerBin({
          2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,20,22,24,28,32,36,40,45,50,55,60,70,80,90,100});
-        std::vector<double> Rs({.2,.3,.4});
+        std::vector<double> Rs({.4});
         std::vector<double> ParticlepTbins({0,1,2,3,4,5,6,8,10,12,14,16,18,20,22,24,26,30,40,60,100});
         std::vector<double> jetpTbins({3,4,5,6,7,10,12,14,16,18,20,24,28,32,36,40,50,60,100});
 	std::vector<double> HFpTbins({2,6,10,20,40,100});
@@ -211,17 +212,16 @@ int main(int argc, char* argv[]){
                         .071, .092, .120,.157, .204, 
                         .266, .347, .452, .589, .767,
                         1.});  
-*/	
+	*/
 
-	// For 5.02 TeV
-	
+	// For 5.02 TeV	
         std::vector<double> TriggerBin({
-	 2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,24,26,
+2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,24,26,
 	 28,30,32,36,40,45,50,55,60,65,70,75,80,85,90,95,100,110,
 	 120,130,140,150,160,180,200,220,240,260,280,300,320,340,
 	 360,400,450,500,600,700,800,1000,1200,1500,2000,2500
 	 });
-        std::vector<double> Rs({.4});
+        std::vector<double> Rs({.2,.3,.4,.6,.8,1.0});
         std::vector<double> ParticlepTbins({0,.25,.5,1.,1.5,2,3,4,5,6,7,8,10,
 			12,14,16,18,20,22,24,28,32,36,40,45,50,
 			55,60,65,70,80,90,100,
@@ -233,7 +233,7 @@ int main(int argc, char* argv[]){
 			1200,1400,1600,2000,2500});
         std::vector<double> HFpTbins({4,20,200});
         std::vector<double> HFETbins({2,6,10,20,40,100});
-        std::vector<double> shapepTbins({20,30,40,60,80,120,2000});
+        std::vector<double> shapepTbins({60,80,100,120,2500});
         std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
                           .35, .4, .45, .5,  .6, .7,  .8,
                            1., 1.5, 2.0, 2.5, 3.0});
@@ -279,7 +279,8 @@ int main(int argc, char* argv[]){
 		e1.maxPT = pythiagen.maxPT();
 		//LOG_INFO << "max pT = " <<e1.maxPT;
                 e1.sigma = pythiagen.sigma_gen()
-                           /args["pythia-events"].as<int>();            
+                           /args["pythia-events"].as<int>();  
+                e1.x0 = pythiagen.x0();		
                 // freestream form t=0 to tau=tau0
                 for (auto & p : e1.plist){
                     p.Tf = Tf+0.0001;
@@ -367,14 +368,14 @@ int main(int argc, char* argv[]){
                 jetfinder.set_sigma(ie.sigma);
                 jetfinder.MakeETower(
                      0.6, Tf, args["pTtrack"].as<double>(),
-                     ie.hlist, ie.clist, ie.slist, 10);
-                jetfinder.FindJets(Rs, 10., -3., 3.);
+                     ie.hlist, ie.clist, ie.slist, 5);
+                jetfinder.FindJets(Rs, 20., -3., 3.);
                 jetfinder.FindHF(ie.hlist);
-                //jetfinder.CorrHFET(shaperbins);
-                //jetfinder.Frag(zbins);
+                jetfinder.CorrHFET(shaperbins);
+                jetfinder.Frag(zbins);
 		jetfinder.LabelFlavor();
-                //jetfinder.CalcJetshape(shaperbins);
-	        JetSample.add_event(jetfinder.Jets, ie.sigma);
+                jetfinder.CalcJetshape(shaperbins);
+	        JetSample.add_event(jetfinder.Jets, ie.sigma, ie.x0);
                 //jet_HF_corr.add_event(jetfinder.Jets, jetfinder.HFs, ie.sigma);
                 //HF_ET_corr.add_event(jetfinder.HFaxis, ie.sigma);
 	    }

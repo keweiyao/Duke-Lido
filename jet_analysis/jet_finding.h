@@ -132,7 +132,7 @@ class JetStatistics{
       std::vector<double> shapepTbins, std::vector<double> shaperbins, 
       std::vector<double> FragspTbins, std::vector<double> Fragszbins, 
       std::vector<double> xJ_pTbins);
-   void add_event(std::vector<Fjet> jets, double sigma_gen);
+   void add_event(std::vector<Fjet> jets, double sigma_gen, fourvec x0);
    void write(std::string fheader);
    private:
    std::vector<double> pTbins, binwidth, 
@@ -143,7 +143,7 @@ class JetStatistics{
    std::vector<std::vector<double> > shapes, xJ, 
 	   Dshapes, Bshapes, 
 	   dsigmadpT, dBdpT, dDdpT,
-	   Frags, Frags_D, Frags_B;
+	   Frags, Frags_D, Frags_B, DijetInfo;
    int NpT, shape_NpT, shape_Nr;
 };
 
