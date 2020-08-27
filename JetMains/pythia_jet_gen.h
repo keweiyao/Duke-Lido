@@ -21,10 +21,14 @@ public:
     double maxPT(void){
 	return pythia.event.scale();
     }
+    fourvec x0(void){
+	return _x0;
+    }
 private:
     Pythia pythia;
     TransverPositionSampler TRENToSampler;
     double sigma0, Q0;
+    fourvec _x0;
 };
 
 void reference_pmu(int i, double & tau, Event & event){
@@ -90,7 +94,7 @@ TRENToSampler(f_trento, iev)
     pythia.readString("Next:numberShowInfo = 0");  
     pythia.readString("Next:numberShowProcess = 0");  
     pythia.readString("Next:numberShowEvent = 0"); 
-
+    
     int processid = getpid();
 
     std::ostringstream s1, s2, s3, s4;
@@ -112,13 +116,15 @@ TRENToSampler(f_trento, iev)
 void PythiaGen::Generate(std::vector<particle> & plist){
     double x, y;
     TRENToSampler.SampleXY(y, x);
+    _x0 = fourvec{0,x,y,0};
     plist.clear();
     pythia.next();
     auto & event = pythia.event;
     color_count = event.lastColTag()+1;
     for (size_t i = 0; i < event.size(); ++i) {
         auto p = event[i];
-        if (p.isFinal()) {
+	int absid = p.idAbs();
+        if (p.isFinal() && (absid!=12) &&  (absid!=13) && (absid!=14) ) {
             // final momenta 
             fourvec p0{p.e(), p.px(), p.py(), p.pz()};
             particle _p; 

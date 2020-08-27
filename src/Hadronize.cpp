@@ -18,8 +18,15 @@ using namespace Pythia8;
 
 
 JetDenseMediumHadronize::JetDenseMediumHadronize(){
+    pythia.readString("Tune:pp=19");
     pythia.readString("ProcessLevel:all = off");
-    pythia.readString("TimeShower:QEDshowerByQ = off");
+    pythia.readString("Print:quiet = on");
+    pythia.readString("SoftQCD:all = off");
+    pythia.readString("PromptPhoton:all=off");
+    pythia.readString("WeakSingleBoson:all=off");
+    pythia.readString("WeakDoubleBoson:all=off");
+    pythia.readString("SpaceShower:QEDshowerByQ=off");
+    pythia.readString("TimeShower:QEDshowerByQ = off");    
     pythia.readString("Next:numberShowInfo = 0");
     pythia.readString("Next:numberShowProcess = 0");
     pythia.readString("Next:numberShowEvent = 0");
@@ -33,8 +40,6 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("HadronLevel:Decay = on");
     pythia.readString("StringZ:usePetersonC=on");
     pythia.readString("StringZ:usePetersonB=on");
-    pythia.readString("4:mayDecay = off");
-    pythia.readString("5:mayDecay = off");
 pythia.readString("411:mayDecay = off");
 pythia.readString("421:mayDecay = off");
 pythia.readString("413:mayDecay = off");
@@ -184,14 +189,14 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
 	    do{
             th.p = Srandom::generate_thermal_parton_with_boost(
                            Tf, 0, 0, vzgrid);
-	    }while(th.p.xT()>.4);
+	    }while(th.p.xT()>.5);
             th.mass = 0.;
             th.vcell.resize(3);
             th.vcell[0] = 0.;
             th.vcell[1] = 0.;
             th.vcell[2] = vzgrid;
             th.Tf = Tf;
-            th.Q0 = 0.4;
+            th.Q0 = 0.5;
             thermal_partons.push_back(th);
 	    colorless_ensemble.push_back(th);
     }
@@ -212,7 +217,9 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
     for (int i = 0; i < pythia.event.size(); ++i) {
         auto ip = pythia.event[i];
         bool good = false;
-        if (level==1) good = ip.isFinal();
+	int absid = std::abs(ip.id());
+        if (level==1) good = ip.isFinal() && (absid!=12)
+		           && (absid!=13) && (absid!=14);
         if (level==0) good = (ip.isParton() 
                         && pythia.event[ip.daughter1()].isHadron())
                       || (ip.isFinal() && ip.isParton());
