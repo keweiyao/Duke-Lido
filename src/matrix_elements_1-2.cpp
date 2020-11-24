@@ -13,6 +13,7 @@ double LGV_q2qg(const double * x_, void * params_){
     double E = params[0];
     double T = params[1];
     double M = params[2];
+    double M2 = M*M;
     double pabs = std::sqrt(E*E-M*M);
 
     double x = x_[0]; // k/p
@@ -26,7 +27,9 @@ double LGV_q2qg(const double * x_, void * params_){
     double x0 = k0/E;
     // No dead cone
     double Jacobian = 2*k0*kT;
-    double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) * P_q2qg(x0)
+    double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) * ( 
+                       P_q2qg(x0) - CF*2.*x0*(1.-x0)*M2/(kT2+x0*x0*M2)
+                     )
                      * 1./std::pow(kT2+mg2, 2)
                      * Jacobian;
     return dR_dxdy;

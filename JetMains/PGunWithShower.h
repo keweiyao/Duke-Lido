@@ -12,17 +12,17 @@ using namespace Pythia8;
 
 class PGunWShower{
 public: 
-    PGunWShower(std::string f_pythia, std::string f_trento, 
-                int iev, double _Q0);
+    PGunWShower(double _Q0, std::string fname);
     void Generate(double pT, std::vector<particle> & plist);
 private:
-    Pythia pythia;
     TransverPositionSampler TRENToSampler;
+    Pythia pythia;
     double Q0;
 };
 
 void reference_pmu(int i, double & tau, Event & event){
     auto p = event[i];
+    int absid = p.idAbs();
     int im1 = p.mother1();
     int im2 = p.mother2();
     if (im1==im2 && im2 > 0){
@@ -30,7 +30,6 @@ void reference_pmu(int i, double & tau, Event & event){
         reference_pmu(im1, tau, event);
     }
     if (im1==0 && im2 ==0) {
-        tau = 0.;
 	return;
     }
     if (im1>0 && im2==0){
@@ -49,29 +48,20 @@ void reference_pmu(int i, double & tau, Event & event){
 	double kT2 = measure_perp(kmu+qmu, kmu).pabs2();
 	double tauf = 2*xq*xk*(kmu.t()+qmu.t())/(kT2 + xq*Mk2 + xk*Mq2 - xk*xq*MP2);
 	if (p.e() > 0.5*(kmu.t()+qmu.t())){
-	    tau += 0.;
             reference_pmu(im1, tau, event);
 	}
 	else {
 	    tau += tauf;
             reference_pmu(im1, tau, event);
-	}
-        
+	}      
     }
     if (im1 != im2 && im1 > 0 && im2 > 0){
-        // hard products, reference particles
         return;
     }
 }
 
-PGunWShower::PGunWShower(std::string f_pythia, std::string f_trento,
-                        int iev, double _Q0):
-TRENToSampler(f_trento, iev)
-{   
+PGunWShower::PGunWShower(double _Q0, std::string f_trento):TRENToSampler(f_trento, 0){   
     Q0 = _Q0;
-    // read pythia settings
-    //pythia.readFile(f_pythia);
-    // suppress output
     pythia.readString("Print:quiet = off");
     pythia.readString("SoftQCD:all = off");
     pythia.readString("PromptPhoton:all=off");
@@ -106,52 +96,64 @@ TRENToSampler(f_trento, iev)
 
 void PGunWShower::Generate(double pT, std::vector<particle> & plist){
     double x, y;
-    TRENToSampler.SampleXY(x, y);
-
-    plist.clear();
+    TRENToSampler.SampleXY(y, x);
+        plist.clear();
         pythia.event.reset();
-	LOG_INFO << pT;
         pythia.event.append(21, 23, 101, 102, 
                          pT, 0., 0., pT, 0.); 
         pythia.event.append(21, 23, 102, 101, 
                          -pT, 0., 0., pT, 0.); 
+
+        /*pythia.event.append(1, 23, 101, 0, 
+                         pT, 0., 0., pT, 0.); 
+        pythia.event.append(-1, 23, 0, 101, 
+                         -pT, 0., 0., pT, 0.); 
+        */
         pythia.event[1].scale(pT);
         pythia.event[2].scale(pT);
         pythia.forceTimeShower(1, 2, pT);
 	pythia.next();
         auto & event = pythia.event;
+        color_count = event.lastColTag()+1;
 	for (size_t i = 0; i < event.size(); ++i) {
 		auto p = event[i];
 		if (p.isParton() && event[p.daughter1()].isHadron()) {
-		    LOG_INFO << p.e() << " " << p.px() << " " << p.py() << " " << p.pz(); 
-		    fourvec p0{p.e(), p.px(), p.py(), p.pz()};
-		    particle _p; 
-		    _p.pid = p.id();
-		    _p.mass = std::abs(p.m());
-		    _p.x0 = fourvec{0,0,0,0};
-		    _p.x = _p.x0; 
-		    double tt= 0.;
-		    reference_pmu(i, tt, event);
-                    _p.tau_i = tt;
-		    _p.p0 = p0;
-		    _p.Q0 = Q0;
-		    if (std::abs(_p.pid) != 4 && std::abs(_p.pid) != 5)
-		        _p.mass = 0;
-                    if (std::abs(_p.pid)==4) _p.mass = 1.3;
-                    if (std::abs(_p.pid)==5) _p.mass = 4.2;
-		    _p.p0.a[0] = std::sqrt(_p.p0.pabs2()+_p.mass*_p.mass);
-		    _p.p = _p.p0; 
-		    _p.weight = 1.;
-		    _p.is_virtual = false;
-		    _p.T0 = 0.;
-		    _p.Tf = 0.;
-		    _p.mfp0 = 0.;
-		    _p.vcell.resize(3);
-		    _p.vcell[0] = 0.; 
-		    _p.vcell[1] = 0.; 
-		    _p.vcell[2] = 0.; 
-		    _p.radlist.clear();
-		    plist.push_back(_p);
+		//if (p.isFinal()) {
+           // final momenta 
+            fourvec p0{p.e(), p.px(), p.py(), p.pz()};
+            particle _p; 
+            _p.pid = p.id();
+            _p.mass = std::abs(p.m());
+            _p.x0 = fourvec{0,x,y,0};
+            _p.x = _p.x0; 
+	    double t0 = 0.;
+	    reference_pmu(i, t0, event);
+            _p.tau_i = t0;
+            _p.p0 = p0;
+            _p.Q0 = Q0;
+            _p.Q00 = Q0;
+ 
+            if (std::abs(_p.pid) != 4 && 
+                std::abs(_p.pid) != 5 && p.isParton()) {
+                _p.mass = 0;
+            }
+
+	    _p.col = p.col();
+            _p.acol = p.acol();
+            _p.p0.a[0] = std::sqrt(_p.p0.pabs2()+_p.mass*_p.mass);
+            _p.p = _p.p0; 
+            _p.weight = 1;
+            _p.is_virtual = false;
+            _p.T0 = 0.;
+            _p.Tf = 0.;
+            _p.mfp0 = 0.;
+            _p.vcell.resize(3);
+            _p.vcell[0] = 0.; 
+            _p.vcell[1] = 0.; 
+            _p.vcell[2] = 0.; 
+            _p.radlist.clear();
+            _p.charged = p.isCharged(); 
+            plist.push_back(_p);
 	    }
 	}
 }

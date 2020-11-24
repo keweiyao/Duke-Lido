@@ -56,7 +56,7 @@ double M2_Qq2Qqg(const double * x_, void * params_){
 	}
 	
 	double mg2 = t_channel_mD2->get_mD2(T) / 2.;
-    double xbar = (kmu.t()+std::abs(kmu.z()))/sqrts;
+        double xbar = (kmu.t()+std::abs(kmu.z()))/sqrts;
 	double one_minus_xbar = 1. - xbar;
 	double MA[2], MB[2], MC[2], A[2], B[2];
 	MA[0] = kmu.x() - qx;
@@ -80,8 +80,10 @@ double M2_Qq2Qqg(const double * x_, void * params_){
 		
 
     double M2_elastic = M2_Qq2Qq(t, params);
+    double x2M2 = M2*std::pow(xbar, 2);
     double Pg = alpha_s(kt2, T) * one_minus_xbar
-			* (1. + std::pow(one_minus_xbar, 2)) / 2.
+			* (1. + std::pow(one_minus_xbar, 2) - 2.*x2M2*one_minus_xbar/(x2M2+kt2)
+                           ) / 2.
  			* (CF*A2 + CF*B2 - (2.*CF-CA)*AB)/CA;
 
 	// Jacobian
@@ -163,11 +165,13 @@ double M2_Qg2Qgg(const double * x_, void * params_){
 	double AB = A[0]*B[0] + A[1]*B[1];
 		
 
-    double M2_elastic = M2_Qg2Qg(t, params);
+        double M2_elastic = M2_Qg2Qg(t, params);
+        double x2M2 = std::pow(xbar,2)*M2;
 	double Pg = 1.;
 	if (y>0){
 		Pg = alpha_s(kt2, T) * one_minus_xbar
-			* (1. + std::pow(one_minus_xbar, 2)) / 2.
+			* (1. + std::pow(one_minus_xbar, 2)  - 2.*x2M2*one_minus_xbar/(x2M2+kt2)
+                           ) / 2.
  			* (CF*A2 + CF*B2 - (2.*CF-CA)*AB)/CA;
 	} else {
 		Pg = alpha_s(kt2, T) * xbar * one_minus_xbar
@@ -656,11 +660,11 @@ double M2_gg2qgqbar(const double * x_, void * params_){
 	// q-perp-vec, q = p2-p4, qperp = -p4perp
 	double qx = -p4mu.x(), qy = -p4mu.y();
 	double kt2 = kmu.x()*kmu.x() + kmu.y()*kmu.y();
-    double t = -2.*Qmax*(p4mu.t()+p4mu.z());
+        double t = -2.*Qmax*(p4mu.t()+p4mu.z());
 
 	double mg2 = t_channel_mD2->get_mD2(T)/2.;
-    double xbar = 2*kmu.t()/sqrts;
-    double one_minus_xbar = 1.-xbar;
+        double xbar = 2*kmu.t()/sqrts;
+        double one_minus_xbar = 1.-xbar;
 
 	if(y < 0){
 		return 0.;

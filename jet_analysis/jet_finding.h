@@ -99,6 +99,7 @@ public:
     std::vector<Fjet> Jets;
     std::vector<particle> HFs;
     std::vector<Fjet> HFaxis;
+    std::vector<std::vector<double> > PT;
 private:
     int corp_index(double x, double xL, double xH, double dx, int Nx){
         if (x<xL || x>xH) return -1;
@@ -112,7 +113,6 @@ private:
     std::vector<particle> plist;
     std::vector<current> clist;
     MediumResponse MR;
-    std::vector<std::vector<double> > PT;
     std::vector<std::vector<fourvec> > Pmu;
 };
 

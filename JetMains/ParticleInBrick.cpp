@@ -102,13 +102,13 @@ int main(int argc, char* argv[]){
         int pid = args["pid"].as<int>();
         double T0 = args["temp"].as<double>();
         double E0 = args["einit"].as<double>();
-        double L0 = 7*5.076;
-        double dL = L0/1000;
+        double L0 = 5*5.076;
+        double dL = L0/300;
         std::vector<particle> plist, new_plist, pOut_list;
-        plist.resize(1000);
+        plist.resize(4000);
         
         fourvec x0{0.,0.,0.,0.};
-        fourvec p0{E0,0.,0.,E0};
+        fourvec p0{E0, E0, 0., 0.};
 
         for (auto & p : plist){
             p.pid = pid;
@@ -122,25 +122,18 @@ int main(int argc, char* argv[]){
             p.vcell.resize(3);
             p.is_virtual = false;
         }
-        
         for (double l=0; l<L0; l+=dL){
-            //LOG_INFO << l;
-            double T = std::pow(.5*5.076/(.5*5.076+l), .5)*T0;
+            new_plist.clear();
+            LOG_INFO << l;
+            double T = T0;
             for (auto & p : plist){
                 int fs_size = update_particle_momentum_Lido(
                       dL, T, {0,0,0}, p, pOut_list, 0.0);
+                for (auto & fp : pOut_list) new_plist.push_back(fp);
             }
+            plist = new_plist;
         }
-        double Efinal = 0., E2;
-        for (auto & p : plist) {
-             Efinal += p.p.t();
-             E2 += p.p.t()*p.p.t();
-        }
-        Efinal /= plist.size();
-        E2 /= plist.size();
-        LOG_INFO<< E0 << " " << E0-Efinal 
-               << " " << std::sqrt((E2-Efinal*Efinal)/(plist.size()-1));
-        //output_jet("out.dat",plist);
+        output_jet("out.dat", plist);
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

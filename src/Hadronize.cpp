@@ -37,7 +37,7 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("5:m0 = 4.2");
     pythia.readString("PartonLevel:Remnants = on");
     pythia.readString("HadronLevel:all = on");
-    pythia.readString("HadronLevel:Decay = on");
+    pythia.readString("HadronLevel:Decay = off");
     pythia.readString("StringZ:usePetersonC=on");
     pythia.readString("StringZ:usePetersonB=on");
 pythia.readString("411:mayDecay = off");
@@ -218,8 +218,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
         auto ip = pythia.event[i];
         bool good = false;
 	int absid = std::abs(ip.id());
-        if (level==1) good = ip.isFinal() && (absid!=12)
-		           && (absid!=13) && (absid!=14);
+        if (level==1) good = ip.isFinal();
         if (level==0) good = (ip.isParton() 
                         && pythia.event[ip.daughter1()].isHadron())
                       || (ip.isFinal() && ip.isParton());

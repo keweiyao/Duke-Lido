@@ -207,7 +207,7 @@ foreach(App "Lido-TabGen" "brick")
 endforeach()
 
 if(pythia8)
-foreach(App "jet-2Dhydro-couple" "jet-pp-gen")
+foreach(App "jet-2Dhydro-couple" "jet-pp-gen" "PGunTest" "ElossTest" "ParticleInBrick")
 	add_executable(${App} ./JetMains/${App}.cpp)
 	target_link_libraries(${App} ${LIBRARY_NAME} ${LIBRARY_JETFIND} ${PYTHIA8_LIBRARIES} ${FASTJET_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS ${App} DESTINATION bin)

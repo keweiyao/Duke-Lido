@@ -135,7 +135,11 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
     AllProcesses[21].push_back(Rate32("Boltzmann/ggg2gg", setting_path, M2_ggg2gg));       // 3->2, index = 5
     AllProcesses[21].push_back(Rate12("Boltzmann/g2gg", setting_path, LGV_g2gg));           // 1->2, index = 6
     AllProcesses[21].push_back(Rate21("Boltzmann/gg2g", setting_path, LGV_gg2g));           // 2->1, index = 7
+    // pair production
     AllProcesses[21].push_back(Rate22QQbar("Boltzmann/gg2ccbar", setting_path, dX_gg2QQbar_dt));    // 2->2, index = 8
+    AllProcesses[21].push_back(Rate23("Boltzmann/gq2qqqbar", setting_path, M2_gq2qqqbar));       // 2->3, index = 9
+    AllProcesses[21].push_back(Rate23("Boltzmann/gg2qgqbar", setting_path, M2_gg2qgqbar));       // 2->3, index = 10
+    AllProcesses[21].push_back(Rate12("Boltzmann/g2qqbar", setting_path, LGV_g2qqbar));           // 1->2, index = 11
 
     // for u, d, s flavor
     AllProcesses[123] = std::vector<Process>();
@@ -200,7 +204,7 @@ double formation_time(fourvec p, fourvec k, double T, int split) {
         colors = 1. - x + x * x;
         mass_sqrs = (1. - x + x * x) * mg2;
     }
-    if (split == 3) {
+    if (split == 3 || split==4) {
         // g --> q + qbar
         colors = 1. - x * CA / CF + x * x * CA / CF;
         mass_sqrs = (CF/CA - x + x * x) * mg2;
@@ -232,7 +236,7 @@ double compute_realtime_to_propagate(double dt, fourvec x, fourvec p){
       exit(-1);
     }
 }
-//std::ofstream f("stat.dat");
+
 int update_particle_momentum_Lido(
     double dt_input, double temp, std::vector<double> v3cell,
     particle & pIn, std::vector<particle> & pOut_list, double Tf){
@@ -248,7 +252,7 @@ int update_particle_momentum_Lido(
     double dt_for_pIn = compute_realtime_to_propagate(dt_input, pIn.x, pIn.p);
     pIn.freestream(dt_for_pIn);
     // we only handle u,d,s,c,b,g
-    bool formed_from_vac = (pIn.x.t()>pIn.tau_i);
+    bool formed_from_vac = (pIn.x.t()>=pIn.tau_i);
     if ( (!((pIn.pid==21) || (std::abs(pIn.pid)<=5)) )
        || (temp<Tf) || (!formed_from_vac) ){
         pIn.radlist.clear();
@@ -289,7 +293,9 @@ int update_particle_momentum_Lido(
         Ito_update(pIn.pid, dt_for_pIn/10, pIn.mass, temp, v3cell, pIn.p, pnew, pIn.is_virtual);
 	if (pIn.is_virtual) pIn.p = pnew*(pIn.p.t()/pnew.t());
 	else pIn.p = pnew;
+        pIn.p.a[0] = std::sqrt(pIn.p.pabs2()+pIn.mass*pIn.mass);
     }
+
 
 
     // Apply large angle scattering, and diffusion induced radiation
@@ -347,7 +353,7 @@ int update_particle_momentum_Lido(
             break;
         case 5:
             if (boost::get<Rate22QQbar>(r).IsActive() && (!pIn.is_virtual))
-                dR = qhatg * boost::get<Rate21>(r).GetZeroM({LnE_cell, temp}).s;
+                dR = boost::get<Rate22QQbar>(r).GetZeroM({LnE_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
@@ -429,7 +435,7 @@ int update_particle_momentum_Lido(
 
         // elastic process changes the momentum immediately
         if (channel == 0 || channel == 1){
-	    pIn.p = FS[0];
+            pIn.p = FS[0];
             if (!pIn.is_virtual){  
 		    int id = (channel==0) ? (Srandom::sample_flavor(3)) : 21;
 		    int col=-100, acol=-100, mcol=-100, macol=-100;
@@ -518,32 +524,75 @@ int update_particle_momentum_Lido(
 	    pIn.acol = macol;
             pOut_list.push_back(ep);
         }
+        if (channel == 9 || channel == 10){
+            if (FS.size()==3 && FS[0].t()>1.4 && FS[2].t()>1.4){
+	        particle vp = produce_parton(Srandom::binary_choice()? 4:-4, FS[2], pIn, true);
+                vp.mass = 1.3;
+                vp.p = vp.p*(std::sqrt(vp.p.t()*vp.p.t()-vp.mass*vp.mass)
+                           /vp.p.t());
+                vp.p.a[0] = std::sqrt(vp.mass*vp.mass+vp.p.pabs2());
+	        // The local 2->2 mean-free-path is estimated with
+	        // the qhat_hard integrate from the 2->2 rate
+	        double xfrac = vp.p.t() / pIn.p.t();
+	        double local_qhat = 0.;
+	        double vp_cell = vp.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
+	        double Lnvp_cell = std::log(vp_cell);
+	        double boost_factor = vp.p.t() / vp_cell;
+	        BOOST_FOREACH (Process &r, AllProcesses[21]){
+	            switch (r.which()){
+	            case 0:
+	                if (boost::get<Rate22>(r).IsActive()){
+	                    tensor A = boost::get<Rate22>(r).GetSecondM({Lnvp_cell, temp});
+	                    local_qhat += A.T[1][1] + A.T[2][2];
+	                }
+	                break;
+	            default:
+	                break;
+	            }
+	        }  
+	        // estimate mfp in the lab frame
+	        vp.mfp0 = LPM_prefactor * mD2 / local_qhat * boost_factor;
+	        pIn.radlist.push_back(vp);
+            }
+        }
+        if (channel == 11 && FS[0].t()>1.4 && FS[1].t()>1.4){
+            if (FS.size()==2){
+	        particle vp = produce_parton(
+                          Srandom::binary_choice()? 4:-4, FS[1], pIn, true);
+                vp.mass = 1.3;
+                vp.p = vp.p*(std::sqrt(vp.p.t()*vp.p.t()-vp.mass*vp.mass)
+                           /vp.p.t());
+                vp.p.a[0] = std::sqrt(vp.mass*vp.mass+vp.p.pabs2());
+                // estimate mfp in the lab frame
+                vp.mfp0 = LPM_prefactor * mD2 / qhatg * pIn.p.t() / E_cell;
+                pIn.radlist.push_back(vp);
+            }
+        }
     }
 
-    bool has_rad = false;
+    bool has_altered_ID = false;
     // Handle the virtual particle, (only for real mother parton)
     if ((!pIn.radlist.empty()) && (!pIn.is_virtual)){
         // loop over each virtual particles
         for (std::vector<particle>::iterator it = pIn.radlist.begin(); it != pIn.radlist.end();){
             int split_type = 0;
-            if (pIn.pid != 21 && it->pid == 21)
-                split_type = 1; // q --> q + g
-            if (pIn.pid == 21 && it->pid == 21)
-                split_type = 2; // g --> g + g
-            if (pIn.pid == 21 && it->pid != 21)
-                split_type = 3; // g --> q + qbar
-            double taun = formation_time(it->mother_p, it->p, 
-                                         temp, split_type);
+            int abs_rad_id = std::abs(it->pid);
+            if (pIn.pid != 21 &&  abs_rad_id==21) split_type = 1; // q --> q + g
+            if (pIn.pid == 21){
+                if (abs_rad_id == 21) split_type = 2; // g --> g + g
+                else if (abs_rad_id<4) split_type = 3; // g --> q + qbar
+                else if (abs_rad_id==4 || abs_rad_id==5) split_type = 4; // g --> Q + Qbar
+                else LOG_FATAL << "Wrong splitting!";
+            }
+            double taun = formation_time(it->mother_p, it->p, temp, split_type);
             std::vector<particle> pnew_Out;
 
             // In the local (adiabatic LPM) mode,
             // use local information to determine the number of rescatterings
             if (Adiabatic_LPM){
                 do{
-                   update_particle_momentum_Lido(
-                           dt_input, temp, v3cell, *it, pnew_Out, Tf);
-                   taun = formation_time(
-                           it->mother_p, it->p, temp, split_type);
+                   update_particle_momentum_Lido(dt_input, temp, v3cell, *it, pnew_Out, Tf);
+                   taun = formation_time(it->mother_p, it->p, temp, split_type);
                 }while(it->x.t() - it->x0.t() <= taun);
                 // once finished, reset its x to where it is produced
                 it->x = it->x0;
@@ -564,9 +613,16 @@ int update_particle_momentum_Lido(
                 double Running = std::min(
 			alpha_s(kt2n,it->T0)/alpha_s(kt20,it->T0), 1.);
                 // 2): a dead-cone approximation for massive particles
-                double theta2 = kt2n / std::pow(it->p.t(), 2);
-                double thetaM2 = std::pow(pIn.mass / it->mother_p.t(), 2);
-		double DeadCone = std::pow(theta2/(theta2 + thetaM2), 2);
+
+		double DeadCone = 1.;
+                if (split_type==1){
+                    double theta2 = kt2n / std::pow(it->p.t(), 2);
+                    double thetaM2 = std::pow(pIn.mass / it->mother_p.t(), 2);
+                    DeadCone = std::pow(theta2/(theta2 + thetaM2), 2);
+                }
+                if (split_type==4) 
+                    DeadCone = std::pow(kt2n/(kt2n+std::pow(it->mass,2)), 2);
+         
                 // 3): an NLL-inspired suppression factor for the LPM effect
                 double mD2 = t_channel_mD2->get_mD2(temp);
                 double lnQ2_1 = std::log(1. + taun / it->mfp0);
@@ -579,26 +635,45 @@ int update_particle_momentum_Lido(
                 if (Srandom::rejection(Srandom::gen) < Acceptance){
                     // accepted branching causes physical effects
                     // momentum change, and put back on shell
-                    pIn.p = pIn.p - it->p;
-                    it->p0 = it->p;                 
-                    pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass+pIn.p.pabs2());
-		    pIn.p0 = pIn.p;
-		    pIn.Q0 = std::sqrt(kt2n+mD2);
-		    pIn.Q00 = pIn.Q0;
-		    it->Q0 = pIn.Q0;
-		    it->Q00 = it->Q0;
-
-		    has_rad = true;
- 
-                    int col=-100, acol=-100, mcol=-100, macol=-100;
-                    SampleFlavorAndColor(pIn.pid, pIn.col,
-                                         pIn.acol, 2,
-                                         21, col, acol, mcol, macol);
-                    it->col = col; 
-                    it->acol = acol;
-                    pIn.col = mcol;
-                    pIn.acol = macol;
-                    // label it as real and put it in output particle list
+                    if (split_type==1 || split_type==2) {
+                        // mother parton id unchanged
+                        pIn.p = pIn.p - it->p;
+                        it->p0 = it->p;                 
+                        pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass+pIn.p.pabs2());
+		        pIn.p0 = pIn.p;
+                        int col=-100, acol=-100, mcol=-100, macol=-100;
+                        SampleFlavorAndColor(pIn.pid, pIn.col, pIn.acol, 2, it->pid, 
+                                            col, acol, mcol, macol);
+                        it->col = col; 
+                        it->acol = acol;
+                        pIn.col = mcol;
+                        pIn.acol = macol;
+                    }
+                    if (split_type==3 || split_type==4) {
+                        // mother parton id unchanged
+                        it->mass = 1.3;
+                        pIn.mass = it->mass;
+                        pIn.pid = -it->pid;
+                        pIn.p = pIn.p - it->p;
+                        it->p0 = it->p;                 
+                        pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass+pIn.p.pabs2());
+                        it->p.a[0] = std::sqrt(it->mass*it->mass+it->p.pabs2());
+		        pIn.p0 = pIn.p;
+                        int col=-100, acol=-100, mcol=-100, macol=-100;
+                        SampleFlavorAndColor(pIn.pid, pIn.col, pIn.acol, 
+                                            9, it->pid, 
+                                            col, acol, mcol, macol);
+                        it->col = col; 
+                        it->acol = acol;
+                        pIn.col = mcol;
+                        pIn.acol = macol;
+                        has_altered_ID = true;
+                    }
+                    double Scale = std::sqrt(kt2n+mD2);
+		    pIn.Q0 = Scale;
+                    pIn.Q00 = Scale;
+	            it->Q0 = Scale;
+		    it->Q00 = Scale;
                     it->is_virtual = false;
 		    if (pIn.origin == 2) it->origin=2;
                     if (pIn.origin == 0 || pIn.origin==1) it->origin=1;
@@ -608,8 +683,8 @@ int update_particle_momentum_Lido(
                 it = pIn.radlist.erase(it);
             }
         }
-
     }
+    if (has_altered_ID) pIn.radlist.clear();
 
     for (std::vector<particle>::iterator it = pIn.radlist.begin(); it != pIn.radlist.end();){
             if(it->p.t()>=pIn.p.t()) it = pIn.radlist.erase(it);
@@ -630,7 +705,6 @@ void SampleFlavorAndColor(int mother_id, int mother_col, int mother_acol,
                 int daughter_id, int & daughter_col, int & daughter_acol,
                 int & new_mother_col, int & new_mother_acol) {
     if (mother_id == 21){
-    
         if (channel==0) {
             int color = color_count; 
             color_count ++;
@@ -679,6 +753,7 @@ void SampleFlavorAndColor(int mother_id, int mother_col, int mother_acol,
                 daughter_acol = color;
             }
         }
+        // g+g-->Q+Qbar
         if (channel == 8){
             int color = color_count;
             color_count++;
@@ -693,6 +768,21 @@ void SampleFlavorAndColor(int mother_id, int mother_col, int mother_acol,
                 new_mother_acol = 0;
                 daughter_col = 0;
                 daughter_acol = mother_col;
+            }
+        }
+        // gluon --> Q+Qbar or q+qbar
+        if (channel == 9 || channel==10|| channel==11){
+            if (daughter_id>0) {
+                daughter_col = mother_col;
+                daughter_acol = 0;
+                new_mother_col = 0;
+                new_mother_acol = mother_col;
+            }
+            else {
+                daughter_col = 0;
+                daughter_acol = mother_col;
+                new_mother_col = mother_col;
+                new_mother_acol = 0;
             }
         }
     }

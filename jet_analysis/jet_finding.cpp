@@ -178,8 +178,8 @@ void JetFinder::MakeETower(double _vradial,
         if (ieta<0) continue;
         int iphi = corp_index(phi, phimin, phimax, dphi, Nphi);
         Pmu[ieta][iphi] = Pmu[ieta][iphi] + p.p;
-        if (p.p.xT()>pTmin)
-            PT[ieta][iphi] += p.p.xT();
+        //if (p.p.xT()>pTmin)
+        //    PT[ieta][iphi] += p.p.xT();
     }
     if (TypeOneSources.size()==0) return;
     // put soft energy-momentum deposition into the towers
@@ -205,7 +205,7 @@ void JetFinder::MakeETower(double _vradial,
                 dpTcut += MR.get_dpT_dydphi(eta-etas, phi, s.p, vradial, pTmin/Tfreeze);
             }
             coarsePT[0][ieta][iphi] = dpT;
-            coarsePT[1][ieta][iphi] = dpTcut;
+            coarsePT[1][ieta][iphi] = dpT-dpTcut;
         }
     }
     // Interpolate the coarse grid into the finer grid for jet finding
