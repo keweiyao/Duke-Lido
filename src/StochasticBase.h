@@ -53,7 +53,9 @@ public:
 			else return tensor{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		};
 	virtual void sample(std::vector<double> arg,
-						std::vector< fourvec > & FS) = 0;
+                        int incoming_hard_pid,
+			std::vector<fourvec> & FS,
+                        std::vector<int> & pids ) = 0;
 	void init(std::string);
 	void load(std::string);
 };

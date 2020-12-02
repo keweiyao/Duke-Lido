@@ -100,6 +100,13 @@ struct fourvec {
 					c3*a[1] - s3*(c2*a[2] - s2*a[3]),
 	             	s2*a[2] + c2*a[3] };
 	}
+  fourvec rotate_around_pz(const double delta_phi) const{
+      double cosdphi = std::cos(delta_phi);
+      double sindphi = std::sin(delta_phi);
+      return fourvec{
+           a[0], a[1]*cosdphi - a[2]*sindphi, a[1]*sindphi + a[2]*cosdphi, a[3]
+        };
+  }
   static size_t size(void){return 4;}
   void set(int i, double value) {a[i] = value;};
   double get(int i) {return a[i];};

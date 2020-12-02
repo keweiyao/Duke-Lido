@@ -79,7 +79,6 @@ bool TableBase<T, N>::Save(std::string fname){
                                 // if the last group existed before
 				// It need to be deleted and rebuild
 				H5Ldelete(file.getId(), prefix.c_str(), H5P_DEFAULT);
-				LOG_WARNING<<"old data deleted and will be overwirtten";
 				group = file.createGroup(prefix.c_str());
 			}
   		}catch (...) {

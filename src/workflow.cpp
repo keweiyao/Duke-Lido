@@ -50,21 +50,6 @@ void init_process(Process &r, std::string mode, std::string table_path)
             return;
         break;
     case 2:
-        if (boost::get<Rate32>(r).IsActive())
-            if (mode == "new")
-            {
-                boost::get<Rate32>(r).initX(table_path);
-                boost::get<Rate32>(r).init(table_path);
-            }
-            else
-            {
-                boost::get<Rate32>(r).loadX(table_path);
-                boost::get<Rate32>(r).load(table_path);
-            }
-        else
-            return;
-        break;
-    case 3:
         if (boost::get<Rate12>(r).IsActive())
             if (mode == "new")
             {
@@ -73,34 +58,6 @@ void init_process(Process &r, std::string mode, std::string table_path)
             else
             {
                 boost::get<Rate12>(r).load(table_path);
-            }
-        else
-            return;
-        break;
-    case 4:
-        if (boost::get<Rate21>(r).IsActive())
-            if (mode == "new")
-            {
-                boost::get<Rate21>(r).init(table_path);
-            }
-            else
-            {
-                boost::get<Rate21>(r).load(table_path);
-            }
-        else
-            return;
-        break;
-    case 5:
-        if (boost::get<Rate22QQbar>(r).IsActive())
-            if (mode == "new")
-            {
-                boost::get<Rate22QQbar>(r).initX(table_path);
-                boost::get<Rate22QQbar>(r).init(table_path);
-            }
-            else
-            {
-                boost::get<Rate22QQbar>(r).loadX(table_path);
-                boost::get<Rate22QQbar>(r).load(table_path);
             }
         else
             return;
@@ -125,65 +82,71 @@ void initialize(std::string mode, std::string setting_path, std::string table_pa
     initialize_mD_and_scale(0, mu, afix, theta, cut);
     echo();
 
-    // for gluon
+    // for gluon 17 channels
     AllProcesses[21] = std::vector<Process>();
-    AllProcesses[21].push_back(Rate22("Boltzmann/gq2gq", setting_path, dX_gq2gq_dt));      // 2->2, index = 0
-    AllProcesses[21].push_back(Rate22("Boltzmann/gg2gg", setting_path, dX_gg2gg_dt));      // 2->2, index = 1
-    AllProcesses[21].push_back(Rate23("Boltzmann/gq2gqg", setting_path, M2_gq2gqg));       // 2->3, index = 2
-    AllProcesses[21].push_back(Rate23("Boltzmann/gg2ggg", setting_path, M2_gg2ggg));       // 2->3, index = 3
-    AllProcesses[21].push_back(Rate32("Boltzmann/gqg2gq", setting_path, M2_gqg2gq));       // 3->2, index = 4
-    AllProcesses[21].push_back(Rate32("Boltzmann/ggg2gg", setting_path, M2_ggg2gg));       // 3->2, index = 5
-    AllProcesses[21].push_back(Rate12("Boltzmann/g2gg", setting_path, LGV_g2gg));           // 1->2, index = 6
-    AllProcesses[21].push_back(Rate21("Boltzmann/gg2g", setting_path, LGV_gg2g));           // 2->1, index = 7
-    // pair production
-    AllProcesses[21].push_back(Rate22QQbar("Boltzmann/gg2ccbar", setting_path, dX_gg2QQbar_dt));    // 2->2, index = 8
-    AllProcesses[21].push_back(Rate23("Boltzmann/gq2qqqbar", setting_path, M2_gq2qqqbar));       // 2->3, index = 9
-    AllProcesses[21].push_back(Rate23("Boltzmann/gg2qgqbar", setting_path, M2_gg2qgqbar));       // 2->3, index = 10
-    AllProcesses[21].push_back(Rate12("Boltzmann/g2qqbar", setting_path, LGV_g2qqbar));           // 1->2, index = 11
+    AllProcesses[21].push_back(Rate22("Boltzmann/gq2gq", setting_path, dX_gq2gq));    
+    AllProcesses[21].push_back(Rate23("Boltzmann/gq2gqg", setting_path, dX_gq2gqg));  
+    AllProcesses[21].push_back(Rate23("Boltzmann/gq2qqqbar", setting_path, dX_gq2qqqbar)); 
+    AllProcesses[21].push_back(Rate23("Boltzmann/gq2cqcbar", setting_path, dX_gq2qqqbar)); 
+    AllProcesses[21].push_back(Rate23("Boltzmann/gq2bqbbar", setting_path, dX_gq2qqqbar)); 
+  
+    AllProcesses[21].push_back(Rate22("Boltzmann/gg2gg", setting_path, dX_gg2gg));      
+    AllProcesses[21].push_back(Rate22("Boltzmann/gg2qqbar", setting_path, dX_gg2qqbar));   
+    AllProcesses[21].push_back(Rate22("Boltzmann/gg2ccbar", setting_path, dX_gg2qqbar));   
+    AllProcesses[21].push_back(Rate22("Boltzmann/gg2bbbar", setting_path, dX_gg2qqbar));   
+    AllProcesses[21].push_back(Rate23("Boltzmann/gg2ggg", setting_path, dX_gg2ggg));      
+    AllProcesses[21].push_back(Rate23("Boltzmann/gg2qgqbar", setting_path, dX_gg2qgqbar));   
+    AllProcesses[21].push_back(Rate23("Boltzmann/gg2cgcbar", setting_path, dX_gg2qgqbar)); 
+    AllProcesses[21].push_back(Rate23("Boltzmann/gg2bgbbar", setting_path, dX_gg2qgqbar));     
 
-    // for u, d, s flavor
+    AllProcesses[21].push_back(Rate12("Boltzmann/g2gg", setting_path, LGV_g2gg));       
+    AllProcesses[21].push_back(Rate12("Boltzmann/g2qqbar", setting_path, LGV_g2qqbar));  
+    AllProcesses[21].push_back(Rate12("Boltzmann/g2ccbar", setting_path, LGV_g2qqbar));   
+    AllProcesses[21].push_back(Rate12("Boltzmann/g2bbbar", setting_path, LGV_g2qqbar)); 
+
+    // for light flavor 11 channels
     AllProcesses[123] = std::vector<Process>();
-    AllProcesses[123].push_back(Rate22("Boltzmann/qq2qq", setting_path, dX_Qq2Qq_dt)); // 2->2, index = 0
-    AllProcesses[123].push_back(Rate22("Boltzmann/qg2qg", setting_path, dX_Qg2Qg_dt)); // 2->2, index = 1
-    AllProcesses[123].push_back(Rate23("Boltzmann/qq2qqg", setting_path, M2_Qq2Qqg));  // 2->3, index = 2
-    AllProcesses[123].push_back(Rate23("Boltzmann/qg2qgg", setting_path, M2_Qg2Qgg));  // 2->3, index = 3
-    AllProcesses[123].push_back(Rate32("Boltzmann/qqg2qq", setting_path, M2_Qqg2Qq));  // 3->2, index = 4
-    AllProcesses[123].push_back(Rate32("Boltzmann/qgg2qg", setting_path, M2_Qgg2Qg));  // 3->2, index = 5
-    AllProcesses[123].push_back(Rate12("Boltzmann/q2qg", setting_path, LGV_q2qg));     // 1->2, index = 6
-    AllProcesses[123].push_back(Rate21("Boltzmann/qg2q", setting_path, LGV_qg2q));     // 2->1, index = 7
-    AllProcesses[123].push_back(Rate22QQbar("Boltzmann/qqbar2ccbar", setting_path, dX_qqbar2QQbar_dt)); // 2->2, index = 8
+    AllProcesses[123].push_back(Rate22("Boltzmann/qq2qq", setting_path, dX_qq2qq)); 
+    AllProcesses[123].push_back(Rate23("Boltzmann/qq2qqg", setting_path, dX_qq2qqg));  
 
-    // for charm flavor
+    AllProcesses[123].push_back(Rate22("Boltzmann/qg2qg", setting_path, dX_qg2qg));
+    AllProcesses[123].push_back(Rate23("Boltzmann/qg2qgg", setting_path, dX_qg2qgg));  
+    AllProcesses[123].push_back(Rate23("Boltzmann/qg2qqqbar", setting_path, dX_qg2qqqbar)); 
+    AllProcesses[123].push_back(Rate23("Boltzmann/qg2qccbar", setting_path, dX_qg2qqqbar)); 
+    AllProcesses[123].push_back(Rate23("Boltzmann/qg2qbbbar", setting_path, dX_qg2qqqbar)); 
+
+    AllProcesses[123].push_back(Rate22("Boltzmann/qqbar2qqbar", setting_path, dX_qqbar2qqbar_diff)); 
+    AllProcesses[123].push_back(Rate22("Boltzmann/qqbar2ccbar", setting_path, dX_qqbar2qqbar_diff)); 
+    AllProcesses[123].push_back(Rate22("Boltzmann/qqbar2bbbar", setting_path, dX_qqbar2qqbar_diff)); 
+
+    AllProcesses[123].push_back(Rate12("Boltzmann/q2qg", setting_path, LGV_q2qg));     
+
+    // for charm flavor 5 channels
     AllProcesses[4] = std::vector<Process>();
-    AllProcesses[4].push_back(Rate22("Boltzmann/cq2cq", setting_path, dX_Qq2Qq_dt)); // 2->2, index = 0
-    AllProcesses[4].push_back(Rate22("Boltzmann/cg2cg", setting_path, dX_Qg2Qg_dt)); // 2->2, index = 1
-    AllProcesses[4].push_back(Rate23("Boltzmann/cq2cqg", setting_path, M2_Qq2Qqg));  // 2->3, index = 2
-    AllProcesses[4].push_back(Rate23("Boltzmann/cg2cgg", setting_path, M2_Qg2Qgg));  // 2->3, index = 3
-    AllProcesses[4].push_back(Rate32("Boltzmann/cqg2cq", setting_path, M2_Qqg2Qq));  // 3->2, index = 4
-    AllProcesses[4].push_back(Rate32("Boltzmann/cgg2cg", setting_path, M2_Qgg2Qg));  // 3->2, index = 5
-    AllProcesses[4].push_back(Rate12("Boltzmann/c2cg", setting_path, LGV_q2qg));     // 1->2, index = 6
-    AllProcesses[4].push_back(Rate21("Boltzmann/cg2c", setting_path, LGV_qg2q));     // 2->1, index = 7
+    AllProcesses[4].push_back(Rate22("Boltzmann/cq2cq", setting_path, dX_qq2qq)); 
+    AllProcesses[4].push_back(Rate22("Boltzmann/cg2cg", setting_path, dX_qg2qg)); 
+    AllProcesses[4].push_back(Rate23("Boltzmann/cq2cqg", setting_path, dX_qq2qqg)); 
+    AllProcesses[4].push_back(Rate23("Boltzmann/cg2cgg", setting_path, dX_qg2qgg)); 
+    AllProcesses[4].push_back(Rate12("Boltzmann/c2cg", setting_path, LGV_q2qg));  
 
-    // for bottom flavor
+    // for bottom flavor 5 channels
     AllProcesses[5] = std::vector<Process>();
-    AllProcesses[5].push_back(Rate22("Boltzmann/bq2bq", setting_path, dX_Qq2Qq_dt)); // 2->2, index = 0
-    AllProcesses[5].push_back(Rate22("Boltzmann/bg2bg", setting_path, dX_Qg2Qg_dt)); // 2->2, index = 1
-    AllProcesses[5].push_back(Rate23("Boltzmann/bq2bqg", setting_path, M2_Qq2Qqg));  // 2->3, index = 2
-    AllProcesses[5].push_back(Rate23("Boltzmann/bg2bgg", setting_path, M2_Qg2Qgg));  // 2->3, index = 3
-    AllProcesses[5].push_back(Rate32("Boltzmann/bqg2bq", setting_path, M2_Qqg2Qq));  // 3->2, index = 4
-    AllProcesses[5].push_back(Rate32("Boltzmann/bgg2bg", setting_path, M2_Qgg2Qg));  // 3->2, index = 5
-    AllProcesses[5].push_back(Rate12("Boltzmann/b2bg", setting_path, LGV_q2qg));     // 1->2, index = 6
-    AllProcesses[5].push_back(Rate21("Boltzmann/bg2b", setting_path, LGV_qg2q));     // 2->1, index = 7
+    AllProcesses[5].push_back(Rate22("Boltzmann/bq2bq", setting_path, dX_qq2qq)); 
+    AllProcesses[5].push_back(Rate22("Boltzmann/bg2bg", setting_path, dX_qg2qg));
+    AllProcesses[5].push_back(Rate23("Boltzmann/bq2bqg", setting_path, dX_qq2qqg)); 
+    AllProcesses[5].push_back(Rate23("Boltzmann/bg2bgg", setting_path, dX_qg2qgg)); 
+    AllProcesses[5].push_back(Rate12("Boltzmann/b2bg", setting_path, LGV_q2qg));
 
     // Initialzie all processes
+    BOOST_FOREACH (Process &r, AllProcesses[21])
+       init_process(r, mode, table_path);
     BOOST_FOREACH (Process &r, AllProcesses[123])
        init_process(r, mode, table_path);
     BOOST_FOREACH (Process &r, AllProcesses[4])
        init_process(r, mode, table_path);
     BOOST_FOREACH (Process &r, AllProcesses[5])
        init_process(r, mode, table_path);
-    BOOST_FOREACH (Process &r, AllProcesses[21])
-       init_process(r, mode, table_path);
+
 }
 
 // split=1: q->q+g, colors = 1 - x + CF/CA * x^2
@@ -331,29 +294,8 @@ int update_particle_momentum_Lido(
             P_channels[channel] = P_total + dR * dt_cell;
             break;
         case 2:
-            if (boost::get<Rate32>(r).IsActive() && can_rad)
-                dR = boost::get<Rate32>(r).GetZeroM({LnE_cell, temp}).s;
-            else
-                dR = 0.0;
-            P_channels[channel] = P_total + dR * dt_cell;
-            break;
-        case 3:
             if (boost::get<Rate12>(r).IsActive() && can_rad)
                 dR = qhatg * boost::get<Rate12>(r).GetZeroM({LnE_cell, temp}).s;
-            else
-                dR = 0.0;
-            P_channels[channel] = P_total + dR * dt_cell;
-            break;
-        case 4:
-            if (boost::get<Rate21>(r).IsActive() && can_rad)
-                dR = qhatg * boost::get<Rate21>(r).GetZeroM({LnE_cell, temp}).s;
-            else
-                dR = 0.0;
-            P_channels[channel] = P_total + dR * dt_cell;
-            break;
-        case 5:
-            if (boost::get<Rate22QQbar>(r).IsActive() && (!pIn.is_virtual))
-                dR = boost::get<Rate22QQbar>(r).GetZeroM({LnE_cell, temp}).s;
             else
                 dR = 0.0;
             P_channels[channel] = P_total + dR * dt_cell;
@@ -400,24 +342,17 @@ int update_particle_momentum_Lido(
         }
         // Final state holder FS
         std::vector<fourvec> FS;
+        std::vector<int> FS_pids;
         // Sampe its differential final state
         switch (AllProcesses[channel_pid][channel].which()){
         case 0:
-            boost::get<Rate22>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, FS);
+            boost::get<Rate22>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, pIn.pid, FS, FS_pids);
             break;
         case 1:
-            boost::get<Rate23>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, FS);
+            boost::get<Rate23>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, pIn.pid, FS, FS_pids);
             break;
         case 2:
-            boost::get<Rate32>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, FS);
-            break;
-        case 3:
-            boost::get<Rate12>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, FS);
-            break;
-        case 4:
-            boost::get<Rate21>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, FS);
-        case 5:
-            boost::get<Rate22QQbar>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, FS);
+            boost::get<Rate12>(AllProcesses[channel_pid][channel]).sample({LnE_cell, temp}, pIn.pid, FS, FS_pids);
             break;
         default:
             LOG_FATAL << "2. Channel = " << channel << " not exists";

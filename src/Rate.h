@@ -19,16 +19,23 @@ template <char const *str, size_t N1, size_t N2, typename F>
 class Rate: public virtual StochasticBase<N1>{
 private:
 	std::shared_ptr<Xsection<str, N2, F>> X;
-    scalar find_max(std::vector<double> parameters);
+        scalar find_max(std::vector<double> parameters);
 	scalar calculate_scalar(std::vector<double> parameters);
 	fourvec calculate_fourvec(std::vector<double> parameters);
 	tensor calculate_tensor(std::vector<double> parameters);
-	double _mass, _degen;
+	std::vector<double> _IS_masses;
+	std::vector<double> _FS_masses;
+	std::vector<int> _IS_types;
+	std::vector<int> _FS_types;
+        int _process_id;
+	double _degen;
 	bool _active;
 public:
 	Rate(std::string Name, std::string configfile, F f);
-	void sample(std::vector<double> arg, 
-				std::vector< fourvec > & FS);
+	void sample(std::vector<double> arg,
+                        int incoming_hard_pid,
+			std::vector<fourvec> & FS,
+                        std::vector<int> & pids );
 	void initX(std::string fname){X->init(fname);}
 	void loadX(std::string fname){X->load(fname);}
 	bool IsActive(void) {return _active;}
@@ -48,33 +55,20 @@ private:
 	fourvec calculate_fourvec(std::vector<double> parameters);
 	tensor calculate_tensor(std::vector<double> parameters);
 	F _f; // the kernel
-	double _mass;
+	std::vector<double> _IS_masses;
+	std::vector<double> _FS_masses;
+	std::vector<int> _IS_types;
+	std::vector<int> _FS_types;
+        int _process_id;
 	bool _active;
 public:
 	EffRate12(std::string Name, std::string configfile, F f);
-	void sample(std::vector<double> arg, 
-				std::vector< fourvec > & FS);
+	void sample(std::vector<double> arg,
+                        int incoming_hard_pid,
+			std::vector<fourvec> & FS,
+                        std::vector<int> & pids );
 	bool IsActive(void) {return _active;}
 };
 
-
-// Diffusion inducd aborption: (currently for some reason, we cannot combine the 
-// radiation and absorption together)
-template <size_t N, typename F>
-class EffRate21: public virtual StochasticBase<N>{
-private:
-    scalar find_max(std::vector<double> parameters);
-    scalar calculate_scalar(std::vector<double> parameters);
-    fourvec calculate_fourvec(std::vector<double> parameters);
-    tensor calculate_tensor(std::vector<double> parameters);
-    F _f; // the kernel (function)
-    double _mass;
-    bool _active;
-public:
-    EffRate21(std::string Name, std::string configfile, F f);
-    void sample(std::vector<double> arg,
-                std::vector< fourvec > & FS);
-    bool IsActive(void) {return _active;}
-};
 
 #endif

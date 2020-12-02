@@ -62,7 +62,7 @@ class MyInfo: public fastjet::PseudoJet::UserInfoBase {
 struct Fjet{
     fourvec pmu;
     double R, pT, M2, phi, eta;
-    std::vector<double> shape, dNdz, dDdz, dBdz;
+    std::vector<double> shape, dNdz, dDdz, dBdz, dNdpT;
     int flavor;
     double sigma;
 };
@@ -83,17 +83,19 @@ public:
                    std::vector<particle> plist, 
                    std::vector<current> TypeOneSources,
                    std::vector<HadronizeCurrent> TypeTwoSources,
-                   int coarse_level);
+                   int coarse_level,
+		   bool charged_jet);
     void set_sigma(double _sigma){
         sigma = _sigma;
     }
     void FindJets(std::vector<double> Rs, 
                   double jetpTMin, 
                   double jetyMin, 
-                  double jetyMax);
+                  double jetyMax, 
+		  bool charged_trigger);
     void FindHF(std::vector<particle> plist);
     void CalcJetshape(std::vector<double> rbins);
-    void Frag(std::vector<double> zbins);
+    void Frag(std::vector<double> zbins, std::vector<double>  zpTbins);
     void LabelFlavor();
     void CorrHFET(std::vector<double> rbins);
     std::vector<Fjet> Jets;
@@ -131,6 +133,7 @@ class JetStatistics{
    JetStatistics(std::vector<double> _pTbins, std::vector<double> Rs, 
       std::vector<double> shapepTbins, std::vector<double> shaperbins, 
       std::vector<double> FragspTbins, std::vector<double> Fragszbins, 
+      std::vector<double> FragszpTbins,
       std::vector<double> xJ_pTbins);
    void add_event(std::vector<Fjet> jets, double sigma_gen, fourvec x0);
    void write(std::string fheader);
@@ -138,12 +141,12 @@ class JetStatistics{
    std::vector<double> pTbins, binwidth, 
 	   shape_pTbins, shape_rbins, 
 	   xJbins, xJ_pTbins, 
-	   Frag_pTbins, Frag_zbins, Frags_W, Frags_D_W, Frags_B_W;
+	   Frag_pTbins, Frag_zbins, Frag_zpTbins, Frags_W, Frags_D_W, Frags_B_W;
    std::vector<double> Rs;
    std::vector<std::vector<double> > shapes, xJ, 
 	   Dshapes, Bshapes, 
 	   dsigmadpT, dBdpT, dDdpT,
-	   Frags, Frags_D, Frags_B, DijetInfo;
+	   Frags, Frags_pT, Frags_D, Frags_B, DijetInfo;
    int NpT, shape_NpT, shape_Nr;
 };
 

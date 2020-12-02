@@ -5,25 +5,27 @@
 #include <H5Cpp.h>
 #include <string>
 #include <iostream>
+#include <vector>
 #include <iomanip>
 #include <sstream>
 #include <fstream>
 
-extern char HS2HS[];
-extern char HS2QQbar[];
-extern char HS2HHS[];
-extern char HHS2HS[];
+extern char HS2PP[];
+extern char HS2PPP[];
+extern char HSS2PP[];
 
 extern bool type1_warned;
 extern bool type2_warned;
 extern bool type3_warned;
 
 //=============useful constants=============================================
+extern const double c2pi;
 extern const double c4d9;
 extern const double c1d9;
 extern const double c16pi;
 extern const double c48pi;
 extern const double c16pi2;
+extern const double c32pi3;
 extern const double c64d9pi2;
 extern const double c256pi4;
 extern const double fmc_to_GeV_m1;
@@ -52,7 +54,9 @@ extern double scale; // mu*pi*T
 extern double afix; // fixed alphas, -1 is running
 extern double cut; // separation between diffusion and scattering
 extern double Lido_Ecut;
-extern const double LPM_prefactor; 
+extern const double LPM_prefactor;
+extern const double Mc;
+extern const double Mb; 
 
 extern int time_type;
 extern bool Adiabatic_LPM;
@@ -77,11 +81,12 @@ public:
 extern Debye_mass * t_channel_mD2;
 
 // splitting function
-double P_q2qg(double x);
-double P_q2gq(double x);
+double P_q2qg(double x, double mq, double kT);
+double P_q2gq(double x, double mq, double kT);
 double P_g2gg(double x);
-double P_g2qq(double x);
+double P_g2qqbar(double x, double mq, double kT);
 
+double pid2mass(int pid);
 
 // helper function for read/write hdf5 scalar attributes
 template <typename T> inline const H5::PredType& type();
@@ -143,5 +148,10 @@ public:
 };
 
 bool is_file_exist(std::string fileName);
-
+int get_process_info(std::string p,
+std::vector<double> & _IM,
+std::vector<double> & _FM,
+std::vector<int> & _IT,
+std::vector<int> & _FT
+);
 #endif

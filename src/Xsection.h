@@ -17,12 +17,18 @@ private:
 	scalar calculate_scalar(std::vector<double> parameters);
 	fourvec calculate_fourvec(std::vector<double> parameters);
 	tensor calculate_tensor(std::vector<double> parameters);
-	double _mass;
+	std::vector<double> _IS_masses;
+	std::vector<double> _FS_masses;
+	std::vector<int> _IS_types;
+	std::vector<int> _FS_types;
+        int _process_id;
 	F _f;// the matrix element
 public:
 	Xsection(std::string Name, std::string configfile, F f);
-	void sample(std::vector<double> arg, 
-						std::vector< fourvec > & FS);
+	void sample(std::vector<double> arg,
+                        int incoming_hard_pid,
+			std::vector<fourvec> & FS,
+                        std::vector<int> & pids );
 };
 
 #endif
