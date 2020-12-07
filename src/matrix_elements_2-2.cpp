@@ -52,7 +52,6 @@ double M2_qq2qq(const double t, void * params){
     double * p = static_cast<double*>(params);
     double s = p[0], tcut = p[1], Temp = p[2];
     double m1sq = std::pow(p[3], 2);
-    //double m2=p[4], m3=p[5], m4=p[6];
     if (t>tcut) return 0;
     double Q2s = s - m1sq, Q2t = t, Q2u = m1sq - s - t;
     double At = alpha_s(Q2t, Temp);
@@ -120,10 +119,10 @@ double M2_gg2qqbar(const double t, void * params){
     double s = p[0], tcut = p[1], Temp = p[2];
     double m3sq = std::pow(p[5], 2);
     //double m1 =p[3], m2=p[4], m4=p[6];
-    double S = s;
-    double T = t - m3sq;
-    double U = - S - T;
-    if (m3sq<1e-9 && (T>tcut || U>tcut)) return 0.;
+    double mg2 = t_channel_mD2->get_mD2(Temp)/2.;
+    double S = s+mg2;
+    double T = t - m3sq-mg2;
+    double U = - S - T-mg2;
     // define coupling constant for each channel
     double As = alpha_s(S, Temp);
     double At = alpha_s(T, Temp);
@@ -150,12 +149,14 @@ double M2_qqbar2qqbar_diff(const double t, void * params){
     double s = p[0], tcut = p[1], Temp = p[2];
     double m3sq = std::pow(p[5], 2);
     //double m1 =p[3], m2=p[4], m4=p[6];
-    double S = s;
-    double T = t - m3sq;
-    double U = - S - T;
+    double mg2 = t_channel_mD2->get_mD2(Temp)/2.;
+    double S = s+mg2;
+    double T = t - m3sq-mg2;
+    double U = - S - T-mg2;
+
     // define coupling constant for each channel
     double As = alpha_s(S, Temp);
-    return 64./9.*std::pow(M_PI*As,2)*(T*T+U*U+2.*m3sq*S)/S/S;
+    return 64./9.*std::pow(M_PI*As,2)*(T*T+U*U+2.*m3sq*S)/std::pow(S,2);
 }
 
 double dX_qqbar2qqbar_diff(const double t, void * params){

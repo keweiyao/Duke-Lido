@@ -1,16 +1,4 @@
-#include <string>
-#include <iostream>
-#include <exception>
 
-//#include "TableBase.h"
-//#include "Xsection.h"
-
-#include "simpleLogger.h"
-#include "workflow.h"
-#include "matrix_elements.h"
-#include <fstream>
-#include <vector>
-#include <iterator>
 
 
 void test_config(void);

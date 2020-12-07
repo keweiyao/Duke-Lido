@@ -60,7 +60,7 @@ X(std::make_shared<Xsection<HS2PPP, 2, double(*)(const double*, void *)>>(Name, 
 /*****************************************************************/
 /*------------------Implementation for 2 -> 2--------------------*/
 template <>
-void Rate<HS2PP, 2, 2, double(*)(const double, void *)>::
+bool Rate<HS2PP, 2, 2, double(*)(const double, void *)>::
         sample(std::vector<double> parameters,
                         int incoming_hard_pid,
 			std::vector<fourvec> & final_states,
@@ -88,7 +88,7 @@ void Rate<HS2PP, 2, 2, double(*)(const double, void *)>::
            * (std::sqrt(1.-4*mA*mA*mB*mB/std::pow(smin-mA*mA-mB*mB,2))*EA-pA);
     double pBmax = pBmin+8.*T;
     bool status = true;
-    double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
+    double fmax = StochasticBase<2>::GetFmax(parameters).s;
     auto res = sample_nd(dR_dxdy, 2, 
                       {{pBmin, pBmax}, {-1., 1.}},
                       fmax, status);
@@ -99,7 +99,9 @@ void Rate<HS2PP, 2, 2, double(*)(const double, void *)>::
         double s = mA*mA + mB*mB + 2.*(EA*EB-pA*pB*costheta);
         double lnsqrts = .5*std::log(s);
         double sintheta = std::sqrt(1. - costheta*costheta);
-        X->sample({lnsqrts, T}, incoming_hard_pid, final_states, pids);
+        bool statusX = X->sample({lnsqrts, T}, 
+                                  incoming_hard_pid, final_states, pids);
+        if (!statusX) return statusX;
         // give incoming partilce a random phi angle
         double phi = Srandom::dist_phi(Srandom::gen);
         // com velocity
@@ -117,13 +119,13 @@ void Rate<HS2PP, 2, 2, double(*)(const double, void *)>::
             p = p.rotate_back(p1com);
             p = p.boost_back(vcom[0], vcom[1], vcom[2]);
         }
+        return statusX;
     }
     else{
-        // sample failed, return original particle and a e->0 parton as 
-        // place holder
         LOG_INFO << "sample rate failed, 2->2";
-        final_states.resize(1);
-        final_states[0] = fourvec{EA, 0, 0, pA};
+        final_states.clear();
+        pids.clear();
+        return false;
     }
 }
 
@@ -132,7 +134,7 @@ void Rate<HS2PP, 2, 2, double(*)(const double, void *)>::
 
 /*------------------Implementation for 2 -> 3--------------------*/
 template <>
-void Rate<HS2PPP, 2, 2, double(*)(const double*, void *)>::
+bool Rate<HS2PPP, 2, 2, double(*)(const double*, void *)>::
         sample(std::vector<double> parameters,
                         int incoming_hard_pid,
 			std::vector<fourvec> & final_states,
@@ -173,7 +175,9 @@ void Rate<HS2PPP, 2, 2, double(*)(const double*, void *)>::
         double s = mA*mA + mB*mB + 2.*(EA*EB-pA*pB*costheta);
         double lnsqrts = .5*std::log(s);
         double sintheta = std::sqrt(1. - costheta*costheta);
-        X->sample({lnsqrts, T}, incoming_hard_pid, final_states, pids);
+        bool statusX = X->sample({lnsqrts, T}, 
+                                  incoming_hard_pid, final_states, pids);
+        if (!statusX) return statusX;
         // give incoming partilce a random phi angle
         double phi = Srandom::dist_phi(Srandom::gen);
         // com velocity
@@ -191,11 +195,13 @@ void Rate<HS2PPP, 2, 2, double(*)(const double*, void *)>::
             p = p.rotate_back(p1com);
             p = p.boost_back(vcom[0], vcom[1], vcom[2]);
         }
+        return statusX;
     }
     else{
         LOG_INFO << "sample rate failed 2->3";
-        final_states.resize(1);
-        final_states[0] = fourvec{EA, 0, 0, pA}; 
+        final_states.clear();
+        pids.clear();
+        return false;
     }
 }
 
@@ -229,9 +235,9 @@ scalar Rate<HS2PP, 2, 2, double(*)(const double, void*)>::
            * (std::sqrt(1.-4*mA*mA*mB*mB/std::pow(smin-mA*mA-mB*mB,2))*EA-pA);
     double pBmax = pBmin+8.*T;
     auto val = -minimize_nd(minus_dR_dxdy, 2, 
-                        {(pBmin+pBmax)/2., -1.}, {(pBmax-pBmin)/10., 0.2}, 
+                        {(pBmin+pBmax)/2., -1.}, {(pBmax-pBmin)/20., 0.1}, 
                           1000, 1e-8);
-    return scalar{std::log(2*val)};
+    return scalar{1.5*val};
 }
 
 
@@ -265,7 +271,7 @@ scalar Rate<HS2PPP, 2, 2, double(*)(const double*, void*)>::
     auto val = -minimize_nd(minus_dR_dxdy, 2, 
                         {(pBmin+pBmax)/2., -1.}, {(pBmax-pBmin)/10., 0.2}, 
                           1000, 1e-8);
-    return scalar{std::log(2*val)};
+    return scalar{1.5*val};
 }
 
 /*****************************************************************/
@@ -490,14 +496,15 @@ _f(f)
    std::string model_name = strs[0];
    std::string process_name = strs[1];
    auto tree = config.get_child(model_name + "." + process_name);
-    _process_id = get_process_info(process_name, _IS_masses, _FS_masses, 
+   _degen = tree.get<double>("degeneracy");
+   _process_id = get_process_info(process_name, _IS_masses, _FS_masses, 
                                    _IS_types, _FS_types);
    _active = (tree.get<std::string>("<xmlattr>.status")=="active")?true:false;
 }
 
 // Sample Final states
 template<>
-void EffRate12<2, double(*)(const double*, void *)>::
+bool EffRate12<2, double(*)(const double*, void *)>::
     sample(std::vector<double> parameters,
                         int incoming_hard_pid,
 			std::vector<fourvec> & final_states,
@@ -537,16 +544,18 @@ void EffRate12<2, double(*)(const double*, void *)>::
         double kz = kT/tantheta;
         double k0 = (kplus - kz);
         double qz = pA-kz;
-        double q0 = std::sqrt(qz*qz + kT*kT + m2*m2);
-
+        double q0 = std::sqrt(qz*qz + kT*kT + m1*m1);
+        assign_1to2_pid(_process_id, incoming_hard_pid, pids);
         final_states.resize(2);
         final_states[0] = fourvec{q0, -kx, -ky, qz};
         final_states[1] = fourvec{k0, kx, ky, kz};
+        return true;
     }
     else{
         LOG_INFO << "sample rate failed, 1->2";
-        final_states.resize(1);
-        final_states[0] = fourvec{EA,0,0,pA};
+        final_states.clear();
+        pids.clear();
+        return false;
     }
 }
 
@@ -575,7 +584,7 @@ scalar EffRate12<2, double(*)(const double*, void*)>::
                                {{lnxmin, lnxmax}, {lnsinmin, lnsinmax}}, 
                                2000);
     double xloc[2] = {loc[0],loc[1]};
-    return scalar{std::log(dR_dlnxdlny(xloc)*2.)};
+    return scalar{std::log(1.5*dR_dlnxdlny(xloc))};
 }
 
 
@@ -606,7 +615,7 @@ scalar EffRate12<2, double(*)(const double*, void*)>::
     double xmax[2] = {lnxmax, lnsinmax};
     double err;
     val = vegas(dR_dlnxdlny, 2, xmin, xmax, err, 3000); 
-    return scalar{val};
+    return scalar{val*_degen};
 }
 
 

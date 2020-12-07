@@ -52,7 +52,7 @@ public:
 			if (_with_moments) return _SecondMoment->InterpolateTable(arg);
 			else return tensor{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		};
-	virtual void sample(std::vector<double> arg,
+	virtual bool sample(std::vector<double> arg,
                         int incoming_hard_pid,
 			std::vector<fourvec> & FS,
                         std::vector<int> & pids ) = 0;

@@ -18,7 +18,7 @@
 template <char const *str, size_t N1, size_t N2, typename F>
 class Rate: public virtual StochasticBase<N1>{
 private:
-	std::shared_ptr<Xsection<str, N2, F>> X;
+	std::shared_ptr<Xsection<str, N2, F> > X;
         scalar find_max(std::vector<double> parameters);
 	scalar calculate_scalar(std::vector<double> parameters);
 	fourvec calculate_fourvec(std::vector<double> parameters);
@@ -32,13 +32,14 @@ private:
 	bool _active;
 public:
 	Rate(std::string Name, std::string configfile, F f);
-	void sample(std::vector<double> arg,
+	bool sample(std::vector<double> arg,
                         int incoming_hard_pid,
 			std::vector<fourvec> & FS,
                         std::vector<int> & pids );
 	void initX(std::string fname){X->init(fname);}
 	void loadX(std::string fname){X->load(fname);}
 	bool IsActive(void) {return _active;}
+        int process_id(void) {return _process_id;}
 	const char * which_implementation() const { return str;}
 };
 
@@ -60,13 +61,15 @@ private:
 	std::vector<int> _IS_types;
 	std::vector<int> _FS_types;
         int _process_id;
+        int _degen;
 	bool _active;
 public:
 	EffRate12(std::string Name, std::string configfile, F f);
-	void sample(std::vector<double> arg,
+	bool sample(std::vector<double> arg,
                         int incoming_hard_pid,
 			std::vector<fourvec> & FS,
                         std::vector<int> & pids );
+        int process_id(void) {return _process_id;}
 	bool IsActive(void) {return _active;}
 };
 

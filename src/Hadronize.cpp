@@ -144,12 +144,12 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
     // Sort the endpoints by rapidty
     std::sort(endpoint_cols.begin(), endpoint_cols.end(), 
       [](const particle & a, const particle & b){
-          return a.x.rap()>b.x.rap();
+          return a.x.x3()>b.x.x3();
       }
       );
     std::sort(endpoint_acols.begin(), endpoint_acols.end(), 
       [](const particle & a, const particle & b){
-          return a.x.rap()>b.x.rap();
+          return a.x.x3()>b.x.x3();
       }
       );
 
@@ -166,26 +166,26 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
 	    if (col==0 && acol==0) continue;
 	    if (col==0 && acol!=0){
                 pid = -std::abs(Srandom::sample_flavor(3));
-		tau = p1.x.tau();
-                rap = p1.x.rap();
+		tau = p1.x.x0();
+                rap = p1.x.x3();
 	    }
 	    if (col!=0 && acol==0){
                 pid = std::abs(Srandom::sample_flavor(3));
-                tau = p2.x.tau();
-                rap = p2.x.rap();
+		tau = p2.x.x0();
+                rap = p2.x.x3();
 	    }
             if (col!=0 && acol!=0){
                 pid = 21;
-		tau = (p1.x.tau()+p2.x.tau())/2.;
-                rap = (p1.x.rap()+p2.x.rap())/2.;
+		tau = (p1.x.x0()+p2.x.x0())/2.;
+                rap = (p1.x.x3()+p2.x.x3())/2.;
 	    }
             particle th;
 	    th.pid = pid;
             th.col = col;
             th.acol = acol;
-            th.x0 = fourvec{tau*std::cosh(rap),0.,0.,tau*std::sinh(rap)};
+            th.x0 = coordinate{tau,0.,0.,rap};
 	    th.x = th.x0;
-	    double vzgrid = th.x.z()/th.x.t();
+	    double vzgrid = std::tanh(rap);
 	    do{
             th.p = Srandom::generate_thermal_parton_with_boost(
                            Tf, 0, 0, vzgrid);

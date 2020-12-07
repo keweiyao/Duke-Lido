@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <sstream>
 #include <fstream>
+#include "lorentz.h"
 
 extern char HS2PP[];
 extern char HS2PPP[];
@@ -87,6 +88,7 @@ double P_g2gg(double x);
 double P_g2qqbar(double x, double mq, double kT);
 
 double pid2mass(int pid);
+fourvec put_on_shell(fourvec p, int pid);
 
 // helper function for read/write hdf5 scalar attributes
 template <typename T> inline const H5::PredType& type();
@@ -109,6 +111,22 @@ void hdf5_read_scalar_attr(
   auto attr = gp.openAttribute(name.c_str());
   attr.read(datatype, &value);
 }
+
+
+bool is1to2(int prcid);
+bool is2to2(int prcid);
+bool is2to3(int prcid);
+bool isPairProduction(int prcid);
+void assign_1to2_pid(int process_id, 
+                     int incoming_hard_id, 
+                     std::vector<int> & pids);
+void assign_2to2_pid(int process_id, 
+                     int incoming_hard_id, 
+                     std::vector<int> & pids);
+void assign_2to3_pid(int process_id,
+                     int incoming_hard_id, 
+                     std::vector<int> & pids, 
+                     bool forward);
 
 // Fortran style float format
 class ff {
@@ -152,6 +170,36 @@ int get_process_info(std::string p,
 std::vector<double> & _IM,
 std::vector<double> & _FM,
 std::vector<int> & _IT,
-std::vector<int> & _FT
-);
+std::vector<int> & _FT);
+
+struct particle{
+	// mass, x, p, t, all in units of [GeV^a]
+	int pid, col, acol;
+	bool charged;
+	double mass, weight, tau0, Q0, Q00;
+	bool is_virtual;
+	int origin;
+	
+	double T0, mfp0, Tf; // production temperature, local mfp
+	coordinate x0; // production location
+	coordinate x; // current location
+	fourvec p0; // production momentum, after each radiation
+	fourvec p; // current momentum
+        fourvec mother_p;
+
+	std::vector<particle> radlist;
+	std::vector<double> vcell;
+
+};
+particle make_parton(int pid, int col, int anticol, 
+                     double scale, 
+                     fourvec pmu, 
+                     particle & mother,
+                     double T, std::vector<double> vcell);
+particle make_parton(int pid, int col, int acol, 
+                     double scale, 
+                     fourvec pmu, 
+                     coordinate x
+                     );
+double formation_time(fourvec p, fourvec k, double T, int idA, int idC);
 #endif

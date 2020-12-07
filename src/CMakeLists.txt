@@ -13,16 +13,16 @@ random.cpp
 simpleLogger.cpp
 stat.cpp
 approx_functions.cpp
-workflow.cpp
+lido.cpp
 Langevin.cpp
 predefine.cpp
 lorentz.cpp
 Medium_Reader.cpp
 Hadronize.cpp
+collision_manager.cpp
 	)
 
 set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "")
-
 
 # compile the actual executable
 add_executable(${PROJECT_NAME} main.cpp)

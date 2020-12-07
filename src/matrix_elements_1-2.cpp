@@ -14,7 +14,6 @@ double LGV_q2qg(const double * x_, void * params_){
   double T = params[1];
   double mA = params[2], m1 = params[3], m2 = params[4];
   double pA = std::sqrt(EA*EA-mA*mA);
-  double mA2 = mA*mA;
   double x = x_[0]; // k+/p+
   double sintheta = x_[1]; // sintheta = kT/kabs > 0
   double tantheta = sintheta/std::sqrt(1.-sintheta*sintheta);

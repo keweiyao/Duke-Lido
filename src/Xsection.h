@@ -25,7 +25,7 @@ private:
 	F _f;// the matrix element
 public:
 	Xsection(std::string Name, std::string configfile, F f);
-	void sample(std::vector<double> arg,
+	bool sample(std::vector<double> arg,
                         int incoming_hard_pid,
 			std::vector<fourvec> & FS,
                         std::vector<int> & pids );

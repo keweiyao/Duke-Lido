@@ -6,7 +6,7 @@
 #include <boost/program_options.hpp>
 
 #include "simpleLogger.h"
-#include "workflow.h"
+#include "collision_manager.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -57,11 +57,11 @@ int main(int argc, char* argv[]){
         double muT = args["muT"].as<double>();
         double cut = args["cut"].as<double>();
         double afix = args["afix"].as<double>();
-
-        initialize("new", 
+        std::vector<double> parameters{muT, afix, 4., cut};
+        collision_manager("new", 
             args["lido-setting"].as<fs::path>().string(), 
             args["lido-table"].as<fs::path>().string(), 
-	                muT, afix, 4, cut);
+            parameters);
     } 
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

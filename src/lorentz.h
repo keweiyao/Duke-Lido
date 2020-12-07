@@ -1,16 +1,25 @@
 #ifndef LORENTZ_H
 #define LORENTZ_H
-#include <iostream>
 #include <cmath>
-#include "hdf5.h"
-#include "hdf5_hl.h"
 #include <cstdlib>
+#include <iostream>
 
-// Lorentz datatype contains: scalar, four-vector, and tensor
+struct coordinate{ // an array of numbers. Can be cartesian or Bjorken coordinates
+  double a[4];
+  double x0(void) const {return a[0];};
+  double x1(void) const {return a[1];};
+  double x2(void) const {return a[2];};
+  double x3(void) const {return a[3];};
+  friend std::ostream& operator<<(std::ostream& os, const coordinate& A){
+    os << A.x0() << " " << A.x1() << " " << A.x2() << " " << A.x3();
+    return os;
+  }
+};
+
+// Lorentz structures on the coordinates: scalar, four-vector, and tensor
 // Each class has method to transform them self with boost-to / boost_back
 // Limited support for rotation.
 // Elementwise  +, -, A/(B), A*(B) are over loaded
-
 const double tiny_v2 = 1e-15;
 struct scalar {
 	static scalar unity(void){

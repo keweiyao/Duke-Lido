@@ -61,9 +61,9 @@ _f(f)
 /*****************************************************************/
 /*------------------Implementation for 2 -> 2--------------------*/
 template<>
-void Xsection<HS2PP, 2, double(*)(const double, void*)>::
+bool Xsection<HS2PP, 2, double(*)(const double, void*)>::
         sample(std::vector<double> parameters,
-               int incoming_pid,
+               int incoming_hard_pid,
                std::vector<fourvec> & FS,
                std::vector<int> & pids){
     double lnsqrts = parameters[0], temp = parameters[1];
@@ -71,6 +71,12 @@ void Xsection<HS2PP, 2, double(*)(const double, void*)>::
     double s = std::pow(sqrts,2);
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1];
+    if (s<std::pow(mA+mB,2)||s<std::pow(m1+m2,2)) {
+        LOG_INFO << "sample failed (below threshold) in 2->2 X";
+	FS.clear();
+        pids.clear();
+        return false;  
+    }
     double pAcm = std::sqrt(
                   (std::pow(sqrts-mA,2)-mB*mB)
                 * (std::pow(sqrts+mA,2)-mB*mB)
@@ -79,32 +85,33 @@ void Xsection<HS2PP, 2, double(*)(const double, void*)>::
                   (std::pow(sqrts-m1,2)-m2*m2)
                 * (std::pow(sqrts+m1,2)-m2*m2)
                   /4./s);
-    double tcut = -cut*t_channel_mD2->get_mD2(temp);
+    double mD2 = t_channel_mD2->get_mD2(temp);
+    double tcut = isPairProduction(_process_id)?
+                0.:-cut*mD2;
     double tm2 = std::pow((mA*mA-m1*m1-mB*mB+m2*m2)/2./sqrts, 2);
     double tmax0 = tm2 - std::pow(pAcm-p1cm, 2);
     double tmin = tm2 - std::pow(pAcm+p1cm, 2);
     double tmax = std::min(tmax0, tcut);
     // Define a lamda function, which transforms the integral
     // varaible for more efficient integration
-    // transform w = -log(1+t/tmax)
-    // t = tmax*(exp(-w)-1)
+    // transform w = -log(1-t/mD2)
+    // t = -mD2*(exp(-w)-1)
     // dw/dt = -1/(tmax+t)
     // dt = (dw/dt)^{-1} * dw = -(tmax+t) * dw
-    auto dXdw = [s, temp, tmax, mA, mB, m1, m2, this](double w) {
+    auto dXdw = [s, temp, tmax, mA, mB, m1, m2, mD2, this](double w) {
         double params[7] = {s, tmax, temp, mA, mB, m1, m2};
-        double t = tmax*(std::exp(-w)-1.);
-        double Jacobian = -(tmax+t);
+        double t = -mD2*(std::exp(-w)-1.);
+        double Jacobian = mD2-t;
         return this->_f(t, params)*Jacobian;
     };
 
-    double wmin = -std::log(1.+tmin/tmax),
-           wmax = -std::log(1.+tmax/tmax);
+    double wmin = -std::log(1.-tmin/mD2),
+           wmax = -std::log(1.-tmax/mD2);
     double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
     bool status=true;
     double w = sample_1d(dXdw, {wmin, wmax}, fmax, status);
-    double t;
     if (status==true){
-        t = tmax*(std::exp(-w)-1.);
+        double t = -mD2*(std::exp(-w)-1.);
         double phi = Srandom::dist_phi(Srandom::gen);
         double cosphi = std::cos(phi), sinphi = std::sin(phi);
         double E1cm = (s+m1*m1-m2*m2)/2./sqrts;
@@ -115,12 +122,13 @@ void Xsection<HS2PP, 2, double(*)(const double, void*)>::
         FS.resize(2);
         FS[0] = {E1cm, p1cm*sintheta*cosphi, p1cm*sintheta*sinphi, p1cm*costheta};
         FS[1] = {E2cm, -p1cm*sintheta*cosphi, -p1cm*sintheta*sinphi, -p1cm*costheta};
+        assign_2to2_pid(_process_id, incoming_hard_pid, pids);
+        return true;
     }else{
         LOG_INFO << "sample failed in 2->2 X";
 	FS.clear();
-        FS.resize(1);
-	FS[0] = fourvec{std::sqrt(pAcm*pAcm+mA*mA),0,0,pAcm};
-        pids.resize(1);
+        pids.clear();
+        return false; 
     }
 }
 
@@ -128,11 +136,11 @@ void Xsection<HS2PP, 2, double(*)(const double, void*)>::
 
 /*------------------Implementation for 2 -> 3--------------------*/
 template<>
-void Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
+bool Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
     sample(std::vector<double> parameters, 
-           int incoming_pid,
+           int incoming_hard_pid,
             std::vector<fourvec> & FS, 
-            std::vector<int> & outgoing_pids){
+            std::vector<int> & pids){
     double lnsqrts = parameters[0], temp = parameters[1];
     double mD2 = t_channel_mD2->get_mD2(temp);
     double tcut = -cut*mD2;
@@ -140,12 +148,12 @@ void Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
     double m1 = _FS_masses[0], m2 = _FS_masses[1], m3 = _FS_masses[2];
     double sqrts = std::exp(lnsqrts);
     double s = std::pow(sqrts,2);
-    double smin = std::max(
-     std::pow(std::sqrt(mA*mA-tcut/4.)+std::sqrt(mB*mB-tcut/4.), 2), 
-     std::pow(std::sqrt(m1*m1-tcut/9.)
-             +std::sqrt(m2*m2-tcut/9.)+std::sqrt(m3*m3-tcut/9.), 2)
-);
-    s = std::max(smin*1.1, s);
+    if (s<std::pow(mA+mB,2)||s<std::pow(m1+m2+m3,2)) {
+        LOG_INFO << "sample failed (below threshold) in 2->3 X";
+	FS.clear();
+        pids.clear();
+        return false;
+    }
     sqrts = std::sqrt(s);
     double pAcm = std::sqrt(
                   (std::pow(sqrts-mA,2)-mB*mB)
@@ -187,9 +195,13 @@ void Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
         double phi12 = res[3]; 
         double kt = std::sqrt(kt2);
         double costheta12 = 1.-mD2_2pA2*(std::exp(res[2])-1);
+        assign_2to3_pid(_process_id, incoming_hard_pid, pids, (yk>=0));
 
         // reconstruct momentums
-        double Ek = std::sqrt(std::pow(kt*std::cosh(yk),2)+m3*m3);
+        double M1sq = std::pow(pid2mass(pids[0]),2);
+        double M2sq = std::pow(pid2mass(pids[1]),2);
+        double Mksq = std::pow(pid2mass(pids[2]),2);
+        double Ek = std::sqrt(std::pow(kt*std::cosh(yk),2) + Mksq);
         fourvec kmu{Ek, kt, 0., kt*std::sinh(yk)}; 
         double s12 = s + m3*m3 - 2.*sqrts*Ek;
         double V0 = sqrts - kmu.t();
@@ -200,15 +212,8 @@ void Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
         // construct p1, p2 in (1+2)-com frame
         double cosphi12 = std::cos(phi12), sinphi12 = std::sin(phi12),
                sintheta12 = std::sqrt(1.-std::pow(costheta12,2));
-        fourvec p1mu, p2mu;
-        if (yk>0){
-            p2mu = fourvec{std::sqrt(p1_12cm*p1_12cm+mB*mB), -p1_12cm*sintheta12*cosphi12, -p1_12cm*sintheta12*sinphi12, -p1_12cm*costheta12};   
-            p1mu = fourvec{std::sqrt(p1_12cm*p1_12cm+m1*m1), -p2mu.x(), -p2mu.y(), -p2mu.z()}; // split_daughter_1
-        }else{
-            p1mu = fourvec{std::sqrt(p1_12cm*p1_12cm+mA*mA), p1_12cm*sintheta12*cosphi12, p1_12cm*sintheta12*sinphi12, p1_12cm*costheta12};
-            p2mu = fourvec{std::sqrt(p1_12cm*p1_12cm+m1*m1), -p1mu.x(), -p1mu.y(), -p1mu.z()}; // split_daughter_1
-
-        }
+        fourvec p1mu = fourvec{std::sqrt(p1_12cm*p1_12cm+M1sq), p1_12cm*sintheta12*cosphi12, p1_12cm*sintheta12*sinphi12, p1_12cm*costheta12};
+        fourvec p2mu = fourvec{std::sqrt(p1_12cm*p1_12cm+M2sq), -p1mu.x(), -p1mu.y(), -p1mu.z()};
         // boost p1, p1 back to (1+2+3) CoM Frame
         p1mu = p1mu.boost_back(v12[0], v12[1], v12[2]); // p1
         p2mu = p2mu.boost_back(v12[0], v12[1], v12[2]); // p2
@@ -221,13 +226,13 @@ void Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
         FS.push_back(p1mu);
         FS.push_back(p2mu);
         FS.push_back(kmu);
+        return true;
     } 
     else{        
         LOG_INFO << "sample failed in 2->3 X";
 	FS.clear();
-        FS.resize(2);
-	FS[0] = fourvec{std::sqrt(pAcm*pAcm+mA*mA),0,0,pAcm};
-	FS[1] = fourvec{std::sqrt(pAcm*pAcm+mB*mB),0,0,-pAcm};
+        pids.clear();
+        return false;
     }
 }
 
@@ -251,27 +256,29 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
                   (std::pow(sqrts-m1,2)-m2*m2)
                 * (std::pow(sqrts+m1,2)-m2*m2)
                   /4./s);
-    double tcut = -cut*t_channel_mD2->get_mD2(temp);
+    double mD2 = t_channel_mD2->get_mD2(temp);
+    double tcut = isPairProduction(_process_id)?
+                0:-cut*mD2;
     double tm2 = std::pow((mA*mA-m1*m1-mB*mB+m2*m2)/2./sqrts, 2);
     double tmax0 = tm2 - std::pow(pAcm-p1cm, 2);
     double tmin = tm2 - std::pow(pAcm+p1cm, 2);
     double tmax = std::min(tmax0, tcut);
     // Define a lamda function, which transforms the integral
     // varaible for more efficient integration
-    // transform w = -log(1+t/tmax)
-    // t = tmax*(exp(-w)-1)
+    // transform w = -log(1-t/mD2)
+    // t = -mD2*(exp(-w)-1)
     // dw/dt = -1/(tmax+t)
     // dt = (dw/dt)^{-1} * dw = -(tmax+t) * dw
-    auto minus_dXdw = [s, temp, tmax, mA, mB, m1, m2, this](double w) {
+    auto minus_dXdw = [s, temp, tmax, mA, mB, m1, m2, mD2, this](double w) {
         double params[7] = {s, tmax, temp, mA, mB, m1, m2};
-        double t = tmax*(std::exp(-w)-1.);
-        double Jacobian = -(tmax+t);
+        double t = -mD2*(std::exp(-w)-1.);
+        double Jacobian = mD2-t;
         return -this->_f(t, params)*Jacobian;
     };
-    double wmin = -std::log(1.+tmin/tmax),
-           wmax = -std::log(1.+tmax/tmax);
+    double wmin = -std::log(1.-tmin/mD2),
+           wmax = -std::log(1.-tmax/mD2);
     double res = -minimize_1d(minus_dXdw, {wmin, wmax}, 1e-8, 100, 1000);
-    return scalar{std::log(res*2)};
+    return scalar{std::log(1.5*res)};
 }
 
 /*------------------Implementation for 2 -> 3--------------------*/
@@ -344,17 +351,17 @@ scalar Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
              {xmin[2],xmax[2]}, 
              {xmin[3],xmax[3]}}, 500);
     // use the best result of MC_maximize and determine the step of the simplex minimization method
-    std::vector<double> step = {(xmax[0]-xmin[0])/20., (xmax[1]-xmin[1])/10., 
-                                (xmax[2]-xmin[2])/20., (xmax[3]-xmin[3])/20};
+    std::vector<double> step = {(xmax[0]-xmin[0])/10., (xmax[1]-xmin[1])/10., 
+                                (xmax[2]-xmin[2])/10., (xmax[3]-xmin[3])/10};
     for(int i=0; i<4; i++){
         double dx = std::min(xmax[i]-startloc[i], startloc[i]-xmin[i])/2.;
         step[i] = std::min(dx, step[i]);
     }
     // find the more precise maximum by the simplex method
-    double val = -minimize_nd(minus_dXdPS, 4, startloc, step, 4000, 
+    double val = -minimize_nd(minus_dXdPS, 4, startloc, step, 2000, 
    (xmax[0]-xmin[0])*(xmax[1]-xmin[1])*(xmax[2]-xmin[2])*(xmax[3]-xmin[3])
    /1e12);
-    return scalar{std::log(2.*val)};
+    return scalar{std::log(1.5*val)};
 
 }
 
@@ -379,29 +386,31 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
                   (std::pow(sqrts-m1,2)-m2*m2)
                 * (std::pow(sqrts+m1,2)-m2*m2)
                   /4./s);
-    double tcut = -cut*t_channel_mD2->get_mD2(temp);
+    double mD2 = t_channel_mD2->get_mD2(temp);
+    double tcut = isPairProduction(_process_id)?
+                0:-cut*mD2;
     double tm2 = std::pow((mA*mA-m1*m1-mB*mB+m2*m2)/2./sqrts, 2);
     double tmax0 = tm2 - std::pow(pAcm-p1cm, 2);
     double tmin = tm2 - std::pow(pAcm+p1cm, 2);
     double tmax = std::min(tmax0, tcut);
     // Define a lamda function, which transforms the integral
     // varaible for more efficient integration
-    // transform w = -log(1+t/tmax)
-    // t = tmax*(exp(-w)-1)
-    // dw/dt = -1/(tmax+t)
-    // dt = (dw/dt)^{-1} * dw = -(tmax+t) * dw
-    auto dXdw = [s, temp, tmax, mA, mB, m1, m2, this](double w) {
+    // transform w = -log(1-t/mD2)
+    // t = -mD2*(exp(-w)-1)
+    // dw/dt = 1/(mD2-t)
+    // dt = (dw/dt)^{-1} * dw = (mD2-t) * dw
+    auto dXdw = [s, temp, tmax, mA, mB, m1, m2, mD2, this](double w) {
         double params[7] = {s, tmax, temp, mA, mB, m1, m2};
-        double t = tmax*(std::exp(-w)-1.);
-        double Jacobian = -(tmax+t);
+        double t = -mD2*(std::exp(-w)-1.);
+        double Jacobian = mD2-t;
         return this->_f(t, params)*Jacobian;
     };
-    double wmin = -std::log(1.+tmin/tmax),
-           wmax = -std::log(1.+tmax/tmax);
+    double wmin = -std::log(1.-tmin/mD2),
+           wmax = -std::log(1.-tmax/mD2);
     if (tmin>=tmax) return scalar{0.};
     else {
-        double wmin = -std::log(1.+tmin/tmax),
-               wmax = -std::log(1.+tmax/tmax);
+        double wmin = -std::log(1.-tmin/mD2),
+               wmax = -std::log(1.-tmax/mD2);
         double error;
         double res = quad_1d(dXdw, {wmin,wmax}, error);
         return scalar{res};
@@ -413,7 +422,7 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
 template<>
 scalar Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
                 calculate_scalar(std::vector<double> parameters){
-        double lnsqrts = parameters[0], temp = parameters[1];
+    double lnsqrts = parameters[0], temp = parameters[1];
     double mD2 = t_channel_mD2->get_mD2(temp);
     double tcut = -cut*mD2;
     double mA = _IS_masses[0], mB = _IS_masses[1];
