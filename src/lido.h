@@ -13,7 +13,6 @@ private:
     std::unique_ptr<collision_manager> CM;
     double Lido_Ecut;
     int FrameChoice;
-    void FreeStream(particle & p, double dt);
     void Diffusion(particle & p, double dt, double T, std::vector<double> v);
 public:
     lido(std::string setting_path, std::string table_path, 
@@ -21,6 +20,7 @@ public:
     int update_single_particle(
         double dt, double T, std::vector<double> v3,
         particle & pIn, std::vector<particle> & pOut_list);
+    void FreeStream(particle & p, double dt);
     void set_frame(int _choice){
         FrameChoice = _choice;
     }; // Cartisian / Bjorken

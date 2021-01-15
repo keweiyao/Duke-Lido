@@ -40,7 +40,7 @@ public:
 	~Medium(){_file.close();};
 	void init();
 	bool load_next();
-	void interpolate(fourvec x, double & T, double & vx, double & vy, double & vz);
+	void interpolate(coordinate x, double & T, double & vx, double & vy, double & vz);
 	double get_tauL() {return _tau0+_dtau*(_frame_count-1);};
 	double get_tauH() {return _tau0+_dtau*_frame_count;};
 	double get_hydro_time_step() {return _dtau;};

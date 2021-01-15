@@ -7,8 +7,8 @@
 #include "Pythia8/Pythia.h"
 #include "Pythia8Plugins/FastJet3.h"
 #include "lorentz.h"
-#include "workflow.h"
 #include "TableBase.h"
+#include "predefine.h"
 
 class MediumResponse{
 private:
@@ -22,17 +22,6 @@ public:
     double get_dpT_dydphi(double y, double phi, fourvec Pmu, double vperp, double pTmin);
     void init(std::string);
     void load(std::string);
-};
-
-struct current{
-    fourvec p;
-    double chetas, shetas;
-    double cs;
-};
-
-struct HadronizeCurrent{
-    fourvec G;
-    double UdotG, phiu, gamma_perp, v_perp, etas;
 };
 
 template <typename T>
@@ -69,7 +58,6 @@ struct Fjet{
 void TestSource(
              MediumResponse MR,
              std::vector<current> jlist,
-             std::vector<HadronizeCurrent> slist,
              std::string fname
      );
 
@@ -82,7 +70,6 @@ public:
                    double pTmin,
                    std::vector<particle> plist, 
                    std::vector<current> TypeOneSources,
-                   std::vector<HadronizeCurrent> TypeTwoSources,
                    int coarse_level,
 		   bool charged_jet);
     void set_sigma(double _sigma){

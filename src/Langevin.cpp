@@ -6,15 +6,15 @@ double const tiny = 1e-10;
 double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
     double CR = (pid==21) ? CA : CF;
     double mD2 = t_channel_mD2->get_mD2(T);
-    double Q2cut = cut*mD2;//std::max(std::min(cut*mD2, 6*E*T),mD2);
-    return alpha_s(Q2cut, T) * CR * T * mD2 * std::log(1.+Q2cut/mD2);
+    double Q2cut = std::max(std::min(cut*mD2, 6*E*T),mD2);
+    return alpha_s(Q2cut, T) * CR * T * mD2 * std::log(Q2cut/mD2);
 }
 
 double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
     double CR = (pid==21) ? CA : CF;
     double mD2 = t_channel_mD2->get_mD2(T);
-    double Q2cut = cut*mD2;//std::max(std::min(cut*mD2, 6*E*T),mD2);
-    return alpha_s(Q2cut, T) * CR * T * .5*mD2 * std::log(1.+Q2cut/mD2);
+    double Q2cut = std::max(std::min(cut*mD2, 6*E*T),mD2);
+    return alpha_s(Q2cut, T) * CR * T * .5*mD2 * std::log(Q2cut/mD2);
 }
 
 
@@ -68,7 +68,7 @@ void Ito_update_rest(int pid, double dt, double M, double T,
     // imaging rotating to a frame where pIn lies on z-axis
     double E0 = pIn.t();
     double p0 = std::sqrt(E0*E0 - M*M + 1e-9);
-    double Eregulate = std::max(E0, T);
+    double Eregulate = std::max(E0, 3*T);
     double kt = qhat(pid, Eregulate, M, T)/2.;
     double kl = qhat_L(pid, Eregulate, M, T);
     double drag = kl/(2.*Eregulate*T);

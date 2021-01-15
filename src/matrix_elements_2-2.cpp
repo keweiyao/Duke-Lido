@@ -14,10 +14,13 @@ double M2_gg2gg(const double t, void * params){
     double * p = static_cast<double*>(params);
     double s = p[0], tcut = p[1], Temp = p[2];
     //double m1=p[3], m2=p[4], m3=p[5], m4=p[6];
-    if (t>tcut) return 0;
+    if (t>tcut) return 0.;
     double Q2s = s, Q2t = t, Q2u = - s - t;
     double At = alpha_s(Q2t, Temp);
-    double result = 72.*M_PI*M_PI*At*At*(-Q2s*Q2u/Q2t/Q2t);
+    double result = c72pi2*At*At*(-Q2s*Q2u/Q2t/Q2t);
+    // There should also be a u channel divergence term, but it is 
+    // accounted by taking the full space-space without identical
+    // boson constrain into account.
     if (result < 0.) return 0.;
     return result;
 }
@@ -28,7 +31,7 @@ double dX_gg2gg(const double t, void * params){
     return M2_gg2gg(t, params)/c16pi/s/s;
 }
 
-///    g(h)1 + q(s)2 --only-t--> g3 + q4
+///    g(h)1 + q(s)2 --only 1/t^2 term--> g3 + q4
 double M2_gq2gq(const double t, void * params){
     double * p = static_cast<double*>(params);
     double s = p[0], tcut = p[1], Temp = p[2];
@@ -36,7 +39,7 @@ double M2_gq2gq(const double t, void * params){
     if (t>tcut) return 0;
     double Q2s = s, Q2t = t, Q2u = - s - t;
     double At = alpha_s(Q2t, Temp);
-    double result = At*At*64.*M_PI*M_PI/9.*(Q2s*Q2s+Q2u*Q2u)*(9./4./Q2t/Q2t);
+    double result = At*At*c16pi2*(Q2s*Q2s+Q2u*Q2u)/(Q2t*Q2t);
     if (result < 0.) return 0.;
     return result;
 }
@@ -75,7 +78,7 @@ double M2_qg2qg(const double t, void * params) {
     if (t>tcut) return 0;
     double Q2s = s - m1sq, Q2t = t, Q2u = m1sq - s - t;
     double At = alpha_s(Q2t, Temp);
-    double result = c16pi2*2.*At*At * Q2s*(-Q2u)/Q2t/Q2t;
+    double result = At*At*c16pi2*(Q2s*Q2s+Q2u*Q2u)/(Q2t*Q2t);
     if (result < 0.) return 0.;
     else return result;
 }

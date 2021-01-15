@@ -23,9 +23,11 @@ extern bool type3_warned;
 extern const double c2pi;
 extern const double c4d9;
 extern const double c1d9;
+extern const double c8pi;
 extern const double c16pi;
 extern const double c48pi;
 extern const double c16pi2;
+extern const double c72pi2;
 extern const double c32pi3;
 extern const double c64d9pi2;
 extern const double c256pi4;
@@ -59,9 +61,6 @@ extern const double LPM_prefactor;
 extern const double Mc;
 extern const double Mb; 
 
-extern int time_type;
-extern bool Adiabatic_LPM;
-
 void initialize_mD_and_scale(int _mD_type, double _mu, double _afix, double _theta, double _cut);
 double alpha_s(double Q2, double T); //runing coupling
 void echo(void);
@@ -82,10 +81,10 @@ public:
 extern Debye_mass * t_channel_mD2;
 
 // splitting function
-double P_q2qg(double x, double mq, double kT);
-double P_q2gq(double x, double mq, double kT);
+double P_q2qg(double x);
+double P_q2gq(double x);
 double P_g2gg(double x);
-double P_g2qqbar(double x, double mq, double kT);
+double P_g2qqbar(double x);
 
 double pid2mass(int pid);
 fourvec put_on_shell(fourvec p, int pid);
@@ -115,6 +114,7 @@ void hdf5_read_scalar_attr(
 
 bool is1to2(int prcid);
 bool is2to2(int prcid);
+bool is_classical(int prcid);
 bool is2to3(int prcid);
 bool isPairProduction(int prcid);
 void assign_1to2_pid(int process_id, 
@@ -127,6 +127,18 @@ void assign_2to3_pid(int process_id,
                      int incoming_hard_id, 
                      std::vector<int> & pids, 
                      bool forward);
+void assign_2to2_color(int process_id, 
+                       int pidA, int pid1, int pid2,
+                       int Ca, int aCa,
+                       int & C1, int & aC1,
+                       int & C2, int & aC2
+                       );
+void assign_n2np1_color(
+                       int pidA, int pid1, int pid2,
+                       int Ca, int aCa,
+                       int & C1, int & aC1,
+                       int & C2, int & aC2
+                       );
 
 // Fortran style float format
 class ff {
@@ -178,7 +190,6 @@ struct particle{
 	bool charged;
 	double mass, weight, tau0, Q0, Q00;
 	bool is_virtual;
-	int origin;
 	
 	double T0, mfp0, Tf; // production temperature, local mfp
 	coordinate x0; // production location
@@ -187,10 +198,16 @@ struct particle{
 	fourvec p; // current momentum
         fourvec mother_p;
 
-	std::vector<particle> radlist;
+	std::vector<std::vector<particle> > radlist;
 	std::vector<double> vcell;
 
 };
+
+struct current{
+    fourvec p;
+    double etas;
+};
+
 particle make_parton(int pid, int col, int anticol, 
                      double scale, 
                      fourvec pmu, 
@@ -201,5 +218,9 @@ particle make_parton(int pid, int col, int acol,
                      fourvec pmu, 
                      coordinate x
                      );
-double formation_time(fourvec p, fourvec k, double T, int idA, int idC);
+void formation_time(double & tauf, double & Q2,
+           int idA, int idB, int idC,
+           fourvec pA, fourvec pB, fourvec pC, 
+           double T, fourvec p0);
+double compute_realtime_to_propagate(double dt, coordinate x, fourvec p, int type);
 #endif

@@ -116,7 +116,6 @@ TRENToSampler(f_trento, iev)
 void PythiaGen::Generate(std::vector<particle> & plist){
     double x, y;
     TRENToSampler.SampleXY(y, x);
-    _x0 = fourvec{0,x,y,0};
     plist.clear();
     pythia.next();
     auto & event = pythia.event;
@@ -124,41 +123,54 @@ void PythiaGen::Generate(std::vector<particle> & plist){
     for (size_t i = 0; i < event.size(); ++i) {
         auto p = event[i];
 	int absid = p.idAbs();
-        if (p.isFinal() && (absid!=12) &&  (absid!=13) && (absid!=14) ) {
+        if (p.isFinal()) {
+            particle _p; 
             // final momenta 
             fourvec p0{p.e(), p.px(), p.py(), p.pz()};
-            particle _p; 
+            // assign pid
             _p.pid = p.id();
-            _p.mass = std::abs(p.m());
-            _p.x0 = fourvec{0,x,y,0};
-            _p.x = _p.x0; 
-	    double t0 = 0.;
-	    reference_pmu(i, t0, event);
-            _p.tau_i = t0;
-            _p.p0 = p0;
+            // copy charge
+            _p.charged = p.isCharged(); 
+            // assign mass
+            if (absid==1||absid==2||absid==3||absid==4||absid==5||absid==21)
+                _p.mass = pid2mass(_p.pid);
+            else 
+                _p.mass = p.m();
+            // put on shell
+            p0 = put_on_shell(p0, _p.pid);
+            // space-time rap:
+            double etas = .5*std::log((p0.t()+p0.z())/(p0.t()-p0.z()));
+            // space-time coordinate
+            _p.x0 = coordinate{0., x, y, etas};
+            _p.x = _p.x0;
+            // initialize momentum in coordinate co-moving frame
+            _p.p0 = p0.boost_to(0., 0., p0.z()/p0.t());
+            _p.p = _p.p0; 
+            // Get formation time in Lab frame
+            double tForm = 0.;
+            reference_pmu(i, tForm, event);
+            // Transform to foramtion time in proper time
+            _p.tau0 = tForm*_p.p.t()/p0.t();
+            // Virtuality of particle production
             _p.Q0 = Q0;
             _p.Q00 = Q0;
- 
-            if (std::abs(_p.pid) != 4 && 
-                std::abs(_p.pid) != 5 && p.isParton()) {
-                _p.mass = 0;
-            }
-
-	    _p.col = p.col();
+            // Copy color indices
+            _p.col = p.col();
             _p.acol = p.acol();
-            _p.p0.a[0] = std::sqrt(_p.p0.pabs2()+_p.mass*_p.mass);
-            _p.p = _p.p0; 
-            _p.weight = sigma0;
+            // These are real particles to the transport eqautions
             _p.is_virtual = false;
+            // Temperature of medium at production
             _p.T0 = 0.;
-            _p.Tf = 0.;
+            // Mean-free path
             _p.mfp0 = 0.;
+            // Velocity of medium
             _p.vcell.resize(3);
             _p.vcell[0] = 0.; 
             _p.vcell[1] = 0.; 
             _p.vcell[2] = 0.; 
+            // clear its radiation list
             _p.radlist.clear();
-            _p.charged = p.isCharged(); 
+            // ready to go
             plist.push_back(_p);
         }
     }

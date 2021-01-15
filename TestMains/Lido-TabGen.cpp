@@ -57,7 +57,7 @@ int main(int argc, char* argv[]){
         double muT = args["muT"].as<double>();
         double cut = args["cut"].as<double>();
         double afix = args["afix"].as<double>();
-        std::vector<double> parameters{muT, afix, 4., cut};
+        std::vector<double> parameters{muT, afix, cut, 4.};
         collision_manager("new", 
             args["lido-setting"].as<fs::path>().string(), 
             args["lido-table"].as<fs::path>().string(), 

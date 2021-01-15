@@ -101,7 +101,12 @@ bool Rate<HS2PP, 2, 2, double(*)(const double, void *)>::
         double sintheta = std::sqrt(1. - costheta*costheta);
         bool statusX = X->sample({lnsqrts, T}, 
                                   incoming_hard_pid, final_states, pids);
-        if (!statusX) return statusX;
+        if (!statusX) {
+            LOG_INFO << "sample rate failed--1, 2->2";
+            final_states.clear();
+            pids.clear();
+            return statusX;
+        }
         // give incoming partilce a random phi angle
         double phi = Srandom::dist_phi(Srandom::gen);
         // com velocity
@@ -122,7 +127,7 @@ bool Rate<HS2PP, 2, 2, double(*)(const double, void *)>::
         return statusX;
     }
     else{
-        LOG_INFO << "sample rate failed, 2->2";
+        LOG_INFO << "sample rate failed--2, 2->2";
         final_states.clear();
         pids.clear();
         return false;
@@ -177,7 +182,12 @@ bool Rate<HS2PPP, 2, 2, double(*)(const double*, void *)>::
         double sintheta = std::sqrt(1. - costheta*costheta);
         bool statusX = X->sample({lnsqrts, T}, 
                                   incoming_hard_pid, final_states, pids);
-        if (!statusX) return statusX;
+        if (!statusX) {
+            LOG_INFO << "sample rate failed--1, 2->3";
+            final_states.clear();
+            pids.clear();
+            return statusX;
+        }
         // give incoming partilce a random phi angle
         double phi = Srandom::dist_phi(Srandom::gen);
         // com velocity

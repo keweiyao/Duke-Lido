@@ -71,7 +71,11 @@ bool Xsection<HS2PP, 2, double(*)(const double, void*)>::
     double s = std::pow(sqrts,2);
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1];
-    if (s<std::pow(mA+mB,2)||s<std::pow(m1+m2,2)) {
+    double mD2 = t_channel_mD2->get_mD2(temp);
+    double tcut = isPairProduction(_process_id)?
+                -mD2/16.:-cut*mD2;
+    if (s<=std::pow(std::sqrt(mA*mA-tcut/4.)+std::sqrt(mB*mB-tcut/4.), 2)
+      ||s<=std::pow(std::sqrt(m1*m1-tcut/4.)+std::sqrt(m2*m2-tcut/4.), 2)) {
         LOG_INFO << "sample failed (below threshold) in 2->2 X";
 	FS.clear();
         pids.clear();
@@ -85,43 +89,42 @@ bool Xsection<HS2PP, 2, double(*)(const double, void*)>::
                   (std::pow(sqrts-m1,2)-m2*m2)
                 * (std::pow(sqrts+m1,2)-m2*m2)
                   /4./s);
-    double mD2 = t_channel_mD2->get_mD2(temp);
-    double tcut = isPairProduction(_process_id)?
-                0.:-cut*mD2;
+
     double tm2 = std::pow((mA*mA-m1*m1-mB*mB+m2*m2)/2./sqrts, 2);
+    double tmin0 = tm2 - std::pow(pAcm+p1cm, 2);
     double tmax0 = tm2 - std::pow(pAcm-p1cm, 2);
-    double tmin = tm2 - std::pow(pAcm+p1cm, 2);
-    double tmax = std::min(tmax0, tcut);
+    double tmin = tmin0-tcut;
+    double tmax = tmax0+tcut;
+    double cosmax = 1. - (tmax0-tmax)/(2.*pAcm*p1cm);
+    double cosmin = 1. - (tmax0-tmin)/(2.*pAcm*p1cm);
+    double etamax = .5*std::log((1.+cosmax)/(1.-cosmax));
+    double etamin = .5*std::log((1.+cosmin)/(1.-cosmin));
     // Define a lamda function, which transforms the integral
     // varaible for more efficient integration
-    // transform w = -log(1-t/mD2)
-    // t = -mD2*(exp(-w)-1)
-    // dw/dt = -1/(tmax+t)
-    // dt = (dw/dt)^{-1} * dw = -(tmax+t) * dw
-    auto dXdw = [s, temp, tmax, mA, mB, m1, m2, mD2, this](double w) {
+    auto dXdeta = [s, temp, tmax, mA, mB, m1, m2, pAcm, p1cm, tmax0, this]
+       (double eta) {
         double params[7] = {s, tmax, temp, mA, mB, m1, m2};
-        double t = -mD2*(std::exp(-w)-1.);
-        double Jacobian = mD2-t;
+        double costheta = std::tanh(eta);
+        double t = tmax0 - 2.*pAcm*p1cm*(1.-costheta);
+        double Jacobian = 2.*pAcm*p1cm*(1.-costheta*costheta);
         return this->_f(t, params)*Jacobian;
     };
-
-    double wmin = -std::log(1.-tmin/mD2),
-           wmax = -std::log(1.-tmax/mD2);
     double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
     bool status=true;
-    double w = sample_1d(dXdw, {wmin, wmax}, fmax, status);
+    double eta = sample_1d(dXdeta, {etamin, etamax}, fmax, status);
     if (status==true){
-        double t = -mD2*(std::exp(-w)-1.);
+        double costheta = std::tanh(eta);
+        double sintheta = std::sqrt(1.-costheta*costheta);
         double phi = Srandom::dist_phi(Srandom::gen);
         double cosphi = std::cos(phi), sinphi = std::sin(phi);
         double E1cm = (s+m1*m1-m2*m2)/2./sqrts;
         double E2cm = (s+m2*m2-m1*m1)/2./sqrts;
-        double costheta = 1. - (tmax0-t)/(2.*pAcm*p1cm); // deflection angle
-        double sintheta = std::sqrt(1.-costheta*costheta);
+
         FS.clear();
         FS.resize(2);
         FS[0] = {E1cm, p1cm*sintheta*cosphi, p1cm*sintheta*sinphi, p1cm*costheta};
         FS[1] = {E2cm, -p1cm*sintheta*cosphi, -p1cm*sintheta*sinphi, -p1cm*costheta};
+        //LOG_INFO << "look: " << FS[0] << " " << FS[1] << ", " << cosmin<< " " << cosmax;
         assign_2to2_pid(_process_id, incoming_hard_pid, pids);
         return true;
     }else{
@@ -248,6 +251,7 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
     double s = std::pow(sqrts,2);
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1];
+    s = std::max(std::pow(m1+m2,2), std::pow(mA+mB,2))*1.01;
     double pAcm = std::sqrt(
                   (std::pow(sqrts-mA,2)-mB*mB)
                 * (std::pow(sqrts+mA,2)-mB*mB)
@@ -258,26 +262,27 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
                   /4./s);
     double mD2 = t_channel_mD2->get_mD2(temp);
     double tcut = isPairProduction(_process_id)?
-                0:-cut*mD2;
+                -mD2/16.:-cut*mD2;
     double tm2 = std::pow((mA*mA-m1*m1-mB*mB+m2*m2)/2./sqrts, 2);
+    double tmin0 = tm2 - std::pow(pAcm+p1cm, 2);
     double tmax0 = tm2 - std::pow(pAcm-p1cm, 2);
-    double tmin = tm2 - std::pow(pAcm+p1cm, 2);
+    double tmin = std::max(tmin0, -s-tcut);
     double tmax = std::min(tmax0, tcut);
+    double cosmax = 1. - (tmax0-tmax)/(2.*pAcm*p1cm);
+    double cosmin = 1. - (tmax0-tmin)/(2.*pAcm*p1cm);
+    double etamax = .5*std::log((1.+cosmax)/(1.-cosmax));
+    double etamin = .5*std::log((1.+cosmin)/(1.-cosmin));
     // Define a lamda function, which transforms the integral
     // varaible for more efficient integration
-    // transform w = -log(1-t/mD2)
-    // t = -mD2*(exp(-w)-1)
-    // dw/dt = -1/(tmax+t)
-    // dt = (dw/dt)^{-1} * dw = -(tmax+t) * dw
-    auto minus_dXdw = [s, temp, tmax, mA, mB, m1, m2, mD2, this](double w) {
+    auto minus_dXdeta = [s, temp, tmax, mA, mB, m1, m2, 
+                        pAcm, p1cm, tmax0, this](double eta) {
         double params[7] = {s, tmax, temp, mA, mB, m1, m2};
-        double t = -mD2*(std::exp(-w)-1.);
-        double Jacobian = mD2-t;
+        double costheta = std::tanh(eta);
+        double t = tmax0 - 2.*pAcm*p1cm*(1.-costheta);
+        double Jacobian = 2.*pAcm*p1cm*(1.-costheta*costheta);
         return -this->_f(t, params)*Jacobian;
     };
-    double wmin = -std::log(1.-tmin/mD2),
-           wmax = -std::log(1.-tmax/mD2);
-    double res = -minimize_1d(minus_dXdw, {wmin, wmax}, 1e-8, 100, 1000);
+    double res = -minimize_1d(minus_dXdeta, {etamin, etamax}, 1e-8, 100, 1000);
     return scalar{std::log(1.5*res)};
 }
 
@@ -297,7 +302,7 @@ scalar Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
      std::pow(std::sqrt(m1*m1-tcut/9.)
              +std::sqrt(m2*m2-tcut/9.)+std::sqrt(m3*m3-tcut/9.), 2)
 );
-    s = std::max(smin*1.1, s);
+    s = std::max(2*smin, s);
     sqrts = std::sqrt(s);
 
     double pAcm = std::sqrt(
@@ -351,10 +356,10 @@ scalar Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
              {xmin[2],xmax[2]}, 
              {xmin[3],xmax[3]}}, 500);
     // use the best result of MC_maximize and determine the step of the simplex minimization method
-    std::vector<double> step = {(xmax[0]-xmin[0])/10., (xmax[1]-xmin[1])/10., 
-                                (xmax[2]-xmin[2])/10., (xmax[3]-xmin[3])/10};
+    std::vector<double> step = {(xmax[0]-xmin[0])/20, (xmax[1]-xmin[1])/20., 
+                                (xmax[2]-xmin[2])/20., (xmax[3]-xmin[3])/20.};
     for(int i=0; i<4; i++){
-        double dx = std::min(xmax[i]-startloc[i], startloc[i]-xmin[i])/2.;
+        double dx = std::min(xmax[i]-startloc[i], startloc[i]-xmin[i])/4.;
         step[i] = std::min(dx, step[i]);
     }
     // find the more precise maximum by the simplex method
@@ -378,6 +383,9 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
     double s = std::pow(sqrts,2);
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1];
+    if (s<=std::pow(m1+m2,2)||s<=std::pow(mA+mB,2)){
+        return scalar{0.};
+    }
     double pAcm = std::sqrt(
                   (std::pow(sqrts-mA,2)-mB*mB)
                 * (std::pow(sqrts+mA,2)-mB*mB)
@@ -388,31 +396,30 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
                   /4./s);
     double mD2 = t_channel_mD2->get_mD2(temp);
     double tcut = isPairProduction(_process_id)?
-                0:-cut*mD2;
+                -mD2/16.:-cut*mD2;
     double tm2 = std::pow((mA*mA-m1*m1-mB*mB+m2*m2)/2./sqrts, 2);
+    double tmin0 = tm2 - std::pow(pAcm+p1cm, 2);
     double tmax0 = tm2 - std::pow(pAcm-p1cm, 2);
-    double tmin = tm2 - std::pow(pAcm+p1cm, 2);
-    double tmax = std::min(tmax0, tcut);
+    double tmin = tmin0-tcut;
+    double tmax = tmax0+tcut;
+    double cosmax = 1. - (tmax0-tmax)/(2.*pAcm*p1cm);
+    double cosmin = 1. - (tmax0-tmin)/(2.*pAcm*p1cm);
+    double etamax = .5*std::log((1.+cosmax)/(1.-cosmax));
+    double etamin = .5*std::log((1.+cosmin)/(1.-cosmin));
     // Define a lamda function, which transforms the integral
     // varaible for more efficient integration
-    // transform w = -log(1-t/mD2)
-    // t = -mD2*(exp(-w)-1)
-    // dw/dt = 1/(mD2-t)
-    // dt = (dw/dt)^{-1} * dw = (mD2-t) * dw
-    auto dXdw = [s, temp, tmax, mA, mB, m1, m2, mD2, this](double w) {
+    auto dXdeta = [s, temp, tmax, mA, mB, m1, m2, 
+                        pAcm, p1cm, tmax0, this](double eta) {
         double params[7] = {s, tmax, temp, mA, mB, m1, m2};
-        double t = -mD2*(std::exp(-w)-1.);
-        double Jacobian = mD2-t;
+        double costheta = std::tanh(eta);
+        double t = tmax0 - 2.*pAcm*p1cm*(1.-costheta);
+        double Jacobian = 2.*pAcm*p1cm*(1.-costheta*costheta);
         return this->_f(t, params)*Jacobian;
     };
-    double wmin = -std::log(1.-tmin/mD2),
-           wmax = -std::log(1.-tmax/mD2);
     if (tmin>=tmax) return scalar{0.};
     else {
-        double wmin = -std::log(1.-tmin/mD2),
-               wmax = -std::log(1.-tmax/mD2);
         double error;
-        double res = quad_1d(dXdw, {wmin,wmax}, error);
+        double res = quad_1d(dXdeta, {etamin,etamax}, error);
         return scalar{res};
     }
 }
@@ -450,7 +457,7 @@ scalar Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
     // x3 = phi12
     // Jacobian = d(kT2, y3, c12, phi12)/d(x0, x1, x3, x3) = (kT2+mD2)*(1-c12+mD/2/pA/pA)*log(sqrts/kt)
     double mD2_2pA2 = mD2 / (2.*pAcm*pAcm);
-    auto dXdPS = [s, tcut, temp, mA, mB, m1, m2, m3, mD2, mD2_2pA2, pAcm, pAcm, this](double * x_){
+    auto dXdPS = [s, tcut, temp, mA, mB, m1, m2, m3, mD2, mD2_2pA2, pAcm, this](double * x_){
         double params[8] = {s, tcut, temp, mA, mB, m1, m2, m3};
         double kt2 = mD2*(std::exp(x_[0])-1);
         double ymax = std::acosh(pAcm/std::sqrt(kt2));
@@ -494,30 +501,30 @@ fourvec Xsection<HS2PP, 2, double(*)(const double, void*)>::
                   /4./s);
     double tcut = -cut*t_channel_mD2->get_mD2(temp);
     double tm2 = std::pow((mA*mA-m1*m1-mB*mB+m2*m2)/2./sqrts, 2);
+    double tmin0 = tm2 - std::pow(pAcm+p1cm, 2);
     double tmax0 = tm2 - std::pow(pAcm-p1cm, 2);
-    double tmin = tm2 - std::pow(pAcm+p1cm, 2);
-    double tmax = std::min(tmax0, tcut);
+    double tmin = tmin0-tcut;
+    double tmax = tmax0+tcut;
+    double cosmax = 1. - (tmax0-tmax)/(2.*pAcm*p1cm);
+    double cosmin = 1. - (tmax0-tmin)/(2.*pAcm*p1cm);
+    double etamax = .5*std::log((1.+cosmax)/(1.-cosmax));
+    double etamin = .5*std::log((1.+cosmin)/(1.-cosmin));
     // Define a lamda function, which transforms the integral
     // varaible for more efficient integration
-    // transform w = -log(1+t/tmax)
-    // t = tmax*(exp(-w)-1)
-    // dw/dt = -1/(tmax+t)
-    // dt = (dw/dt)^{-1} * dw = -(tmax+t) * dw
-    auto dXdpz_dw = [s, temp, tmax, tmax0, mA, mB, m1, m2, pAcm, p1cm, this](double w) {
+    auto dXdeta_Pmu = [s, temp, tmax, mA, mB, m1, m2, 
+                        pAcm, p1cm, tmax0, this](double eta) {
         double params[7] = {s, tmax, temp, mA, mB, m1, m2};
-        double t = tmax*(std::exp(-w)-1.);
-        double Jacobian = -(tmax+t);
-        double cos_thetaA1 = 1. - (tmax0-t)/(2.*pAcm*p1cm);
-        double dpz = p1cm*cos_thetaA1-pAcm;
+        double costheta = std::tanh(eta);
+        double t = tmax0 - 2.*pAcm*p1cm*(1.-costheta);
+        double Jacobian = 2.*pAcm*p1cm*(1.-costheta*costheta);
+        double dpz = p1cm*costheta-pAcm;
         return this->_f(t, params)*dpz*Jacobian;
     };
 
     if (tmin>=tmax)  return fourvec{0., 0., 0., 0.};
     else {
-        double wmin = -std::log(1+tmin/tmax),
-               wmax = -std::log(1+tmax/tmax);
         double error;
-        double dpz = quad_1d(dXdpz_dw, {wmin, wmax}, error);
+        double dpz = quad_1d(dXdeta_Pmu, {etamin, etamax}, error);
         return fourvec{0., 0., 0., dpz};
     }
 }
@@ -549,29 +556,33 @@ tensor Xsection<HS2PP, 2, double(*)(const double, void*)>::
                   /4./s);
     double tcut = -cut*t_channel_mD2->get_mD2(temp);
     double tm2 = std::pow((mA*mA-m1*m1-mB*mB+m2*m2)/2./sqrts, 2);
+    double tmin0 = tm2 - std::pow(pAcm+p1cm, 2);
     double tmax0 = tm2 - std::pow(pAcm-p1cm, 2);
-    double tmin = tm2 - std::pow(pAcm+p1cm, 2);
-    double tmax = std::min(tmax0, tcut);
+    double tmin = tmin0-tcut;
+    double tmax = tmax0+tcut;
+    double cosmax = 1. - (tmax0-tmax)/(2.*pAcm*p1cm);
+    double cosmin = 1. - (tmax0-tmin)/(2.*pAcm*p1cm);
+    double etamax = .5*std::log((1.+cosmax)/(1.-cosmax));
+    double etamin = .5*std::log((1.+cosmin)/(1.-cosmin));
     // Define a lamda function, which transforms the integral
     // varaible for more efficient integration
-    // transform w = -log(1+t/tmax)
-    // t = tmax*(exp(-w)-1)
-    // dw/dt = -1/(tmax+t)
-    // dt = (dw/dt)^{-1} * dw = -(tmax+t) * dw
-    auto dXdpz2_dw = [s, temp, tmax, tmax0, mA, mB, m1, m2, pAcm, p1cm, this](double w) {
+    auto dXdeta_PzPz = [s, temp, tmax, mA, mB, m1, m2, 
+                        pAcm, p1cm, tmax0, this](double eta) {
         double params[7] = {s, tmax, temp, mA, mB, m1, m2};
-        double t = tmax*(std::exp(-w)-1.);
-        double Jacobian = -(tmax+t);
-        double cos_thetaA1 = 1. - (tmax0-t)/(2.*pAcm*p1cm);
-        double dpz = p1cm*cos_thetaA1-pAcm;
+        double costheta = std::tanh(eta);
+        double t = tmax0 - 2.*pAcm*p1cm*(1.-costheta);
+        double Jacobian = 2.*pAcm*p1cm*(1.-costheta*costheta);
+        double dpz = p1cm*costheta-pAcm;
         return this->_f(t, params)*dpz*dpz*Jacobian;
     };
-    auto dXdpt2_dw = [s, temp, tmax, tmax0, mA, mB, m1, m2, pAcm, p1cm, this](double w) {
+
+    auto dXdeta_PTPT = [s, temp, tmax, mA, mB, m1, m2, 
+                        pAcm, p1cm, tmax0, this](double eta) {
         double params[7] = {s, tmax, temp, mA, mB, m1, m2};
-        double t = tmax*(std::exp(-w)-1.);
-        double Jacobian = -(tmax+t);
-        double cos_thetaA1 = 1. - (tmax0-t)/(2.*pAcm*p1cm);
-        double dpt2 = p1cm*p1cm*(1.-cos_thetaA1*cos_thetaA1);
+        double costheta = std::tanh(eta);
+        double t = tmax0 - 2.*pAcm*p1cm*(1.-costheta);
+        double Jacobian = 2.*pAcm*p1cm*(1.-costheta*costheta);
+        double dpt2 = p1cm*p1cm*(1.-costheta*costheta);
         return this->_f(t, params)*dpt2*Jacobian;
     };
 
@@ -583,10 +594,8 @@ tensor Xsection<HS2PP, 2, double(*)(const double, void*)>::
     }
     else{
         double error;
-        double wmin = -std::log(1.+tmin/tmax),
-               wmax = -std::log(1.+tmax/tmax);
-        dpzdpz = quad_1d(dXdpz2_dw, {wmin, wmax}, error);
-        dptdpt = quad_1d(dXdpt2_dw, {wmin, wmax}, error);
+        dpzdpz = quad_1d(dXdeta_PzPz, {etamin, etamax}, error);
+        dptdpt = quad_1d(dXdeta_PTPT, {etamin, etamax}, error);
     }
     return tensor{0.,     0.,         0.,         0.,
                   0.,     dptdpt/2.,     0.,         0.,

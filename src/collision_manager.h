@@ -17,14 +17,15 @@ private:
     std::map<int, std::vector<Process> > AllProcesses;
     void init_process(Process &r, std::string mode, std::string table_path);
     double get_effective_mfp_soft(
-                              particle & pIn,
-                              double Temp, 
-                              std::vector<double> v3cell);
+                              double Ecell, double x,
+                              int idA, int idB, int idC,
+                              double Temp
+                              );
     double get_effective_mfp_hard(
-                              particle & mother,
-                              particle & pIn,
-                              double Temp, 
-                              std::vector<double> v3cell);
+                              double Ecell, double x,
+                              int idA, int idB, int idC,
+                              double Temp
+                              );
 public:
     collision_manager(std::string mode, std::string setting_path,
                     std::string table_path, std::vector<double> parameters);

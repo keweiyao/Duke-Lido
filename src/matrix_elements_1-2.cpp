@@ -21,12 +21,12 @@ double LGV_q2qg(const double * x_, void * params_){
   double kT = std::sqrt((kplus/sintheta+m1)*(kplus/sintheta-m1))
             - kplus/tantheta;
   double kT2 = kT*kT;
-  double mg2 = t_channel_mD2->get_mD2(T)/2.;
+  double mg2 = (CF/CA*x*x + 1. -x)*t_channel_mD2->get_mD2(T)/2.;
   double Jacobian = 2*kT2/sintheta;
   double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI)
-                     * P_q2qg(x, 0., kT)
+                     * P_q2qg(x)
                      / std::pow(kT2+mg2, 2)
-                     * Jacobian;
+                     * Jacobian * (x*x*CF/CA+(1-x));
   return dR_dxdy;
 }
 
@@ -45,13 +45,13 @@ double LGV_g2gg(const double * x_, void * params_){
   double kT = std::sqrt((kplus/sintheta+m1)*(kplus/sintheta-m1))
             - kplus/tantheta;
   double kT2 = kT*kT;
-  double mg2 = t_channel_mD2->get_mD2(T)/2.;
+  double mg2 = (1.-x+x*x)*t_channel_mD2->get_mD2(T)/2.;
   if (x > 0.5) return 0.0; 
   double Jacobian = 2*kT2/sintheta;
   double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) 
                      * P_g2gg(x)
                      / std::pow(kT2+mg2, 2)
-                     * Jacobian;
+                     * Jacobian * (1.-x+x*x);
   return dR_dxdy;
 }
 
@@ -70,22 +70,11 @@ double LGV_g2qqbar(const double * x_, void * params_){
   double kT = std::sqrt((kplus/sintheta+m1)*(kplus/sintheta-m1))
             - kplus/tantheta;
   double kT2 = kT*kT;
-  double mg2 = t_channel_mD2->get_mD2(T)/2.;
+  double mg2 = (CF/CA-x*(1.-x))*t_channel_mD2->get_mD2(T)/2.;
   double Jacobian = 2*kT2/sintheta;
   double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI)
-                     * P_g2qqbar(x, 0., kT) 
+                     * P_g2qqbar(x) 
                      / std::pow(kT2+mg2, 2)
-                     * Jacobian;
+                     * Jacobian * (CF/CA-x*(1.-x));
   return dR_dxdy;
-}
-
-////////////////// ABSORPTION ////////////////////////
-// Diffusion-induced gluon absorption process q + g -> q
-double LGV_qg2q(const double * x_, void * params_){
-return 0.;
-}
-
-// Diffusion-induced gluon absorption process g + g -> g
-double LGV_gg2g(const double * x_, void * params_){
-return 0.;
 }

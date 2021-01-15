@@ -110,7 +110,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                                        std::vector<particle> & hadrons, 
                                        std::vector<particle> & thermal_partons,
                                        double Q0, double Tf,
-                                       int level, int Nos){
+                                       int level){
     std::vector<particle> colorless_ensemble;
     for(auto & p : partons) colorless_ensemble.push_back(p);
     int Npartons = partons.size();
@@ -195,18 +195,18 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
             th.vcell[0] = 0.;
             th.vcell[1] = 0.;
             th.vcell[2] = vzgrid;
-            th.Tf = Tf;
             th.Q0 = 0.5;
             thermal_partons.push_back(th);
 	    colorless_ensemble.push_back(th);
     }
-    for (int i=0; i<Nos; i++){
     double maxQ0 = Q0;
     pythia.event.reset();
     int count=1;
     for (auto & p : colorless_ensemble){
+         p.p = put_on_shell(p.p, p.pid);
+         auto pmu = p.p.boost_back(0,0,std::tanh(p.x.x3()));
          pythia.event.append(p.pid, 23, p.col, p.acol, 
-			 p.p.x(), p.p.y(), p.p.z(), p.p.t(), p.mass);
+			 pmu.x(), pmu.y(), pmu.z(), pmu.t(), p.mass);
          pythia.event[count].scale(p.Q0);
 	 maxQ0 = (p.Q0>maxQ0) ? p.Q0 : maxQ0;
          count++;
@@ -226,17 +226,16 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
             Nff ++;
             particle h;
             h.pid = ip.id();
-            h.p.a[0] = ip.e();
+            
             h.p.a[1] = ip.px();
             h.p.a[2] = ip.py();
             h.p.a[3] = ip.pz();
-            h.mass = std::sqrt(h.p.t()*h.p.t() - h.p.pabs2());
+            h.mass = ip.m();
+            h.p.a[0] = std::sqrt(h.mass*h.mass + h.p.pabs2());
             h.weight = 1;
             h.charged = ip.isCharged();
             hadrons.push_back(h);
         }
-            
-       } 
     }
     return hadrons.size();
 }

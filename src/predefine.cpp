@@ -15,9 +15,11 @@ bool type3_warned = false;
 const double c2pi = 2.*M_PI;
 const double c4d9 = 4./9.;
 const double c1d9 = 1./9.;
+const double c8pi = 8.*M_PI;
 const double c16pi = 16.*M_PI;
 const double c48pi = 48.*M_PI;
 const double c16pi2 = 16.*M_PI*M_PI;
+const double c72pi2 = 72.*M_PI*M_PI;
 const double c32pi3 = 32.*M_PI*M_PI*M_PI;
 const double c64d9pi2 = 64./9.*M_PI*M_PI;
 const double c256pi4 = 256.*std::pow(M_PI, 4);
@@ -52,7 +54,7 @@ double afix;
 double Lido_Ecut;
 
 Debye_mass * t_channel_mD2;
-const double LPM_prefactor = .73;
+const double LPM_prefactor = 2.0;
 
 int time_type;
 bool Adiabatic_LPM;
@@ -126,61 +128,46 @@ double Debye_mass::get_mD2(double T){
 
 
 // splitting functions
-double P_q2qg(double x, double mq, double kperp){
-    double mq2 = mq*mq;
-    double mTx2 = mq2*x*x + kperp*kperp;
-    return CF*(
-                (1. + std::pow(1.-x, 2))/x - 2.*x*(1.-x)*mq2/mTx2
-                 );
+double P_q2qg(double x){
+    return CF*(1. + std::pow(1.-x, 2))/x;
 }
-double P_q2gq(double x, double mq, double kperp){
-    double mq2 = mq*mq;
-    double mTx2 = mq2*std::pow(1.-x,2) + kperp*kperp;
-    return CF*(
-                (1. + std::pow(x, 2))/(1.-x) - 2.*x*(1.-x)*mq2/mTx2
-                 );
+double P_q2gq(double x){
+    return CF*(1. + std::pow(x, 2))/(1-x);
 }
 double P_g2gg(double x){
     return CA*(1.+std::pow(x, 4)+std::pow(1.-x,4))/x/(1.-x);
 }
-double P_g2qqbar(double x, double mq, double kperp){
-        double mq2 = mq*mq;
-        double mT2 = mq2 + kperp*kperp;
-    return ( x*x + std::pow(1.-x, 2) + 2*x*(1-x)*mq2/mT2
-               )*TR;
+double P_g2qqbar(double x){
+    return ( x*x + std::pow(1.-x, 2) )*TR;
 }
 
 // split=1: q->q+g, colors = 1 - x + CF/CA * x^2
 // split=2: g->g+g, colors = 1 - x + x^2
 // split=3: g->q+qbar, colors = 1 - x*CA/CF + x^2*CA/CF
-double formation_time(fourvec p, fourvec k, double T, int idA, int idC) {
-    double E0 = p.t();
-    double x = k.t() / E0;
-    double mg2 = t_channel_mD2->get_mD2(T) / 2.,
-           mass_sqrs = 0.0, colors = 1.;
-    if (std::abs(idA)<=5 && idC==21 ) {
-        // q --> q + g
-        colors = 1. - x + CF / CA * x * x;
-        mass_sqrs = x * x * dot(p, p) + (1. - x) * mg2;
+void formation_time(double & tauf, double & Q2,
+           int idA, int idB, int idC,
+           fourvec pA, fourvec pB, fourvec pC, 
+           double T, fourvec p0){
+    double mg2 = t_channel_mD2->get_mD2(T) / 2.;
+    double p0abs = p0.pabs();
+    fourvec nbar{1., -p0.x()/p0abs,  -p0.y()/p0abs,  -p0.z()/p0abs};
+    double x = dot(pB, nbar)/dot(p0, nbar);
+    if (x<0.||x>1.) { 
+        Q2 = mg2; 
+        LOG_WARNING << "x<0 or x>1 in formation time, x = "<<x;
     }
-    else if (idA==21 && idC==21) {
-        // g --> g + g
-        colors = 1. - x + x * x;
-        mass_sqrs = (1. - x + x * x) * mg2;
+    double M2 = x*(std::pow(pid2mass(idC), 2)+ mg2)
+            + (1.-x)*(std::pow(pid2mass(idB), 2)+ mg2)
+          - x*(1.-x)*(std::pow(pid2mass(idA), 2) + mg2);
+    Q2 =  x*(measure_perp(p0, pC)).pabs2()
+       + (1.-x)*(measure_perp(p0, pB)).pabs2()
+       - x*(1.-x)*(measure_perp(p0, pA)).pabs2() 
+       + M2;
+    if (Q2<M2) { 
+        Q2 = M2;
+        //LOG_WARNING << "Q2<M2 in formationt time, set it by M2";
     }
-    else if (idA==21 && std::abs(idC)<=5) {
-        // g --> q + qbar
-        colors = 1. - x * CA / CF + x * x * CA / CF;
-        mass_sqrs = (CF/CA - x + x * x) * mg2;
-    }
-    else{
-        LOG_INFO << "Funny channel for formation time: " << idA << " " << idC;
-        return -1;
-    }
-
-    double QT2 = measure_perp(p, k).pabs2() * colors;
-    double tauf = 2. * x * (1. - x) * E0 / (QT2 + mass_sqrs);
-    return tauf;
+    tauf = x*(1.-x)*dot(p0, nbar)/Q2;
 }
 
 //=============running coupling========================
@@ -226,7 +213,6 @@ particle make_parton(int pid, int col, int acol,
     p.x = mother.x;
     p.mother_p = mother.p;
     p.T0 = T;
-    p.Tf = T;
     p.is_virtual = mother.is_virtual;
     p.vcell.resize(3);
     p.vcell[0] = vcell[0];
@@ -255,7 +241,6 @@ particle make_parton(int pid, int col, int acol,
     p.x = x;
     p.mother_p = pmu;
     p.T0 = 0;
-    p.Tf = 0;
     p.is_virtual = false;
     p.vcell.resize(3);
     p.vcell[0] = 0;
@@ -277,6 +262,12 @@ bool is2to2(int prcid){ // 14
     return (prcid==1||prcid==2||prcid==3||prcid==4||prcid==5||
             prcid==18||prcid==19||prcid==20||prcid==21||prcid==22||
             prcid==29||prcid==30||prcid==34||prcid==35);
+}
+bool is_classical(int prcid){
+    return (prcid == 1 || prcid == 2 
+                    || prcid == 18 || prcid == 19
+                    || prcid == 29 || prcid == 30
+                    || prcid == 34 || prcid == 35 );
 }
 bool is2to3(int prcid){ // 17
     return (prcid==6||prcid==7||prcid==8||prcid==9
@@ -774,171 +765,147 @@ void assign_2to3_pid(int process_id,
         }
 }
 
-void SampleColor(int mother_id, int mother_col, int mother_acol, 
-                int channel, 
-                int daughter_id, int & daughter_col, int & daughter_acol,
-                int & new_mother_col, int & new_mother_acol) {
-    if (mother_id == 21){
-        if (channel==0) {
-            int color = color_count; 
-            color_count ++;
-            if (daughter_id > 0){
-                daughter_col = color;
-                daughter_acol = 0;
-                new_mother_col = mother_col;
-                new_mother_acol = color;
-            } 
-            else {
-                daughter_col = 0;
-                daughter_acol = color;
-                new_mother_col = color;
-                new_mother_acol = mother_acol;
-            }
-        }
-        if (channel==1) {
-            int color1 = color_count; 
-            color_count ++;
-            int color2 = color_count; 
-            color_count ++;
-            daughter_col = color1;
-            daughter_acol = color2;
-            if (Srandom::binary_choice()) {
-                new_mother_col = mother_col;
-                new_mother_acol = color1;
-            }
-            else {
-                new_mother_col = color2;
-                new_mother_acol = mother_acol;
-            }
-        }
-        if (channel==2 || channel==3 || channel == 6) {
-            int color = color_count;
-            color_count ++;
-            if (Srandom::binary_choice()) {
-                new_mother_col = mother_col;
-                new_mother_acol = color;
-                daughter_col = color;
-                daughter_acol = mother_acol;
-            }
-            else {
-                new_mother_col = color;
-                new_mother_acol = mother_acol;
-                daughter_col = mother_col;;
-                daughter_acol = color;
-            }
-        }
-        // g+g-->Q+Qbar
-        if (channel == 8){
-            int color = color_count;
-            color_count++;
-            if (Srandom::binary_choice()) {
-                new_mother_col = mother_col;
-                new_mother_acol = 0;
-                daughter_col = 0;
-                daughter_acol = color;
-            }
-            else {
-                new_mother_col = color;
-                new_mother_acol = 0;
-                daughter_col = 0;
-                daughter_acol = mother_col;
-            }
-        }
-        // gluon --> Q+Qbar or q+qbar
-        if (channel == 9 || channel==10|| channel==11){
-            if (daughter_id>0) {
-                daughter_col = mother_col;
-                daughter_acol = 0;
-                new_mother_col = 0;
-                new_mother_acol = mother_col;
-            }
-            else {
-                daughter_col = 0;
-                daughter_acol = mother_col;
-                new_mother_col = mother_col;
-                new_mother_acol = 0;
-            }
-        }
-    }
 
-    if (std::abs(mother_id) <= 5){
-        if (channel==0) {
-            int color = color_count; 
-            color_count ++; 
-            if (daughter_id > 0 && mother_id > 0){
-                daughter_col = mother_col;
-                daughter_acol = 0;
-                new_mother_col = color;
-                new_mother_acol = 0;
-            } 
-            if (daughter_id < 0 && mother_id < 0){
-                daughter_col = 0;
-                daughter_acol = mother_acol;
-                new_mother_col = 0;
-                new_mother_acol = color;
-            } 
-            if (daughter_id > 0 && mother_id < 0){
-                daughter_col = color;
-                daughter_acol = 0;
-                new_mother_col = 0;
-                new_mother_acol = color;
-            } 
-            if (daughter_id < 0 && mother_id > 0){
-                daughter_col = 0;
-                daughter_acol = color;
-                new_mother_col = color;
-                new_mother_acol = 0;
-            } 
-        }
-        if (channel==1) {
-            int color1 = color_count; 
-            color_count ++;
-            int color2 = color_count; 
-            color_count ++;
-            daughter_col = color1;
-            daughter_acol = color2;
-            if (mother_id<0) {
-                new_mother_col = 0;
-                new_mother_acol = color1;
-            }
-            else {
-                new_mother_col = color2;
-                new_mother_acol = 0;
-            }
-        }
-        if (channel==2 || channel==3 || channel == 6) {
-            int color = color_count;
-            color_count ++;
-            if (mother_id<0) {
-                new_mother_col = 0;
-                new_mother_acol = color;
-                daughter_col = color;
-                daughter_acol = mother_acol;
-            }
-            else {
-                new_mother_col = color;
-                new_mother_acol = 0;
-                daughter_col = mother_col;
-                daughter_acol = color;
-            }
-        }
-        if (channel==8) {
-            int color = color_count;
-            color_count ++;
-            if (mother_id<0) {
-                new_mother_col = color;
-                new_mother_acol = 0;
-                daughter_col = 0;
-                daughter_acol = mother_acol;
-            }
-            else {
-                new_mother_col = mother_col;
-                new_mother_acol = 0;
-                daughter_col = 0;
-                daughter_acol = color;
-            }  
+void assign_2to2_color(int process_id, 
+                       int pidA, int pid1, int pid2,
+                       int Ca, int aCa,
+                       int & C1, int & aC1,
+                       int & C2, int & aC2
+                       ){
+    if (process_id==1){ // gq2gq
+        if (pid2>0){
+            C1 = Ca; aC1 = color_count; color_count ++;
+            C2 = aC1; aC2 = 0;
+
+        }else{
+            C1 = color_count; aC1 = aCa; color_count ++;
+            C2 = 0; aC2 = C1;
         }
     }
-    
+    else if (process_id==2){ // gg2gg
+        if (Srandom::binary_choice()){
+            C1 = Ca; aC1 = color_count; color_count ++;
+            C2 = aC1; aC2 = color_count; color_count ++;
+        }else{
+            C1 = color_count; aC1 = aCa; color_count ++;
+            C2 = color_count; aC2 = C1; color_count ++;
+        }
+    }
+    else if (process_id==3 || process_id==4
+             || process_id==5 ){ // gg2qqbar, ccbar, bbbar
+        if (pid1>0){
+            if (Srandom::binary_choice()){   
+                C1 = Ca; aC1 = 0;
+                C2 = 0; aC2 = color_count; color_count ++;
+            }else{
+                C1 = color_count; aC1 = 0; color_count ++;
+                C2 = 0; aC2 = aCa; 
+            }
+        }
+        else{
+            if (Srandom::binary_choice()){   
+                C1 = 0; aC1 = aCa;
+                C2 = color_count; aC2 = 0; color_count ++;
+            }else{
+                C1 = 0; aC1 = color_count; color_count ++;
+                C2 = Ca; aC2 = 0; 
+            }
+        }
+    }
+    else if (process_id == 18 || process_id == 29
+             || process_id == 34){ // qq2qq
+        if (pid1>0 && pid2>0){  
+            C1 = color_count; aC1 = 0; color_count ++;
+            C2 = Ca; aC2 = 0;
+        }
+        if (pid1<0 && pid2<0){  
+            C1 = 0; aC1 = color_count; color_count ++;
+            C2 = 0; aC2 = aCa;
+        }
+        if (pid1>0 && pid2<0){  
+            C1 = color_count; aC1 = 0; color_count ++;
+            C2 = 0; aC2 = C1;
+        }
+        if (pid1<0 && pid2>0){  
+            C1 = 0; aC1 = color_count; color_count ++;
+            C2 = aC1; aC2 = 0;
+        }
+    }
+    else if (process_id == 19 || process_id == 30
+             || process_id == 35) { // qg2qg
+        if (pid1>0){
+            C1 = color_count; aC1 = 0; color_count++;
+            C2 = color_count; aC2 = C1; color_count++;
+        }
+        if (pid1<0){
+            C1 = 0; aC1 = color_count; color_count++;
+            C2 = aC1; aC2 = color_count; color_count++;
+        }
+    }
+    else if (process_id==20 || process_id==21 
+             || process_id==22){  // qq2qqbar, ccbar, bbbar
+        if (pidA>0 && pid1>0){
+            C1 = Ca; aC1 = 0;
+            C2 = 0; aC2 = color_count; color_count++;
+        }
+        if (pidA<0 && pid1<0){
+            C1 = 0; aC1 = aCa;
+            C2 = color_count; aC2 = 0; color_count++;
+        }   
+        if (pidA>0 && pid1<0){
+            C1 = 0; aC1 = color_count; color_count++;
+            C2 = Ca; aC2 = 0; 
+        }    
+        if (pidA<0 && pid1>0){
+            C1 = color_count; aC1 = 0; color_count++;
+            C2 = 0; aC2 = aCa; 
+        }    
+    }else{
+        LOG_FATAL << "Wrong process id when assiging color";
+        exit(-1);
+    }
+}
+
+
+void assign_n2np1_color(
+                       int pidA, int pid1, int pid2,
+                       int Ca, int aCa,
+                       int & C1, int & aC1,
+                       int & C2, int & aC2
+                       ){  
+    if (pidA==21 && pid1==21 && pid2==21){ // g->g+g
+        if (Srandom::binary_choice()){
+            C1 = Ca; aC1 = color_count; color_count ++;
+            C2 = aC1; aC2 = aCa;
+        }else{
+            C1 = color_count; aC1 = aCa; color_count ++;
+            C2 = Ca; aC2 = C1;
+        }
+    }
+    else if (pidA==21&&pid1!=21&&pid2!=21){ //gH->q+qbar
+        if (pid1>0){
+            C1 = Ca; aC1 = 0;
+            C2 = 0; aC2 = aCa;
+        }
+        else{
+            C1 = 0; aC1 = aCa;
+            C2 = Ca; aC2 = 0;
+        }
+    }
+    else if (pidA!=21&&pid1!=21&&pid2==21
+             ){ // q -> q+g
+        if (pid1>0){
+            C1 = color_count; aC1 = 0; color_count ++;
+            C2 = Ca; aC2 = C1;
+        }
+        else{
+            C1 = 0; aC1 = color_count; color_count ++;
+            C2 = aC1; aC2 = aCa;
+        }
+    }else{
+        LOG_FATAL << "Wrong process id when assiging color in n->n+1";
+        LOG_FATAL << pidA << " " << pid1 << " " << pid2;
+        exit(-1);
+    }
 }
 

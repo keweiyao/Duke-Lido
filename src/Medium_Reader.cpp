@@ -157,19 +157,16 @@ bool Medium<N>::load_next(){
 }
 
 template <size_t N>
-void Medium<N>::interpolate(fourvec x, double & T, double & vx, double & vy, double & vz){
+void Medium<N>::interpolate(coordinate x, double & T, double & vx, double & vy, double & vz){
     // check tau limits first
-    double tau = x.tau();
-    if ( tau < get_tauL()*.99 || tau > get_tauH()*1.01)
-        LOG_WARNING << "tau = " << tau 
+    if ( x.x0() < get_tauL()*.99 || x.x0() > get_tauH()*1.01)
+        LOG_WARNING << "tau = " << x.x0() 
                     << " GeV^{-1} out of interpolation range from"
                     << get_tauL() << " to " << get_tauH();
 
     // Next, check spatial limits
-    double eta = x.rap();
-    double xMiline[4] = {tau, x.x(), x.y(), eta};
     for(int i=1; i<N+1; ++i) {
-        if ( xMiline[i] < _xl_limits[i] || xMiline[i] > _xh_limits[i] ){
+        if ( x.a[i] < _xl_limits[i] || x.a[i] > _xh_limits[i] ){
             T = 0.;
             vx = 0.;
             vy = 0.;
@@ -177,21 +174,17 @@ void Medium<N>::interpolate(fourvec x, double & T, double & vx, double & vy, dou
             return;
         }
     }
-    
-    // velocity of the comoving frame where we see this (vx, vy, vz)
-    double vzframe = x.z()/x.t();
-    double gammaFrame = 1./std::sqrt(1. - vzframe*vzframe);
-
+   
     // Interpolate in the comoving frame
     std::vector<size_t> start_index(N+1);
     std::vector<double> w(N+1);
     for(int i=0; i<N+1; ++i) {
         if (i==0){ // time component
-            w[0] = (tau-get_tauL())/_dtau;
+            w[0] = (x.x0()-get_tauL())/_dtau;
             start_index[0] = 0;
         }
         else { // spatial component
-            double var = (xMiline[i]-_xl_limits[i])/_x_steps[i];
+            double var = (x.a[i]-_xl_limits[i])/_x_steps[i];
             var = std::min(std::max(var, 0.), _shape[i]-2.);
             size_t n = size_t(floor(var));
             double rx = var-n;
@@ -216,14 +209,6 @@ void Medium<N>::interpolate(fourvec x, double & T, double & vx, double & vy, dou
         vy = vy + _Vy(index)*W;
         vz = vz + _Vz(index)*W;
     }
-    
-    // Boost back from U = (cosh(eta_s), 0, 0, sinh(eta_s)) 
-    // comoving frame to the lab frame
-    double GammaFrame_1_vdotv = gammaFrame*(1+vzframe*vz);
-    vx = vx/GammaFrame_1_vdotv;
-    vy = vy/GammaFrame_1_vdotv;
-    //LOG_INFO <<  vzframe << " " << vz;
-    vz = (vz + vzframe)/(1+vzframe*vz); 
 
     // regulate v if necessary
     double vabs = std::sqrt(vx*vx + vy*vy + vz*vz);

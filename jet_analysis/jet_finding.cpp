@@ -3,7 +3,6 @@
 #include <math.h>
 #include <vector>
 #include "jet_finding.h"
-#include "workflow.h"
 #include "lorentz.h"
 #include "simpleLogger.h"
 #include "integrator.h"
@@ -133,8 +132,7 @@ void JetFinder::MakeETower(double _vradial,
                            double _Tfreeze, 
                            double pTmin,
                            std::vector<particle> _plist, 
-                           std::vector<current> TypeOneSources,
-                           std::vector<HadronizeCurrent> TypeTwoSources,
+                           std::vector<current> Sources,
                            int coarse_level,
 			   bool charged_jet
 			   ){
@@ -189,17 +187,16 @@ void JetFinder::MakeETower(double _vradial,
             if (p.p.xT()>pTmin) PT[ieta][iphi] += p.p.xT();
 	}
     }
-    if (TypeOneSources.size()==0) return;
+    if (Sources.size()==0) return;
     // put soft energy-momentum deposition into the towers
     clist.clear();
     clist.resize(coarseNeta);
     for (int ieta=0; ieta<coarseNeta; ieta++){
-        clist[ieta].chetas = std::cosh(etamin+ieta*coarsedeta);
-        clist[ieta].shetas = std::sinh(etamin+ieta*coarsedeta);
+        clist[ieta].etas = etamin+ieta*coarsedeta;
         clist[ieta].p = azero;
     }
-    for (auto & s: TypeOneSources){
-        int i = corp_index(std::atanh(s.shetas/s.chetas), etamin, etamax, coarsedeta, coarseNeta);
+    for (auto & s: Sources){
+        int i = corp_index(s.etas, etamin, etamax, coarsedeta, coarseNeta);
         if (i>=0) clist[i].p = clist[i].p + s.p;
     }
     for (int ieta=0; ieta<coarseNeta; ieta++) {
@@ -208,7 +205,7 @@ void JetFinder::MakeETower(double _vradial,
             double phi = phimin+iphi*coarsedphi;
             double dpT = 0., dpTcut = 0.;
             for (auto & s: clist){
-                double etas = std::atanh(s.shetas/s.chetas);
+                double etas = s.etas;
                 if (charged_jet){
 		    dpT += 2./3.*MR.get_dpT_dydphi(eta-etas, phi, 
 				                   s.p, vradial, 0.);
@@ -1266,7 +1263,6 @@ void HFETCorr::write(std::string fheader){
 void TestSource(
              MediumResponse MR,
              std::vector<current> SourceList,
-             std::vector<HadronizeCurrent> HadronizeList,
              std::string fname) {
     // contruct four momentum tower in the eta-phi plane
     int Neta = 100, Nphi = 101;
@@ -1298,7 +1294,7 @@ void TestSource(
             fourvec Nmu0{chy, cphi, sphi, shy};
             double dpT = 0.;
             for (auto & s: SourceList){
-                double etas = std::atanh(s.shetas/s.chetas);
+                double etas = s.etas;
                 dpT += MR.get_dpT_dydphi(eta, phi, s.p, 0.0, 0.0)*dphi*deta;
             }
             dpTarray[ieta][iphi] = dpT;

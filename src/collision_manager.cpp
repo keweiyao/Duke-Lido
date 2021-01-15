@@ -15,7 +15,7 @@ collision_manager::collision_manager(std::string mode,
                     std::vector<double> parameters):
 AllProcesses(){
     double mu = parameters[0], afix = parameters[1], 
-           theta = parameters[2], cut = parameters[2];
+           cut = parameters[2], theta = parameters[3];
     initialize_mD_and_scale(0, mu, afix, theta, cut);
     echo();
    // For gluon, 17 channels
@@ -112,56 +112,47 @@ AllProcesses(){
 }
 
 double collision_manager::get_effective_mfp_soft(
-                              particle & pIn,
-                              double Temp, 
-                              std::vector<double> v3cell){
-    int HardID;
-    int abspid = std::abs(pIn.pid);
-    if (abspid == 21) HardID = 21;
-    else if (abspid==1 || abspid==2 || abspid==3) HardID = 123;
-    else if (abspid==4) HardID = 4;
-    else if (abspid==5) HardID = 5;
-    else LOG_FATAL << "2.1 This particle, pid="
-                   << pIn.pid
-                   << " should not be handled by the LIDO collision term!";
-    double Ecell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
-    double lnEcell = std::log(Ecell);
-    double boost_factor = pIn.p.t() / Ecell;
-    double softqhatg = qhat(21, Ecell, 0., Temp);
+                              double Ecell, double x,
+                              int idA, int idB, int idC,
+                              double Temp
+                              ){
+    double qA = qhat(idA, Ecell, 0., Temp);
+    double qB = qhat(idB, x*Ecell, 0., Temp);
+    double qC = qhat(idC, (1-x)*Ecell, 0., Temp);
     double mD2 = t_channel_mD2->get_mD2(Temp);
-    return LPM_prefactor * mD2 / softqhatg * boost_factor;
+    double qhat3 = x*qC+(1.-x)*qB-x*(1.-x)*qA;
+    return LPM_prefactor * mD2 /qhat3;
 }
 
 double collision_manager::get_effective_mfp_hard(
-                              particle & mother,
-                              particle & pIn,
-                              double Temp, 
-                              std::vector<double> v3cell){
-    int HardID;
-    int abspid = std::abs(pIn.pid);
-    if (abspid == 21) HardID = 21;
-    else if (abspid==1 || abspid==2 || abspid==3) HardID = 123;
-    else if (abspid==4) HardID = 4;
-    else if (abspid==5) HardID = 5;
-    else LOG_FATAL << "2.2 This particle, pid="
-                   << pIn.pid
-                   << " should not be handled by the LIDO collision term!";
-    double Ecell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]).t();
+                              double Ecell, double x,
+                              int idA, int idB, int idC,
+                              double Temp){
+    //double qA=0., qB=0., qC=0.;
+    double qA = qhat(idA, Ecell, 0., Temp);
+    double qB = qhat(idB, x*Ecell, 0., Temp);
+    double qC = qhat(idC, (1-x)*Ecell, 0., Temp);
+    double qhat3soft = x*qC+(1.-x)*qB-x*(1.-x)*qA;
+    double mD2 = t_channel_mD2->get_mD2(Temp);
     double lnEcell = std::log(Ecell);
-    double boost_factor = pIn.p.t() / Ecell;
-    double local_qhat = 0.;
-    BOOST_FOREACH (Process &r, AllProcesses[21]){
+
+    int iA = std::abs(idA),iB = std::abs(idB),iC = std::abs(idC);
+    if (iA<=3) iA = 123;
+    if (iB<=3) iB = 123;
+    if (iC<=3) iC = 123;
+    double CRA = (idA==21)? CA:CF;
+    double CRB = (idB==21)? CA:CF;
+    double CRC = (idC==21)? CA:CF;
+
+    BOOST_FOREACH (Process &r, AllProcesses[iA]){
         switch (r.which()){
         case 0:
             if (boost::get<Rate22>(r).IsActive()){
                 int prcid = boost::get<Rate22>(r).process_id();
-                if (prcid == 1 || prcid == 2 
-                || prcid == 18 || prcid == 19
-                || prcid == 29 || prcid == 30
-                || prcid == 34 || prcid == 35 ) {
-                    tensor A = boost::get<Rate22>(r).GetSecondM(
-                               {lnEcell, Temp});
-                    local_qhat += A.T[1][1] + A.T[2][2];
+                if (is_classical(prcid)) {
+                    auto A = boost::get<Rate22>(r).GetSecondM(
+                               {std::log(Ecell), Temp});
+                    qA += A.T[1][1] + A.T[2][2];
                 }
             }
             break;
@@ -169,15 +160,48 @@ double collision_manager::get_effective_mfp_hard(
             break;
         }
     }  
-    // estimate mfp in the lab frame
-    double mD2 = t_channel_mD2->get_mD2(Temp);
-    return LPM_prefactor * mD2 / local_qhat * boost_factor;
+    BOOST_FOREACH (Process &r, AllProcesses[iB]){
+        switch (r.which()){
+        case 0:
+            if (boost::get<Rate22>(r).IsActive()){
+                int prcid = boost::get<Rate22>(r).process_id();
+                if (is_classical(prcid)) {
+                    auto A = boost::get<Rate22>(r).GetSecondM(
+                               {std::log(x*Ecell), Temp});
+                    qB += A.T[1][1] + A.T[2][2];
+                }
+            }
+            break;
+        default:
+            break;
+        }
+    }  
+    BOOST_FOREACH (Process &r, AllProcesses[iC]){
+        switch (r.which()){
+        case 0:
+            if (boost::get<Rate22>(r).IsActive()){
+                int prcid = boost::get<Rate22>(r).process_id();
+                if (is_classical(prcid)) {
+                    auto A = boost::get<Rate22>(r).GetSecondM(
+                               {std::log((1-x)*Ecell), Temp});
+                    qC += A.T[1][1] + A.T[2][2];
+                }
+            }
+            break;
+        default:
+            break;
+        }
+    }        
+    double qhat3hard = x*qC+(1.-x)*qB-x*(1.-x)*qA;
+    return LPM_prefactor * mD2 * (x*CRC+(1-x)*CRB-x*(1-x)*CRA) /CA
+                               / (qhat3hard+qhat3soft);
 }
 
 void collision_manager::init_process(Process &r, std::string mode, std::string table_path){
     switch (r.which()){
     case 0:
         if (boost::get<Rate22>(r).IsActive())
+            //LOG_INFO << boost::get<Rate22>(r).name
             if (mode == "new"){
                 boost::get<Rate22>(r).initX(table_path);
                 boost::get<Rate22>(r).init(table_path);
@@ -207,6 +231,7 @@ void collision_manager::init_process(Process &r, std::string mode, std::string t
     default:
         LOG_FATAL << "Initializing processes: process type" 
                   << r.which() << " not exists";
+        exit(-1);
         break;
     }
 }
@@ -216,6 +241,7 @@ int collision_manager::sample(particle & pIn,
                               double Temp, 
                               std::vector<double> v3cell,
                               double dt_lab){
+    fourvec p0 = pIn.p;
     pOut_list.clear();
     // check pid
     int HardID;
@@ -224,14 +250,17 @@ int collision_manager::sample(particle & pIn,
     else if (abspid==1 || abspid==2 || abspid==3) HardID = 123;
     else if (abspid==4) HardID = 4;
     else if (abspid==5) HardID = 5;
-    else LOG_FATAL << "1. This particle, pid="
-                   << pIn.pid
-                   << " should not be handled by the LIDO collision term!";
+    else {
+        LOG_FATAL << "1. This particle, pid="
+                  << pIn.pid
+                  << " should not be handled by the LIDO collision term!";
+        exit(-1);
+    }    
 
     // Get the kinematics in the cell frame:
     auto p_cell = pIn.p.boost_to(v3cell[0], v3cell[1], v3cell[2]);
-    double E_cell = p_cell.t();
-    double LnEcell = std::log(std::max(E_cell, .5));
+    double E_cell = std::max(p_cell.t(), .5);
+    double LnEcell = std::log(E_cell);
     double dt_cell = dt_lab / pIn.p.t() * p_cell.t();
     // For diffusion induced radiation, qhat_Soft is an input
     double softqhatg = qhat(21, E_cell, 0., Temp);
@@ -251,10 +280,7 @@ int collision_manager::sample(particle & pIn,
                     dR = boost::get<Rate22>(r).GetZeroM({LnEcell, Temp}).s;
                 else{
                     int prcid = boost::get<Rate22>(r).process_id();
-                    if (prcid == 1 || prcid == 2 
-                    || prcid == 18 || prcid == 19
-                    || prcid == 29 || prcid == 30
-                    || prcid == 34 || prcid == 35 )
+                    if (is_classical(prcid))
                         dR = boost::get<Rate22>(r).GetZeroM({LnEcell, Temp}).s;
                     else dR = 0.;
                 }
@@ -276,6 +302,7 @@ int collision_manager::sample(particle & pIn,
         default:
             LOG_FATAL << "Computing rate: process type" 
                       << r.which() << " not exists";
+            exit(-1);
             break;
         }
         TotProb += dR*dt_cell;
@@ -307,10 +334,11 @@ int collision_manager::sample(particle & pIn,
 
     // Sample incoherent final state in the cell frame
     if (choice >= AllProcesses[HardID].size()){
-        LOG_INFO << pIn.pid << " " << pIn.p;
+        LOG_INFO << pIn.pid << " p0 = " << p0 << ", p=" << pIn.p;
         LOG_INFO << Temp  << " " 
                 << v3cell[0] << " " << v3cell[1] << " " << v3cell[2];
         LOG_FATAL << "Choosen channel: " << choice << " does not exist";
+        exit(-1);
     }
     // Final state holder FS, and pids
     std::vector<fourvec> FS;
@@ -360,32 +388,46 @@ int collision_manager::sample(particle & pIn,
     pOut_list.clear();
     // if it is a 2->2 process
     if(is2to2(prcid)){
+        double scale[2] = {pIn.Q0, 0.0};
         for (int i=0; i<FS.size(); i++){
-            int col=0, anticol=0, scale = pIn.Q0;
-            auto newp = make_parton(FS_pids[i], col, anticol, scale,
+            int col=0, anticol=0;
+            auto newp = make_parton(FS_pids[i], col, anticol, scale[i],
                                 FS[i], pIn, Temp, v3cell);
             pOut_list.push_back(newp);  
         }
         return prcid;
     }
     // if it is a 1->2 process
+    double boost_factor = pIn.p.t() / E_cell;
     if(is1to2(prcid)){
+        double p0abs = pIn.p.pabs();
+        fourvec nbar{1., -pIn.p.x()/p0abs,  
+               -pIn.p.y()/p0abs, -pIn.p.z()/p0abs};
+        double x = dot(FS[1], nbar)/dot(pIn.p, nbar);
+        double mfp = boost_factor * get_effective_mfp_hard(
+              E_cell, x, pIn.pid, FS_pids[1], FS_pids[0], Temp);
         for (int i=0; i<FS.size(); i++){
-            int col=0, anticol=0, scale = pIn.Q0;
-            auto newp = make_parton(FS_pids[i], col, anticol, scale,
+            int col=0, anticol=0;
+            auto newp = make_parton(FS_pids[i], col, anticol, pIn.Q0,
                                 FS[i], pIn, Temp, v3cell);
-            newp.mfp0 = get_effective_mfp_soft(pIn, Temp, v3cell);
+            newp.mfp0 = mfp;
             pOut_list.push_back(newp);  
         }
         return prcid;
     }
     // if it is a 2->3 process
     if(is2to3(prcid)){
+        double p0abs = pIn.p.pabs();
+        fourvec nbar{1., -pIn.p.x()/p0abs,  
+               -pIn.p.y()/p0abs, -pIn.p.z()/p0abs};
+        double x = dot(FS[2], nbar)/dot(pIn.p, nbar);
+        double mfp = boost_factor * get_effective_mfp_hard(
+              E_cell, x, pIn.pid, FS_pids[2], FS_pids[0], Temp);
         for (int i=0; i<FS.size(); i++){
             int col=0, anticol=0, scale = pIn.Q0;
             auto newp = make_parton(FS_pids[i], col, anticol, scale,
                                 FS[i], pIn, Temp, v3cell);
-            newp.mfp0 = get_effective_mfp_hard(pIn, newp, Temp, v3cell);
+            newp.mfp0 = mfp;
             pOut_list.push_back(newp);  
         }
         return prcid;

@@ -6,7 +6,6 @@
 #include <boost/program_options.hpp>
 
 #include "simpleLogger.h"
-#include "collision_manager.h"
 #include "lido.h"
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -57,7 +56,7 @@ int main(int argc, char* argv[]){
         double muT = args["muT"].as<double>();
         double cut = args["cut"].as<double>();
         double afix = args["afix"].as<double>();
-        std::vector<double> parameters{muT, afix, 4., cut};
+        std::vector<double> parameters{muT, afix, cut, 4.};
         lido A(args["lido-setting"].as<fs::path>().string(), 
             args["lido-table"].as<fs::path>().string(), 
             parameters);
@@ -67,29 +66,32 @@ int main(int argc, char* argv[]){
         std::ofstream f1("particles.dat");
         std::ofstream f2("channels.dat");
         
-        double T=0.3, dt = 0.02*5.076;
-        int N = 1000;
+        double T0 = 0.4, dt = .035*5.076;
+        int N = 100000; 
         fourvec p0{100,0,0,100};
         coordinate x0{0,0,0,0};
         plist.clear();
+        int pid0 = 21;
         for (int i=0; i<N; i++){
-            plist.push_back(make_parton(1, 0, 0, 0, p0, x0) );
+            plist.push_back(make_parton(pid0, 0, 0, 0, p0, x0) );
         }
         for (int i=0; i<200; i++){
-            LOG_INFO << "N = " << plist.size();
+            double T = T0;//*std::pow(.5/(dt*i/5.076+.5), 1./3.);
+            LOG_INFO << i << "N = " << plist.size();
             for (auto & p : plist){
                 A.update_single_particle(dt, T, {0,0,0}, p, pOut_list);
-                for (auto & ip: pOut_list) newplist.push_back(ip);
-                //p.p = p0;
-                //p.pid = 21;
+                //for (auto & ip: pOut_list) newplist.push_back(ip);
+                p.p = p.p*(p0.t()/p.p.t());
+                p.pid = pid0;
+                p.p = put_on_shell(p.p, p.pid);
             }
-            plist = newplist;
-            newplist.clear();
+            //plist = newplist;
+            //newplist.clear();
             
         }
-        for (auto & p : plist){
-            f1 << p.pid << " " << p.p << " " << p.x << std::endl;
-        }
+        //for (auto & p : plist){
+       //     f1 << p.pid << " " << p.p << " " << p.x << std::endl;
+        //}
 
     } 
     catch (const po::required_option& e){

@@ -11,20 +11,22 @@
 #include <sstream>
 #include <unistd.h>
 
-#include "Medium_Reader.h"
 #include "simpleLogger.h"
-#include "workflow.h"
+#include "Medium_Reader.h"
+#include "lido.h"
 #include "PGunWithShower.h"
 #include "Hadronize.h"
-#include "jet_finding.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
 void output_jet(std::string fname, std::vector<particle> plist){
     std::ofstream f(fname);
-    for (auto & p : plist) f << p.pid << " " << 
-                                p.p << " " << p.Q0 << std::endl;
+    f << "# pid, tau, x, y, etas, pT, phi, eta, M\n";
+    for (auto & p : plist) f << p.pid << " " << p.x << " "
+                             << p.p.xT() << " " << p.p.phi() << " "
+                             << p.p.pseudorap() << " " << p.mass
+                             << std::endl;
     f.close();
 }
 
@@ -52,25 +54,25 @@ int main(int argc, char* argv[]){
            ("muT",
            po::value<double>()->value_name("DOUBLE")->default_value(1.5,"1.5"),
            "mu_min/piT")
-	   ("Q0,q",
+       ("Q0,q",
            po::value<double>()->value_name("DOUBLE")->default_value(.5,".5"),
            "Scale [GeV] to insert in-medium transport")
-	   ("theta",
+       ("theta",
            po::value<double>()->value_name("DOUBLE")->default_value(4.,"4."),
            "Emin/T")
-	   ("Tf",
+       ("Tf",
            po::value<double>()->value_name("DOUBLE")->default_value(0.16,"0.16"),
            "Tf")
-	   ("pTmin",
+       ("pTmin",
            po::value<double>()->value_name("DOUBLE")->default_value(0.7,"0.7"),
            "pTmin")
-	   ("afix",
+       ("afix",
            po::value<double>()->value_name("DOUBLE")->default_value(-1.,"-1."),
            "fixed alpha_s, <0 for running alphas")
-	   ("E0",
+       ("E0",
            po::value<double>()->value_name("DOUBLE")->default_value(100.,"100"),
            "E0")
-	   ("cut",
+       ("cut",
            po::value<double>()->value_name("DOUBLE")->default_value(4.,"4."),
            "cut between diffusion and scattering, Qc^2 = cut*mD^2")
           ("ic,i",
@@ -127,21 +129,18 @@ int main(int argc, char* argv[]){
         int processid = getpid();
         
         /// Initialize Lido in-medium transport
-	// Scale to insert In medium transport
+        // Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
         double muT = args["muT"].as<double>();
         double theta = args["theta"].as<double>();
-	double cut = args["cut"].as<double>();
-	double afix = args["afix"].as<double>();
+        double cut = args["cut"].as<double>();
+        double afix = args["afix"].as<double>();
         double Tf = args["Tf"].as<double>();
-
-	initialize(table_mode,
-            args["lido-setting"].as<fs::path>().string(),
-            args["lido-table"].as<fs::path>().string(),
-	    muT, afix, theta, cut
-        );
-        /// Initialize jet finder with medium response
-        JetFinder jetfinder(150,150,3.,need_response_table, args["response-table"].as<fs::path>().string());
+        std::vector<double> parameters{muT, afix, cut, theta};
+        lido A(args["lido-setting"].as<fs::path>().string(), 
+               args["lido-table"].as<fs::path>().string(), 
+               parameters);
+        A.set_frame(1); //Bjorken Frame
 
         /// Initialize a simple hadronizer
         JetDenseMediumHadronize Hadronizer;
@@ -150,108 +149,69 @@ int main(int argc, char* argv[]){
         std::vector<particle> plist, dplist, thermal_list, hlist;
         std::vector<current> clist;
 
-        PGunWShower pythiagen(Q0,args["ic"].as<fs::path>().string());
+        PGunWShower pythiagen(Q0, args["ic"].as<fs::path>().string());
 
         /// Initialzie a hydro reader
-        
-
         for (int i=0; i<args["nevents"].as<int>(); i++){
-          Medium<2> med1(args["hydro"].as<fs::path>().string());
-          double mini_tau0 = med1.get_tauH();
-        std::vector<HadronizeCurrent> slist;
-        plist.clear();
-        clist.clear();
-        slist.clear();
-        pythiagen.Generate(args["E0"].as<double>(),plist);
-        for (auto & p : plist){
-                p.Tf = Tf+0.0001;
-                p.origin = 0;
-                if (p.x.tau() < mini_tau0 )
-                    p.freestream(
-			compute_realtime_to_propagate(
-                                   mini_tau0 , p.x, p.p)
-                        );
+            Medium<2> med1(args["hydro"].as<fs::path>().string());
+            double mini_tau0 = med1.get_tauH();
+            plist.clear();
+            clist.clear();
+            pythiagen.Generate(21, args["E0"].as<double>(), plist);
+            // move partciles below tau0 to tau0
+            for (auto & p : plist){
+                if (p.x.x0() >= mini_tau0 ) continue;
+                else {
+                    p.x.a[0] = mini_tau0;
+                    p.x.a[1] += p.p.x()/p.p.t()*mini_tau0;
+                    p.x.a[2] += p.p.y()/p.p.t()*mini_tau0;
+                }
             }   
             std::vector<particle> new_plist, pOut_list;
-
             while(med1.load_next()) {
-              new_plist.clear();
-              double current_hydro_clock = med1.get_tauL();
-              double dtau = med1.get_hydro_time_step();
-            LOG_INFO << "Hydro t = " << current_hydro_clock/5.076 << " fm/c";
-            for (auto & p : plist){     
-                if (p.Tf < Tf || std::abs(p.x.rap())>5. 			  || std::abs(p.p.rap()>5. )
-		    ) {
+                new_plist.clear();
+                double current_hydro_clock = med1.get_tauL();
+                double dtau = med1.get_hydro_time_step();
+                LOG_INFO << "Hydro t = " 
+                         << current_hydro_clock/5.076 << " fm/c";
+                for (auto & p : plist){     
+                    if ( std::abs(p.x.x3())>5. ){
+                        // skip particles at large space-time rapidity
                         new_plist.push_back(p);
                         continue;       
-                }
-                if (p.x.tau() > current_hydro_clock+dtau){
-                    new_plist.push_back(p);
-                    continue;
-                }
-                else{
-                    double DeltaTau = current_hydro_clock + dtau - p.x.tau();
-                    fourvec ploss = p.p;
+                    }
+                    if (p.x.x0() > current_hydro_clock+dtau){
+                        // skip particles in the future
+                        new_plist.push_back(p);
+                        continue;
+                    }
+                    else{
+                        double DeltaTau = current_hydro_clock 
+                                        + dtau - p.x.x0();
+                        fourvec ploss = p.p;
                         double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.0;
                         med1.interpolate(p.x, T, vx, vy, vz);
-                    int fs_size = update_particle_momentum_Lido(
-                            DeltaTau, T, {vx, vy, vz}, 
-                            p, pOut_list, Tf);     
-                    for (auto & fp : pOut_list) {
-                        ploss = ploss - fp.p;
-                        new_plist.push_back(fp);
-                    }                           
-                    current J; 
-                    J.p = ploss.boost_to(0, 0, p.x.z()/p.x.t());
-                    J.chetas = std::cosh(p.x.rap());
-                    J.shetas = std::sinh(p.x.rap());
-                    clist.push_back(J);  
+                        A.update_single_particle(DeltaTau, 
+                                                 T, {vx, vy, vz}, 
+                                                 p, pOut_list
+                                                 );  
+                        for (auto & fp : pOut_list) {
+                            // compute energy momentum loss of hard partons
+                            ploss = ploss - fp.p;
+                            new_plist.push_back(fp);
+                        }
+                    }
                 }
+                plist = new_plist;
             }
-            plist = new_plist;
+            for (auto & p : plist) p.radlist.clear();
+            //Hadronizer.hadronize(plist, hlist, thermal_list, Q0, Tf, 0, 1);
+            std::stringstream fheader;
+            fheader << args["output"].as<fs::path>().string() 
+                    << processid<<"-"<<i << ".dat";
+            std::ofstream f(fheader.str());
+            output_jet(fheader.str(), plist);
         }
-	for (auto & p : plist) p.radlist.clear();
-
-        Hadronizer.hadronize(plist, hlist, thermal_list, Q0, Tf, 0, 1);
-        std::stringstream fheader;
-        fheader << args["output"].as<fs::path>().string() 
-                << processid<<"-"<<i << "-scale.dat";
-        std::ofstream f(fheader.str());
-        output_jet(fheader.str(), hlist);
-
-
-        //LOG_INFO << "Hadronization";
-        //;
-        
-        /*for(auto & it : thermal_list){
-                double vz = it.x.z()/it.x.t();
-                current J; 
-                J.p = it.p.boost_to(0, 0, vz)*(-1.);
-                J.chetas = std::cosh(it.x.rap());
-                J.shetas = std::sinh(it.x.rap());
-                clist.push_back(J);  
-        }*/
-        /*jetfinder.set_sigma(1);
-        std::stringstream fheader;
-        fheader << args["output"].as<fs::path>().string() 
-                << processid<<"-"<<i << "-vac-Q0.dat";
-        std::ofstream f(fheader.str());
-        output_jet(fheader.str(), hlist);*/
-
-        /*jetfinder.PT.clear();
-        jetfinder.MakeETower(
-            0.6, Tf, args["pTmin"].as<double>(),
-            plist, clist, slist, 5);
-        std::stringstream fheader;
-        fheader << args["output"].as<fs::path>().string() 
-                << processid<<"-"<<i << "-soft.dat";
-        std::ofstream f(fheader.str());
-        for (auto & it : jetfinder.PT) {
-            for (auto & iit : it)
-                f << iit << " ";
-            f << std::endl;
-        }*/
-      }
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

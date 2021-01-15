@@ -7,13 +7,26 @@
 
 lido::lido(std::string setting_path, std::string table_path, 
          std::vector<double> parameters){
-    Lido_Ecut = parameters[2];
+    Lido_Ecut = parameters[3];
     std::string table_mode = (boost::filesystem::exists(table_path)) ? 
                          "old" : "new";
     CM = std::unique_ptr<collision_manager>(
            new collision_manager(table_mode, setting_path, table_path, parameters)
     );
 }
+
+
+fourvec ParallelTransportAlongZ(
+          fourvec p, coordinate x, double dx3, int Frame){
+    if (Frame==0) return p;
+    else if (Frame==1){
+        double ch = std::cosh(dx3), sh = std::sinh(dx3);
+        double newp0 =  p.t()*ch - p.z()*sh; 
+        double newpz = -p.t()*sh + p.z()*ch;
+        return fourvec{newp0, p.x(), p.y(), newpz};
+    }
+}
+
 
 void lido::FreeStream(
     particle & p, double dt){
@@ -55,15 +68,15 @@ void lido::Diffusion(
     auto pcell = p.p.boost_to(v[0], v[1], v[2]);
     double dtcell = dt*pcell.t()/p.p.t();
     fourvec pnew;
-    for (int i=0; i<10; i++){
-        Ito_update_rest(p.pid, dtcell/10, p.mass, T, pcell, pnew);
+    for (int i=0; i<5; i++){
+        Ito_update_rest(p.pid, dtcell/5., p.mass, T, pcell, pnew);
         if (p.is_virtual) pcell = pnew*(pcell.t()/pnew.t());
         else pcell = pnew;
         pcell = put_on_shell(pcell, p.pid);
     }
     p.p = pcell.boost_back(v[0], v[1], v[2]);
 }
-std::ofstream f("stat.dat");
+
 int lido::update_single_particle(
     double dt, double T, std::vector<double> v3,
     particle & pIn, std::vector<particle> & pOut_list){
@@ -72,10 +85,13 @@ int lido::update_single_particle(
     //                  in the frame vF = (0, 0, z/t=tanh(etas));
     pOut_list.clear();
     int abspid = std::abs(pIn.pid);
-    pIn.Tf = T;
     pIn.vcell[0] = v3[0];
     pIn.vcell[1] = v3[1];
     pIn.vcell[2] = v3[2];
+    pIn.Tf = T;
+    //---A---: FreeStream the particle
+    FreeStream(pIn, dt);
+
 
     // we only handle u,d,s,c,b,g
     // other wise, leave it untouched
@@ -92,21 +108,17 @@ int lido::update_single_particle(
     double mD2 = t_channel_mD2->get_mD2(T);
     double mD = std::sqrt(mD2);
     double minf = mD/std::sqrt(2);
-    double Eradmin = minf;
+    double Eradmin = 3.*T;
 
     // If a light parton has
     // E<Emin and Q<mD
     // and is not a virtual particle, drop it from LIDO
     double Ecell = pIn.p.boost_to(v3[0], v3[1], v3[2]).t();
-    if ( (!pIn.is_virtual) && (pIn.Q0<mD) && (Ecell < Emin) && isLightParton
+    if ( (!pIn.is_virtual) && (pIn.Q0<minf) && (Ecell < Emin) && isLightParton
     ){
         pIn.radlist.clear();
         return pOut_list.size();
     }
-   
-
-    //---A---: FreeStream the particle
-    FreeStream(pIn, dt);
  
     //---B---: If the pareton is not yet formed,
     // skip its interactions
@@ -147,6 +159,12 @@ int lido::update_single_particle(
     else if (is2to2(process_id)){
         // Two-body collision
         // add both final-state particle to Lido list
+        assign_2to2_color(process_id, 
+                       pIn.pid, FS[0].pid, FS[1].pid,
+                       pIn.col, pIn.acol,
+                       FS[0].col, FS[0].acol,
+                       FS[1].col, FS[1].acol
+                       );
         if (isPairProduction(process_id)) {
             // 2->2 pair production destroy all the interference
             pIn.radlist.clear();
@@ -157,6 +175,8 @@ int lido::update_single_particle(
         else {
             // semi-classical 2->2 preserve the identity
             pIn.p = FS[0].p;
+            pIn.col = FS[0].col;
+            pIn.acol = FS[0].acol;
             // add the recoil particle
             pOut_list.push_back(FS[1]);
         }
@@ -164,88 +184,164 @@ int lido::update_single_particle(
     else if (is1to2(process_id)){
         // if the radiated parton is energytic enough, take it as a 
         // virtual particle about to from
-        if (FS[1].p.boost_to(v3[0], v3[1], v3[2]).t() > Eradmin){
+        if (  (FS[0].p.boost_to(v3[0], v3[1], v3[2]).t() > Eradmin || std::abs(FS[0].pid)==4 || std::abs(FS[0].pid)==5 )
+           && (FS[1].p.boost_to(v3[0], v3[1], v3[2]).t() > Eradmin || std::abs(FS[1].pid)==4 || std::abs(FS[1].pid)==5 )
+        ){
+            FS[0].is_virtual = true;
+            FS[0].T0 = T;
             FS[1].is_virtual = true;
-            pIn.radlist.push_back(FS[1]);
+            FS[1].T0 = T;
+            pIn.radlist.push_back({FS[0], FS[1]});
         }
     }
     else if (is2to3(process_id)){
         // if the radiated parton is energytic enough, take it as a 
         // virtual particle about to from
-        if (FS[2].p.boost_to(v3[0], v3[1], v3[2]).t() > Eradmin){
+        if (  (FS[0].p.boost_to(v3[0], v3[1], v3[2]).t() > Eradmin || std::abs(FS[0].pid)==4 || std::abs(FS[0].pid)==5 )
+           && (FS[2].p.boost_to(v3[0], v3[1], v3[2]).t() > Eradmin || std::abs(FS[2].pid)==4 || std::abs(FS[2].pid)==5 )
+        ){
+            FS[0].is_virtual = true;
+            FS[0].T0 =T;
             FS[2].is_virtual = true;
-            pIn.radlist.push_back(FS[2]);
+            FS[0].T0 =T;
+            pIn.radlist.push_back({FS[0], FS[2]});
         }
         // recoil parton is neglected
     }
 
     //---G---: LPM correction
     // Only for real particle that has a non-empty radiation list
-    
+
     if ((!pIn.radlist.empty()) && (!pIn.is_virtual)){
+        // Remove those rad particle whose kinematic constrain is  
+        // violated
+        for (std::vector<std::vector<particle> >::iterator 
+             it = pIn.radlist.begin(); 
+             it != pIn.radlist.end();){
+            fourvec PB = ParallelTransportAlongZ(
+                (*it)[1].p, (*it)[1].x0, 
+                pIn.x.x3()-(*it)[1].x.x3(), FrameChoice
+            );
+            fourvec PC = ParallelTransportAlongZ(
+                (*it)[0].p, (*it)[0].x0, 
+                pIn.x.x3()-(*it)[0].x.x3(), FrameChoice
+            );
+            if(PB.t()>=pIn.p.t() || PC.t()>=pIn.p.t() ) 
+                it = pIn.radlist.erase(it);
+            else it++;
+        }
+
         // loop over each virtual particles and evolve it
-        for (std::vector<particle>::iterator it = pIn.radlist.begin(); 
+        for (std::vector<std::vector<particle> >::iterator 
+             it = pIn.radlist.begin(); 
              it != pIn.radlist.end(); it++){
-            std::vector<particle> virtual_FS;
-            update_single_particle(dt, T, v3, *it, virtual_FS);
-            it->p = virtual_FS[0].p;
+            std::vector<particle> F1, F2;
+            update_single_particle(dt, T, v3, (*it)[0], F1);
+            (*it)[0].p = F1[0].p;
+            update_single_particle(dt, T, v3, (*it)[1], F2);
+            (*it)[1].p = F2[0].p;
         }
         bool nonclassical = false;
         // check which one has reached its formation time
-        for (std::vector<particle>::iterator it = pIn.radlist.begin(); 
+        for (std::vector<std::vector<particle> >::iterator 
+             it = pIn.radlist.begin(); 
              it != pIn.radlist.end();){
             if (nonclassical) break;
-            double taun = formation_time(it->mother_p, it->p, 
-                                         T, pIn.pid, it->pid);
+            double taun, kt2n;
+            // to compute formation time in Bjorken frame,
+            // we will need to parallel transport other vectors 
+            // to the coordinate of the current partcile
+            // 1) Daughter partons: boost in eta
+            // 2) Original copy: transport in tau
+            fourvec P0 = (*it)[1].mother_p.boost_back(
+                           0, 0, std::tanh((*it)[1].x0.x3())).boost_to(
+                           0, 0, std::tanh(pIn.x.x3()));
+            fourvec PB = ParallelTransportAlongZ(
+                (*it)[1].p, (*it)[1].x0, 
+                pIn.x.x3()-(*it)[1].x.x3(), FrameChoice
+            );
+            fourvec PB0 = ParallelTransportAlongZ(
+                (*it)[1].p0, (*it)[1].x0, 
+                pIn.x.x3()-(*it)[1].x.x3(), FrameChoice
+            );
+            fourvec PC = ParallelTransportAlongZ(
+                (*it)[0].p, (*it)[0].x0, 
+                pIn.x.x3()-(*it)[0].x.x3(), FrameChoice
+            );
+           
+            formation_time(taun, kt2n, 
+                          pIn.pid, (*it)[1].pid, (*it)[0].pid, 
+                          pIn.p, PB, PC, T, P0);
             // it it has not formed, continue
-            if (it->x.x0()-it->x0.x0() <= taun) it++;
+            if (pIn.x.x0()-(*it)[1].x0.x0() <= taun) it++;
             else{
-                // if formed, apply LPM suppression
+                double P0abs = P0.pabs();
+                fourvec nbar{1., -P0.x()/P0abs, -P0.y()/P0abs, -P0.z()/P0abs};
+                double Eplus_mother = dot(P0, nbar);
+                double Z = dot(PB, nbar)/Eplus_mother;
+                // if formed, apply LPM suppression in the Bjorken frame
                 double Acceptance = 0.;
-                double kt20 = measure_perp(it->mother_p, it->p0).pabs2();
-                double kt2n = measure_perp(pIn.p, it->p).pabs2();
+                double kt20 = measure_perp(P0, PB0).pabs2();
+                double kt21 = measure_perp(P0, PB).pabs2();
+                double kt22 = measure_perp(P0, PC).pabs2();
                 double Running = std::min(
-                       alpha_s(kt2n,T)/alpha_s(kt20,T), 1.);
-
+                       alpha_s(kt21,T)/alpha_s(kt20,T), 1.);
+                
                 // an NLL-inspired suppression factor for the LPM effect
                 double mD2 = t_channel_mD2->get_mD2(T);
-                double lnQ2_1 = std::log(1. + taun / it->mfp0);
+                double lnQ2_1 = std::log(1. + taun/(*it)[1].mfp0);
                 double lnQ2_0 = std::log(1. + 
-                    6.*it->p.boost_to(v3[0], v3[1], v3[2]).t()*T/mD2);
+                 6.*Z*(1-Z)*pIn.p.boost_to(v3[0], v3[1], v3[2]).t()
+                   * (*it)[1].T0 / mD2);
+                double MassFactors = 1.0;
+                if (std::abs(pIn.pid)==4 || std::abs(pIn.pid)==5){
+                    double m2 = std::pow(Z*pIn.mass, 2);
+                    MassFactors = std::pow(kt21/(kt21+m2), 2);
+                }
+                if (std::abs(pIn.pid)==21 && (*it)[1].pid!=21){
+                    double m2 = std::pow((*it)[1].mass, 2);
+                    MassFactors = std::pow(kt21/(kt21+m2), 2);
+                }
                 double log_factor = std::sqrt(lnQ2_1/lnQ2_0);
-                double LPM = std::min(it->mfp0 / taun * log_factor, 1.);
+                double LPM = std::min((*it)[1].mfp0 / taun * log_factor, 1.);
                 // The final acceptance factor
-                Acceptance = LPM * Running;
+                Acceptance = LPM * Running * MassFactors;
 
                 if (Srandom::rejection(Srandom::gen) < Acceptance){   
-                    if (it->pid==21) {
-                        // mother parton id unchanged, semi-classical   
-                        pIn.p = pIn.p - it->p;   
-                        //f << pIn.x.x0() << " " << (pIn.p.t()+pIn.p.z())/2. << " " << (it->p.t()+it->p.z())/2. << std::endl;        
+                    assign_n2np1_color(
+                       pIn.pid, (*it)[0].pid, (*it)[1].pid,
+                       pIn.col, pIn.acol,
+                       (*it)[0].col, (*it)[0].acol,
+                       (*it)[1].col, (*it)[1].acol
+                       );
+                    if ((*it)[1].pid==21) { 
+                        pIn.p = pIn.p - PB;
                     }
-                    if (it->pid!=21) {
-                        // mother parton id unchanged, 
-                        // no semi-classical analog --> pair production
-
-                        it->mass = pid2mass(it->pid);
-                        pIn.mass = pid2mass(it->pid);
-                        pIn.pid = -it->pid;
-                        pIn.p = pIn.p - it->p;
-                        it->p0 = it->p;                 
-                        pIn.p.a[0] = std::sqrt(pIn.mass*pIn.mass+pIn.p.pabs2());
-                        it->p.a[0] = std::sqrt(it->mass*it->mass+it->p.pabs2());
+                    if ((*it)[1].pid!=21) {
+                        pIn.p = pIn.p - PB;   
+                        pIn.pid = -(*it)[1].pid;
+                        pIn.mass = pid2mass(pIn.pid);
                         nonclassical = true;
                     }
-                    pIn.p = put_on_shell(pIn.p, pIn.pid);
-                    it->p = put_on_shell(it->p, it->pid);
-                    pIn.p0 = pIn.p;
-                    double Scale = std::sqrt(kt2n+mD2);
+                    pIn.p = put_on_shell(pIn.p, pIn.pid);;
+                    pIn.p0 = pIn.p; 
+
+                    (*it)[1].p = put_on_shell(PB, (*it)[1].pid);
+                    (*it)[1].p0 = (*it)[1].p;  
+                    (*it)[1].x = pIn.x;
+                    (*it)[1].x0 = pIn.x;
+
+                    double Scale = std::sqrt(kt2n);
                     pIn.Q0 = Scale;
                     pIn.Q00 = Scale;
-                    it->Q0 = Scale;
-                    it->Q00 = Scale;
-                    it->is_virtual = false;
-                    pOut_list.push_back(*it);
+                 
+                    pIn.col = (*it)[0].col;
+                    pIn.acol = (*it)[0].acol;
+                    (*it)[1].Q0 = Scale;
+                    (*it)[1].Q00 = Scale;
+
+                    (*it)[1].is_virtual = false;
+                    pOut_list.push_back((*it)[1]);
                 }
                 // final remove it from the radlist
                 it = pIn.radlist.erase(it);
@@ -253,13 +349,7 @@ int lido::update_single_particle(
         }
         if (nonclassical) pIn.radlist.clear();
     }
-    // Finally, remove those rad particle whose kinematic constrain is  
-    // violated
-    for (std::vector<particle>::iterator it = pIn.radlist.begin(); 
-         it != pIn.radlist.end();){
-        if(it->p.t()>=pIn.p.t()) it = pIn.radlist.erase(it);
-        else it++;
-    }
+
 
 
     // Add the mother parton to the end of the output list

@@ -14,6 +14,8 @@ struct coordinate{ // an array of numbers. Can be cartesian or Bjorken coordinat
     os << A.x0() << " " << A.x1() << " " << A.x2() << " " << A.x3();
     return os;
   }
+  double tau(void) const {return std::sqrt(a[0]*a[0] - a[3]*a[3]);};
+  double etas(void) const {return .5*std::log((a[0]+a[3])/(a[0]-a[3]));};
 };
 
 // Lorentz structures on the coordinates: scalar, four-vector, and tensor
