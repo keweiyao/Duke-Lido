@@ -181,12 +181,12 @@ void JetFinder::MakeETower(double _vradial,
 	if (charged_jet){
 	    if (p.charged) {
                 Pmu[ieta][iphi] = Pmu[ieta][iphi] + p.p;
-	        if (p.p.xT()>pTmin) PT[ieta][iphi] += p.p.xT();
+	        if (p.p.xT()>pTmin && p.origin!=2) PT[ieta][iphi] += p.p.xT();
 	    }
 	}
 	else {
             Pmu[ieta][iphi] = Pmu[ieta][iphi] + p.p;
-            if (p.p.xT()>pTmin) PT[ieta][iphi] += p.p.xT();
+            if (p.p.xT()>pTmin && p.origin!=2) PT[ieta][iphi] += p.p.xT();
 	}
     }
     if (TypeOneSources.size()==0) return;
@@ -212,13 +212,13 @@ void JetFinder::MakeETower(double _vradial,
                 if (charged_jet){
 		    dpT += 2./3.*MR.get_dpT_dydphi(eta-etas, phi, 
 				                   s.p, vradial, 0.);
-                    dpTcut += 2./3.*MR.get_dpT_dydphi(eta-etas, phi, 
+                    dpTcut += 0*2./3.*MR.get_dpT_dydphi(eta-etas, phi, 
 				               s.p, vradial, pTmin/Tfreeze);
 		}
 		else{
                     dpT += MR.get_dpT_dydphi(eta-etas, phi, 
                                                    s.p, vradial, 0.);
-                    dpTcut += MR.get_dpT_dydphi(eta-etas, phi, 
+                    dpTcut += 0*MR.get_dpT_dydphi(eta-etas, phi, 
                                                s.p, vradial, pTmin/Tfreeze);
 		}
 
@@ -905,7 +905,7 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
             }
         }
         if (iR==Rs.size()) continue;
-        if (std::abs(J.eta) < 1.-J.R){
+        if (std::abs(J.eta) < 2.8){
             // check jet pT cut
             int ii=-1;
             for (int i=0; i<NpT; i++){

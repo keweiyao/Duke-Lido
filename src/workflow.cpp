@@ -430,7 +430,7 @@ int update_particle_momentum_Lido(
         // elastic process changes the momentum immediately
         if (channel == 0 || channel == 1){
 	    pIn.p = FS[0];
-            /*if (!pIn.is_virtual){  
+            if (!pIn.is_virtual){  
 		    int id = (channel==0) ? (Srandom::sample_flavor(3)) : 21;
 		    int col=-100, acol=-100, mcol=-100, macol=-100;
 		    SampleFlavorAndColor(
@@ -443,7 +443,7 @@ int update_particle_momentum_Lido(
 		    pIn.col = mcol;
 		    pIn.acol = macol;
 		    pOut_list.push_back(ep);
-           }*/
+           }
         }
         // inelastic process takes a finite time to happen
         if (channel == 2 || channel == 3){

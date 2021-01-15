@@ -194,7 +194,7 @@ int main(int argc, char* argv[]){
 	
         // all kinds of bins and cuts
 	// For RHIC 200 GeV
-        std::vector<double> TriggerBin({
+        /*std::vector<double> TriggerBin({
          2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,20,22,24,28,32,36,40,45,50,55,60,70,80,90,100});
         std::vector<double> Rs({.2,.3,.4});
         std::vector<double> ParticlepTbins({0,1,2,3,4,5,6,8,10,12,14,16,18,20,22,24,26,30,40,60,100});
@@ -215,9 +215,9 @@ int main(int argc, char* argv[]){
         std::vector<double> zpTbins({
         0.0, 0.3, 0.6, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 10.0,
         12.0, 15.0, 20.0, 25.0, 30.0, 40.0, 50.0, 60.0, 80.0, 100.0
-        });
+        });*/
 
-        /*
+        
 	// For 5.02 TeV	
         std::vector<double> TriggerBin({
          2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,24,26,
@@ -256,7 +256,7 @@ int main(int argc, char* argv[]){
         31.54786722,  44.56254691,  62.94627059,  88.9139705 ,
        125.59432158, 177.40669462, 250.59361681, 353.97289219,
        500.        	});
-       */
+       
 	LeadingParton dNdpT(ParticlepTbins);
 	JetStatistics JetSample(jetpTbins, Rs, 
 			 shapepTbins, shaperbins, 
