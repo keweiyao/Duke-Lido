@@ -341,6 +341,21 @@ int main(int argc, char* argv[]){
         }*/
         int c=0;
         LOG_INFO << "Jet finding, w/ medium excitation";
+        std::stringstream fj;
+	fj << args["output"].as<fs::path>().string()
+                       << processid << "-jets.dat";
+        std::ofstream Fj(fj.str());
+
+        std::stringstream fs, fc, fb;
+        fs << args["output"].as<fs::path>().string()
+                 << processid << "-s.dat";
+        fc << args["output"].as<fs::path>().string()
+                 << processid << "-c.dat";
+        fb << args["output"].as<fs::path>().string()
+                 << processid << "-b.dat";
+
+        std::ofstream Fs(fs.str()), Fc(fc.str()), Fb(fb.str());
+
         for (auto & ie : events){
             //dNdpT.add_event(ie.hlist, ie.sigma, ie.maxPT);
 	    if (args["jet"].as<bool>()) {
@@ -350,40 +365,48 @@ int main(int argc, char* argv[]){
                      0.6, Tf, args["pTtrack"].as<double>(),
                      ie.hlist, ie.clist, 10, false);
                 jetfinder.FindJets(Rs, 5., -3., 3., false);
-                std::stringstream fheader;
-                fheader << args["output"].as<fs::path>().string() 
-                       << processid << "-" << c << "-jets.dat";  
-                std::ofstream f(fheader.str());
-                for (auto & j : jetfinder.Jets){
-                    f << ie.sigma << " "
+                Fj << "# " << c<<std::endl;
+		for (auto & j : jetfinder.Jets){
+                    Fj << ie.sigma << " "
                       << j.pmu.xT() << " " 
                       << j.pmu.phi() << " " 
                       << j.pmu.pseudorap() << std::endl;
                 }      
-
-                std::stringstream fheader2;
-                fheader2 << args["output"].as<fs::path>().string() 
-                       << processid << "-" << c << "-HFs.dat";  
-                std::ofstream ff(fheader2.str());
+                Fs << "# " << c<<std::endl; 
                 for (auto & p : ie.hlist){
                     int absid = std::abs(p.pid);
                     if (  absid==311||absid==321||absid==3122
-                        ||absid==411||absid==421||absid==413
-                        ||absid==423||absid==511||absid==521
-                        ||absid==513||absid==523
                         )
-                    ff << ie.sigma << " "
+                    Fs << ie.sigma << " "
                       << p.pid << " "
                       << p.p.xT() << " " 
                       << p.p.phi() << " " 
                       << p.p.pseudorap() << std::endl;
                 }      
-                //jetfinder.FindHF(ie.hlist);
-                //jetfinder.CorrHFET(shaperbins);
-                //jetfinder.Frag(zbins, zpTbins);
-		//jetfinder.LabelFlavor();
-                //jetfinder.CalcJetshape(shaperbins);
-	        //JetSample.add_event(jetfinder.Jets, ie.sigma, ie.x0);
+                Fc << "# " << c<<std::endl;
+                for (auto & p : ie.hlist){
+                    int absid = std::abs(p.pid);
+                    if ( 
+                        absid==411||absid==421||absid==413||absid==423
+                        )
+                    Fc << ie.sigma << " "
+                      << p.pid << " "
+                      << p.p.xT() << " "
+                      << p.p.phi() << " "
+                      << p.p.pseudorap() << std::endl;
+                }
+                Fb << "# " << c<<std::endl;
+                for (auto & p : ie.hlist){
+                    int absid = std::abs(p.pid);
+                    if ( 
+                        absid==511||absid==521||absid==513||absid==523
+                        )
+                    Fb << ie.sigma << " "
+                      << p.pid << " "
+                      << p.p.xT() << " "
+                      << p.p.phi() << " "
+                      << p.p.pseudorap() << std::endl;
+                }
                 c++;
 	    }
         }
