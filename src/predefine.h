@@ -114,6 +114,7 @@ void hdf5_read_scalar_attr(
 
 bool is1to2(int prcid);
 bool is2to2(int prcid);
+bool is2to2_nlo(int prcid);
 bool is_classical(int prcid);
 bool is2to3(int prcid);
 bool isPairProduction(int prcid);
@@ -132,6 +133,13 @@ void assign_2to2_color(int process_id,
                        int Ca, int aCa,
                        int & C1, int & aC1,
                        int & C2, int & aC2
+                       );
+void assign_2to2_nlo_color(int process_id, 
+                       int pidA, int pid1, int pid2, int pid3,
+                       int Ca, int aCa,
+                       int & C1, int & aC1,
+                       int & C2, int & aC2,
+                       int & C3, int & aC3
                        );
 void assign_n2np1_color(
                        int pidA, int pid1, int pid2,

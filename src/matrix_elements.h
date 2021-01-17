@@ -58,4 +58,7 @@ double dX_gq2qqqbar(const double * x_, void * params_);
 double M2_gg2qgqbar(const double * x_, void * params_);
 double dX_gg2qgqbar(const double * x_, void * params_);
 
+double M2_gg2gqqbar(const double * x_, void * params_);
+double dX_gg2gqqbar(const double * x_, void * params_);
+
 #endif

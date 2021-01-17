@@ -181,6 +181,24 @@ int lido::update_single_particle(
             pOut_list.push_back(FS[1]);
         }
     }
+    else if (is2to2_nlo(process_id)){
+        // elastic for hard 
+        // soft parton undergoes quark-pair production
+        assign_2to2_nlo_color(process_id, 
+                       pIn.pid, FS[0].pid, FS[1].pid, FS[2].pid,
+                       pIn.col, pIn.acol,
+                       FS[0].col, FS[0].acol,
+                       FS[1].col, FS[1].acol,
+                       FS[2].col, FS[2].acol
+                       );
+        // hard parton changes momentum and color
+        pIn.p = FS[0].p;
+        pIn.col = FS[0].col;
+        pIn.acol = FS[0].acol;
+        // add two recoil particle
+        pOut_list.push_back(FS[1]);
+        pOut_list.push_back(FS[2]);
+    }
     else if (is1to2(process_id)){
         // if the radiated parton is energytic enough, take it as a 
         // virtual particle about to from
@@ -194,7 +212,7 @@ int lido::update_single_particle(
             pIn.radlist.push_back({FS[0], FS[1]});
         }
     }
-    else if (is2to3(process_id)){
+    else if (is2to3(process_id) && (!is2to2_nlo(process_id))){
         // if the radiated parton is energytic enough, take it as a 
         // virtual particle about to from
         if (  (FS[0].p.boost_to(v3[0], v3[1], v3[2]).t() > Eradmin || std::abs(FS[0].pid)==4 || std::abs(FS[0].pid)==5 )

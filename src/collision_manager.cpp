@@ -45,7 +45,13 @@ AllProcesses(){
     AllProcesses[21].push_back(Rate23("Boltzmann/gg2cgcbar", 
                                setting_path, dX_gg2qgqbar)); 
     AllProcesses[21].push_back(Rate23("Boltzmann/gg2bgbbar", 
-                               setting_path, dX_gg2qgqbar));     
+                               setting_path, dX_gg2qgqbar)); 
+    AllProcesses[21].push_back(Rate23("Boltzmann/gg2gqqbar", 
+                               setting_path, dX_gg2gqqbar));   
+    AllProcesses[21].push_back(Rate23("Boltzmann/gg2gccbar", 
+                               setting_path, dX_gg2gqqbar)); 
+    AllProcesses[21].push_back(Rate23("Boltzmann/gg2gbbbar", 
+                               setting_path, dX_gg2gqqbar));     
     AllProcesses[21].push_back(Rate12("Boltzmann/g2gg", 
                                setting_path, LGV_g2gg));       
     AllProcesses[21].push_back(Rate12("Boltzmann/g2qqbar", 

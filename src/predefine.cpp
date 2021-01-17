@@ -263,6 +263,10 @@ bool is2to2(int prcid){ // 14
             prcid==18||prcid==19||prcid==20||prcid==21||prcid==22||
             prcid==29||prcid==30||prcid==34||prcid==35);
 }
+bool is2to2_nlo(int prcid){
+    return (prcid==25||prcid==26||prcid==27||
+            prcid==39||prcid==40||prcid==41);
+}
 bool is_classical(int prcid){
     return (prcid == 1 || prcid == 2 
                     || prcid == 18 || prcid == 19
@@ -274,7 +278,7 @@ bool is2to3(int prcid){ // 17
            ||prcid==10||prcid==11||prcid==12||prcid==13
            ||prcid==23||prcid==24||prcid==25||prcid==26
            ||prcid==27||prcid==31||prcid==32||prcid==36
-           ||prcid==37);
+           ||prcid==37||prcid==39||prcid==40||prcid==41);
 }
 bool isPairProduction(int prcid){
    return (prcid==3||prcid==4||prcid==5
@@ -282,7 +286,8 @@ bool isPairProduction(int prcid){
          ||prcid==11||prcid==12||prcid==13
          ||prcid==15||prcid==16||prcid==17
          ||prcid==20||prcid==21||prcid==22
-         ||prcid==25||prcid==26||prcid==27);
+         ||prcid==25||prcid==26||prcid==27
+         ||prcid==39||prcid==40||prcid==41);
 }
 
 
@@ -445,13 +450,13 @@ int get_process_info(std::string p,
     else if (p=="qg2qccbar"){ // 26
         _IM.resize(2); _FM.resize(3); _IT.resize(2); _FT.resize(3);
         _IM[0]=0.; _IM[1]=0.; _FM[0]=Mc; _FM[1]=0.; _FM[2]=Mc;
-        _IT[0]=123; _IT[1]=21; _FT[0]=4; _FT[1]=123; _FT[2]=4;
+        _IT[0]=123; _IT[1]=21; _FT[0]=123; _FT[1]=4; _FT[2]=4;
         return 26;       
     } 
     else if (p=="qg2qbbbar"){ // 27
         _IM.resize(2); _FM.resize(3); _IT.resize(2); _FT.resize(3);
         _IM[0]=0.; _IM[1]=0.; _FM[0]=Mb; _FM[1]=0.; _FM[2]=Mb;
-        _IT[0]=123; _IT[1]=21; _FT[0]=5; _FT[1]=123; _FT[2]=5;
+        _IT[0]=123; _IT[1]=21; _FT[0]=123; _FT[1]=5; _FT[2]=5;
         return 27;       
     } 
     else if (p=="q2qg"){ // 28
@@ -519,6 +524,24 @@ int get_process_info(std::string p,
         _IM[0]=Mb;  _FM[0]=Mb; _FM[1]=0.; 
         _IT[0]=5; _FT[0]=5; _FT[1]=21; 
         return 38;             
+    } 
+    else if (p=="gg2gqqbar"){ // 39
+        _IM.resize(2); _FM.resize(3); _IT.resize(2); _FT.resize(3);
+        _IM[0]=0.; _IM[1]=0.; _FM[0]=0.; _FM[1]=0.; _FM[2]=0.;
+        _IT[0]=21; _IT[1]=21; _FT[0]=21; _FT[1]=123; _FT[2]=123;
+        return 39;       
+    } 
+    else if (p=="gg2gccbar"){ // 40
+        _IM.resize(2); _FM.resize(3); _IT.resize(2); _FT.resize(3);
+        _IM[0]=0.; _IM[1]=0.; _FM[0]=Mc; _FM[1]=0.; _FM[2]=Mc;
+        _IT[0]=123; _IT[1]=21; _FT[0]=123; _FT[1]=4; _FT[2]=4;
+        return 40;       
+    } 
+    else if (p=="gg2gbbbar"){ // 41
+        _IM.resize(2); _FM.resize(3); _IT.resize(2); _FT.resize(3);
+        _IM[0]=0.; _IM[1]=0.; _FM[0]=Mb; _FM[1]=0.; _FM[2]=Mb;
+        _IT[0]=123; _IT[1]=21; _FT[0]=123; _FT[1]=5; _FT[2]=5;
+        return 41;       
     } 
 }
 
@@ -758,6 +781,30 @@ void assign_2to3_pid(int process_id,
             pids[1] = 21;
             pids[2] = 21;
             break; 
+        case 39: // gg2gqqbar
+            if (forward) LOG_FATAL<< "process 39 \"q(F)+g(B)->q+q+qbar\" cannot be forward";
+            else{
+                pids[0] = incoming_hard_id;
+                pids[1] = Srandom::sample_flavor(nf);
+                pids[2] = -pids[1];
+            }
+            break; 
+        case 40: // gg2gccbar
+            if (forward) LOG_FATAL<< "process 40 \"q(F)+g(B)->q+c+cbar\" cannot be forward";
+            else{
+                pids[0] = incoming_hard_id;
+                pids[1] = Srandom::binary_choice()? 4:-4;
+                pids[2] = -pids[1];
+            }
+            break; 
+        case 41: // gg2gbbbar
+            if (forward) LOG_FATAL<< "process 41 \"q(F)+g(B)->q+b+bbar\" cannot be forward";
+            else{
+                pids[0] = incoming_hard_id;
+                pids[1] = Srandom::binary_choice()? 5:-5;
+                pids[2] = -pids[1];
+            }
+            break; 
         default:
             LOG_FATAL << "Assign pid: process_id " << process_id << " is not a known 2-3-body process";
             exit(-1);
@@ -908,4 +955,62 @@ void assign_n2np1_color(
         exit(-1);
     }
 }
+
+
+
+void assign_2to2_nlo_color(int process_id, 
+                       int pidA, int pid1, int pid2, int pid3,
+                       int Ca, int aCa,
+                       int & C1, int & aC1,
+                       int & C2, int & aC2,
+                       int & C3, int & aC3
+                       ){
+    if (process_id==25 || process_id==26 || process_id==27){ // qg2qqqbar
+        if (pidA>0){
+            C1 = color_count; aC1 = 0; color_count ++;
+            if (pid2<0){
+                C2 = 0; aC2 = C1;
+                C3 = color_count, aC3 = 0; color_count ++;
+            }else{
+                C3 = 0; aC3 = C1;
+                C2 = color_count, aC2 = 0; color_count ++;
+            }
+        }else{
+            C1 = 0; aC1 = color_count; color_count ++;
+            if (pid2>0){
+                C2 = aC1; aC2 = 0;
+                C3 = 0, aC3 = color_count; color_count ++;
+            }else{
+                C3 = aC1; aC3 = 0;
+                C2 = 0, aC2 = color_count; color_count ++;
+            }
+        }
+    }
+    else if (process_id==39 || process_id==40 || process_id==41){ // gg2gqqbar
+        if (Srandom::binary_choice()){
+            C1 = Ca; aC1 = color_count; color_count ++;
+            if (pid2>0){
+                C2 = aC1; aC2 = 0;
+                C3 = 0, aC3 = color_count; color_count ++;
+            }else{
+                C3 = aC1; aC3 = 0;
+                C2 = 0, aC2 = color_count; color_count ++;
+            }
+        }else{
+            C1 = color_count; aC1 = aCa; color_count ++;
+            if (pid2<0){
+                C2 = 0; aC2 = aC1;
+                C3 = color_count, aC3 = 0; color_count ++;
+            }else{
+                C3 = 0; aC3 = aC1;
+                C2 = color_count, aC2 = 0; color_count ++;
+            }
+        }
+    }
+    else{
+        LOG_FATAL << "Wrong process id when assiging color";
+        exit(-1);
+    }
+}
+
 

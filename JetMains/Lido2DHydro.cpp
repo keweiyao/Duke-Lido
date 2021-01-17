@@ -320,6 +320,7 @@ int main(int argc, char* argv[]){
         for (auto & ie : events){ 
             Hadronizer.hadronize(ie.plist, ie.hlist, ie.thermal_list,
                                  ie.Q0, Tf, 1);
+            //LOG_INFO << "Theraml partons = " << ie.thermal_list.size();
 	    if (args["jet"].as<bool>()){
                 for(auto & it : ie.thermal_list){
                     double vz = std::tanh(it.x.x3());
@@ -373,40 +374,30 @@ int main(int argc, char* argv[]){
                       << j.pmu.pseudorap() << std::endl;
                 }      
                 Fs << "# " << c<<std::endl; 
+                Fc << "# " << c<<std::endl;
+                Fb << "# " << c<<std::endl;
                 for (auto & p : ie.hlist){
-                    int absid = std::abs(p.pid);
-                    if (  absid==311||absid==321||absid==3122
-                        )
-                    Fs << ie.sigma << " "
+                    int meson_specie = (std::abs(p.pid)/100)%10;
+                    int baryon_specie = (std::abs(p.pid)/1000)%10;
+                    if (meson_specie == 3 || baryon_specie==3)
+                      Fs << ie.sigma << " "
+                      << p.pid << " "
+                      << p.p.xT() << " " 
+                      << p.p.phi() << " " 
+                      << p.p.pseudorap() << std::endl;
+                    if (meson_specie == 4 || baryon_specie==4)
+                      Fc << ie.sigma << " "
+                      << p.pid << " "
+                      << p.p.xT() << " " 
+                      << p.p.phi() << " " 
+                      << p.p.pseudorap() << std::endl;
+                    if (meson_specie == 5 || baryon_specie==5)
+                      Fb << ie.sigma << " "
                       << p.pid << " "
                       << p.p.xT() << " " 
                       << p.p.phi() << " " 
                       << p.p.pseudorap() << std::endl;
                 }      
-                Fc << "# " << c<<std::endl;
-                for (auto & p : ie.hlist){
-                    int absid = std::abs(p.pid);
-                    if ( 
-                        absid==411||absid==421||absid==413||absid==423
-                        )
-                    Fc << ie.sigma << " "
-                      << p.pid << " "
-                      << p.p.xT() << " "
-                      << p.p.phi() << " "
-                      << p.p.pseudorap() << std::endl;
-                }
-                Fb << "# " << c<<std::endl;
-                for (auto & p : ie.hlist){
-                    int absid = std::abs(p.pid);
-                    if ( 
-                        absid==511||absid==521||absid==513||absid==523
-                        )
-                    Fb << ie.sigma << " "
-                      << p.pid << " "
-                      << p.p.xT() << " "
-                      << p.p.phi() << " "
-                      << p.p.pseudorap() << std::endl;
-                }
                 c++;
 	    }
         }

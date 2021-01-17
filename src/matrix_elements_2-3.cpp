@@ -579,4 +579,58 @@ double dX_gg2qgqbar(const double * x_, void * params){
 }
 
 
+// g[h](A) + g[s](B) --> q(1)+g(2)+qbar(3)
+double M2_gg2gqqbar(const double * x_, void * params_){
+    double * params = static_cast<double*>(params_);
+    double Temp = params[2], m1 = params[5];
+    double m1sq = m1*m1;
+    double kx, ky, qx, qy, xbar, t, Jacobian, yk;
+    bool status = false;
+    unpack_three_body_phase_space(
+      x_, params, 
+      kx, ky, yk, 
+      qx, qy,
+      xbar, t,
+      Jacobian, status
+    );
+    if (status==false) return 0.;
+    if (yk>0) return 0.;
+    double one_minus_xbar = 1.-xbar;
+    double mg2 = t_channel_mD2->get_mD2(Temp) / 2.;
+    double kt2 = kx*kx+ky*ky;
+    double MA[2], MB[2], MC[2], A[2], B[2];
+    double DA, DB, DC, A2, B2, AB, Msq_22, Msq_12;
+    MA[0] = kx - xbar*qx;
+    MA[1] = ky - xbar*qy;
+    MB[0] = kx - qx;
+    MB[1] = ky - qy;
+    MC[0] = kx;
+    MC[1] = ky;
+    double mth2 = (CF/CA-xbar+xbar*xbar)*mg2;
+    DA = MA[0]*MA[0] + MA[1]*MA[1] + mth2;
+    DB = MB[0]*MB[0] + MB[1]*MB[1] + mth2;
+    DC = MC[0]*MC[0] + MC[1]*MC[1] + mth2;
+    A[0] = MA[0]/DA-MB[0]/DB;
+    A[1] = MA[1]/DA-MB[1]/DB;
+    B[0] = MA[0]/DA-MC[0]/DC;
+    B[1] = MA[1]/DA-MC[1]/DC;
+    A2 = std::pow(A[0],2) + std::pow(A[1],2);
+    B2 = std::pow(B[0],2) + std::pow(B[1],2);
+    AB = A[0]*B[0] + A[1]*B[1];
+    Msq_22 = M2_gg2gg(t, params);
+    Msq_12 = c8pi* alpha_s(kt2, Temp) 
+            * one_minus_xbar * xbar
+            * P_g2qqbar(xbar)
+             * ( CF*A2 + CF*B2 - (2*CF-CA)*AB ) /CA;
+    return Msq_12*Msq_22*Jacobian;
+}    
+double dX_gg2gqqbar(const double * x_, void * params){
+    double * p = static_cast<double*>(params);
+    double s = p[0];
+    double mA=p[3], mB=p[4];
+    double Flux = 2*std::sqrt((s-std::pow(mA-mB,2))*(s-std::pow(mA+mB,2)));
+    return M2_gg2gqqbar(x_, params)/Flux;
+}
+
+
 

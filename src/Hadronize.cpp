@@ -40,39 +40,23 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("HadronLevel:Decay = off");
     pythia.readString("StringZ:usePetersonC=on");
     pythia.readString("StringZ:usePetersonB=on");
-pythia.readString("411:mayDecay = off");
-pythia.readString("421:mayDecay = off");
-pythia.readString("413:mayDecay = off");
-pythia.readString("423:mayDecay = off");
-pythia.readString("511:mayDecay = off");
-pythia.readString("521:mayDecay = off");
-pythia.readString("513:mayDecay = off");
-pythia.readString("523:mayDecay = off");
+    pythia.readString("4:mayDecay = off");
+    pythia.readString("5:mayDecay = off");
+    pythia.readString("311:mayDecay = off");
+    pythia.readString("411:mayDecay = off");
+    pythia.readString("421:mayDecay = off");
+    pythia.readString("431:mayDecay = off");
+    pythia.readString("413:mayDecay = off");
+    pythia.readString("433:mayDecay = off");
+    pythia.readString("413:mayDecay = off");
+    pythia.readString("433:mayDecay = off");
+    pythia.readString("511:mayDecay = off");
+    pythia.readString("521:mayDecay = off");
+    pythia.readString("531:mayDecay = off");
+    pythia.readString("513:mayDecay = off");
+    pythia.readString("523:mayDecay = off");
+    pythia.readString("533:mayDecay = off");
     pythia.init();
-}
-
-double GetMass(int pid){
-    int absid = std::abs(pid);
-    if (absid == 21) return 0.;
-    else if (absid == 123 || absid == 1 || absid == 2 || absid == 3) return 0.;
-    else if (absid == 4) return 1.3;
-    else if (absid == 5) return 4.2;
-    else {
-        LOG_WARNING << "I don't know what pid = " << pid << " is, but going to give it a zero mass.";
-        return 0.;
-    }
-}
-
-double GetThreshold(int pid){
-    int absid = std::abs(pid);
-    if (absid == 21) return 0.;
-    else if (absid == 123 || absid == 1 || absid == 2 || absid == 3) return 0.;
-    else if (absid == 4) return 1.3;
-    else if (absid == 5) return 4.2;
-    else {
-        LOG_WARNING << "I don't know what pid = " << pid << " is, but going to give it a zero mass.";
-        return 0.;
-    }
 }
 
 void FormChain(particle pi, particle pf, 
@@ -218,9 +202,9 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
         auto ip = pythia.event[i];
         bool good = false;
 	int absid = std::abs(ip.id());
-        if (level==1) good = ip.isFinal();
+        if (level==1) good = ip.isFinal() || (ip.daughter1()==0 && ip.daughter2()==0);
         if (level==0) good = (ip.isParton() 
-                        && pythia.event[ip.daughter1()].isHadron())
+                      && pythia.event[ip.daughter1()].isHadron())
                       || (ip.isFinal() && ip.isParton());
         if (good) {
             Nff ++;
