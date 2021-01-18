@@ -170,8 +170,13 @@ int main(int argc, char* argv[]){
         }
 
 
-        std::vector<double> TriggerBin({
-         5,10,15,20,30,40,50,60,70,80,90,100,110,120,160,200,250,300,350,400,500,600,800,1000,2500});
+        std::vector<double> TriggerBin;
+        double logPTL=std::log(10), logPTH=std::log(2500);
+        int NPT = 21;
+        double dlogPT = (logPTH-logPTL)/NPT;
+        for (int i=0; i<NPT; i++){
+            TriggerBin.push_back(std::exp(logPTL+dlogPT*i));
+        }
         std::vector<double> Rs({.3});
         std::vector<double> ParticlepTbins({0,.25,.5,1.,1.5,2,3,4,5,6,7,8,10,
 			12,14,16,18,20,22,24,28,32,36,40,45,50,
