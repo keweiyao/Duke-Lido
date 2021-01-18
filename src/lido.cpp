@@ -244,7 +244,7 @@ int lido::update_single_particle(
                 (*it)[0].p, (*it)[0].x0, 
                 pIn.x.x3()-(*it)[0].x.x3(), FrameChoice
             );
-            if(PB.t()>=pIn.p.t() || PC.t()>=pIn.p.t() ) 
+            if(PB.t() + PC.t() >= pIn.p.t() ) 
                 it = pIn.radlist.erase(it);
             else it++;
         }

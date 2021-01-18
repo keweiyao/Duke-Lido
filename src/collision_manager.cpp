@@ -416,6 +416,7 @@ int collision_manager::sample(particle & pIn,
             int col=0, anticol=0;
             auto newp = make_parton(FS_pids[i], col, anticol, pIn.Q0,
                                 FS[i], pIn, Temp, v3cell);
+	    newp.is_virtual = true;
             newp.mfp0 = mfp;
             pOut_list.push_back(newp);  
         }
@@ -433,6 +434,7 @@ int collision_manager::sample(particle & pIn,
             int col=0, anticol=0, scale = pIn.Q0;
             auto newp = make_parton(FS_pids[i], col, anticol, scale,
                                 FS[i], pIn, Temp, v3cell);
+	    newp.is_virtual = true;
             newp.mfp0 = mfp;
             pOut_list.push_back(newp);  
         }

@@ -534,13 +534,13 @@ int get_process_info(std::string p,
     else if (p=="gg2gccbar"){ // 40
         _IM.resize(2); _FM.resize(3); _IT.resize(2); _FT.resize(3);
         _IM[0]=0.; _IM[1]=0.; _FM[0]=0.; _FM[1]=Mc; _FM[2]=Mc;
-        _IT[0]=123; _IT[1]=21; _FT[0]=123; _FT[1]=4; _FT[2]=4;
+        _IT[0]=21; _IT[1]=21; _FT[0]=21; _FT[1]=4; _FT[2]=4;
         return 40;       
     } 
     else if (p=="gg2gbbbar"){ // 41
         _IM.resize(2); _FM.resize(3); _IT.resize(2); _FT.resize(3);
         _IM[0]=0.; _IM[1]=0.; _FM[0]=0.; _FM[1]=Mb; _FM[2]=Mb;
-        _IT[0]=123; _IT[1]=21; _FT[0]=123; _FT[1]=5; _FT[2]=5;
+        _IT[0]=21; _IT[1]=21; _FT[0]=21; _FT[1]=5; _FT[2]=5;
         return 41;       
     } 
 }
@@ -699,33 +699,21 @@ void assign_2to3_pid(int process_id,
                 pids[0] = Srandom::sample_flavor(nf);
                 pids[1] = 21;
                 pids[2] = -pids[0];
-            }else{
-                pids[0] = incoming_hard_id;
-                pids[1] = Srandom::sample_flavor(nf);
-                pids[2] = -pids[1];
-            }
+            }else LOG_FATAL<< "process 11 \"g(F)+g(B)->q+g+qbar\" cannot be backward";
             break;  
         case 12: // gg2cgcbar
             if (forward){
                 pids[0] = Srandom::binary_choice()? 4:-4;
                 pids[1] = 21;
                 pids[2] = -pids[0];
-            }else{
-                pids[0] = incoming_hard_id;
-                pids[1] = Srandom::binary_choice()? 4:-4;
-                pids[2] = -pids[1];
-            }
+            }else LOG_FATAL<< "process 12 \"g(F)+g(B)->c+g+cbar\" cannot be backward";
             break;  
         case 13: // gg2bgbbar
             if (forward){
                 pids[0] = Srandom::binary_choice()? 5:-5;
                 pids[1] = 21;
                 pids[2] = -pids[0];
-            }else{
-                pids[0] = incoming_hard_id;
-                pids[1] = Srandom::binary_choice()? 5:-5;
-                pids[2] = -pids[1];
-            }
+            }else LOG_FATAL<< "process 13 \"g(F)+g(B)->b+g+bbar\" cannot be backward";
             break;  
         case 23: // qq2qqg 
             pids[0] = incoming_hard_id;
@@ -746,7 +734,7 @@ void assign_2to3_pid(int process_id,
             }
             break; 
         case 26: // qg2qccbar
-            if (forward) LOG_FATAL<< "process 25 \"q(F)+g(B)->q+c+cbar\" cannot be forward";
+            if (forward) LOG_FATAL<< "process 26 \"q(F)+g(B)->q+c+cbar\" cannot be forward";
             else{
                 pids[0] = incoming_hard_id;
                 pids[1] = Srandom::binary_choice()? 4:-4;
@@ -754,7 +742,7 @@ void assign_2to3_pid(int process_id,
             }
             break; 
         case 27: // qg2qbbbar
-            if (forward) LOG_FATAL<< "process 25 \"q(F)+g(B)->q+b+bbar\" cannot be forward";
+            if (forward) LOG_FATAL<< "process 27 \"q(F)+g(B)->q+b+bbar\" cannot be forward";
             else{
                 pids[0] = incoming_hard_id;
                 pids[1] = Srandom::binary_choice()? 5:-5;
