@@ -212,7 +212,7 @@ int lido::update_single_particle(
             pIn.radlist.push_back({FS[0], FS[1]});
         }
     }
-    else if (is2to3(process_id) && (!is2to2_nlo(process_id))){
+    else if (is2to3(process_id)){
         // if the radiated parton is energytic enough, take it as a 
         // virtual particle about to from
         if (  (FS[0].p.boost_to(v3[0], v3[1], v3[2]).t() > Eradmin || std::abs(FS[0].pid)==4 || std::abs(FS[0].pid)==5 )
@@ -349,7 +349,7 @@ int lido::update_single_particle(
                     (*it)[1].x = pIn.x;
                     (*it)[1].x0 = pIn.x;
 
-                    double Scale = std::sqrt(kt2n);
+                    double Scale = std::sqrt(kt2n+mD2);
                     pIn.Q0 = Scale;
                     pIn.Q00 = Scale;
                  

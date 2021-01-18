@@ -449,13 +449,13 @@ int get_process_info(std::string p,
     } 
     else if (p=="qg2qccbar"){ // 26
         _IM.resize(2); _FM.resize(3); _IT.resize(2); _FT.resize(3);
-        _IM[0]=0.; _IM[1]=0.; _FM[0]=Mc; _FM[1]=0.; _FM[2]=Mc;
+        _IM[0]=0.; _IM[1]=0.; _FM[0]=0.; _FM[1]=Mc; _FM[2]=Mc;
         _IT[0]=123; _IT[1]=21; _FT[0]=123; _FT[1]=4; _FT[2]=4;
         return 26;       
     } 
     else if (p=="qg2qbbbar"){ // 27
         _IM.resize(2); _FM.resize(3); _IT.resize(2); _FT.resize(3);
-        _IM[0]=0.; _IM[1]=0.; _FM[0]=Mb; _FM[1]=0.; _FM[2]=Mb;
+        _IM[0]=0.; _IM[1]=0.; _FM[0]=0.; _FM[1]=Mb; _FM[2]=Mb;
         _IT[0]=123; _IT[1]=21; _FT[0]=123; _FT[1]=5; _FT[2]=5;
         return 27;       
     } 
@@ -533,13 +533,13 @@ int get_process_info(std::string p,
     } 
     else if (p=="gg2gccbar"){ // 40
         _IM.resize(2); _FM.resize(3); _IT.resize(2); _FT.resize(3);
-        _IM[0]=0.; _IM[1]=0.; _FM[0]=Mc; _FM[1]=0.; _FM[2]=Mc;
+        _IM[0]=0.; _IM[1]=0.; _FM[0]=0.; _FM[1]=Mc; _FM[2]=Mc;
         _IT[0]=123; _IT[1]=21; _FT[0]=123; _FT[1]=4; _FT[2]=4;
         return 40;       
     } 
     else if (p=="gg2gbbbar"){ // 41
         _IM.resize(2); _FM.resize(3); _IT.resize(2); _FT.resize(3);
-        _IM[0]=0.; _IM[1]=0.; _FM[0]=Mb; _FM[1]=0.; _FM[2]=Mb;
+        _IM[0]=0.; _IM[1]=0.; _FM[0]=0.; _FM[1]=Mb; _FM[2]=Mb;
         _IT[0]=123; _IT[1]=21; _FT[0]=123; _FT[1]=5; _FT[2]=5;
         return 41;       
     } 
@@ -999,10 +999,10 @@ void assign_2to2_nlo_color(int process_id,
         }else{
             C1 = color_count; aC1 = aCa; color_count ++;
             if (pid2<0){
-                C2 = 0; aC2 = aC1;
+                C2 = 0; aC2 = C1;
                 C3 = color_count, aC3 = 0; color_count ++;
             }else{
-                C3 = 0; aC3 = aC1;
+                C3 = 0; aC3 = C1;
                 C2 = color_count, aC2 = 0; color_count ++;
             }
         }
