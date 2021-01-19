@@ -169,15 +169,9 @@ int main(int argc, char* argv[]){
             }
         }
 
-
-        std::vector<double> TriggerBin;
-        double logPTL=std::log(10), logPTH=std::log(2500);
-        int NPT = 21;
-        double dlogPT = (logPTH-logPTL)/NPT;
-        for (int i=0; i<NPT; i++){
-            TriggerBin.push_back(std::exp(logPTL+dlogPT*i));
-        }
-        std::vector<double> Rs({.3});
+        std::vector<double> TriggerBin({2,5,10,20,40,60,80,100,120,160,200,300,
+           400,500,600,800,1000,1500,2000,2500});
+	std::vector<double> Rs({.3});
         std::vector<double> ParticlepTbins({0,.25,.5,1.,1.5,2,3,4,5,6,7,8,10,
 			12,14,16,18,20,22,24,28,32,36,40,45,50,
 			55,60,65,70,80,90,100,
@@ -278,7 +272,6 @@ int main(int argc, char* argv[]){
             for (auto & ie : events){
                 std::vector<particle> new_plist, pOut_list;
                 for (auto & p : ie.plist){     
-                    //LOG_INFO << p.pid << " " << p.p;
                     if ( std::abs(p.x.x3())>5. || p.Tf<Tf ){
                         // skip particles at large space-time rapidity
                         new_plist.push_back(p);
@@ -338,12 +331,6 @@ int main(int argc, char* argv[]){
 
         /// use process id to define filename
         int processid = getpid();
-        /*
-	for (auto & ie : events) {
-            
-            output_jet(fheader.str(), ie.hlist);
-            c++;
-        }*/
         int c=0;
         LOG_INFO << "Jet finding, w/ medium excitation";
         std::stringstream fj;
@@ -362,7 +349,6 @@ int main(int argc, char* argv[]){
         std::ofstream Fs(fs.str()), Fc(fc.str()), Fb(fb.str());
 
         for (auto & ie : events){
-            //dNdpT.add_event(ie.hlist, ie.sigma, ie.maxPT);
 	    if (args["jet"].as<bool>()) {
 		    //--->>>
                 jetfinder.set_sigma(ie.sigma);

@@ -231,24 +231,6 @@ int lido::update_single_particle(
     // Only for real particle that has a non-empty radiation list
 
     if ((!pIn.radlist.empty()) && (!pIn.is_virtual)){
-        // Remove those rad particle whose kinematic constrain is  
-        // violated
-        for (std::vector<std::vector<particle> >::iterator 
-             it = pIn.radlist.begin(); 
-             it != pIn.radlist.end();){
-            fourvec PB = ParallelTransportAlongZ(
-                (*it)[1].p, (*it)[1].x0, 
-                pIn.x.x3()-(*it)[1].x.x3(), FrameChoice
-            );
-            fourvec PC = ParallelTransportAlongZ(
-                (*it)[0].p, (*it)[0].x0, 
-                pIn.x.x3()-(*it)[0].x.x3(), FrameChoice
-            );
-            if(PB.t()>=pIn.p.t() || PC.t()>=pIn.p.t() ) 
-                it = pIn.radlist.erase(it);
-            else it++;
-        }
-
         // loop over each virtual particles and evolve it
         for (std::vector<std::vector<particle> >::iterator 
              it = pIn.radlist.begin(); 
@@ -332,22 +314,23 @@ int lido::update_single_particle(
                        (*it)[0].col, (*it)[0].acol,
                        (*it)[1].col, (*it)[1].acol
                        );
+                    
+                    (*it)[1].p = put_on_shell(pIn.p*Z, (*it)[1].pid);
+                    (*it)[1].p0 = (*it)[1].p;  
+                    (*it)[1].x = pIn.x;
+                    (*it)[1].x0 = pIn.x;
+
                     if ((*it)[1].pid==21) { 
-                        pIn.p = pIn.p - PB;
+                        pIn.p = pIn.p*(1.-Z);
                     }
                     if ((*it)[1].pid!=21) {
-                        pIn.p = pIn.p - PB;   
+                        pIn.p = pIn.p*(1.-Z);   
                         pIn.pid = -(*it)[1].pid;
                         pIn.mass = pid2mass(pIn.pid);
                         nonclassical = true;
                     }
                     pIn.p = put_on_shell(pIn.p, pIn.pid);;
                     pIn.p0 = pIn.p; 
-
-                    (*it)[1].p = put_on_shell(PB, (*it)[1].pid);
-                    (*it)[1].p0 = (*it)[1].p;  
-                    (*it)[1].x = pIn.x;
-                    (*it)[1].x0 = pIn.x;
 
                     double Scale = std::sqrt(kt2n+mD2);
                     pIn.Q0 = Scale;
