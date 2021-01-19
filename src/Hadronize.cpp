@@ -30,6 +30,9 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("Next:numberShowInfo = 0");
     pythia.readString("Next:numberShowProcess = 0");
     pythia.readString("Next:numberShowEvent = 0");
+    pythia.readString("1:m0 = 0");
+    pythia.readString("2:m0 = 0");
+    pythia.readString("3:m0 = 0");
     pythia.readString("4:m0 = 1.3");
     pythia.readString("5:m0 = 4.2");
     pythia.readString("PartonLevel:Remnants = on");

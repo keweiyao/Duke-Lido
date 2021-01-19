@@ -394,10 +394,9 @@ int collision_manager::sample(particle & pIn,
     pOut_list.clear();
     // if it is a 2->2 process
     if(is2to2(prcid)){
-        double scale[2] = {pIn.Q0, 0.0};
         for (int i=0; i<FS.size(); i++){
             int col=0, anticol=0;
-            auto newp = make_parton(FS_pids[i], col, anticol, scale[i],
+            auto newp = make_parton(FS_pids[i], col, anticol, pIn.Q0,
                                 FS[i], pIn, Temp, v3cell);
             pOut_list.push_back(newp);  
         }
@@ -431,8 +430,8 @@ int collision_manager::sample(particle & pIn,
         double mfp = boost_factor * get_effective_mfp_hard(
               E_cell, x, pIn.pid, FS_pids[2], FS_pids[0], Temp);
         for (int i=0; i<FS.size(); i++){
-            int col=0, anticol=0, scale = pIn.Q0;
-            auto newp = make_parton(FS_pids[i], col, anticol, scale,
+            int col=0, anticol=0;
+            auto newp = make_parton(FS_pids[i], col, anticol, pIn.Q0,
                                 FS[i], pIn, Temp, v3cell);
 	    newp.is_virtual = true;
             newp.mfp0 = mfp;

@@ -170,8 +170,8 @@ int main(int argc, char* argv[]){
         }
 
         std::vector<double> TriggerBin({2,5,10,20,40,60,80,100,120,160,200,300,
-           400,500,600,800,1000,1500,2000,2500});
-	std::vector<double> Rs({.3});
+           400,500,600,700,800,900,1000,1200,1500,2000,2500});
+	std::vector<double> Rs({.4});
         std::vector<double> ParticlepTbins({0,.25,.5,1.,1.5,2,3,4,5,6,7,8,10,
 			12,14,16,18,20,22,24,28,32,36,40,45,50,
 			55,60,65,70,80,90,100,
@@ -317,7 +317,6 @@ int main(int argc, char* argv[]){
         for (auto & ie : events){ 
             Hadronizer.hadronize(ie.plist, ie.hlist, ie.thermal_list,
                                  ie.Q0, Tf, 1);
-            //LOG_INFO << "Theraml partons = " << ie.thermal_list.size();
 	    if (args["jet"].as<bool>()){
                 for(auto & it : ie.thermal_list){
                     double vz = std::tanh(it.x.x3());
@@ -333,28 +332,23 @@ int main(int argc, char* argv[]){
         int processid = getpid();
         int c=0;
         LOG_INFO << "Jet finding, w/ medium excitation";
-        std::stringstream fj;
+        std::stringstream fj, fs, fc, fb;
 	fj << args["output"].as<fs::path>().string()
                        << processid << "-jets.dat";
-        std::ofstream Fj(fj.str());
-
-        std::stringstream fs, fc, fb;
         fs << args["output"].as<fs::path>().string()
                  << processid << "-s.dat";
         fc << args["output"].as<fs::path>().string()
                  << processid << "-c.dat";
         fb << args["output"].as<fs::path>().string()
                  << processid << "-b.dat";
-
-        std::ofstream Fs(fs.str()), Fc(fc.str()), Fb(fb.str());
+        std::ofstream Fj(fj.str()), Fs(fs.str()), Fc(fc.str()), Fb(fb.str());
 
         for (auto & ie : events){
 	    if (args["jet"].as<bool>()) {
-		    //--->>>
                 jetfinder.set_sigma(ie.sigma);
                 jetfinder.MakeETower(
                      0.6, Tf, args["pTtrack"].as<double>(),
-                     ie.hlist, ie.clist, 10, false);
+                     ie.hlist, ie.clist, 15, false);
                 jetfinder.FindJets(Rs, 5., -3., 3., false);
                 Fj << "# " << c<<std::endl;
 		for (auto & j : jetfinder.Jets){
@@ -363,6 +357,7 @@ int main(int argc, char* argv[]){
                       << j.pmu.phi() << " " 
                       << j.pmu.pseudorap() << std::endl;
                 }      
+            }
                 Fs << "# " << c<<std::endl; 
                 Fc << "# " << c<<std::endl;
                 Fb << "# " << c<<std::endl;
@@ -389,7 +384,6 @@ int main(int argc, char* argv[]){
                       << p.p.pseudorap() << std::endl;
                 }      
                 c++;
-	    }
         }
         //std::stringstream fheader;
         //fheader << args["output"].as<fs::path>().string() << processid ;

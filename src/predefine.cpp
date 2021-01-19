@@ -149,12 +149,18 @@ void formation_time(double & tauf, double & Q2,
            fourvec pA, fourvec pB, fourvec pC, 
            double T, fourvec p0){
     double mg2 = t_channel_mD2->get_mD2(T) / 2.;
-    double p0abs = p0.pabs();
-    fourvec nbar{1., -p0.x()/p0abs,  -p0.y()/p0abs,  -p0.z()/p0abs};
-    double x = dot(pB, nbar)/dot(p0, nbar);
+    fourvec Ptot = pB+pC;
+    double Ptotabs = Ptot.pabs();
+    fourvec nbar{1.,-Ptot.x()/Ptotabs,-Ptot.y()/Ptotabs,-Ptot.z()/Ptotabs};
+    double Etot = dot(Ptot, nbar);
+    double x = dot(pB, nbar)/Etot;
     if (x<0.||x>1.) { 
         Q2 = mg2; 
-        LOG_WARNING << "x<0 or x>1 in formation time, x = "<<x;
+        LOG_WARNING << "x<0 or x>1 in formation time, x = "<<x ;
+        LOG_INFO << p0;
+        LOG_INFO << pA;
+        LOG_INFO << pB;
+        LOG_INFO << pC;
     }
     double M2 = x*(std::pow(pid2mass(idC), 2)+ mg2)
             + (1.-x)*(std::pow(pid2mass(idB), 2)+ mg2)
@@ -167,7 +173,7 @@ void formation_time(double & tauf, double & Q2,
         Q2 = M2;
         //LOG_WARNING << "Q2<M2 in formationt time, set it by M2";
     }
-    tauf = x*(1.-x)*dot(p0, nbar)/Q2;
+    tauf = x*(1.-x)*Etot/Q2;
 }
 
 //=============running coupling========================
@@ -213,6 +219,7 @@ particle make_parton(int pid, int col, int acol,
     p.x = mother.x;
     p.mother_p = mother.p;
     p.T0 = T;
+    p.Tf = T;
     p.is_virtual = mother.is_virtual;
     p.vcell.resize(3);
     p.vcell[0] = vcell[0];
@@ -241,6 +248,7 @@ particle make_parton(int pid, int col, int acol,
     p.x = x;
     p.mother_p = pmu;
     p.T0 = 0;
+    p.Tf = 0;
     p.is_virtual = false;
     p.vcell.resize(3);
     p.vcell[0] = 0;

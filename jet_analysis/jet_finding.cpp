@@ -141,7 +141,6 @@ void JetFinder::MakeETower(double _vradial,
     plist.clear();
     plist = _plist;
     // Initialzie empty towers
-    //LOG_INFO << "do jet finding";
     PT.clear();
     PT.resize(Neta); 
     for (auto & it : PT) {
@@ -221,7 +220,7 @@ void JetFinder::MakeETower(double _vradial,
 
             }
             coarsePT[0][ieta][iphi] = dpT;
-            coarsePT[1][ieta][iphi] = dpT-dpTcut;
+            coarsePT[1][ieta][iphi] = dpTcut;
         }
     }
     // Interpolate the coarse grid into the finer grid for jet finding

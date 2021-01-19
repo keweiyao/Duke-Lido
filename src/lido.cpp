@@ -108,13 +108,14 @@ int lido::update_single_particle(
     double mD2 = t_channel_mD2->get_mD2(T);
     double mD = std::sqrt(mD2);
     double minf = mD/std::sqrt(2);
-    double Eradmin = 3.*T;
+    double Eradmin = mD;
 
     // If a light parton has
     // E<Emin and Q<mD
     // and is not a virtual particle, drop it from LIDO
     double Ecell = pIn.p.boost_to(v3[0], v3[1], v3[2]).t();
-    if ( (!pIn.is_virtual) && (pIn.Q0<minf) && (Ecell < Emin) && isLightParton
+    if ( (!pIn.is_virtual) && (pIn.Q0<minf) 
+      && (Ecell < Emin) && isLightParton
     ){
         pIn.radlist.clear();
         return pOut_list.size();
@@ -140,7 +141,8 @@ int lido::update_single_particle(
     if (pIn.is_virtual){  
         // virtual particle only evolves according to semi-classical
         // 2-2 collisions, only return itself
-        if (process_id>0) pIn.p = FS[0].p;
+        if (process_id>0)
+            pIn.p = put_on_shell(FS[0].p*(pIn.p.t()/FS[0].p.t()), pIn.pid);
         pIn.radlist.clear();
         pOut_list.push_back(pIn);
         return pOut_list.size();
@@ -221,7 +223,7 @@ int lido::update_single_particle(
             FS[0].is_virtual = true;
             FS[0].T0 =T;
             FS[2].is_virtual = true;
-            FS[0].T0 =T;
+            FS[2].T0 =T;
             pIn.radlist.push_back({FS[0], FS[2]});
         }
         // recoil parton is neglected
@@ -253,9 +255,9 @@ int lido::update_single_particle(
             // to the coordinate of the current partcile
             // 1) Daughter partons: boost in eta
             // 2) Original copy: transport in tau
-            fourvec P0 = (*it)[1].mother_p.boost_back(
-                           0, 0, std::tanh((*it)[1].x0.x3())).boost_to(
-                           0, 0, std::tanh(pIn.x.x3()));
+            fourvec P0 = (*it)[1].mother_p.boost_to(
+                           0, 0, std::tanh(pIn.x.x3()-(*it)[1].x0.x3())
+                         );
             fourvec PB = ParallelTransportAlongZ(
                 (*it)[1].p, (*it)[1].x0, 
                 pIn.x.x3()-(*it)[1].x.x3(), FrameChoice
@@ -275,9 +277,11 @@ int lido::update_single_particle(
             // it it has not formed, continue
             if (pIn.x.x0()-(*it)[1].x0.x0() <= taun) it++;
             else{
-                double P0abs = P0.pabs();
-                fourvec nbar{1., -P0.x()/P0abs, -P0.y()/P0abs, -P0.z()/P0abs};
-                double Eplus_mother = dot(P0, nbar);
+                fourvec Ptot = PB+PC;
+                double Ptotabs = Ptot.pabs();
+                fourvec nbar{1., -Ptot.x()/Ptotabs, 
+                       -Ptot.y()/Ptotabs, -Ptot.z()/Ptotabs};
+                double Eplus_mother = dot(Ptot, nbar);
                 double Z = dot(PB, nbar)/Eplus_mother;
                 // if formed, apply LPM suppression in the Bjorken frame
                 double Acceptance = 0.;
@@ -332,7 +336,7 @@ int lido::update_single_particle(
                     pIn.p = put_on_shell(pIn.p, pIn.pid);;
                     pIn.p0 = pIn.p; 
 
-                    double Scale = std::sqrt(kt2n+mD2);
+                    double Scale = std::sqrt(kt21+mD2);
                     pIn.Q0 = Scale;
                     pIn.Q00 = Scale;
                  
