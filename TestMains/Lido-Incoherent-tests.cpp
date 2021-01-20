@@ -67,11 +67,11 @@ int main(int argc, char* argv[]){
         std::ofstream f2("channels.dat");
         
         double T0 = 0.4, dt = .035*5.076;
-        int N = 100000; 
-        fourvec p0{100,0,0,100};
-        coordinate x0{0,0,0,0};
+        int N = 10000; 
+        fourvec p0{100,100,0,0};
+        coordinate x0{1,0,0,0};
         plist.clear();
-        int pid0 = 21;
+        int pid0 = 1;
         for (int i=0; i<N; i++){
             plist.push_back(make_parton(pid0, 0, 0, 0, p0, x0) );
         }
@@ -80,11 +80,15 @@ int main(int argc, char* argv[]){
             LOG_INFO << i << "N = " << plist.size();
             for (auto & p : plist){
                 A.update_single_particle(dt, T, {0,0,0}, p, pOut_list);
+               
                 //for (auto & ip: pOut_list) newplist.push_back(ip);
-                p.p = p.p*(p0.t()/p.p.t());
-                p.pid = pid0;
-                p.p = put_on_shell(p.p, p.pid);
+                //p.p = p.p*(p0.t()/p.p.t());
+                //p.pid = pid0;
+                //p.p = put_on_shell(p.p, p.pid);
             }
+            double E0=0;
+            for (auto &p:plist) E0+=p.p.t();
+            LOG_INFO <<"dE/dL-----------: "<< (p0.t()-E0/N)/(i+1)/dt;
             //plist = newplist;
             //newplist.clear();
             

@@ -109,6 +109,7 @@ bool Xsection<HS2PP, 2, double(*)(const double, void*)>::
         double Jacobian = 2.*pAcm*p1cm*(1.-costheta*costheta);
         return this->_f(t, params)*Jacobian;
     };
+    double params[7] = {s, tmax, temp, mA, mB, m1, m2};
     double fmax = std::exp(StochasticBase<2>::GetFmax(parameters).s);
     bool status=true;
     double eta = sample_1d(dXdeta, {etamin, etamax}, fmax, status);
@@ -251,7 +252,7 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
     double s = std::pow(sqrts,2);
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1];
-    s = std::max(std::pow(m1+m2,2), std::pow(mA+mB,2))*1.01;
+    s = std::max(s, std::max(std::pow(m1+m2,2), std::pow(mA+mB,2))*1.01);
     double pAcm = std::sqrt(
                   (std::pow(sqrts-mA,2)-mB*mB)
                 * (std::pow(sqrts+mA,2)-mB*mB)
@@ -266,12 +267,14 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
     double tm2 = std::pow((mA*mA-m1*m1-mB*mB+m2*m2)/2./sqrts, 2);
     double tmin0 = tm2 - std::pow(pAcm+p1cm, 2);
     double tmax0 = tm2 - std::pow(pAcm-p1cm, 2);
-    double tmin = std::max(tmin0, -s-tcut);
-    double tmax = std::min(tmax0, tcut);
+    double tmin = tmin0-tcut;
+    double tmax = tmax0+tcut;
     double cosmax = 1. - (tmax0-tmax)/(2.*pAcm*p1cm);
     double cosmin = 1. - (tmax0-tmin)/(2.*pAcm*p1cm);
     double etamax = .5*std::log((1.+cosmax)/(1.-cosmax));
     double etamin = .5*std::log((1.+cosmin)/(1.-cosmin));
+
+
     // Define a lamda function, which transforms the integral
     // varaible for more efficient integration
     auto minus_dXdeta = [s, temp, tmax, mA, mB, m1, m2, 
@@ -283,6 +286,7 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
         return -this->_f(t, params)*Jacobian;
     };
     double res = -minimize_1d(minus_dXdeta, {etamin, etamax}, 1e-8, 100, 1000);
+
     return scalar{std::log(1.5*res)};
 }
 

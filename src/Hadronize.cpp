@@ -37,7 +37,7 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("5:m0 = 4.2");
     pythia.readString("PartonLevel:Remnants = on");
     pythia.readString("HadronLevel:all = on");
-    pythia.readString("HadronLevel:Decay = on");
+    pythia.readString("HadronLevel:Decay = off");
     pythia.readString("StringZ:usePetersonC=on");
     pythia.readString("StringZ:usePetersonB=on");
     pythia.readString("411:mayDecay = off");

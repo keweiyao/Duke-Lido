@@ -169,8 +169,8 @@ int main(int argc, char* argv[]){
             }
         }
 
-        std::vector<double> TriggerBin({2,5,10,20,40,60,80,100,120,160,200,300,
-           400,500,600,700,800,900,1000,1200,1500,2000,2500});
+        std::vector<double> TriggerBin({2,5,10,20,40,60,80,120,160,200,300,
+           400,600,800,1000,1200,1600,2000,2500});
 	std::vector<double> Rs({.4});
         std::vector<double> ParticlepTbins({0,.25,.5,1.,1.5,2,3,4,5,6,7,8,10,
 			12,14,16,18,20,22,24,28,32,36,40,45,50,
@@ -255,9 +255,10 @@ int main(int argc, char* argv[]){
                     p.Tf = Tf+.001;
                     if (p.x.x0() >= mini_tau0 ) continue;
                     else {
-                        p.x.a[0] = mini_tau0;
-                        p.x.a[1] += p.p.x()/p.p.t()*mini_tau0;
-                        p.x.a[2] += p.p.y()/p.p.t()*mini_tau0;
+                        double dtau = std::max(mini_tau0, p.tau0);
+                        p.x.a[0] = dtau;
+                        p.x.a[1] += p.p.x()/p.p.t()*dtau;
+                        p.x.a[2] += p.p.y()/p.p.t()*dtau;
                     }
                 }   
                 events.push_back(e1);
@@ -332,16 +333,19 @@ int main(int argc, char* argv[]){
         int processid = getpid();
         int c=0;
         LOG_INFO << "Jet finding, w/ medium excitation";
-        std::stringstream fj, fs, fc, fb;
+        std::stringstream fj, fud, fs, fc, fb;
 	fj << args["output"].as<fs::path>().string()
                        << processid << "-jets.dat";
+        fud << args["output"].as<fs::path>().string()
+                 << processid << "-u.dat";
         fs << args["output"].as<fs::path>().string()
                  << processid << "-s.dat";
         fc << args["output"].as<fs::path>().string()
                  << processid << "-c.dat";
         fb << args["output"].as<fs::path>().string()
                  << processid << "-b.dat";
-        std::ofstream Fj(fj.str()), Fs(fs.str()), Fc(fc.str()), Fb(fb.str());
+        std::ofstream Fj(fj.str()), Fs(fs.str()), 
+                      Fud(fud.str()), Fc(fc.str()), Fb(fb.str());
 
         for (auto & ie : events){
 	    if (args["jet"].as<bool>()) {
@@ -358,12 +362,19 @@ int main(int argc, char* argv[]){
                       << j.pmu.pseudorap() << std::endl;
                 }      
             }
+                Fud << "# " << c<<std::endl; 
                 Fs << "# " << c<<std::endl; 
                 Fc << "# " << c<<std::endl;
                 Fb << "# " << c<<std::endl;
                 for (auto & p : ie.hlist){
                     int meson_specie = (std::abs(p.pid)/100)%10;
                     int baryon_specie = (std::abs(p.pid)/1000)%10;
+                    if (meson_specie == 2 || baryon_specie==2)
+                      Fud << ie.sigma << " "
+                      << p.pid << " "
+                      << p.p.xT() << " " 
+                      << p.p.phi() << " " 
+                      << p.p.pseudorap() << std::endl;
                     if (meson_specie == 3 || baryon_specie==3)
                       Fs << ie.sigma << " "
                       << p.pid << " "

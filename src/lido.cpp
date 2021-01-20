@@ -16,17 +16,17 @@ lido::lido(std::string setting_path, std::string table_path,
 }
 
 
-fourvec ParallelTransportAlongZ(
-          fourvec p, coordinate x, double dx3, int Frame){
+
+fourvec MilneShift(
+          fourvec p, double etas, int Frame){
     if (Frame==0) return p;
     else if (Frame==1){
-        double ch = std::cosh(dx3), sh = std::sinh(dx3);
+        double ch = std::cosh(etas), sh = std::sinh(etas);
         double newp0 =  p.t()*ch - p.z()*sh; 
         double newpz = -p.t()*sh + p.z()*ch;
         return fourvec{newp0, p.x(), p.y(), newpz};
     }
 }
-
 
 void lido::FreeStream(
     particle & p, double dt){
@@ -142,7 +142,7 @@ int lido::update_single_particle(
         // virtual particle only evolves according to semi-classical
         // 2-2 collisions, only return itself
         if (process_id>0)
-            pIn.p = put_on_shell(FS[0].p*(pIn.p.t()/FS[0].p.t()), pIn.pid);
+            pIn.p = put_on_shell(FS[0].p, pIn.pid);
         pIn.radlist.clear();
         pOut_list.push_back(pIn);
         return pOut_list.size();
@@ -250,50 +250,34 @@ int lido::update_single_particle(
              it != pIn.radlist.end();){
             if (nonclassical) break;
             double taun, kt2n;
-            // to compute formation time in Bjorken frame,
-            // we will need to parallel transport other vectors 
-            // to the coordinate of the current partcile
-            // 1) Daughter partons: boost in eta
-            // 2) Original copy: transport in tau
-            fourvec P0 = (*it)[1].mother_p.boost_to(
-                           0, 0, std::tanh(pIn.x.x3()-(*it)[1].x0.x3())
-                         );
-            fourvec PB = ParallelTransportAlongZ(
-                (*it)[1].p, (*it)[1].x0, 
-                pIn.x.x3()-(*it)[1].x.x3(), FrameChoice
-            );
-            fourvec PB0 = ParallelTransportAlongZ(
-                (*it)[1].p0, (*it)[1].x0, 
-                pIn.x.x3()-(*it)[1].x.x3(), FrameChoice
-            );
-            fourvec PC = ParallelTransportAlongZ(
-                (*it)[0].p, (*it)[0].x0, 
-                pIn.x.x3()-(*it)[0].x.x3(), FrameChoice
-            );
-           
+            fourvec P0 = MilneShift((*it)[1].mother_p, 
+                                pIn.x.x3()-(*it)[1].x0.x3(), FrameChoice);
+            fourvec PB = MilneShift((*it)[1].p, 
+                                pIn.x.x3()-(*it)[1].x.x3(), FrameChoice);
+            fourvec PC = MilneShift((*it)[0].p, 
+                                pIn.x.x3()-(*it)[0].x.x3(), FrameChoice);
             formation_time(taun, kt2n, 
                           pIn.pid, (*it)[1].pid, (*it)[0].pid, 
                           pIn.p, PB, PC, T, P0);
             // it it has not formed, continue
             if (pIn.x.x0()-(*it)[1].x0.x0() <= taun) it++;
             else{
-                fourvec Ptot = PB+PC;
+                fourvec Ptot = P0*((PB.t()+PC.t())/P0.t());
                 double Ptotabs = Ptot.pabs();
                 fourvec nbar{1., -Ptot.x()/Ptotabs, 
                        -Ptot.y()/Ptotabs, -Ptot.z()/Ptotabs};
-                double Eplus_mother = dot(Ptot, nbar);
+                double Eplus_mother = Ptotabs + Ptot.t();
                 double Z = dot(PB, nbar)/Eplus_mother;
                 // if formed, apply LPM suppression in the Bjorken frame
                 double Acceptance = 0.;
-                double kt20 = measure_perp(P0, PB0).pabs2();
+                double kt20 = measure_perp((*it)[1].mother_p, (*it)[1].p).pabs2();
                 double kt21 = measure_perp(P0, PB).pabs2();
-                double kt22 = measure_perp(P0, PC).pabs2();
                 double Running = std::min(
-                       alpha_s(kt21,T)/alpha_s(kt20,T), 1.);
-                
+                       alpha_s(kt2n,T)/alpha_s(kt20,T), 1.);
+                double MFP = (*it)[1].mfp0 * P0.t() / (*it)[1].mother_p.t();
                 // an NLL-inspired suppression factor for the LPM effect
                 double mD2 = t_channel_mD2->get_mD2(T);
-                double lnQ2_1 = std::log(1. + taun/(*it)[1].mfp0);
+                double lnQ2_1 = std::log(1. + taun/MFP);
                 double lnQ2_0 = std::log(1. + 
                  6.*Z*(1-Z)*pIn.p.boost_to(v3[0], v3[1], v3[2]).t()
                    * (*it)[1].T0 / mD2);
@@ -307,11 +291,13 @@ int lido::update_single_particle(
                     MassFactors = std::pow(kt21/(kt21+m2), 2);
                 }
                 double log_factor = std::sqrt(lnQ2_1/lnQ2_0);
-                double LPM = std::min((*it)[1].mfp0 / taun * log_factor, 1.);
+                double LPM = std::min(MFP / taun * log_factor, 1.);
                 // The final acceptance factor
                 Acceptance = LPM * Running * MassFactors;
 
-                if (Srandom::rejection(Srandom::gen) < Acceptance){   
+                if (Srandom::rejection(Srandom::gen) < Acceptance){  
+                    fourvec newPB = pIn.p*Z;
+                    fourvec newPA = pIn.p*(1.-Z);
                     assign_n2np1_color(
                        pIn.pid, (*it)[0].pid, (*it)[1].pid,
                        pIn.col, pIn.acol,
@@ -319,16 +305,16 @@ int lido::update_single_particle(
                        (*it)[1].col, (*it)[1].acol
                        );
                     
-                    (*it)[1].p = put_on_shell(pIn.p*Z, (*it)[1].pid);
+                    (*it)[1].p = put_on_shell(newPB, (*it)[1].pid);
                     (*it)[1].p0 = (*it)[1].p;  
                     (*it)[1].x = pIn.x;
                     (*it)[1].x0 = pIn.x;
 
                     if ((*it)[1].pid==21) { 
-                        pIn.p = pIn.p*(1.-Z);
+                        pIn.p = newPA;
                     }
                     if ((*it)[1].pid!=21) {
-                        pIn.p = pIn.p*(1.-Z);   
+                        pIn.p = newPA;   
                         pIn.pid = -(*it)[1].pid;
                         pIn.mass = pid2mass(pIn.pid);
                         nonclassical = true;

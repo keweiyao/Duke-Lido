@@ -149,10 +149,10 @@ void formation_time(double & tauf, double & Q2,
            fourvec pA, fourvec pB, fourvec pC, 
            double T, fourvec p0){
     double mg2 = t_channel_mD2->get_mD2(T) / 2.;
-    fourvec Ptot = pB+pC;
+    fourvec Ptot = p0*((pB.t()+pC.t())/p0.t());
     double Ptotabs = Ptot.pabs();
     fourvec nbar{1.,-Ptot.x()/Ptotabs,-Ptot.y()/Ptotabs,-Ptot.z()/Ptotabs};
-    double Etot = dot(Ptot, nbar);
+    double Etot = Ptotabs + Ptot.t();
     double x = dot(pB, nbar)/Etot;
     if (x<0.||x>1.) { 
         Q2 = mg2; 
