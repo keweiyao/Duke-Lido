@@ -84,7 +84,6 @@ public:
     void CalcJetshape(std::vector<double> rbins);
     void Frag(std::vector<double> zbins, std::vector<double>  zpTbins);
     void LabelFlavor();
-    void CorrHFET(std::vector<double> rbins);
     std::vector<Fjet> Jets;
     std::vector<particle> HFs;
     std::vector<Fjet> HFaxis;
@@ -111,7 +110,7 @@ class LeadingParton{
    void add_event(std::vector<particle> plist, double sigma_gen, double maxPT);
    void write(std::string fheader);
    private:
-   std::vector<double> pTbins, binwidth, nchg, npi, nD, nB, v2chg, v2pi, v2D, v2B;
+   std::vector<double> pTbins, binwidth, nchg, npi, nstrange, nD, nB, v2chg, v2strange, v2pi, v2D, v2B;
    int NpT;
 };
 
@@ -147,16 +146,5 @@ class JetHFCorr{
    std::vector<double> pTHFbins, rbins;
    std::vector<std::vector<double> > dDdr, dBdr;
 };
-
-class HFETCorr{
-   public:
-   HFETCorr(std::vector<double> pTHFbins, std::vector<double> rbins);
-   void add_event(std::vector<Fjet> HFaxis, double sigma_gen);
-   void write(std::string fheader);
-   private:
-   std::vector<double> pTHFbins, rbins;
-   std::vector<std::vector<double> > D_dPTdr, B_dPTdr;
-};
-
 
 #endif

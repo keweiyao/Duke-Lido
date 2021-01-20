@@ -169,9 +169,12 @@ int main(int argc, char* argv[]){
             }
         }
 
-        std::vector<double> TriggerBin({2,5,10,20,40,60,80,120,160,200,300,
-           400,600,800,1000,1200,1600,2000,2500});
-	std::vector<double> Rs({.4});
+        std::vector<double> TriggerBin({
+           2,4,6,8,10,12,16,20,
+           30,40,50,60,70,80,100,
+           120,140,160,180,200,250,300,350,400,500,
+           600,700,800,900,1000,1200,1600,2000,2500});
+	std::vector<double> Rs({.2,.3,.4});
         std::vector<double> ParticlepTbins({0,.25,.5,1.,1.5,2,3,4,5,6,7,8,10,
 			12,14,16,18,20,22,24,28,32,36,40,45,50,
 			55,60,65,70,80,90,100,
@@ -188,7 +191,7 @@ int main(int argc, char* argv[]){
                           .35, .4, .45, .5,  .6, .7,  .8,
                            1., 1.5, 2.0, 2.5, 3.0});
 	std::vector<double> xJpTbins({100,126,158,178,200,224,251,282,316,398,562});
-        std::vector<double> FragpTbins({100,126,158,200,251,316,398,600,800});
+        std::vector<double> FragpTbins({40,60,70,100,126,158,200,251,316,398,600,800});
 
 	std::vector<double> zbins({0, 0.001,0.002, 0.0035,.005,.0065,.0085,.011,.015,
                         .019,.025,.032,.042,.055,
@@ -196,12 +199,12 @@ int main(int argc, char* argv[]){
                         .266, .347, .452, .589, .767,
                         1.});
         std::vector<double> zpTbins({
-0.0, 0.15, 0.3, 0.5       ,   0.70626877,   0.99763116,   1.40919147,
+         0.0, 0.15, 0.3, 0.5       ,   0.70626877,   0.99763116,   1.40919147,
          1.99053585,   2.81170663,   3.97164117,   5.61009227,
          7.92446596,  11.19360569,  15.8113883 ,  22.33417961,
-        31.54786722,  44.56254691,  62.94627059,  88.9139705 ,
-       125.59432158, 177.40669462, 250.59361681, 353.97289219,
-       500.        	});
+         31.54786722,  44.56254691,  62.94627059,  88.9139705 ,
+         125.59432158, 177.40669462, 250.59361681, 353.97289219,
+         500.        	});
 
 	LeadingParton dNdpT(ParticlepTbins);
 	JetStatistics JetSample(jetpTbins, Rs, 
@@ -209,6 +212,7 @@ int main(int argc, char* argv[]){
 			 FragpTbins, zbins, zpTbins,
 			 xJpTbins);
         JetFinder jetfinder(300,300,3., need_response_table, args["response-table"].as<fs::path>().string());
+        JetHFCorr jet_HF_corr(HFpTbins, shaperbins);
 
         /// Initialize Lido in-medium transport
 	// Scale to insert In medium transport
@@ -264,6 +268,7 @@ int main(int argc, char* argv[]){
                 events.push_back(e1);
             }
         }
+
         LOG_INFO << "Start evolution of " << events.size() << " hard events";
         while(med1.load_next()) {
             double current_hydro_clock = med1.get_tauL();
@@ -328,80 +333,34 @@ int main(int argc, char* argv[]){
                 }
 	    }
          }
-
+        LOG_INFO << "Jet finding, w/ medium excitation";
         /// use process id to define filename
         int processid = getpid();
-        int c=0;
-        LOG_INFO << "Jet finding, w/ medium excitation";
-        std::stringstream fj, fud, fs, fc, fb;
-	fj << args["output"].as<fs::path>().string()
-                       << processid << "-jets.dat";
-        fud << args["output"].as<fs::path>().string()
-                 << processid << "-u.dat";
-        fs << args["output"].as<fs::path>().string()
-                 << processid << "-s.dat";
-        fc << args["output"].as<fs::path>().string()
-                 << processid << "-c.dat";
-        fb << args["output"].as<fs::path>().string()
-                 << processid << "-b.dat";
-        std::ofstream Fj(fj.str()), Fs(fs.str()), 
-                      Fud(fud.str()), Fc(fc.str()), Fb(fb.str());
-
+        std::stringstream fheader;
+        fheader << args["output"].as<fs::path>().string() 
+                << processid;
         for (auto & ie : events){
+            dNdpT.add_event(ie.hlist, ie.sigma, ie.maxPT);
 	    if (args["jet"].as<bool>()) {
                 jetfinder.set_sigma(ie.sigma);
                 jetfinder.MakeETower(
                      0.6, Tf, args["pTtrack"].as<double>(),
-                     ie.hlist, ie.clist, 15, false);
+                     ie.hlist, ie.clist, 10, false);
                 jetfinder.FindJets(Rs, 5., -3., 3., false);
-                Fj << "# " << c<<std::endl;
-		for (auto & j : jetfinder.Jets){
-                    Fj << ie.sigma << " "
-                      << j.pmu.xT() << " " 
-                      << j.pmu.phi() << " " 
-                      << j.pmu.pseudorap() << std::endl;
-                }      
-            }
-                Fud << "# " << c<<std::endl; 
-                Fs << "# " << c<<std::endl; 
-                Fc << "# " << c<<std::endl;
-                Fb << "# " << c<<std::endl;
-                for (auto & p : ie.hlist){
-                    int meson_specie = (std::abs(p.pid)/100)%10;
-                    int baryon_specie = (std::abs(p.pid)/1000)%10;
-                    if (meson_specie == 2 || baryon_specie==2)
-                      Fud << ie.sigma << " "
-                      << p.pid << " "
-                      << p.p.xT() << " " 
-                      << p.p.phi() << " " 
-                      << p.p.pseudorap() << std::endl;
-                    if (meson_specie == 3 || baryon_specie==3)
-                      Fs << ie.sigma << " "
-                      << p.pid << " "
-                      << p.p.xT() << " " 
-                      << p.p.phi() << " " 
-                      << p.p.pseudorap() << std::endl;
-                    if (meson_specie == 4 || baryon_specie==4)
-                      Fc << ie.sigma << " "
-                      << p.pid << " "
-                      << p.p.xT() << " " 
-                      << p.p.phi() << " " 
-                      << p.p.pseudorap() << std::endl;
-                    if (meson_specie == 5 || baryon_specie==5)
-                      Fb << ie.sigma << " "
-                      << p.pid << " "
-                      << p.p.xT() << " " 
-                      << p.p.phi() << " " 
-                      << p.p.pseudorap() << std::endl;
-                }      
-                c++;
+                jetfinder.FindHF(ie.hlist);
+                jetfinder.Frag(zbins, zpTbins);
+		jetfinder.LabelFlavor();
+                jetfinder.CalcJetshape(shaperbins);
+	        JetSample.add_event(jetfinder.Jets, ie.sigma, ie.x0);
+                jet_HF_corr.add_event(jetfinder.Jets, jetfinder.HFs, ie.sigma);
+	    }
         }
-        //std::stringstream fheader;
-        //fheader << args["output"].as<fs::path>().string() << processid ;
-        //dNdpT.write(fheader.str());
-	//if (args["jet"].as<bool>()){
-	//    JetSample.write(fheader.str());
-        //}       
+        dNdpT.write(fheader.str());
+	if (args["jet"].as<bool>()){
+            LOG_INFO << fheader.str();
+	    JetSample.write(fheader.str());
+	    jet_HF_corr.write(fheader.str());
+        }
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";
