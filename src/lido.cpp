@@ -107,7 +107,7 @@ int lido::update_single_particle(
     double Emin = Lido_Ecut * T;
     double mD2 = t_channel_mD2->get_mD2(T);
     double mD = std::sqrt(mD2);
-    double minf = mD/std::sqrt(2);
+    double minf = mD;
     double Eradmin = mD;
 
     // If a light parton has
@@ -115,7 +115,7 @@ int lido::update_single_particle(
     // and is not a virtual particle, drop it from LIDO
     double Ecell = pIn.p.boost_to(v3[0], v3[1], v3[2]).t();
     if ( (!pIn.is_virtual) && (pIn.Q0<minf) 
-      && (Ecell < Emin) && isLightParton
+         && (Ecell < Emin) && isLightParton
     ){
         pIn.radlist.clear();
         return pOut_list.size();
@@ -243,6 +243,9 @@ int lido::update_single_particle(
             update_single_particle(dt, T, v3, (*it)[1], F2);
             (*it)[1].p = F2[0].p;
         }
+    }
+
+    if ((!pIn.radlist.empty()) && (!pIn.is_virtual)){
         bool nonclassical = false;
         // check which one has reached its formation time
         for (std::vector<std::vector<particle> >::iterator 
@@ -296,8 +299,8 @@ int lido::update_single_particle(
                 Acceptance = LPM * Running * MassFactors;
 
                 if (Srandom::rejection(Srandom::gen) < Acceptance){  
-                    fourvec newPB = pIn.p*Z;
-                    fourvec newPA = pIn.p*(1.-Z);
+                    double newEB = pIn.p.t()*Z;
+                    double newEA = pIn.p.t()*(1.-Z);
                     assign_n2np1_color(
                        pIn.pid, (*it)[0].pid, (*it)[1].pid,
                        pIn.col, pIn.acol,
@@ -305,24 +308,26 @@ int lido::update_single_particle(
                        (*it)[1].col, (*it)[1].acol
                        );
                     
-                    (*it)[1].p = put_on_shell(newPB, (*it)[1].pid);
+                    (*it)[1].p = put_on_shell(PB*(newEB/PB.t()), (*it)[1].pid);
                     (*it)[1].p0 = (*it)[1].p;  
                     (*it)[1].x = pIn.x;
                     (*it)[1].x0 = pIn.x;
 
                     if ((*it)[1].pid==21) { 
-                        pIn.p = newPA;
+                        pIn.p = PC*(newEA/PC.t());
                     }
                     if ((*it)[1].pid!=21) {
-                        pIn.p = newPA;   
+                        pIn.p = PC*(newEA/PC.t());
                         pIn.pid = -(*it)[1].pid;
                         pIn.mass = pid2mass(pIn.pid);
                         nonclassical = true;
                     }
                     pIn.p = put_on_shell(pIn.p, pIn.pid);;
                     pIn.p0 = pIn.p; 
-
+ 
+                    // this should be the scale in lab frame for vac-like shower
                     double Scale = std::sqrt(kt21+mD2);
+                   
                     pIn.Q0 = Scale;
                     pIn.Q00 = Scale;
                  

@@ -86,7 +86,6 @@ public:
     void LabelFlavor();
     std::vector<Fjet> Jets;
     std::vector<particle> HFs;
-    std::vector<Fjet> HFaxis;
     std::vector<std::vector<double> > PT;
 private:
     int corp_index(double x, double xL, double xH, double dx, int Nx){

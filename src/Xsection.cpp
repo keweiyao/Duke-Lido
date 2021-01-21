@@ -74,8 +74,8 @@ bool Xsection<HS2PP, 2, double(*)(const double, void*)>::
     double mD2 = t_channel_mD2->get_mD2(temp);
     double tcut = isPairProduction(_process_id)?
                 -mD2/16.:-cut*mD2;
-    if (s<=std::pow(std::sqrt(mA*mA-tcut/4.)+std::sqrt(mB*mB-tcut/4.), 2)
-      ||s<=std::pow(std::sqrt(m1*m1-tcut/4.)+std::sqrt(m2*m2-tcut/4.), 2)) {
+    if (s<=std::pow(std::sqrt(mA*mA-tcut/2.)+std::sqrt(mB*mB-tcut/2.), 2)
+      ||s<=std::pow(std::sqrt(m1*m1-tcut/2.)+std::sqrt(m2*m2-tcut/2.), 2)) {
         LOG_INFO << "sample failed (below threshold) in 2->2 X";
 	FS.clear();
         pids.clear();
@@ -252,7 +252,14 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
     double s = std::pow(sqrts,2);
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1];
-    s = std::max(s, std::max(std::pow(m1+m2,2), std::pow(mA+mB,2))*1.01);
+    double mD2 = t_channel_mD2->get_mD2(temp);
+    double tcut = isPairProduction(_process_id)?
+                -mD2/16.:-cut*mD2;
+    double smin = std::max(std::pow(std::sqrt(mA*mA-tcut/2.)
+                                   +std::sqrt(mB*mB-tcut/2.), 2),
+                 std::pow(m1+m2,2) );
+    s = std::max(smin*1.2, s);
+    sqrts = std::sqrt(s);
     double pAcm = std::sqrt(
                   (std::pow(sqrts-mA,2)-mB*mB)
                 * (std::pow(sqrts+mA,2)-mB*mB)
@@ -261,9 +268,6 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
                   (std::pow(sqrts-m1,2)-m2*m2)
                 * (std::pow(sqrts+m1,2)-m2*m2)
                   /4./s);
-    double mD2 = t_channel_mD2->get_mD2(temp);
-    double tcut = isPairProduction(_process_id)?
-                -mD2/16.:-cut*mD2;
     double tm2 = std::pow((mA*mA-m1*m1-mB*mB+m2*m2)/2./sqrts, 2);
     double tmin0 = tm2 - std::pow(pAcm+p1cm, 2);
     double tmax0 = tm2 - std::pow(pAcm-p1cm, 2);
@@ -286,7 +290,7 @@ scalar Xsection<HS2PP, 2, double(*)(const double, void*)>::
         return -this->_f(t, params)*Jacobian;
     };
     double res = -minimize_1d(minus_dXdeta, {etamin, etamax}, 1e-8, 100, 1000);
-
+    //LOG_INFO << sqrts << " " << temp << " " << res << " " << tmin << " " << tmax;
     return scalar{std::log(1.5*res)};
 }
 

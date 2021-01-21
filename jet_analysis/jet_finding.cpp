@@ -262,7 +262,6 @@ void JetFinder::FindJets(std::vector<double> Rs,
     LOG_INFO << "find jet";
     Jets.clear();
     HFs.clear();
-    HFaxis.clear();
     std::vector<fastjet::PseudoJet> fjInputs;
     for (int ieta=0; ieta<Pmu.size(); ieta++) {
         for (int iphi=0; iphi<Pmu[ieta].size(); iphi++) {
@@ -419,7 +418,7 @@ void JetFinder::Frag(std::vector<double> zbins, std::vector<double> zpTbins){
             } 
         }
         // response effect
-	for(double eta=Jeta-J.R; eta<=Jeta+J.R; eta+=.1){
+	/*for(double eta=Jeta-J.R; eta<=Jeta+J.R; eta+=.1){
             double Rp = std::sqrt(1e-9+std::pow(J.R,2)-std::pow(Jeta-eta,2)); 
 	    for (double phi=Jphi-Rp; phi<=Jphi+Rp; phi+=.1){
 		double dR = std::sqrt(std::pow(Jeta-eta,2)
@@ -458,7 +457,7 @@ void JetFinder::Frag(std::vector<double> zbins, std::vector<double> zpTbins){
                     }
                 }
 	    }
-        }
+        }*/
         for (int i=0; i<J.dNdz.size(); i++)
             J.dNdz[i] /= (zbins[i+1]-zbins[i]);
         for (int i=0; i<J.dNdpT.size(); i++)
@@ -528,6 +527,7 @@ void JetFinder::LabelFlavor(){
         bool isD = false;
         bool isB = false;
         for (auto & p : HFs){
+            if (p.p.xT()<5.0) continue;
             double absdphi = std::abs(Jphi - p.p.phi());
             if (absdphi>M_PI) absdphi = 2.*M_PI-absdphi;
             double deta = Jeta-p.p.pseudorap();
@@ -817,12 +817,12 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
 	    if (J.flavor==4) Frags_D_W[ii] += sigma_gen;
 	    if (J.flavor==5) Frags_B_W[ii] += sigma_gen;
 	    Frags_W[ii] += sigma_gen;
-            double sumb = 0.;
-            double sumc = 0.;
             for (int j=0; j<Frags[ii].size(); j++){
                 if (J.flavor==4) Frags_D[ii][j] += sigma_gen*J.dDdz[j];
 		if (J.flavor==5) Frags_B[ii][j] += sigma_gen*J.dBdz[j];
 		Frags[ii][j] += sigma_gen*J.dNdz[j];
+	    }
+            for (int j=0; j<Frags_pT[ii].size(); j++){
 		Frags_pT[ii][j] += sigma_gen*J.dNdpT[j];
 	    }
         }
@@ -1007,15 +1007,6 @@ void JetStatistics::write(std::string fheader){
 	f5 << std::endl;
     }
     f5.close();
-    /*std::stringstream filename6;
-       filename6 << fheader << "-dijet-x0.dat";
-    std::ofstream f6(filename6.str());
-    for (auto & it: DijetInfo){
-	    for (auto & iit: it){
-		    f6 << iit << " ";
-	    }f6<<std::endl;
-    }*/
-
 }
 
 JetHFCorr::JetHFCorr(std::vector<double> _pTHFbins, 
@@ -1065,7 +1056,7 @@ void JetHFCorr::add_event(std::vector<Fjet> jets,
                         }
                     }
                     if (pTindex==-1) continue;      
-                    int absid = p.pid;
+                    int absid = std::abs(p.pid);
                     if (absid == 4 || 
                         absid == 411 || absid == 421 ||
                         absid == 413 || absid == 423) {

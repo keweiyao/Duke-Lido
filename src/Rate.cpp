@@ -70,15 +70,17 @@ bool Rate<HS2PP, 2, 2, double(*)(const double, void *)>::
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1];
     double pA = std::sqrt(EA*EA-mA*mA);
-    double tcut = -cut*t_channel_mD2->get_mD2(T);
+    double mD2 = t_channel_mD2->get_mD2(T);
+    double tcut = isPairProduction(_process_id)?
+                -mD2/16.:-cut*mD2;
     double smin = std::max(
-     std::pow(std::sqrt(mA*mA-tcut/4.)+std::sqrt(mB*mB-tcut/4.), 2), 
-     std::pow(std::sqrt(m1*m1-tcut/4.)+std::sqrt(m2*m2-tcut/4.), 2) );
+     std::pow(std::sqrt(mA*mA-tcut/2.)+std::sqrt(mB*mB-tcut/2.), 2), 
+     std::pow(std::sqrt(m1*m1-tcut/2.)+std::sqrt(m2*m2-tcut/2.), 2) );
     auto dR_dxdy = [EA, T, smin, pA, mA, mB, this](const double * x){
         double pB = x[0], costheta = x[1];
         double EB = std::sqrt(pB*pB+mB*mB);
         double s = mA*mA + mB*mB + 2.*(EA*EB-pA*pB*costheta);
-        if (s<smin||std::abs(costheta)>=1.) return 0.;
+        if (s<smin*1.5||std::abs(costheta)>=1.) return 0.;
         double flux = 2.*std::sqrt((s-std::pow(mA-mB,2))
                                   *(s-std::pow(mA+mB,2)));
         double Xtot = this->X->GetZeroM({.5*std::log(s),T}).s;
@@ -128,6 +130,7 @@ bool Rate<HS2PP, 2, 2, double(*)(const double, void *)>::
     }
     else{
         LOG_INFO << "sample rate failed--2, 2->2";
+        LOG_INFO <<"prcid = "<< _process_id<< ", EA = " << EA << ", T = " << T;
         final_states.clear();
         pids.clear();
         return false;
@@ -227,15 +230,17 @@ scalar Rate<HS2PP, 2, 2, double(*)(const double, void*)>::
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1];
     double pA = std::sqrt(EA*EA-mA*mA);
-    double tcut = -cut*t_channel_mD2->get_mD2(T);
+    double mD2 = t_channel_mD2->get_mD2(T);
+    double tcut = isPairProduction(_process_id)?
+                -mD2/16.:-cut*mD2;
     double smin = std::max(
-     std::pow(std::sqrt(mA*mA-tcut/4.)+std::sqrt(mB*mB-tcut/4.), 2), 
-     std::pow(std::sqrt(m1*m1-tcut/4.)+std::sqrt(m2*m2-tcut/4.), 2) );
+     std::pow(std::sqrt(mA*mA-tcut/2.)+std::sqrt(mB*mB-tcut/2.), 2), 
+     std::pow(std::sqrt(m1*m1-tcut/2.)+std::sqrt(m2*m2-tcut/2.), 2) );
     auto minus_dR_dxdy = [EA, T, smin, pA, mA, mB, this](const double * x){
         double pB = x[0], costheta = x[1];
         double EB = std::sqrt(pB*pB+mB*mB);
         double s = mA*mA + mB*mB + 2.*(EA*EB-pA*pB*costheta);
-        if (s<smin||std::abs(costheta)>=1.) return 0.;
+        if (s<smin*1.5||std::abs(costheta)>=1.) return 0.;
         double flux = 2.*std::sqrt((s-std::pow(mA-mB,2))
                                   *(s-std::pow(mA+mB,2)));
         double Xtot = this->X->GetZeroM({.5*std::log(s),T}).s;
@@ -246,7 +251,7 @@ scalar Rate<HS2PP, 2, 2, double(*)(const double, void*)>::
     double pBmax = pBmin+8.*T;
     auto val = -minimize_nd(minus_dR_dxdy, 2, 
                         {(pBmin+pBmax)/2., -1.}, {(pBmax-pBmin)/20., 0.1}, 
-                          1000, 1e-8);
+                          1000, 1e-12);
     return scalar{1.5*val};
 }
 
@@ -280,7 +285,7 @@ scalar Rate<HS2PPP, 2, 2, double(*)(const double*, void*)>::
     double pBmax = pBmin+8.*T;
     auto val = -minimize_nd(minus_dR_dxdy, 2, 
                         {(pBmin+pBmax)/2., -1.}, {(pBmax-pBmin)/10., 0.2}, 
-                          1000, 1e-8);
+                          1000, 1e-12);
     return scalar{1.5*val};
 }
 

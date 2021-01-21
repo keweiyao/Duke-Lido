@@ -207,7 +207,7 @@ foreach(App "Lido-TabGen" "Lido-X-tests" "Lido-R-tests" "Lido-Incoherent-tests")
 endforeach()
 
 if(pythia8)
-foreach(App "PGunTest" "Lido2DHydro")
+foreach(App "PGunTest" "Lido2DHydro" "Lido_pp")
 	add_executable(${App} ./JetMains/${App}.cpp)
 	target_link_libraries(${App} ${LIBRARY_NAME} ${LIBRARY_JETFIND} ${PYTHIA8_LIBRARIES} ${FASTJET_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS ${App} DESTINATION bin)
