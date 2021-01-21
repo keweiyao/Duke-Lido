@@ -66,8 +66,8 @@ int main(int argc, char* argv[]){
         std::ofstream f1("particles.dat");
         std::ofstream f2("channels.dat");
         
-        double T0 = 0.4, dt = .035*5.076;
-        int N = 10000; 
+        double T0 = 0.4, dt = .05*5.076;
+        int N = 100; 
         fourvec p0{100,100,0,0};
         coordinate x0{1,0,0,0};
         plist.clear();
@@ -75,16 +75,16 @@ int main(int argc, char* argv[]){
         for (int i=0; i<N; i++){
             plist.push_back(make_parton(pid0, 0, 0, 0, p0, x0) );
         }
-        for (int i=0; i<200; i++){
+        for (int i=0; i<2000; i++){
             double T = T0;//*std::pow(.5/(dt*i/5.076+.5), 1./3.);
             LOG_INFO << i << "N = " << plist.size();
             for (auto & p : plist){
                 A.update_single_particle(dt, T, {0,0,0}, p, pOut_list);
                
                 //for (auto & ip: pOut_list) newplist.push_back(ip);
-                //p.p = p.p*(p0.t()/p.p.t());
-                //p.pid = pid0;
-                //p.p = put_on_shell(p.p, p.pid);
+                p.p = p.p*(p0.t()/p.p.t());
+                p.pid = pid0;
+                p.p = put_on_shell(p.p, p.pid);
             }
             double E0=0;
             for (auto &p:plist) E0+=p.p.t();
@@ -94,7 +94,7 @@ int main(int argc, char* argv[]){
             
         }
         //for (auto & p : plist){
-       //     f1 << p.pid << " " << p.p << " " << p.x << std::endl;
+        //     f1 << p.pid << " " << p.p << " " << p.x << std::endl;
         //}
 
     } 

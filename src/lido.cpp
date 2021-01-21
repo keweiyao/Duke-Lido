@@ -27,7 +27,7 @@ fourvec MilneShift(
         return fourvec{newp0, p.x(), p.y(), newpz};
     }
 }
-
+//std::ofstream f("stat.dat");
 void lido::FreeStream(
     particle & p, double dt){
     if (FrameChoice==0){ // Cartesian
@@ -170,6 +170,8 @@ int lido::update_single_particle(
         if (isPairProduction(process_id)) {
             // 2->2 pair production destroy all the interference
             pIn.radlist.clear();
+            FS[0].Q0=0.;
+            FS[1].Q0=0.;
             pOut_list.push_back(FS[0]);
             pOut_list.push_back(FS[1]);
             return pOut_list.size();
@@ -180,6 +182,7 @@ int lido::update_single_particle(
             pIn.col = FS[0].col;
             pIn.acol = FS[0].acol;
             // add the recoil particle
+            FS[1].Q0=0.;
             pOut_list.push_back(FS[1]);
         }
     }
@@ -198,6 +201,8 @@ int lido::update_single_particle(
         pIn.col = FS[0].col;
         pIn.acol = FS[0].acol;
         // add two recoil particle
+            FS[1].Q0=0.;
+            FS[2].Q0=0.;
         pOut_list.push_back(FS[1]);
         pOut_list.push_back(FS[2]);
     }
@@ -315,6 +320,7 @@ int lido::update_single_particle(
 
                     if ((*it)[1].pid==21) { 
                         pIn.p = PC*(newEA/PC.t());
+                        //f << pIn.x.x0() << " " << Z << std::endl;
                     }
                     if ((*it)[1].pid!=21) {
                         pIn.p = PC*(newEA/PC.t());
