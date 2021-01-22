@@ -284,7 +284,7 @@ double dX_qg2qgg(const double * x_, void * params){
 // q[h](A) + g[s](B) --> q(1)+q(2)+qbar(3)
 double M2_qg2qqqbar(const double * x_, void * params_){
     double * params = static_cast<double*>(params_);
-    double Temp = params[2];
+    double Temp = params[2], m3 = params[7];
     double kx, ky, qx, qy, xbar, t, Jacobian, yk;
     bool status = false;
     unpack_three_body_phase_space(
@@ -297,7 +297,7 @@ double M2_qg2qqqbar(const double * x_, void * params_){
     if (status==false) return 0.;
     double one_minus_xbar = 1.-xbar;
     double mg2 = t_channel_mD2->get_mD2(Temp) / 2.;
-    double mth2 = (CF/CA-xbar*(1-xbar))*mg2;
+    double mth2 = (CF/CA-xbar*(1-xbar))*mg2 + m3*m3;
     double kt2 = kx*kx+ky*ky;
     double MA[2], MB[2], MC[2], A[2], B[2];
     double DA, DB, DC, A2, B2, AB, Msq_22, Msq_12;
@@ -475,9 +475,8 @@ double dX_gg2ggg(const double * x_, void * params){
 // g[h](A) + q[s](B) --> q(1)+q(2)+qbar(3)
 double M2_gq2qqqbar(const double * x_, void * params_){
     double * params = static_cast<double*>(params_);
-    double s = params[0], Temp = params[2], m1 = params[5];
+    double Temp = params[2];
     double kx, ky, qx, qy, xbar, t, Jacobian, yk;
-    double m1sq = m1*m1;
     bool status = false;
     unpack_three_body_phase_space_same(
       x_, params, 
@@ -528,8 +527,7 @@ double dX_gq2qqqbar(const double * x_, void * params){
 // g[h](A) + g[s](B) --> q(1)+g(2)+qbar(3)
 double M2_gg2qgqbar(const double * x_, void * params_){
     double * params = static_cast<double*>(params_);
-    double Temp = params[2], m1 = params[5];
-    double m1sq = m1*m1;
+    double Temp = params[2];
     double kx, ky, qx, qy, xbar, t, Jacobian, yk;
     bool status = false;
     unpack_three_body_phase_space(
@@ -582,8 +580,7 @@ double dX_gg2qgqbar(const double * x_, void * params){
 // g[h](A) + g[s](B) --> q(1)+g(2)+qbar(3)
 double M2_gg2gqqbar(const double * x_, void * params_){
     double * params = static_cast<double*>(params_);
-    double Temp = params[2], m1 = params[5];
-    double m1sq = m1*m1;
+    double Temp = params[2], m3 = params[7];
     double kx, ky, qx, qy, xbar, t, Jacobian, yk;
     bool status = false;
     unpack_three_body_phase_space(
@@ -606,7 +603,7 @@ double M2_gg2gqqbar(const double * x_, void * params_){
     MB[1] = ky - qy;
     MC[0] = kx;
     MC[1] = ky;
-    double mth2 = (CF/CA-xbar+xbar*xbar)*mg2;
+    double mth2 = (CF/CA-xbar+xbar*xbar)*mg2 + m3*m3;
     DA = MA[0]*MA[0] + MA[1]*MA[1] + mth2;
     DB = MB[0]*MB[0] + MB[1]*MB[1] + mth2;
     DC = MC[0]*MC[0] + MC[1]*MC[1] + mth2;
