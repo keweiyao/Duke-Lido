@@ -8,15 +8,17 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
-
+#include <sstream>
+#include <unistd.h>
 
 #include "simpleLogger.h"
 #include "Medium_Reader.h"
-#include "workflow.h"
+#include "lido.h"
 #include "pythia_HQ_gen.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
+
 
 int main(int argc, char* argv[]){
     using OptDesc = po::options_description;
@@ -27,7 +29,7 @@ int main(int argc, char* argv[]){
            po::value<fs::path>()->value_name("PATH")->required(),
            "Pythia setting file")
           ("pythia-events,n",
-            po::value<int>()->value_name("INT")->default_value(50000,"50000"),
+            po::value<int>()->value_name("INT")->default_value(100,"100"),
            "number of Pythia events")
           ("ic,i",
             po::value<fs::path>()->value_name("PATH")->required(),
@@ -43,13 +45,28 @@ int main(int argc, char* argv[]){
            "Lido table setting file")
           ("lido-table,t", 
             po::value<fs::path>()->value_name("PATH")->required(),
-           "Lido table path to file")   
+           "Lido table path to file")  
            ("output,o",
            po::value<fs::path>()->value_name("PATH")->default_value("./"),
            "output file prefix or folder")
-          ("Q0,q",
+           ("muT",
+           po::value<double>()->value_name("DOUBLE")->default_value(1.5,"1.5"),
+           "mu_min/piT")
+	   ("Q0,q",
            po::value<double>()->value_name("DOUBLE")->default_value(.4,".4"),
            "Scale [GeV] to insert in-medium transport")
+	   ("theta",
+           po::value<double>()->value_name("DOUBLE")->default_value(4.,"4."),
+           "Emin/T")
+	   ("afix",
+           po::value<double>()->value_name("DOUBLE")->default_value(-1.,"-1."),
+           "fixed alpha_s, <0 for running alphas")
+	   ("cut",
+           po::value<double>()->value_name("DOUBLE")->default_value(4.,"4."),
+           "cut between diffusion and scattering, Qc^2 = cut*mD^2")
+           ("Tf",
+        po::value<double>()->value_name("DOUBLE")->default_value(0.17,"0.17"),
+           "Transport stopping temperature, Tf")
     ;
 
     po::variables_map args{};
@@ -115,92 +132,117 @@ int main(int argc, char* argv[]){
             }
         }
 
-        // start
-        std::vector<particle> plist, dlist, flist;
+        std::vector<double> TriggerBin({
+           1,2,3,4,6,8,10,12,14,16,18,20,22,24,26,28,30,
+           35,40,45,50,55,60,65,70,75,80,85,90,100,
+           110,120,140,160,180,200,
+           240,280,320,360,400,500});
 
-    
-        /// Read Hydro
+        /// Initialize Lido in-medium transport
+	// Scale to insert In medium transport
+        double Q0 = args["Q0"].as<double>();
+        double muT = args["muT"].as<double>();
+        double theta = args["theta"].as<double>();
+	double cut = args["cut"].as<double>();
+	double afix = args["afix"].as<double>();
+        double Tf = args["Tf"].as<double>();
+        std::vector<double> parameters{muT, afix, cut, theta};
+        lido A(args["lido-setting"].as<fs::path>().string(), 
+               args["lido-table"].as<fs::path>().string(), 
+               parameters);
+        A.set_frame(1); //Bjorken Frame
+                
+        /// Initialzie a hydro reader
         Medium<2> med1(args["hydro"].as<fs::path>().string());
+        double mini_tau0 = med1.get_tauH();
 
-        /// Lido init
-        initialize(table_mode,
-                args["lido-setting"].as<fs::path>().string(),
-                args["lido-table"].as<fs::path>().string()
-                );
-
-        /// generate events from pythia
-        std::vector<double> pThatbins({2,4,6,8,10,12,14,16,18,20,25,30,35,40,45,50,60,80,100,120,150,200,300,500});
-        for (int i=0; i<pThatbins.size()-1; i++){
-            HQGenerator hardgen(args["pythia-setting"].as<fs::path>().string(),
+        // Fill in all events
+        LOG_INFO << "Events initialization, tau0 = " <<  mini_tau0;
+        std::vector<particle> plist, dlist, flist;
+        for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++) {
+            HQGenerator pythiagen(
+                            args["pythia-setting"].as<fs::path>().string(),
                             args["ic"].as<fs::path>().string(),
+                            TriggerBin[iBin],
+                            TriggerBin[iBin+1],
                             args["eid"].as<int>(),
-                            pThatbins[i], pThatbins[i+1],
-                            args["Q0"].as<double>()
+                            Q0
                             );
             dlist.clear();
-            hardgen.Generate(dlist,
+            pythiagen.Generate(dlist,
                              args["pythia-events"].as<int>(),
-                             3.0);
+                             4.0);
             plist.insert(plist.end(), dlist.begin(), dlist.end());
         }
-
-        // freestream form t=0 to tau=tau0
         for (auto & p : plist){
-            p.Tf = 0.0;
-            if (p.x.tau() < med1.get_tauH()){
-                p.freestream(
-                    compute_realtime_to_propagate(
-                        med1.get_tauH(), p.x, p.p
-                    )
-                );
+            p.Tf = Tf+.001;
+            if (p.x.x0() >= mini_tau0 ) continue;
+            else {
+                double dtau = std::max(mini_tau0, p.tau0);
+                p.x.a[0] = dtau;
+                p.x.a[1] += p.p.x()/p.p.t()*dtau;
+                p.x.a[2] += p.p.y()/p.p.t()*dtau;
             }
-        }   
-        int itau = 0;
-        bool started = false;
-        while(med1.load_next()){
-            
-            double current_hydro_clock = med1.get_tauL();
-            double hydro_dtau = med1.get_hydro_time_step();
-            //LOG_INFO << current_hydro_clock/fmc_to_GeV_m1 
-            //        << " [fm/c]\t" 
-            //       << " # of hard =" << plist.size();
-            // further divide hydro step into 10 transpor steps
-            int Ns = 2; 
-            double dtau = hydro_dtau/Ns, DeltaTau;
-            for (int i=0; i<Ns; ++i){
-                for (auto & p : plist){     
-                    if (p.Tf < 0.161 && started) {
-                        continue;       
-                    }
-                    if (p.x.tau() > current_hydro_clock+(i+1)*dtau){
-                        // if the particle time is in the future 
-                        // (not formed to the medium yet)
-                        continue;
-                    }
-                    else{
-                        DeltaTau = current_hydro_clock 
-                                   + (i+1)*dtau - p.x.tau();
-                    }
-                    // get hydro information
-                    double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.0;
-                    double vzgrid = p.x.z()/p.x.t();
-                    med1.interpolate(p.x, T, vx, vy, vz);
-
-                    int fs_size = update_particle_momentum_Lido(
-                                  DeltaTau, T, {vx, vy, vz}, p, flist);
-                }
-                started = true;
-            }
-            itau ++; 
         }
+
+        while(med1.load_next()) {
+            double current_hydro_clock = med1.get_tauL();
+            double dtau = med1.get_hydro_time_step();
+            LOG_INFO << "Hydro t = " 
+                     << current_hydro_clock/5.076 << " fm/c";
+            std::vector<particle> new_plist, pOut_list;
+            for (auto & p : plist){     
+                if ( std::abs(p.x.x3())>5. || p.Tf<Tf ){
+                    // skip particles at large space-time rapidity
+                    new_plist.push_back(p);
+                    continue;       
+                }
+                if (p.x.x0() > current_hydro_clock+dtau){
+                    // skip particles in the future
+                    new_plist.push_back(p);
+                    continue;
+                }
+                else{
+                    double DeltaTau = current_hydro_clock 
+                                    + dtau - p.x.x0();
+                    fourvec ploss = p.p;
+                    double T = 0.0, vx = 0.0, vy = 0.0, vz = 0.0;
+                    med1.interpolate(p.x, T, vx, vy, vz);
+                    pOut_list.clear();
+                    A.update_single_particle(DeltaTau, 
+                                             T, {vx, vy, vz}, 
+                                             p, pOut_list
+                                             );  
+                }
+            }
+        }
+        // free some mem and boost to lab frame
+	for (auto & p : plist) {
+            p.radlist.clear();
+            double tau = p.x.x0();
+            double etas = p.x.x3();
+            p.x.a[0] = tau*std::cosh(etas);
+            p.x.a[3] = tau*std::sinh(etas);
+            double vzcell = std::tanh(etas);
+            double gamma = 1./std::sqrt(1.-vzcell*vzcell);
+            double vz0cell = std::tanh(p.x0.x3());
+            p.p = p.p.boost_back(0,0,vzcell);
+            p.p0 = p.p0.boost_back(0,0,vz0cell);
+            p.vcell[0] = p.vcell[0]/gamma/(1+vzcell*p.vcell[2]);
+            p.vcell[1] = p.vcell[1]/gamma/(1+vzcell*p.vcell[2]);     
+            p.vcell[2] = (vzcell+p.vcell[2])/(1+vzcell*p.vcell[2]);  
+
+        }
+
         int processid = getpid();
-        std::stringstream outputfilename1;
-        outputfilename1 << args["output"].as<fs::path>().string()
-                        << "c-quark-" << processid <<".dat";
+        std::stringstream outputfilename1,outputfilename2;
+        outputfilename1 << args["output"].as<fs::path>().string() 
+                        << "c-quark-" << processid<<".dat";
+        outputfilename2 << args["output"].as<fs::path>().string()
+                        << "b-quark-" << processid<<".dat";
         output_oscar(plist, 4, outputfilename1.str());
-        outputfilename1 << args["output"].as<fs::path>().string()
-                        << "b-quark-" << processid <<".dat";
-        output_oscar(plist, 5, outputfilename1.str());
+        output_oscar(plist, 5, outputfilename2.str());
+  
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

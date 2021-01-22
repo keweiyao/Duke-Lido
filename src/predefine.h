@@ -231,4 +231,7 @@ void formation_time(double & tauf, double & Q2,
            fourvec pA, fourvec pB, fourvec pC, 
            double T, fourvec p0);
 double compute_realtime_to_propagate(double dt, coordinate x, fourvec p, int type);
+
+void output_oscar(const std::vector<particle> plist,
+                  int abspid, std::string fname);
 #endif
