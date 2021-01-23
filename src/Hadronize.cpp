@@ -166,7 +166,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
 	    do{
             th.p = Srandom::generate_thermal_parton_with_boost(
                            Tf, 0, 0, vzgrid);
-	    }while(th.p.xT()>.5);
+	    }while(th.p.xT()<.5);
             th.mass = 0.;
             th.vcell.resize(3);
             th.vcell[0] = 0.;
@@ -184,7 +184,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
          auto pmu = p.p.boost_back(0,0,std::tanh(p.x.x3()));
          pythia.event.append(p.pid, 23, p.col, p.acol, 
 			 pmu.x(), pmu.y(), pmu.z(), pmu.t(), p.mass);
-         pythia.event[count].scale(p.Q0);
+         pythia.event[count].scale(Q0);
 	 maxQ0 = (p.Q0>maxQ0) ? p.Q0 : maxQ0;
          count++;
     }     
