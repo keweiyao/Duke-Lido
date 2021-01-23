@@ -1010,3 +1010,48 @@ void assign_2to2_nlo_color(int process_id,
 }
 
 
+void output_oscar(const std::vector<particle> plist,
+                  int abspid, std::string fname){
+    // output OSCAR Format
+    int Nparticles = 0;
+    for (auto &p : plist)
+    {
+        if (std::abs(p.pid) == abspid)
+            Nparticles++;
+    }
+
+    std::ofstream f(fname);
+    f << "OSC1997A\n";
+    f << "final_id_p_x\n";
+    f << "    lbt  1.0alpha   208    82   208    82   aacm  0.1380E+04        1\n";
+    f << "        1  " << std::setw(10)
+      << Nparticles << "    0.001    0.001    1    1       1\n";
+
+    int i = 0;
+    for (auto &p : plist){
+        if (std::abs(p.pid) == abspid){
+            f << std::setw(10) << std::setfill(' ') << i << "  "      // particle index, i10,2x
+              << std::setw(10) << std::setfill(' ') << p.pid << "  "; // particle id, i10,2x
+            f << ff(p.p.x()) << "  "
+              << ff(p.p.y()) << "  "
+              << ff(p.p.z()) << "  "
+              << ff(p.p.t()) << "  "
+              << ff(p.mass) << "  "
+              << ff(p.x.x1() / fmc_to_GeV_m1) << "  "
+              << ff(p.x.x2() / fmc_to_GeV_m1) << "  "
+              << ff(p.x.x3() / fmc_to_GeV_m1) << "  "
+              << ff(p.x.x0() / fmc_to_GeV_m1) << "  "
+              << ff(p.Tf) << "  "
+              << ff(p.vcell[0]) << "  "
+              << ff(p.vcell[1]) << "  "
+              << ff(p.vcell[2]) << "  "
+              << ff(p.p0.x()) << "  "
+              << ff(p.p0.y()) << "  "
+              << ff(p.p0.z()) << "  "
+              << ff(p.weight) << "\n";
+        }
+        i++;
+    }
+}
+
+

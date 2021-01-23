@@ -5,65 +5,35 @@
 #include "Pythia8/Pythia.h"
 #include "workflow.h"
 #include <sstream>
-#include <unistd.h>
 #include "predefine.h"
+#include "random.h"
+
 using namespace Pythia8;
 
 class HQGenerator{
 public: 
     HQGenerator(std::string f_pythia, std::string f_trento, 
-                int iev, double pTHL, double pTHH, double _Q0);
+              double pTHL, double pTHH, int iev, double _Q0);
     void Generate(std::vector<particle> & plist, int Neve, double ycut);
+    double sigma_gen(void){
+        return sigma0;
+    }
+    double maxPT(void){
+	return pythia.event.scale();
+    }
+    fourvec x0(void){
+	return _x0;
+    }
 private:
     double pL, pH, Q0, sigma0;
     Pythia pythia;
-    std::string f_pythia;
     TransverPositionSampler TRENToSampler;
+    fourvec _x0;
 };
-
-HQGenerator::HQGenerator(std::string f_p, std::string f_trento, int iev, double pTHL, double pTHH, double _Q0):
-pL(pTHL), pH(pTHH),f_pythia(f_p),TRENToSampler(f_trento, iev)
-{
-    Q0 = _Q0;
-    // read pythia settings
-    pythia.readFile(f_pythia);
-    // suppress output
-    pythia.readString("Print:quiet = off");
-    pythia.readString("SoftQCD:all = off");
-    pythia.readString("PromptPhoton:all=off");
-    pythia.readString("WeakSingleBoson:all=off");
-    pythia.readString("WeakDoubleBoson:all=off");
-    pythia.readString("SpaceShower:QEDshowerByQ=off");
-    pythia.readString("TimeShower:QEDshowerByQ = off");
-    pythia.readString("Init:showProcesses = off");  
-    pythia.readString("Init:showMultipartonInteractions = off");  
-    pythia.readString("Init:showChangedSettings = off");  
-    pythia.readString("Init:showChangedParticleData = off");  
-    pythia.readString("Next:numberCount = 1000");  
-    pythia.readString("Next:numberShowInfo = 0");  
-    pythia.readString("Next:numberShowProcess = 0");  
-    pythia.readString("Next:numberShowEvent = 0"); 
-
-    int processid = getpid();
-
-    std::ostringstream s1, s2, s3, s4;
-    s1 << "PhaseSpace:pTHatMin = " << pTHL;
-    s2 << "PhaseSpace:pTHatMax = " << pTHH;
-    s3 << "Random:seed = " << processid;
-    s4 << "TimeShower:pTmin = " << Q0;
-    std::cout<< s4.str();
-    pythia.readString(s1.str());
-    pythia.readString(s2.str());
-    pythia.readString(s3.str());
-    pythia.readString(s4.str());
-    // Init
-    pythia.init();
-    for (int i=0; i<1000; i++) pythia.next();
-    sigma0 = pythia.info.sigmaGen();
-}
 
 void reference_pmu(int i, double & tau, Event & event){
     auto p = event[i];
+    int absid = p.idAbs();
     int im1 = p.mother1();
     int im2 = p.mother2();
     if (im1==im2 && im2 > 0){
@@ -101,61 +71,122 @@ void reference_pmu(int i, double & tau, Event & event){
     }
 }
 
+HQGenerator::HQGenerator(std::string f_pythia, std::string f_trento, 
+              double pTHL, double pTHH, int iev, double _Q0):
+TRENToSampler(f_trento, iev)
+{   
+    Q0 = _Q0;
+    // read pythia settings
+    pythia.readFile(f_pythia);
+    // suppress output
+    pythia.readString("Print:quiet = on");
+    pythia.readString("SoftQCD:all = off");
+    pythia.readString("PromptPhoton:all=off");
+    pythia.readString("WeakSingleBoson:all=off");
+    pythia.readString("WeakDoubleBoson:all=off");
+    pythia.readString("SpaceShower:QEDshowerByQ=off");
+    pythia.readString("TimeShower:QEDshowerByQ = off");
+    pythia.readString("Init:showProcesses = off");  
+    pythia.readString("Init:showMultipartonInteractions = off");  
+    pythia.readString("Init:showChangedSettings = off");  
+    pythia.readString("Init:showChangedParticleData = off");  
+    pythia.readString("Next:numberCount = 1000");  
+    pythia.readString("Next:numberShowInfo = 0");  
+    pythia.readString("Next:numberShowProcess = 0");  
+    pythia.readString("Next:numberShowEvent = 0"); 
+    
+    int processid = getpid();
+
+    std::ostringstream s1, s2, s3, s4;
+    s1 << "PhaseSpace:pTHatMin = " << pTHL;
+    s2 << "PhaseSpace:pTHatMax = " << pTHH;
+    s3 << "Random:seed = " << processid;
+    s4 << "TimeShower:pTmin = " << Q0;
+    std::cout<< s4.str();
+    pythia.readString(s1.str());
+    pythia.readString(s2.str());
+    pythia.readString(s3.str());
+    pythia.readString(s4.str());
+    // Init
+    pythia.init();
+    for (int i=0; i<100; i++) pythia.next();
+        sigma0 = pythia.info.sigmaGen();
+}
 
 void HQGenerator::Generate(std::vector<particle> & plist, int Neve, double ycut){
-    double x0, y0;
+    double x, y;
     int Ncharm = 0, Nbottom = 0;
+    TRENToSampler.SampleXY(y, x);
     plist.clear();
     for(int Ntot=0; Ntot<Neve; Ntot++){
-        if (Ntot%1000==0) LOG_INFO << "Ncharm = " << Ncharm << ", Nbottom = " << Nbottom;
-        TRENToSampler.SampleXY(y0, x0);
+        if (Ntot%1000==0) LOG_INFO << "Ncharm = " << Ncharm 
+                                   << ", Nbottom = " << Nbottom;
+        TRENToSampler.SampleXY(y, x);
         pythia.next();
         double weight = pythia.info.sigmaGen()/Neve;
-        for (size_t i = 0; i < pythia.event.size(); ++i) {
-            auto p = pythia.event[i];
-            bool triggered = ((p.idAbs() == 5) || (p.idAbs() == 4))
+        auto & event = pythia.event;
+        for (size_t i = 0; i < event.size(); ++i) {
+            auto p = event[i];
+            int absid = p.idAbs();
+            bool triggered = ((absid == 5) || (absid == 4))
                       && p.isFinal() && (std::abs(p.y())< ycut);
             if (triggered) {
-	        double t0 = 0.;
-	        reference_pmu(i, t0, pythia.event);
-                if (p.idAbs() == 4) Ncharm ++;
-                if (p.idAbs() == 5) Nbottom ++;
-                for(int iphi=0; iphi<8; iphi++){
-                    double phi = iphi*2*M_PI/8;
+                if (absid == 4) Ncharm ++;
+                if (absid == 5) Nbottom ++;
+                // Get formation time in Lab frame
+                double tForm = 0.;
+                reference_pmu(i, tForm, event);
+                for (int iphi=0; iphi<12; iphi++){
+                    particle _p; 
+                    double phi = iphi*2.*M_PI/12.;
                     double cos = std::cos(phi), sin = std::sin(phi);
+                    // final momenta 
                     fourvec p0{p.e(), p.px()*cos-p.py()*sin, 
                                       p.px()*sin+p.py()*cos, p.pz()};
-                    particle _p; 
-                    _p.pid = p.idAbs();
-                    _p.mass = std::abs(p.m());
-                    _p.x0 = fourvec{0,x0,y0,0};
-                    _p.tau_i = t0;
-                    _p.x = _p.x0; 
+                    // assign pid
+                    _p.pid = absid;
+                    // copy charge
+                    _p.charged = p.isCharged(); 
+                    // assign mass
+                    _p.mass = pid2mass(_p.pid);
+                    // put on shell
+                    p0 = put_on_shell(p0, _p.pid);
+                    // space-time rap:
+                    double etas = .5*std::log((p0.t()+p0.z())/(p0.t()-p0.z()));
+                    // space-time coordinate
+                    _p.x0 = coordinate{0., x, y, etas};
+                    _p.x = _p.x0;
+                    // initialize momentum in coordinate co-moving frame
+                    _p.p0 = p0.boost_to(0., 0., p0.z()/p0.t());
+                    _p.p = _p.p0; 
+                    // Transform to foramtion time in proper time
+                    _p.tau0 = tForm*_p.p.t()/p0.t();
+                    // Virtuality of particle production
                     _p.Q0 = Q0;
                     _p.Q00 = Q0;
-                    _p.p0 = p0;
+                    // Copy color indices
                     _p.col = p.col();
                     _p.acol = p.acol();
-                _p.p = _p.p0; 
-                _p.weight = weight/8;
-                _p.is_virtual = false;
-                _p.T0 = 0.;
-                _p.Tf = 0.;
-                _p.mfp0 = 0.;
-                _p.vcell.resize(3);
-                _p.vcell[0] = 0.; 
-                _p.vcell[1] = 0.; 
-                _p.vcell[2] = 0.; 
-                _p.radlist.clear();
-                _p.charged = p.isCharged(); 
-                plist.push_back(_p);
-              }
-           }
+                    // These are real particles to the transport eqautions
+                    _p.is_virtual = false;
+                    // Temperature of medium at production
+                    _p.T0 = 0.;
+                    // Mean-free path
+                    _p.mfp0 = 0.;
+                    // Velocity of medium
+                    _p.vcell.resize(3);
+                    _p.vcell[0] = 0.; 
+                    _p.vcell[1] = 0.; 
+                    _p.vcell[2] = 0.; 
+                    // clear its radiation list
+                    _p.radlist.clear();
+                    // ready to go
+                    _p.weight = weight/12.;
+                    plist.push_back(_p);
+                }
+            }
         }
     }
-    //double normW = 0.5*pythia.info.sigmaGen()/pythia.info.weightSum();
-    //for (auto & p : plist) p.weight *= normW;
-    //LOG_INFO << "norm = " << normW;
 }
 
 
