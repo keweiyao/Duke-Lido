@@ -67,15 +67,15 @@ int main(int argc, char* argv[]){
         std::ofstream f2("channels.dat");
         
         double T0 = 0.4, dt = .05*5.076;
-        int N = 100; 
+        int N = 100000; 
         fourvec p0{100,100,0,0};
         coordinate x0{1,0,0,0};
         plist.clear();
-        int pid0 = 1;
+        int pid0 = 21;
         for (int i=0; i<N; i++){
             plist.push_back(make_parton(pid0, 0, 0, 0, p0, x0) );
         }
-        for (int i=0; i<2000; i++){
+        for (int i=0; i<200; i++){
             double T = T0;//*std::pow(.5/(dt*i/5.076+.5), 1./3.);
             LOG_INFO << i << "N = " << plist.size();
             for (auto & p : plist){

@@ -320,9 +320,9 @@ int lido::update_single_particle(
 
                     if ((*it)[1].pid==21) { 
                         pIn.p = PC*(newEA/PC.t());
-                        //f << pIn.x.x0() << " " << Z << std::endl;
                     }
                     if ((*it)[1].pid!=21) {
+                        //f << pIn.x.x0() << " " << Z << std::endl;
                         pIn.p = PC*(newEA/PC.t());
                         pIn.pid = -(*it)[1].pid;
                         pIn.mass = pid2mass(pIn.pid);

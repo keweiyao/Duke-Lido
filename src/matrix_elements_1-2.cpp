@@ -73,7 +73,7 @@ double LGV_g2qqbar(const double * x_, void * params_){
   double mg2 = (CF/CA-x*(1.-x))*t_channel_mD2->get_mD2(T)/2.;
   double Jacobian = 2*kT2/sintheta;
   double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI)
-                     * P_g2qqbar(x) 
+                     * ( P_g2qqbar(x) + x*(1.-x)*m2*m2/(kT2+mg2+m2*m2))
                      / std::pow(kT2+mg2, 2)
                      * Jacobian * (CF/CA-x*(1.-x));
   return dR_dxdy;
