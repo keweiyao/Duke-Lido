@@ -147,7 +147,7 @@ bool Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
             std::vector<int> & pids){
     double lnsqrts = parameters[0], temp = parameters[1];
     double mD2 = t_channel_mD2->get_mD2(temp);
-    double tcut = -cut*mD2;
+    double tcut = is2to2_nlo(_process_id)?-mD2:-cut*mD2;
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1], m3 = _FS_masses[2];
     double sqrts = std::exp(lnsqrts);
@@ -300,7 +300,7 @@ scalar Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
     find_max(std::vector<double> parameters){
     double lnsqrts = parameters[0], temp = parameters[1];
     double mD2 = t_channel_mD2->get_mD2(temp);
-    double tcut = -cut*mD2;
+    double tcut = is2to2_nlo(_process_id)?-mD2:-cut*mD2;
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1], m3 = _FS_masses[2];
     double sqrts = std::exp(lnsqrts);
@@ -439,7 +439,7 @@ scalar Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
                 calculate_scalar(std::vector<double> parameters){
     double lnsqrts = parameters[0], temp = parameters[1];
     double mD2 = t_channel_mD2->get_mD2(temp);
-    double tcut = -cut*mD2;
+    double tcut = is2to2_nlo(_process_id)?-mD2:-cut*mD2;
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1], m3 = _FS_masses[2];
     double sqrts = std::exp(lnsqrts);
