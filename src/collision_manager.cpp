@@ -199,8 +199,9 @@ double collision_manager::get_effective_mfp_hard(
         }
     }        
     double qhat3hard = x*qC+(1.-x)*qB-x*(1.-x)*qA;
-    return LPM_prefactor * mD2 * (x*CRC+(1-x)*CRB-x*(1-x)*CRA) /CA
-                               / (qhat3hard+qhat3soft);
+    return LPM_prefactor * mD2/ (qhat3hard+qhat3soft) 
+           * (x*CRC+(1-x)*CRB-x*(1-x)*CRA) /CA
+                               ;
 }
 
 void collision_manager::init_process(Process &r, std::string mode, std::string table_path){

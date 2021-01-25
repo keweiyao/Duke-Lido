@@ -54,7 +54,7 @@ double afix;
 double Lido_Ecut;
 
 Debye_mass * t_channel_mD2;
-const double LPM_prefactor = 2.0;
+const double LPM_prefactor = 2.2;
 
 int time_type;
 bool Adiabatic_LPM;
@@ -150,10 +150,7 @@ void formation_time(double & tauf, double & Q2,
            double T, fourvec p0){
     double mg2 = t_channel_mD2->get_mD2(T) / 2.;
     fourvec Ptot = p0*((pB.t()+pC.t())/p0.t());
-    double Ptotabs = Ptot.pabs();
-    fourvec nbar{1.,-Ptot.x()/Ptotabs,-Ptot.y()/Ptotabs,-Ptot.z()/Ptotabs};
-    double Etot = Ptotabs + Ptot.t();
-    double x = dot(pB, nbar)/Etot;
+    double x = pB.t()/Ptot.t();
     if (x<0.||x>1.) { 
         Q2 = mg2; 
         LOG_WARNING << "x<0 or x>1 in formation time, x = "<<x ;
@@ -173,7 +170,7 @@ void formation_time(double & tauf, double & Q2,
         Q2 = M2;
         //LOG_WARNING << "Q2<M2 in formationt time, set it by M2";
     }
-    tauf = x*(1.-x)*Etot/Q2;
+    tauf = 2.*x*(1.-x)*Ptot.t()/Q2;
 }
 
 //=============running coupling========================

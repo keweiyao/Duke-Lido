@@ -47,7 +47,7 @@ double LGV_g2gg(const double * x_, void * params_){
   double kT2 = kT*kT;
   double mg2 = (1.-x+x*x)*t_channel_mD2->get_mD2(T)/2.;
   if (x > 0.5) return 0.0; 
-  double Jacobian = 2*kT2/sintheta;
+  double Jacobian = 2.*kT2/sintheta;
   double dR_dxdy = alpha_s(kT2, T)/(2.*M_PI) 
                      * P_g2gg(x)
                      / std::pow(kT2+mg2, 2)
