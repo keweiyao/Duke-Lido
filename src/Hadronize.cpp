@@ -166,7 +166,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
 	    do{
             th.p = Srandom::generate_thermal_parton_with_boost(
                            Tf, 0, 0, vzgrid);
-	    }while(th.p.xT()>.5);
+	    }while(th.p.xT()<.5);
             th.mass = 0.;
             th.vcell.resize(3);
             th.vcell[0] = 0.;
@@ -215,4 +215,103 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
         }
     }
     return hadrons.size();
+}
+
+
+HFHadronize::HFHadronize(){
+    pythia.readString("Tune:pp=19");
+    pythia.readString("ProcessLevel:all = off");
+    pythia.readString("Print:quiet = on");
+    pythia.readString("SoftQCD:all = off");
+    pythia.readString("PromptPhoton:all=off");
+    pythia.readString("WeakSingleBoson:all=off");
+    pythia.readString("WeakDoubleBoson:all=off");
+    pythia.readString("SpaceShower:QEDshowerByQ=off");
+    pythia.readString("TimeShower:QEDshowerByQ = off");
+    pythia.readString("Next:numberShowInfo = 0");
+    pythia.readString("Next:numberShowProcess = 0");
+    pythia.readString("Next:numberShowEvent = 0");
+    pythia.readString("1:m0 = 0");
+    pythia.readString("2:m0 = 0");
+    pythia.readString("3:m0 = 0");
+    pythia.readString("4:m0 = 1.3");
+    pythia.readString("5:m0 = 4.2");
+    pythia.readString("PartonLevel:Remnants = on");
+    pythia.readString("HadronLevel:all = on");
+    pythia.readString("HadronLevel:Decay = on");
+    pythia.readString("StringZ:usePetersonC=on");
+    pythia.readString("StringZ:usePetersonB=on");
+    pythia.readString("321:mayDecay = off");
+    pythia.readString("411:mayDecay = off");
+    pythia.readString("421:mayDecay = off");
+    pythia.readString("413:mayDecay = off");
+    pythia.readString("423:mayDecay = off");
+    pythia.readString("511:mayDecay = off");
+    pythia.readString("521:mayDecay = off");
+    pythia.readString("513:mayDecay = off");
+    pythia.readString("523:mayDecay = off");
+    pythia.init();
+}
+
+int HFHadronize::hadronize(particle pIn, std::vector<particle> & pOut,
+                           double Q0, double Tf){
+    double maxQ0 = Q0;
+    pOut.clear();
+    pythia.event.reset();
+    double vzgrid = std::tanh(pIn.x.x3());
+    auto pmu = pIn.p.boost_back(0,0,vzgrid);
+    pythia.event.append(std::abs(pIn.pid), 23, 101, 0,
+                        pmu.x(), pmu.y(), pmu.z(), pmu.t(), pIn.mass);
+
+    fourvec p2;
+    double kperp = 0.;
+    do{
+        p2 = Srandom::generate_thermal_parton_with_boost(
+                           Q0, 0, 0, vzgrid);
+	kperp = measure_perp(pmu, p2).pabs();
+    }while(kperp<Q0);
+
+    pythia.event.append(-std::abs(Srandom::sample_flavor(3)), 23, 0, 101,
+                        p2.x(), p2.y(), p2.z(), pmu.t(), 0.);
+    pythia.event[1].scale(Q0);
+    pythia.event[2].scale(3*Tf);
+    pythia.forceTimeShower(1,2,Q0);
+    pythia.next();
+
+
+    double tau = pIn.x.x0();
+    double etas = pIn.x.x3();
+    coordinate x{tau*std::cosh(etas), pIn.x.x1(), pIn.x.x2(),
+                 tau*std::sinh(etas)};
+    double vzcell = std::tanh(etas);
+    double gamma = 1./std::sqrt(1.-vzcell*vzcell);
+            pIn.vcell[0] = pIn.vcell[0]/gamma/(1+vzcell*pIn.vcell[2]);
+            pIn.vcell[1] = pIn.vcell[1]/gamma/(1+vzcell*pIn.vcell[2]);
+            pIn.vcell[2] = (vzcell+pIn.vcell[2])/(1+vzcell*pIn.vcell[2]);
+
+
+    for (int i = 0; i < pythia.event.size(); ++i) {
+        auto ip = pythia.event[i];
+        int absid = std::abs(ip.id());
+        if ( ((ip.isParton()
+          && pythia.event[ip.daughter1()].isHadron())
+            || (ip.isFinal() && ip.isParton()))
+		       	&& absid==std::abs(pIn.pid)){
+            particle p;
+	    
+	    p.p = fourvec{ip.e(), ip.px(), ip.py(), ip.pz()};
+	    p.mass = pIn.mass;
+	    p.vcell.resize(3);
+	    p.vcell[0] = pIn.vcell[0];
+	    p.vcell[1] = pIn.vcell[1];
+            p.vcell[2] = pIn.vcell[2];
+	    p.p0 = p.p;
+	    p.weight = pIn.weight;
+	    p.Tf = pIn.Tf;
+	    p.x = x;
+	    p.pid = pIn.pid;
+            pOut.push_back(p);
+        }
+    }
+    return 0;
 }

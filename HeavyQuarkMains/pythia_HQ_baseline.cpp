@@ -76,32 +76,15 @@ int main(int argc, char* argv[]){
         }
 
         std::vector<double> TriggerBin({
-           1,2,3,4,6,8,10,12,14,16,18,20,22,24,26,28,30,
+           2,3,4,6,8,10,12,14,16,18,20,22,24,26,28,30,
            35,40,45,50,55,60,65,70,75,80,85,90,100,
            110,120,140,160,180,200,
            240,280,320,360,400,500});
 
-        /// Initialize Lido in-medium transport
-	// Scale to insert In medium transport
         double Q0 = args["Q0"].as<double>();
-        double muT = args["muT"].as<double>();
-        double theta = args["theta"].as<double>();
-	double cut = args["cut"].as<double>();
-	double afix = args["afix"].as<double>();
-        double Tf = args["Tf"].as<double>();
-        std::vector<double> parameters{muT, afix, cut, theta};
-        lido A(args["lido-setting"].as<fs::path>().string(), 
-               args["lido-table"].as<fs::path>().string(), 
-               parameters);
-        A.set_frame(1); //Bjorken Frame
                 
-        /// Initialzie a hydro reader
-        Medium<2> med1(args["hydro"].as<fs::path>().string());
-        double mini_tau0 = med1.get_tauH();
-
         // Fill in all events
-        LOG_INFO << "Events initialization, tau0 = " <<  mini_tau0;
-        std::vector<particle> plist, dlist, flist;
+        std::vector<particle> plist, dlist;
         for (int iBin = 0; iBin < TriggerBin.size()-1; iBin++) {
             HQGenerator pythiagen(
                             args["pythia-setting"].as<fs::path>().string(),
@@ -137,9 +120,9 @@ int main(int argc, char* argv[]){
         int processid = getpid();
         std::stringstream outputfilename1,outputfilename2;
         outputfilename1 << args["output"].as<fs::path>().string() 
-                        << "c-quark-" << processid<<".dat";
+                        << "c-quark-frzout.dat";
         outputfilename2 << args["output"].as<fs::path>().string()
-                        << "b-quark-" << processid<<".dat";
+                        << "b-quark-frzout.dat";
         output_oscar(plist, 4, outputfilename1.str());
         output_oscar(plist, 5, outputfilename2.str());
   

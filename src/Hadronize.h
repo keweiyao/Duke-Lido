@@ -17,4 +17,13 @@ private:
    Pythia pythia;
 };
 
+class HFHadronize{
+public:
+   HFHadronize();
+   int hadronize(particle pIn, std::vector<particle> & pOut, double Q0, double Tf);
+private:
+   Pythia pythia;
+};
+
+
 #endif
