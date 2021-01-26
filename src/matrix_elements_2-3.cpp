@@ -322,10 +322,15 @@ double M2_qg2qqqbar(const double * x_, void * params_){
         A2 = std::pow(A[0],2) + std::pow(A[1],2);
         B2 = std::pow(B[0],2) + std::pow(B[1],2);
         AB = A[0]*B[0] + A[1]*B[1];
+        double A2M = std::pow(1/DA-1/DB,2);
+        double B2M = std::pow(1/DA-1/DC,2);
+        double ABM = (1/DA-1/DB)*(1/DA-1/DC);
         Msq_12 = c8pi* alpha_s(kt2, Temp) 
             * one_minus_xbar * xbar
-            * P_g2qqbar(xbar)
-            * ( CF*A2 + CF*B2 - (2*CF-CA)*AB )/CF;
+            * ( P_g2qqbar(xbar)*( CF*A2 + CF*B2 - (2*CF-CA)*AB ) // anti-spin
+              + m3*m3/2. * ( CF*A2M + CF*B2M - (2*CF-CA)*ABM ) // para-spin
+            ) /CF;
+
     }
     return Msq_12*Msq_22*Jacobian;
 }    
@@ -475,7 +480,7 @@ double dX_gg2ggg(const double * x_, void * params){
 // g[h](A) + q[s](B) --> q(1)+q(2)+qbar(3)
 double M2_gq2qqqbar(const double * x_, void * params_){
     double * params = static_cast<double*>(params_);
-    double Temp = params[2];
+    double Temp = params[2], m3 = params[7];
     double kx, ky, qx, qy, xbar, t, Jacobian, yk;
     bool status = false;
     unpack_three_body_phase_space_same(
@@ -498,7 +503,7 @@ double M2_gq2qqqbar(const double * x_, void * params_){
     MB[1] = ky - qy;
     MC[0] = kx;
     MC[1] = ky;
-    double mth2 = (CF/CA-xbar+xbar*xbar)*mg2;
+    double mth2 = (CF/CA-xbar+xbar*xbar)*mg2 + m3*m3;
     DA = MA[0]*MA[0] + MA[1]*MA[1] + mth2;
     DB = MB[0]*MB[0] + MB[1]*MB[1] + mth2;
     DC = MC[0]*MC[0] + MC[1]*MC[1] + mth2;
@@ -509,11 +514,16 @@ double M2_gq2qqqbar(const double * x_, void * params_){
     A2 = std::pow(A[0],2) + std::pow(A[1],2);
     B2 = std::pow(B[0],2) + std::pow(B[1],2);
     AB = A[0]*B[0] + A[1]*B[1];
+    double A2M = std::pow(1/DA-1/DB,2);
+    double B2M = std::pow(1/DA-1/DC,2);
+    double ABM = (1/DA-1/DB)*(1/DA-1/DC);
     Msq_22 = M2_gq2gq(t, params);
     Msq_12 = c8pi* alpha_s(kt2, Temp) 
             * one_minus_xbar * xbar
-            * P_g2qqbar(xbar)
-             * ( CF*A2 + CF*B2 - (2*CF-CA)*AB )/CA;
+            * ( P_g2qqbar(xbar)*( CF*A2 + CF*B2 - (2*CF-CA)*AB ) // anti-spin
+              + m3*m3/2. * ( CF*A2M + CF*B2M - (2*CF-CA)*ABM ) // para-spin
+            ) /CA;
+
     return Msq_12*Msq_22*Jacobian;
 }    
 double dX_gq2qqqbar(const double * x_, void * params){
@@ -527,7 +537,7 @@ double dX_gq2qqqbar(const double * x_, void * params){
 // g[h](A) + g[s](B) --> q(1)+g(2)+qbar(3)
 double M2_gg2qgqbar(const double * x_, void * params_){
     double * params = static_cast<double*>(params_);
-    double Temp = params[2];
+    double Temp = params[2], m3 = params[7];
     double kx, ky, qx, qy, xbar, t, Jacobian, yk;
     bool status = false;
     unpack_three_body_phase_space(
@@ -550,7 +560,7 @@ double M2_gg2qgqbar(const double * x_, void * params_){
     MB[1] = ky - qy;
     MC[0] = kx;
     MC[1] = ky;
-    double mth2 = (CF/CA-xbar+xbar*xbar)*mg2;
+    double mth2 = (CF/CA-xbar+xbar*xbar)*mg2 + m3*m3;
     DA = MA[0]*MA[0] + MA[1]*MA[1] + mth2;
     DB = MB[0]*MB[0] + MB[1]*MB[1] + mth2;
     DC = MC[0]*MC[0] + MC[1]*MC[1] + mth2;
@@ -561,11 +571,15 @@ double M2_gg2qgqbar(const double * x_, void * params_){
     A2 = std::pow(A[0],2) + std::pow(A[1],2);
     B2 = std::pow(B[0],2) + std::pow(B[1],2);
     AB = A[0]*B[0] + A[1]*B[1];
+    double A2M = std::pow(1/DA-1/DB,2);
+    double B2M = std::pow(1/DA-1/DC,2);
+    double ABM = (1/DA-1/DB)*(1/DA-1/DC);
     Msq_22 = M2_gg2gg(t, params);
     Msq_12 = c8pi* alpha_s(kt2, Temp) 
             * one_minus_xbar * xbar
-            * P_g2qqbar(xbar)
-             * ( CF*A2 + CF*B2 - (2*CF-CA)*AB ) /CA;
+            * ( P_g2qqbar(xbar)*( CF*A2 + CF*B2 - (2*CF-CA)*AB ) // anti-spin
+              + m3*m3/2. * ( CF*A2M + CF*B2M - (2*CF-CA)*ABM ) // para-spin
+            ) /CA;
     return Msq_12*Msq_22*Jacobian;
 }    
 double dX_gg2qgqbar(const double * x_, void * params){
@@ -614,11 +628,15 @@ double M2_gg2gqqbar(const double * x_, void * params_){
     A2 = std::pow(A[0],2) + std::pow(A[1],2);
     B2 = std::pow(B[0],2) + std::pow(B[1],2);
     AB = A[0]*B[0] + A[1]*B[1];
+    double A2M = std::pow(1/DA-1/DB,2);
+    double B2M = std::pow(1/DA-1/DC,2);
+    double ABM = (1/DA-1/DB)*(1/DA-1/DC);
     Msq_22 = M2_gg2gg(t, params);
     Msq_12 = c8pi* alpha_s(kt2, Temp) 
             * one_minus_xbar * xbar
-            * P_g2qqbar(xbar)
-             * ( CF*A2 + CF*B2 - (2*CF-CA)*AB ) /CA;
+            * ( P_g2qqbar(xbar)*( CF*A2 + CF*B2 - (2*CF-CA)*AB ) // anti-spin
+	      + m3*m3/2. * ( CF*A2M + CF*B2M - (2*CF-CA)*ABM ) // para-spin
+	    ) /CA;
     return Msq_12*Msq_22*Jacobian;
 }    
 double dX_gg2gqqbar(const double * x_, void * params){

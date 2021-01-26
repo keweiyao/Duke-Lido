@@ -147,7 +147,7 @@ bool Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
             std::vector<int> & pids){
     double lnsqrts = parameters[0], temp = parameters[1];
     double mD2 = t_channel_mD2->get_mD2(temp);
-    double tcut = -cut*mD2;
+    double tcut = is2to2_nlo(_process_id)?-mD2:-cut*mD2;
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1], m3 = _FS_masses[2];
     double sqrts = std::exp(lnsqrts);
@@ -300,7 +300,7 @@ scalar Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
     find_max(std::vector<double> parameters){
     double lnsqrts = parameters[0], temp = parameters[1];
     double mD2 = t_channel_mD2->get_mD2(temp);
-    double tcut = -cut*mD2;
+    double tcut = is2to2_nlo(_process_id)?-mD2:-cut*mD2;
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1], m3 = _FS_masses[2];
     double sqrts = std::exp(lnsqrts);
@@ -362,7 +362,7 @@ scalar Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
             {{xmin[0],xmax[0]}, 
              {xmin[1],xmax[1]},
              {xmin[2],xmax[2]}, 
-             {xmin[3],xmax[3]}}, 500);
+             {xmin[3],xmax[3]}}, 1000);
     // use the best result of MC_maximize and determine the step of the simplex minimization method
     std::vector<double> step = {(xmax[0]-xmin[0])/20, (xmax[1]-xmin[1])/20., 
                                 (xmax[2]-xmin[2])/20., (xmax[3]-xmin[3])/20.};
@@ -371,9 +371,9 @@ scalar Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
         step[i] = std::min(dx, step[i]);
     }
     // find the more precise maximum by the simplex method
-    double val = -minimize_nd(minus_dXdPS, 4, startloc, step, 2000, 
+    double val = -minimize_nd(minus_dXdPS, 4, startloc, step, 4000, 
    (xmax[0]-xmin[0])*(xmax[1]-xmin[1])*(xmax[2]-xmin[2])*(xmax[3]-xmin[3])
-   /1e12);
+   /1e-12);
     return scalar{std::log(1.5*val)};
 
 }
@@ -439,7 +439,7 @@ scalar Xsection<HS2PPP, 2, double(*)(const double*, void*)>::
                 calculate_scalar(std::vector<double> parameters){
     double lnsqrts = parameters[0], temp = parameters[1];
     double mD2 = t_channel_mD2->get_mD2(temp);
-    double tcut = -cut*mD2;
+    double tcut = is2to2_nlo(_process_id)?-mD2:-cut*mD2;
     double mA = _IS_masses[0], mB = _IS_masses[1];
     double m1 = _FS_masses[0], m2 = _FS_masses[1], m3 = _FS_masses[2];
     double sqrts = std::exp(lnsqrts);

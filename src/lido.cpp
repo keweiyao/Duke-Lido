@@ -271,11 +271,7 @@ int lido::update_single_particle(
             if (pIn.x.x0()-(*it)[1].x0.x0() <= taun) it++;
             else{
                 fourvec Ptot = P0*((PB.t()+PC.t())/P0.t());
-                double Ptotabs = Ptot.pabs();
-                fourvec nbar{1., -Ptot.x()/Ptotabs, 
-                       -Ptot.y()/Ptotabs, -Ptot.z()/Ptotabs};
-                double Eplus_mother = Ptotabs + Ptot.t();
-                double Z = dot(PB, nbar)/Eplus_mother;
+                double Z = PB.t()/Ptot.t();
                 // if formed, apply LPM suppression in the Bjorken frame
                 double Acceptance = 0.;
                 double kt20 = measure_perp((*it)[1].mother_p, (*it)[1].p).pabs2();
@@ -299,11 +295,12 @@ int lido::update_single_particle(
                     MassFactors = std::pow(kt21/(kt21+m2), 2);
                 }
                 double log_factor = std::sqrt(lnQ2_1/lnQ2_0);
-                double LPM = std::min(MFP / taun * log_factor, 1.);
+                double LPM = std::min((1-Z+Z*Z)*MFP / taun * log_factor, 1.);
                 // The final acceptance factor
                 Acceptance = LPM * Running * MassFactors;
 
-                if (Srandom::rejection(Srandom::gen) < Acceptance){  
+                if (Srandom::rejection(Srandom::gen) < Acceptance){ 
+                    //f << pIn.x.x0() << " " <<  (*it)[1].p.t()/pIn.p0.t() << std::endl; 
                     double newEB = pIn.p.t()*Z;
                     double newEA = pIn.p.t()*(1.-Z);
                     assign_n2np1_color(
@@ -320,9 +317,9 @@ int lido::update_single_particle(
 
                     if ((*it)[1].pid==21) { 
                         pIn.p = PC*(newEA/PC.t());
-                        //f << pIn.x.x0() << " " << Z << std::endl;
                     }
                     if ((*it)[1].pid!=21) {
+                        //
                         pIn.p = PC*(newEA/PC.t());
                         pIn.pid = -(*it)[1].pid;
                         pIn.mass = pid2mass(pIn.pid);
