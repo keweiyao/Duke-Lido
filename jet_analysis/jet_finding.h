@@ -105,44 +105,53 @@ private:
 
 class LeadingParton{
    public:
-   LeadingParton(std::vector<double> _pTbins);
-   void add_event(std::vector<particle> plist, double sigma_gen, double maxPT);
+   LeadingParton();
+   void add_event(std::vector<particle> plist, double sigma_gen);
    void write(std::string fheader);
    private:
-   std::vector<double> pTbins, binwidth, nchg, npi, nstrange, nD, nB, v2chg, v2strange, v2pi, v2D, v2B;
+   std::vector<double> pTbins, binwidth, nchg, npi, nstrange, nD, nB;
+   std::vector<std::vector<double> > v2chg, v2strange, v2pi, v2D, v2B,
+                        v3chg, v3strange, v3pi, v3D, v3B;
    int NpT;
 };
 
 class JetStatistics{
    public:
-   JetStatistics(std::vector<double> _pTbins, std::vector<double> Rs, 
-      std::vector<double> shapepTbins, std::vector<double> shaperbins, 
-      std::vector<double> FragspTbins, std::vector<double> Fragszbins, 
-      std::vector<double> FragszpTbins,
-      std::vector<double> xJ_pTbins);
+   JetStatistics(std::vector<double> Rs, 
+      std::vector<double> shaperbins, 
+      std::vector<double> Fragszbins, 
+      std::vector<double> FragszpTbins);
    void add_event(std::vector<Fjet> jets, double sigma_gen, fourvec x0);
    void write(std::string fheader);
    private:
    std::vector<double> pTbins, binwidth, 
 	   shape_pTbins, shape_rbins, 
-	   xJbins, xJ_pTbins, 
-	   Frag_pTbins, Frag_zbins, Frag_zpTbins, Frags_W, Frags_D_W, Frags_B_W;
+	   xJbins, xJ_pTbins, xJ_W, 
+	   Frag_pTbins, Frag_zbins, Frag_zpTbins, 
+           Frags_W, Frags_D_W, Frags_B_W,
+           Shape_W, Shape_D_W, Shape_B_W,
+           D_in_jet_W, B_in_jet_W;
+   std::vector<std::vector<std::vector<double> > > JQ2, JQ3;
    std::vector<double> Rs;
    std::vector<std::vector<double> > shapes, xJ, 
 	   Dshapes, Bshapes, 
 	   dsigmadpT, dBdpT, dDdpT,
-	   Frags, Frags_pT, Frags_D, Frags_B, DijetInfo;
+	   Frags, Frags_pT, 
+           Frags_D, Frags_D_pT,
+           Frags_B, Frags_B_pT,
+           D_in_jet, B_in_jet,
+           DijetInfo;
    int NpT, shape_NpT, shape_Nr;
 };
 
 class JetHFCorr{
    public:
-   JetHFCorr(std::vector<double> pTHFbins, std::vector<double> rbins);
+   JetHFCorr(std::vector<double> rbins);
    void add_event(std::vector<Fjet> jets, std::vector<particle> HFs, 
                   double sigma_gen);
    void write(std::string fheader);
    private:
-   std::vector<double> pTHFbins, rbins;
+   std::vector<double> pTHFbins, rbins, dDdr_W, dBdr_W;
    std::vector<std::vector<double> > dDdr, dBdr;
 };
 

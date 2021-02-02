@@ -100,34 +100,19 @@ int main(int argc, char* argv[]){
             }
         }
 
-        std::vector<double> TriggerBin({
-           0,2,4,6,8,10,12,14,16,18,20,24,28,32,
-           36,40,45,50,60,70,80,90,100,110,
+         std::vector<double> TriggerBin({
+           0,2,5,10,20,30,40,60,80,100,
            120,140,160,180,200,250,300,350,400,500,
            600,700,800,900,1000,1200,1600,2000,2500});
-	std::vector<double> Rs({.2,.3,.4, .6, .8,1.0});
-        std::vector<double> ParticlepTbins({0,.25,.5,1.,1.5,2,3,4,5,6,7,8,10,
-			12,14,16,18,20,22,24,28,32,36,40,45,50,
-			55,60,65,70,80,90,100,
-			110,120,140,160,180,200,220,240,260,300,
-			350,400,500,600,800,1000});
-        std::vector<double> jetpTbins({20,25,30,35,
-			40,45,50,55,60,70,80,90,100,110,120,140,160,180,200,
-			240,280,320,360,400,500,600,800,1000,
-			1200,1400,1600,2000,2500});
-        std::vector<double> HFpTbins({4,20,200});
-        std::vector<double> HFETbins({2,6,10,20,40,100});
-        std::vector<double> shapepTbins({60,80,100,120,2500});
-        std::vector<double> shaperbins({0, .05, .1, .15,  .2, .25, .3,
-                          .35, .4, .45, .5,  .6, .7,  .8,
-                           1., 1.5, 2.0, 2.5, 3.0});
-	std::vector<double> xJpTbins({100,126,158,178,200,224,251,282,316,398,562});
-        std::vector<double> FragpTbins({40,60,70,100,126,158,200,251,316,398,600,800});
-
-	std::vector<double> zbins({0, 0.001,0.002, 0.0035,.005,.0065,.0085,.011,.015,
-                        .019,.025,.032,.042,.055,
-                        .071, .092, .120,.157, .204, 
-                        .266, .347, .452, .589, .767,
+	std::vector<double> Rs({.2,.3,.4,.6,.8,1.0});
+        std::vector<double> shaperbins({0., .05, .1, .15,  .2, .25, .3,
+                         .35, .4, .45, .5,  .6, .7,  .8,
+                          1., 1.5, 2.0, 2.5, 3.0});
+	std::vector<double> zbins({0, 0.001, 0.002, 
+                         0.0035,.005,.0065,.0085, .01,
+                        .012, .016, .02,.025, .03,.04,.05,
+                        .07, .09, .120, .15, .20, 
+                        .25, .35, .45, .55, .65, .8,
                         1.});
         std::vector<double> zpTbins({
          0.0, 0.15, 0.3, 0.5       ,   0.70626877,   0.99763116,   1.40919147,
@@ -135,15 +120,12 @@ int main(int argc, char* argv[]){
          7.92446596,  11.19360569,  15.8113883 ,  22.33417961,
          31.54786722,  44.56254691,  62.94627059,  88.9139705 ,
          125.59432158, 177.40669462, 250.59361681, 353.97289219,
-         500.        	});
+         500.});
 
-	LeadingParton dNdpT(ParticlepTbins);
-	JetStatistics JetSample(jetpTbins, Rs, 
-			 shapepTbins, shaperbins, 
-			 FragpTbins, zbins, zpTbins,
-			 xJpTbins);
+	LeadingParton HadronSample;
+	JetStatistics JetSample(Rs, shaperbins, zbins, zpTbins);
         JetFinder jetfinder(300,300,3.);
-        JetHFCorr jet_HF_corr(HFpTbins, shaperbins);
+        JetHFCorr jet_HF_corr(shaperbins);
 
         std::vector<event> events;
         // Fill in all events
@@ -182,9 +164,9 @@ int main(int argc, char* argv[]){
         int processid = getpid();
         std::stringstream fheader;
         fheader << args["output"].as<fs::path>().string() 
-                << processid;
+                << "/lido";
         for (auto & ie : events){
-            dNdpT.add_event(ie.plist, ie.sigma, ie.maxPT);
+            HadronSample.add_event(ie.plist, ie.sigma);
             ie.clist.clear();
 	    if (args["jet"].as<bool>()) {
                 jetfinder.set_sigma(ie.sigma);
@@ -202,7 +184,7 @@ int main(int argc, char* argv[]){
             ie.plist.clear();
         }
           LOG_INFO << "Jet finding idone";    
-        dNdpT.write(fheader.str());
+        HadronSample.write(fheader.str());
 	if (args["jet"].as<bool>()){
            JetSample.write(fheader.str());
            jet_HF_corr.write(fheader.str());

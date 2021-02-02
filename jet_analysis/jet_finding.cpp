@@ -550,25 +550,77 @@ void JetFinder::LabelFlavor(){
     }
 }
 
-LeadingParton::LeadingParton(std::vector<double> _pTbins){
-    pTbins = _pTbins;
+LeadingParton::LeadingParton():
+pTbins({0, 1.,2.,3,
+    4,5,6,7,8,10,12,14,16,18,
+    20,22,24,28,32,36,40,45,50,
+    55,60,65,70,80,90,100,
+    110,120,140,160,180,200,
+    220,240,260,300,350,
+    400,500,600,800,1000}){
     NpT = pTbins.size()-1;
-    
     nchg.resize(NpT); for (auto & it:nchg) it=0.;
     npi.resize(NpT); for (auto & it:npi) it=0.;
     nstrange.resize(NpT); for (auto & it:nstrange) it=0.;
     nD.resize(NpT); for (auto & it:nD) it=0.;
     nB.resize(NpT); for (auto & it:nB) it=0.;
-    v2chg.resize(NpT); for (auto & it:v2chg) it=0.;
-    v2pi.resize(NpT); for (auto & it:v2pi) it=0.;
-    v2strange.resize(NpT); for (auto & it:v2strange) it=0.;
-    v2D.resize(NpT); for (auto & it:v2D) it=0.;
-    v2B.resize(NpT); for (auto & it:v2B) it=0.;
+    v2chg.resize(NpT); 
+    for (auto & it:v2chg) {
+        it.resize(2);
+        for (auto & iit : it) iit=0.;
+    }
+    v3chg.resize(NpT); 
+    for (auto & it:v3chg) {
+        it.resize(2);
+        for (auto & iit : it) iit=0.;
+    }
+    v2pi.resize(NpT); 
+    for (auto & it:v2pi) {
+        it.resize(2);
+        for (auto & iit : it) iit=0.;
+    }
+    v3pi.resize(NpT); 
+    for (auto & it:v3pi) {
+        it.resize(2);
+        for (auto & iit : it) iit=0.;
+    }
+    v2strange.resize(NpT); 
+    for (auto & it:v2strange) {
+        it.resize(2);
+        for (auto & iit : it) iit=0.;
+    }
+    v3strange.resize(NpT); 
+    for (auto & it:v3strange) {
+        it.resize(2);
+        for (auto & iit : it) iit=0.;
+    }
+    v2D.resize(NpT); 
+    for (auto & it:v2D) {
+        it.resize(2);
+        for (auto & iit : it) iit=0.;
+    }
+    v3D.resize(NpT); 
+    for (auto & it:v3D) {
+        it.resize(2);
+        for (auto & iit : it) iit=0.;
+    }
+    v2B.resize(NpT); 
+    for (auto & it:v2B) {
+        it.resize(2);
+        for (auto & iit : it) iit=0.;
+    }
+    v3B.resize(NpT); 
+    for (auto & it:v3B) {
+        it.resize(2);
+        for (auto & iit : it) iit=0.;
+    }
+
     binwidth.resize(NpT); 
     for (int i=0; i<NpT; i++) 
         binwidth[i]=pTbins[i+1]-pTbins[i];
 }
-void LeadingParton::add_event(std::vector<particle> plist, double sigma_gen, double maxPT){
+void LeadingParton::add_event(std::vector<particle> plist, 
+                            double sigma_gen){
     for (auto & p : plist){
         if (std::abs(p.p.pseudorap()) < 1.) {
             int pid = std::abs(p.pid);
@@ -579,13 +631,13 @@ void LeadingParton::add_event(std::vector<particle> plist, double sigma_gen, dou
 	    }
             double pT = p.p.xT();
 
-	    bool ispi = pid==111 || pid == 211;
-	    bool isstrange = pid==311 || pid == 321;
-            bool ischg = p.charged;
+	    bool ispi = pid == 211;
+	    bool isstrange = pid == 321;
+            bool ischg = pid==211 || pid==321 || pid==2212;
             bool isD = pid==411 || pid == 421 || pid == 413 
                     || pid == 423 || pid == 4;
             bool isB = pid==511 || pid == 521 || pid == 513 
-		    || pid == 523 || pid ==5;
+		    || pid == 523 || pid == 5;
             int ii=0;
             for (int i=0; i<NpT; i++){
                 if ( (pTbins[i]<pT) && (pT<pTbins[i+1]) ) {
@@ -596,23 +648,38 @@ void LeadingParton::add_event(std::vector<particle> plist, double sigma_gen, dou
             if (ii==NpT) ii=NpT-1;
             if (ispi) {
                 npi[ii] += sigma_gen;
-                v2pi[ii] += sigma_gen*std::cos(2*p.p.phi());
+                v2pi[ii][0] += sigma_gen*std::cos(2*p.p.phi());
+                v2pi[ii][1] += sigma_gen*std::sin(2*p.p.phi());
+                v3pi[ii][0] += sigma_gen*std::cos(3*p.p.phi());
+                v3pi[ii][1] += sigma_gen*std::sin(3*p.p.phi());
             }
             if (ischg){
                 nchg[ii] += sigma_gen;
-                v2chg[ii] += sigma_gen*std::cos(2*p.p.phi());
+                v2chg[ii][0] += sigma_gen*std::cos(2*p.p.phi());
+                v2chg[ii][1] += sigma_gen*std::sin(2*p.p.phi());
+                v3chg[ii][0] += sigma_gen*std::cos(3*p.p.phi());
+                v3chg[ii][1] += sigma_gen*std::sin(3*p.p.phi());
             }
             if (isstrange){
                 nstrange[ii] += sigma_gen;
-                v2strange[ii] += sigma_gen*std::cos(2*p.p.phi());
+                v2strange[ii][0] += sigma_gen*std::cos(2*p.p.phi());
+                v2strange[ii][1] += sigma_gen*std::sin(2*p.p.phi());
+                v3strange[ii][0] += sigma_gen*std::cos(3*p.p.phi());
+                v3strange[ii][1] += sigma_gen*std::sin(3*p.p.phi());
             }
             if (isD) {
                 nD[ii] += sigma_gen;
-                v2D[ii] += sigma_gen*std::cos(2*p.p.phi());
+                v2D[ii][0] += sigma_gen*std::cos(2*p.p.phi());
+                v2D[ii][1] += sigma_gen*std::sin(2*p.p.phi());
+                v3D[ii][0] += sigma_gen*std::cos(3*p.p.phi());
+                v3D[ii][1] += sigma_gen*std::sin(3*p.p.phi());
             }
             if (isB) {
                 nB[ii] += sigma_gen;
-                v2B[ii] += sigma_gen*std::cos(2*p.p.phi());
+                v2B[ii][0] += sigma_gen*std::cos(2*p.p.phi());
+                v2B[ii][1] += sigma_gen*std::sin(2*p.p.phi());
+                v3B[ii][0] += sigma_gen*std::cos(3*p.p.phi());
+                v3B[ii][1] += sigma_gen*std::sin(3*p.p.phi());
             }
         }
     }
@@ -626,51 +693,90 @@ void LeadingParton::write(std::string fheader){
         f    << (pTbins[i]+pTbins[i+1])/2. << " "
              << pTbins[i] << " "
              << pTbins[i+1] << " "
-             << nchg[i]/binwidth[i] << " " << v2chg[i] << " "
-             << npi[i]/binwidth[i] << " " << v2pi[i] << " "
-             << nstrange[i]/binwidth[i] << " "<< v2strange[i] << " "
-             << nD[i]/binwidth[i] << " "<< v2D[i] << " "
-             << nB[i]/binwidth[i] << " "<< v2B[i] << std::endl;
+             << nchg[i]/binwidth[i] << " "
+             << npi[i]/binwidth[i] << " "
+             << nstrange[i]/binwidth[i] << " "
+             << nD[i]/binwidth[i] << " "
+             << nB[i]/binwidth[i] << std::endl;
     }
     f.close();
+
+    std::stringstream filename2;
+    filename2 << fheader << "-LeadingQn.dat";
+    std::ofstream f2(filename2.str());
+
+    for (int i=0; i<NpT; i++) {
+        f2   << (pTbins[i]+pTbins[i+1])/2. << " "
+             << pTbins[i] << " "
+             << pTbins[i+1] << " "
+             << nchg[i] << " " 
+             << v2chg[i][0] << " " << v2chg[i][1] << " "
+             << v3chg[i][0] << " " << v3chg[i][1] << " "
+             << npi[i] << " " 
+             << v2pi[i][0] << " " << v2pi[i][1] << " "
+             << v3pi[i][0] << " " << v3pi[i][1] << " "
+             << nstrange[i] << " "
+             << v2strange[i][0] << " " << v2strange[i][1] << " "
+             << v3strange[i][0] << " " << v3strange[i][1] << " "
+             << nD[i] << " " 
+             << v2D[i][0] << " " << v2D[i][1] << " "
+             << v3D[i][0] << " " << v3D[i][1] << " "
+             << nB[i] << " " 
+             << v2B[i][0] << " " << v2B[i][1] << " "
+             << v3B[i][0] << " " << v3B[i][1] << std::endl;
+    }
+    f2.close();
 }
 
 JetStatistics::JetStatistics(
-     std::vector<double> _pTbins, 
-     std::vector<double> _Rs,
-     std::vector<double> _shape_pTbins, 
+     std::vector<double> _Rs, 
      std::vector<double> _shape_rbins,
-     std::vector<double> _Frag_pTbins,
      std::vector<double> _Frag_zbins,
-     std::vector<double> _Frag_zpTbins,
-     std::vector<double> _xJ_pTbins){ 
+     std::vector<double> _Frag_zpTbins):
+Rs(_Rs),
+pTbins({4,6,8,12,16,20,25,30,35,
+      40,45,50,60,70,80,90,100,
+      110,120,140,160,180,200,
+      240,280,320,360,400,500,
+      600,800,1000,1200,1400,1600,2000,2500}),
+xJ_pTbins({10,20,30,40,60,80,100,126,158,178,200,224,251,282,316,398,562}),
+shape_pTbins({10,20,30,40,60,80,100,120,2500}),
+Frag_pTbins({10,20,30,40,60,70,100,126,158,200,251,316,398,600,800}),
+shape_rbins(_shape_rbins),
+Frag_zbins(_Frag_zbins),
+Frag_zpTbins(_Frag_zpTbins),
+xJbins({0, .05,  .1, .15,  .2,
+         .25,  .3, .35,  .4, .45,
+          .5, .55,  .6, .65,  .7,
+         .75,  .8, .85,  .9, .95, 1.0})
+{ 
+
     DijetInfo.clear();
-    xJ_pTbins = _xJ_pTbins;
-    for (int i=0; i<21; i++) xJbins.push_back(i*0.05);
+    xJ_W.resize(xJ_pTbins.size()-1);
+    for (auto & it: xJ_W) it = 0.;
     xJ.resize(xJ_pTbins.size()-1);
     for (auto & it: xJ) {
         it.resize(xJbins.size()-1);
         for (auto & iit : it) iit = 0.;
     }
-    pTbins = _pTbins;
-    Rs = _Rs;
-    shape_pTbins = _shape_pTbins;
-    shape_rbins = _shape_rbins;
     NpT = pTbins.size()-1;
     shape_NpT = shape_pTbins.size()-1;
     shape_Nr = shape_rbins.size()-1;
-
-    Frag_pTbins = _Frag_pTbins;
-    Frag_zbins = _Frag_zbins;
-    Frag_zpTbins = _Frag_zpTbins;
 
     Frags.resize(Frag_pTbins.size()-1);
     Frags_pT.resize(Frag_pTbins.size()-1);
     Frags_W.resize(Frag_pTbins.size()-1);
     Frags_D.resize(Frag_pTbins.size()-1);
+    Frags_D_pT.resize(Frag_pTbins.size()-1);
     Frags_D_W.resize(Frag_pTbins.size()-1);
     Frags_B.resize(Frag_pTbins.size()-1);
+    Frags_B_pT.resize(Frag_pTbins.size()-1);
     Frags_B_W.resize(Frag_pTbins.size()-1);
+
+    D_in_jet_W.resize(Frag_pTbins.size()-1);
+    B_in_jet_W.resize(Frag_pTbins.size()-1);
+    D_in_jet.resize(Frag_pTbins.size()-1);
+    B_in_jet.resize(Frag_pTbins.size()-1);
 
     for (auto & it : Frags_W) it=0.;
     for (auto & it : Frags) {
@@ -687,23 +793,46 @@ JetStatistics::JetStatistics(
         it.resize(Frag_zbins.size()-1);
         for (auto & itt : it) itt =0.;
     }
+    for (auto & it : Frags_D_pT) {
+        it.resize(Frag_zpTbins.size()-1);
+        for (auto & itt : it) itt =0.;
+    }
 
     for (auto & it : Frags_B_W) it=0.;
     for (auto & it : Frags_B) {
         it.resize(Frag_zbins.size()-1);
         for (auto & itt : it) itt =0.;
     }
+    for (auto & it : Frags_B_pT) {
+        it.resize(Frag_zpTbins.size()-1);
+        for (auto & itt : it) itt =0.;
+    }
 
+    for (auto & it : D_in_jet_W) it=0.;
+    for (auto & it : D_in_jet) {
+        it.resize(Frag_zbins.size()-1);
+	for (auto & itt : it) itt =0.;
+    }
+
+    for (auto & it : B_in_jet_W) it=0.;
+    for (auto & it : B_in_jet) {
+        it.resize(Frag_zbins.size()-1);
+	for (auto & itt : it) itt =0.;
+    }
+
+    Shape_W.resize(shape_NpT); for (auto & it: Shape_W) it=0.;
     shapes.resize(shape_NpT); 
     for (auto & it:shapes) {
         it.resize(_shape_rbins.size()-1);
         for (auto & iit : it ) iit=0.;
     }
+    Shape_D_W.resize(shape_NpT); for (auto & it: Shape_D_W) it=0.;
     Dshapes.resize(shape_NpT); 
     for (auto & it:Dshapes) {
         it.resize(_shape_rbins.size()-1);
         for (auto & iit : it ) iit=0.;
     }
+    Shape_B_W.resize(shape_NpT); for (auto & it: Shape_B_W) it=0.;
     Bshapes.resize(shape_NpT); 
     for (auto & it:Bshapes) {
         it.resize(_shape_rbins.size()-1);
@@ -723,6 +852,22 @@ JetStatistics::JetStatistics(
     for (auto & it:dBdpT) {
             it.resize(NpT);
         for (auto & iit : it ) iit=0.;
+    }
+    JQ2.resize(Rs.size());
+    for (auto & it:JQ2) {
+        it.resize(NpT);
+        for (auto & iit : it ){
+            iit.resize(2);
+            iit[0] = 0.; iit[1] = 0.;
+        }
+    }
+    JQ3.resize(Rs.size());
+    for (auto & it:JQ3) {
+        it.resize(NpT);
+        for (auto & iit : it ){
+            iit.resize(2);
+            iit[0] = 0.; iit[1] = 0.;
+        }
     }
 
     binwidth.resize(NpT);
@@ -764,8 +909,10 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
                             break;
                         }
                     }
-		    if (rindex>=0)
+		    if (rindex>=0){
                         xJ[pTindex][rindex] += sigma_gen;
+                        xJ_W[pTindex] += sigma_gen;
+                    }
 		}
             }
         }
@@ -781,6 +928,9 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
                 }
             }
             if (ii<0) continue;
+	    if (J.flavor==4) Shape_D_W[ii] += sigma_gen;
+	    if (J.flavor==5) Shape_B_W[ii] += sigma_gen;
+	    Shape_W[ii] += sigma_gen;
             for (int i=0; i<shape_Nr; i++){
                 shapes[ii][i] += sigma_gen*J.shape[i];
                 if (J.flavor==4) Dshapes[ii][i] += sigma_gen*J.shape[i];
@@ -818,17 +968,54 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
 	    if (J.flavor==5) Frags_B_W[ii] += sigma_gen;
 	    Frags_W[ii] += sigma_gen;
             for (int j=0; j<Frags[ii].size(); j++){
-                if (J.flavor==4) Frags_D[ii][j] += sigma_gen*J.dDdz[j];
-		if (J.flavor==5) Frags_B[ii][j] += sigma_gen*J.dBdz[j];
+                if (J.flavor==4) Frags_D[ii][j] += sigma_gen*J.dNdz[j];
+		if (J.flavor==5) Frags_B[ii][j] += sigma_gen*J.dNdz[j];
 		Frags[ii][j] += sigma_gen*J.dNdz[j];
 	    }
             for (int j=0; j<Frags_pT[ii].size(); j++){
+                if (J.flavor==4) Frags_D_pT[ii][j] += sigma_gen*J.dNdpT[j];
+		if (J.flavor==5) Frags_B_pT[ii][j] += sigma_gen*J.dNdpT[j];
 		Frags_pT[ii][j] += sigma_gen*J.dNdpT[j];
 	    }
         }
     }
 
-    // Yield
+
+    // Flavor in jet
+    for (int i=0; i<jets.size(); i++){
+	auto & J = jets[i];
+        if ((J.R<0.41) && (J.R>0.39) && (std::abs(J.eta) < 2.1) ) {
+            bool triggered = true;
+            for (int j=0; j<jets.size(); j++){
+                if (i==j) continue;
+	        if (jets[j].R<0.39||jets[j].R>0.41) continue;
+                auto & J2 = jets[j];
+                double absdphi = std::abs(J.phi - J2.phi);
+                if (absdphi>M_PI) absdphi = 2.*M_PI-absdphi;
+                double deta = J.eta-J2.eta;
+                double dR = std::sqrt(absdphi*absdphi + deta*deta);
+                if ((dR<1.0) && (J2.pT>J.pT)) triggered = false;
+            }
+            if (!triggered) continue;	
+            int ii=-1;
+            for (int i=0; i<Frag_pTbins.size()-1; i++){
+                if ((Frag_pTbins[i]<J.pT) && (J.pT<Frag_pTbins[i+1])) {
+                    ii = i;
+                    break;
+                }
+            }
+            if (ii<0) continue;
+	    if (J.flavor==4) D_in_jet_W[ii] += sigma_gen;
+	    if (J.flavor==5) B_in_jet_W[ii] += sigma_gen;
+            for (int j=0; j<D_in_jet[ii].size(); j++){
+                if (J.flavor==4) D_in_jet[ii][j] += sigma_gen*J.dDdz[j];
+		if (J.flavor==5) B_in_jet[ii][j] += sigma_gen*J.dBdz[j];
+	    }
+        }
+    }
+
+
+    // Yield and Vn
     for (auto & J : jets){
         // check jet R
         int iR;
@@ -854,6 +1041,10 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
             if (J.flavor==4) dDdpT[iR][ii] += sigma_gen;
             if (J.flavor==5) dBdpT[iR][ii] += sigma_gen;
             dsigmadpT[iR][ii] += sigma_gen;
+            JQ2[iR][ii][0] += sigma_gen * std::cos(2.*J.phi);
+            JQ2[iR][ii][1] += sigma_gen * std::sin(2.*J.phi);
+            JQ3[iR][ii][0] += sigma_gen * std::cos(3.*J.phi);
+            JQ3[iR][ii][1] += sigma_gen * std::sin(3.*J.phi);
         }
     }     
 }
@@ -867,15 +1058,30 @@ void JetStatistics::write(std::string fheader){
             f    << (pTbins[i]+pTbins[i+1])/2. << " "
                  << pTbins[i] << " "
                  << pTbins[i+1] << " "
-                 << dsigmadpT[iR][i]/binwidth[i] << " "
+                 << dsigmadpT[iR][i]/binwidth[i] << " " 
                  << dDdpT[iR][i]/binwidth[i] << " "
                  << dBdpT[iR][i]/binwidth[i] <<  std::endl;
         }
         f.close();
+
+        std::stringstream filename2;
+        filename2 << fheader << "-jet-R-"<<iR<<"-"<<"qn.dat";
+        std::ofstream f2(filename2.str());
+        for (int i=0; i<NpT; i++) {
+            f2   << (pTbins[i]+pTbins[i+1])/2. << " "
+                 << pTbins[i] << " "
+                 << pTbins[i+1] << " "
+                 << dsigmadpT[iR][i] << " " 
+                 << JQ2[iR][i][0] << " " << JQ2[iR][i][1] << " " 
+                 << JQ3[iR][i][0] << " " << JQ3[iR][i][1] 
+                 <<  std::endl;
+        }
+        f2.close();
+
     }
 
     std::stringstream filename1;
-    filename1 << fheader << "-jetFrag.dat";
+    filename1 << fheader << "-jet-dNdz.dat";
     std::ofstream f1(filename1.str());
     f1 << "#";
     for (auto it : Frag_zbins) f1 << it << " ";
@@ -910,7 +1116,7 @@ void JetStatistics::write(std::string fheader){
 
 
     std::stringstream filename11;
-    filename11 << fheader << "-jetFragD.dat";
+    filename11 << fheader << "-D-jet-dNdz.dat";
     std::ofstream f11(filename11.str());
     f11 << "#";
     for (auto it : Frag_zbins) f11 << it << " ";
@@ -926,8 +1132,25 @@ void JetStatistics::write(std::string fheader){
     }
     f11.close();
 
+    std::stringstream filename111;
+    filename111 << fheader << "-D-jet-dNdpT.dat";
+    std::ofstream f111(filename111.str());
+    f111 << "#";
+    for (auto it : Frag_zpTbins) f111 << it << " ";
+    f111 << std::endl;
+    for (int i=0; i<Frags_pT.size(); i++) {
+        f111   << (Frag_pTbins[i]+Frag_pTbins[i+1])/2. << " "
+             << Frag_pTbins[i] << " "
+             << Frag_pTbins[i+1] << " " << Frags_D_W[i] << " ";
+        for (int j=0; j<Frags_D_pT[i].size(); j++){
+            f111 << Frags_D_pT[i][j] << " " ;
+        }
+        f111 << std::endl;
+    }
+    f111.close();
+
     std::stringstream filename12;
-    filename12 << fheader << "-jetFragB.dat";
+    filename12 << fheader << "-B-jet-dNdz.dat";
     std::ofstream f12(filename12.str());
     f12 << "#";
     for (auto it : Frag_zbins) f12 << it << " ";
@@ -943,6 +1166,24 @@ void JetStatistics::write(std::string fheader){
     }
     f12.close();
 
+    std::stringstream filename121;
+    filename121 << fheader << "-B-jet-dNdpT.dat";
+    std::ofstream f121(filename121.str());
+    f121 << "#";
+    for (auto it : Frag_zpTbins) f121 << it << " ";
+    f121 << std::endl;
+    for (int i=0; i<Frags_pT.size(); i++) {
+        f121   << (Frag_pTbins[i]+Frag_pTbins[i+1])/2. << " "
+             << Frag_pTbins[i] << " "
+             << Frag_pTbins[i+1] << " " << Frags_B_W[i] << " ";
+        for (int j=0; j<Frags_B_pT[i].size(); j++){
+            f121 << Frags_B_pT[i][j] << " " ;
+        }
+        f121 << std::endl;
+    }
+    f121.close();
+
+
     std::stringstream filename2;
     filename2 << fheader << "-jetshape.dat";
     std::ofstream f2(filename2.str());
@@ -952,7 +1193,7 @@ void JetStatistics::write(std::string fheader){
     for (int i=0; i<shape_NpT; i++) {
         f2   << (shape_pTbins[i]+shape_pTbins[i+1])/2. << " "
              << shape_pTbins[i] << " "
-             << shape_pTbins[i+1] << " ";
+             << shape_pTbins[i+1] << " " << Shape_W[i] << " ";
         for (int j=0; j<shapes[i].size(); j++){
             f2 << shapes[i][j] << " "; 
         }
@@ -969,7 +1210,7 @@ void JetStatistics::write(std::string fheader){
     for (int i=0; i<shape_NpT; i++) {
         f3   << (shape_pTbins[i]+shape_pTbins[i+1])/2. << " "
              << shape_pTbins[i] << " "
-             << shape_pTbins[i+1] << " ";
+             << shape_pTbins[i+1] << " " << Shape_D_W[i] << " ";
         for (int j=0; j<Dshapes[i].size(); j++){
             f3 << Dshapes[i][j] << " "; 
         }
@@ -986,7 +1227,7 @@ void JetStatistics::write(std::string fheader){
     for (int i=0; i<shape_NpT; i++) {
         f4   << (shape_pTbins[i]+shape_pTbins[i+1])/2. << " "
              << shape_pTbins[i] << " "
-             << shape_pTbins[i+1] << " ";
+             << shape_pTbins[i+1] << " " << Shape_B_W[i] << " ";
         for (int j=0; j<Bshapes[i].size(); j++){
             f4 << Bshapes[i][j] << " "; 
         }
@@ -1000,18 +1241,58 @@ void JetStatistics::write(std::string fheader){
     for (int i=0; i<xJ.size(); i++){
 	f5 << (xJ_pTbins[i]+xJ_pTbins[i+1])/2. << " "
 	   << xJ_pTbins[i] << " "
-           << xJ_pTbins[i+1] << " ";
+           << xJ_pTbins[i+1] << " " << xJ_W[i] << " ";
         for (int j=0; j<xJ[i].size(); j++) {
             f5 << xJ[i][j] << " ";
         }
 	f5 << std::endl;
     }
     f5.close();
+
+
+    std::stringstream filename100;
+    filename100 << fheader << "-D-in-jet.dat";
+    std::ofstream f100(filename100.str());
+    f100 << "#";
+    for (auto it : Frag_zbins) f100 << it << " ";
+    f100 << std::endl;
+    for (int i=0; i<D_in_jet.size(); i++) {
+        f100   << (Frag_pTbins[i]+Frag_pTbins[i+1])/2. << " "
+             << Frag_pTbins[i] << " "
+             << Frag_pTbins[i+1] << " " << D_in_jet_W[i] << " ";
+        for (int j=0; j<D_in_jet[i].size(); j++){
+            f100 << D_in_jet[i][j] << " " ;
+        }
+        f100 << std::endl;
+    }
+    f100.close();
+
+    std::stringstream filename200;
+    filename200 << fheader << "-B-in-jet.dat";
+    std::ofstream f200(filename200.str());
+    f200 << "#";
+    for (auto it : Frag_zbins) f200 << it << " ";
+    f200 << std::endl;
+    for (int i=0; i<B_in_jet.size(); i++) {
+        f200   << (Frag_pTbins[i]+Frag_pTbins[i+1])/2. << " "
+             << Frag_pTbins[i] << " "
+             << Frag_pTbins[i+1] << " " << B_in_jet_W[i] << " ";
+        for (int j=0; j<B_in_jet[i].size(); j++){
+            f200 << B_in_jet[i][j] << " " ;
+        }
+        f200 << std::endl;
+    }
+    f200.close();
 }
 
-JetHFCorr::JetHFCorr(std::vector<double> _pTHFbins, 
-                     std::vector<double> _rbins)
-:pTHFbins(_pTHFbins), rbins(_rbins){
+JetHFCorr::JetHFCorr(std::vector<double> _rbins):
+pTHFbins({4,20,2000}), 
+rbins(_rbins){
+    dDdr_W.resize(pTHFbins.size());
+    for (auto & it: dDdr_W) it=0.;
+    dBdr_W.resize(pTHFbins.size());
+    for (auto & it: dBdr_W) it=0.;
+
     dDdr.clear();
     dDdr.resize(pTHFbins.size());
     for (auto & it: dDdr){
@@ -1061,11 +1342,13 @@ void JetHFCorr::add_event(std::vector<Fjet> jets,
                         absid == 411 || absid == 421 ||
                         absid == 413 || absid == 423) {
                         dDdr[pTindex][rindex] += sigma_gen;
+                        dDdr_W[pTindex] += sigma_gen;
                     }    
                     if (absid == 5 ||
                         absid == 511 || absid == 521 ||
                         absid == 513 || absid == 523) {
                         dBdr[pTindex][rindex] += sigma_gen;
+                        dBdr_W[pTindex] += sigma_gen;
                     }          
                 }
             }
@@ -1083,7 +1366,7 @@ void JetHFCorr::write(std::string fheader){
     for (int i=0; i<pTHFbins.size()-1; i++) {
         f1   << (pTHFbins[i]+pTHFbins[i+1])/2. << " "
              << pTHFbins[i] << " "
-             << pTHFbins[i+1] << " ";
+             << pTHFbins[i+1] << " " << dDdr_W[i] << " ";
         for (int j=0; j<rbins.size()-1; j++){
             f1 << dDdr[i][j] << " "; 
         }
@@ -1100,7 +1383,7 @@ void JetHFCorr::write(std::string fheader){
     for (int i=0; i<pTHFbins.size()-1; i++) {
         f2   << (pTHFbins[i]+pTHFbins[i+1])/2. << " "
              << pTHFbins[i] << " "
-             << pTHFbins[i+1] << " ";
+             << pTHFbins[i+1] << " " << dBdr_W[i] << " ";
         for (int j=0; j<rbins.size()-1; j++){
             f2 << dBdr[i][j] << " "; 
         }
