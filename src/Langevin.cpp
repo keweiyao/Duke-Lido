@@ -2,19 +2,24 @@
 #include "random.h"
 #include "predefine.h"
 double const tiny = 1e-10;
+double inline deltaQhat(double T, double M, double E){
+    return 5.*std::pow(T,3)*(7*M/(6*M+E));
+}
 
 double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){
     double CR = (pid==21) ? CA : CF;
     double mD2 = t_channel_mD2->get_mD2(T);
     double Q2cut = std::max(std::min(cut*mD2, 6*E*T),mD2);
-    return alpha_s(Q2cut, T) * CR * T * mD2 * std::log(1+Q2cut/mD2);
+    return alpha_s(Q2cut, T) * CR * T * mD2 * std::log(1+Q2cut/mD2) 
+	 + deltaQhat(T, M, E);
 }
 
 double qhat_L_small_angle_LOpQCD(int pid, double E, double M, double T){
     double CR = (pid==21) ? CA : CF;
     double mD2 = t_channel_mD2->get_mD2(T);
     double Q2cut = std::max(std::min(cut*mD2, 6*E*T),mD2);
-    return alpha_s(Q2cut, T) * CR * T * .5*mD2 * std::log(1+Q2cut/mD2);
+    return alpha_s(Q2cut, T) * CR * T * .5*mD2 * std::log(1+Q2cut/mD2)
+         + deltaQhat(T, M, E)/2.;
 }
 
 

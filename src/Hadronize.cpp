@@ -19,6 +19,7 @@ using namespace Pythia8;
 
 JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("Tune:pp=19");
+    pythia.readString("PDF:pSet = 8");
     pythia.readString("ProcessLevel:all = off");
     pythia.readString("Print:quiet = on");
     pythia.readString("SoftQCD:all = off");

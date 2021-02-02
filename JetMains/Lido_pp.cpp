@@ -101,7 +101,7 @@ int main(int argc, char* argv[]){
         }
 
         std::vector<double> TriggerBin({
-           2,4,6,8,10,12,14,16,18,20,24,28,32,
+           0,2,4,6,8,10,12,14,16,18,20,24,28,32,
            36,40,45,50,60,70,80,90,100,110,
            120,140,160,180,200,250,300,350,400,500,
            600,700,800,900,1000,1200,1600,2000,2500});
@@ -163,8 +163,8 @@ int main(int argc, char* argv[]){
 		e1.Q0 = Q0;
                 pythiagen.Generate(e1.plist);
 		e1.maxPT = pythiagen.maxPT();
-                e1.sigma = pythiagen.sigma_gen()
-                           /args["pythia-events"].as<int>();  
+                e1.sigma = pythiagen.sigma_gen()/args["pythia-events"].as<int>();
+	        LOG_INFO << pythiagen.sigma_gen() << " " <<e1.sigma;	
                 e1.x0 = pythiagen.x0();		
                 events.push_back(e1);
             }

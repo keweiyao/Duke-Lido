@@ -10,6 +10,12 @@
 
 using namespace Pythia8;
 
+double Tpp(double b){
+    double w = 0.45;
+    return 1/(4*M_PI*w*w) * std::exp(-b*b/(4*w*w));
+}
+
+
 class PythiaGen{
 public: 
     PythiaGen(std::string f_pythia, std::string f_trento, 
@@ -110,7 +116,6 @@ TRENToSampler(f_trento, iev)
     // Init
     pythia.init();
     for (int i=0; i<100; i++) pythia.next();
-        sigma0 = pythia.info.sigmaGen();
 }
 
 void PythiaGen::Generate(std::vector<particle> & plist){
@@ -118,6 +123,17 @@ void PythiaGen::Generate(std::vector<particle> & plist){
     TRENToSampler.SampleXY(y, x);
     plist.clear();
     pythia.next();
+    double sg = pythia.info.sigmaGen();
+    // convert sigma_hard into hadronic level cross-section
+    if (sg < 1e-4) sigma0 = sg;
+    else{
+        double db = 0.005;
+        sigma0 = 0.;
+        for (int m=0; m<1000; m++){
+            double b = db*m;
+            sigma0 += (1.-std::exp(-sg*Tpp(b)))*2.*M_PI*b*db;
+        }
+    }
     auto & event = pythia.event;
     color_count = event.lastColTag()+1;
     for (size_t i = 0; i < event.size(); ++i) {
@@ -133,11 +149,11 @@ void PythiaGen::Generate(std::vector<particle> & plist){
             _p.charged = p.isCharged(); 
             // assign mass
             if (absid==1||absid==2||absid==3||absid==4||absid==5||absid==21)
-                _p.mass = pid2mass(_p.pid);
+	    {    _p.mass = pid2mass(_p.pid);
+		    p0 = put_on_shell(p0, _p.pid);
+	    }
             else 
                 _p.mass = p.m();
-            // put on shell
-            p0 = put_on_shell(p0, _p.pid);
             // space-time rap:
             double etas = .5*std::log((p0.t()+p0.z())/(p0.t()-p0.z()));
             // space-time coordinate
