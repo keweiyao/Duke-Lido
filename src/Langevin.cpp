@@ -3,7 +3,7 @@
 #include "predefine.h"
 double const tiny = 1e-10;
 double inline deltaQhat(double T, double M, double E){
-    return 5.*std::pow(T,3)*(7*M/(6*M+E));
+    return 0*5.*std::pow(T,3)*(7*M/(6*M+E));
 }
 
 double qhat_small_angle_LOpQCD(int pid, double E, double M, double T){

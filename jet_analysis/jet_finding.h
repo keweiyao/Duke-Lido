@@ -101,6 +101,8 @@ private:
     std::vector<current> clist;
     MediumResponse MR;
     std::vector<std::vector<fourvec> > Pmu;
+    Pythia8::Pythia HF2mu;
+    std::map<int,double> BRs;
 };
 
 class LeadingParton{
@@ -130,8 +132,8 @@ class JetStatistics{
 	   Frag_pTbins, Frag_zbins, Frag_zpTbins, 
            Frags_W, Frags_D_W, Frags_B_W,
            Shape_W, Shape_D_W, Shape_B_W,
-           D_in_jet_W, B_in_jet_W;
-   std::vector<std::vector<std::vector<double> > > JQ2, JQ3;
+           leading_yield, subleading_yield;
+   std::vector<std::vector<std::vector<double> > > JQ2, JQ3, JQ4,  D_in_jet, B_in_jet;
    std::vector<double> Rs;
    std::vector<std::vector<double> > shapes, xJ, 
 	   Dshapes, Bshapes, 
@@ -139,8 +141,7 @@ class JetStatistics{
 	   Frags, Frags_pT, 
            Frags_D, Frags_D_pT,
            Frags_B, Frags_B_pT,
-           D_in_jet, B_in_jet,
-           DijetInfo;
+           DijetInfo,  D_in_jet_W, B_in_jet_W;
    int NpT, shape_NpT, shape_Nr;
 };
 

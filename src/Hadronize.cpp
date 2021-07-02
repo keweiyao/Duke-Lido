@@ -23,11 +23,6 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("ProcessLevel:all = off");
     pythia.readString("Print:quiet = on");
     pythia.readString("SoftQCD:all = off");
-    pythia.readString("PromptPhoton:all=off");
-    pythia.readString("WeakSingleBoson:all=off");
-    pythia.readString("WeakDoubleBoson:all=off");
-    pythia.readString("SpaceShower:QEDshowerByQ=off");
-    pythia.readString("TimeShower:QEDshowerByQ = off");    
     pythia.readString("Next:numberShowInfo = 0");
     pythia.readString("Next:numberShowProcess = 0");
     pythia.readString("Next:numberShowEvent = 0");
@@ -39,25 +34,19 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("PartonLevel:Remnants = on");
     pythia.readString("HadronLevel:all = on");
     pythia.readString("HadronLevel:Decay = on");
-    pythia.readString("StringZ:usePetersonC=on");
-    pythia.readString("StringZ:usePetersonB=on");
-    pythia.readString("321:mayDecay = off");
     pythia.readString("411:mayDecay = off");
     pythia.readString("421:mayDecay = off");
-    pythia.readString("413:mayDecay = off");
-    pythia.readString("423:mayDecay = off");
+    pythia.readString("431:mayDecay = off");
     pythia.readString("511:mayDecay = off");
     pythia.readString("521:mayDecay = off");
-    pythia.readString("513:mayDecay = off");
-    pythia.readString("523:mayDecay = off");
+    pythia.readString("531:mayDecay = off");
     pythia.init();
 }
 
 void FormChain(particle pi, particle pf, 
 	       particle & front, particle & back,
                std::vector<particle> & chain, 
-               std::vector<particle> & plist, 
-               std::vector<particle> & thermal){
+               std::vector<particle> & plist){
     int size0 = chain.size();
     for (std::vector<particle>::iterator it = plist.begin(); 
          it != plist.end();){
@@ -81,19 +70,27 @@ void FormChain(particle pi, particle pf,
 	back = pf;
         return;
     }
-    else FormChain(pi, pf, front, back, chain, plist, thermal);
+    else FormChain(pi, pf, front, back, chain, plist);
 }
 
-int JetDenseMediumHadronize::hadronize(std::vector<particle> partons, 
+int JetDenseMediumHadronize::hadronize(std::vector<particle> pIn_list, 
                                        std::vector<particle> & hadrons, 
                                        std::vector<particle> & thermal_partons,
                                        double Q0, double Tf,
                                        int level){
-    std::vector<particle> colorless_ensemble;
-    for(auto & p : partons) colorless_ensemble.push_back(p);
+    std::vector<particle> colorless_ensemble, partons;
+    hadrons.clear();
+    for(auto & p : pIn_list) {
+	    if (p.pid != 22) {
+		colorless_ensemble.push_back(p); 
+		partons.push_back(p);
+	    }
+	    else {
+		hadrons.push_back(p);
+	    }
+    }
     int Npartons = partons.size();
     const int status = 23;
-    hadrons.clear();
     thermal_partons.clear();
     int Ninit, Nfinal;
     // step1: group partons into patches connected by color index
@@ -114,7 +111,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
         FormChain(chain.front(), chain.back(), 
 		  front, back,
 		  chain, 
-                  partons, thermal_partons);
+                  partons);
         chains.push_back(chain);
 	endpoint_cols.push_back(front);
 	endpoint_acols.push_back(back);
@@ -173,7 +170,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
             th.vcell[0] = 0.;
             th.vcell[1] = 0.;
             th.vcell[2] = vzgrid;
-            th.Q0 = 0.5;
+            th.Q0 = 0.0;
             thermal_partons.push_back(th);
 	    colorless_ensemble.push_back(th);
     }
@@ -182,16 +179,15 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
     int count=1;
     for (auto & p : colorless_ensemble){
          p.p = put_on_shell(p.p, p.pid);
-         auto pmu = p.p.boost_back(0,0,std::tanh(p.x.x3()));
+         auto pmu = p.p;
          pythia.event.append(p.pid, 23, p.col, p.acol, 
 			 pmu.x(), pmu.y(), pmu.z(), pmu.t(), p.mass);
-         pythia.event[count].scale(Q0);
+         pythia.event[count].scale(p.Q0);
 	 maxQ0 = (p.Q0>maxQ0) ? p.Q0 : maxQ0;
          count++;
     }     
-    pythia.forceTimeShower(1,count-1,maxQ0);
+    pythia.forceTimeShower(1,count-1, maxQ0);
     pythia.next();
-    int Nff=0;
     for (int i = 0; i < pythia.event.size(); ++i) {
         auto ip = pythia.event[i];
         bool good = false;
@@ -201,23 +197,38 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> partons,
                       && pythia.event[ip.daughter1()].isHadron())
                       || (ip.isFinal() && ip.isParton());
         if (good) {
-            Nff ++;
             particle h;
             h.pid = ip.id();
-            
             h.p.a[1] = ip.px();
             h.p.a[2] = ip.py();
             h.p.a[3] = ip.pz();
             h.mass = ip.m();
             h.p.a[0] = std::sqrt(h.mass*h.mass + h.p.pabs2());
             h.weight = 1;
+	    h.T0 = 0;
             h.charged = ip.isCharged();
+	    if (std::abs(h.pid)==13) {
+                auto & pQ = pythia.event[ip.mother1()];
+		if (pQ.idAbs()==411 || pQ.idAbs()==421 || pQ.idAbs()==511 || pQ.idAbs()==521){
+                    h.radlist.clear();
+		     particle h2;
+            h2.pid = pQ.id();
+            h2.p.a[1] = pQ.px();
+            h2.p.a[2] = pQ.py();
+            h2.p.a[3] = pQ.pz();
+            h2.mass = pQ.m();
+            h2.p.a[0] = std::sqrt(pQ.m()*pQ.m() + h2.p.pabs2());
+            h2.weight = 1;
+            h2.charged = pQ.isCharged();
+
+		    h.radlist.push_back({h2});
+                }
+            }
             hadrons.push_back(h);
         }
     }
     return hadrons.size();
 }
-
 
 HFHadronize::HFHadronize(){
     pythia.readString("Tune:pp=19");
@@ -242,7 +253,6 @@ HFHadronize::HFHadronize(){
     pythia.readString("HadronLevel:Decay = on");
     pythia.readString("StringZ:usePetersonC=on");
     pythia.readString("StringZ:usePetersonB=on");
-    pythia.readString("321:mayDecay = off");
     pythia.readString("411:mayDecay = off");
     pythia.readString("421:mayDecay = off");
     pythia.readString("413:mayDecay = off");
@@ -251,6 +261,10 @@ HFHadronize::HFHadronize(){
     pythia.readString("521:mayDecay = off");
     pythia.readString("513:mayDecay = off");
     pythia.readString("523:mayDecay = off");
+pythia.readString("411:oneChannel = 1 1 22 -13 14 311");
+pythia.readString("421:oneChannel = 1 1 22 -13 14 321");
+pythia.readString("511:oneChannel = 1 1 22 14 -13 -411");
+pythia.readString("521:oneChannel = 1 1 22 14 -13 -421");
     pythia.init();
 }
 
@@ -297,7 +311,8 @@ int HFHadronize::hadronize(particle pIn, std::vector<particle> & pOut,
         if ( ((ip.isParton()
           && pythia.event[ip.daughter1()].isHadron())
             || (ip.isFinal() && ip.isParton()))
-		       	&& absid==std::abs(pIn.pid)){
+		       	&& absid==std::abs(pIn.pid)
+	    ){
             particle p;
 	    
 	    p.p = fourvec{ip.e(), ip.px(), ip.py(), ip.pz()};

@@ -38,7 +38,6 @@ std::vector<current> clist;
 double sigma, Q0, maxPT;
 fourvec x0;
 };
-
 int main(int argc, char* argv[]){
     using OptDesc = po::options_description;
     OptDesc options{};
@@ -50,6 +49,9 @@ int main(int argc, char* argv[]){
           ("pythia-events,n",
             po::value<int>()->value_name("INT")->default_value(100,"100"),
            "number of Pythia events")
+          ("angular-oversample",
+            po::value<int>()->value_name("INT")->default_value(1,"1"),
+           "number of angular oversamples")
           ("ic,i",
             po::value<fs::path>()->value_name("PATH")->required(),
            "trento initial condition file")
@@ -169,22 +171,38 @@ int main(int argc, char* argv[]){
             }
         }
 
-        std::vector<double> TriggerBin({
-           0,2,5,10,20,30,40,60,80,100,
-           120,140,160,180,200,250,300,350,400,500,
-           600,700,800,900,1000,1200,1600,2000,2500});
-	std::vector<double> Rs({.2,.3,.4,.6,.8,1.0});
+        std::vector<double> TriggerBin;
+        if (args["jet"].as<bool>()){
+           std::vector<double> a({10,20,30,40,50,60,70,80,90,100,110,
+           120,140,160,180,200,
+           220,240,260,280,300,400,500,600,800,1000,
+	   1500,2000,2500});
+           TriggerBin = a;
+        } else{
+           std::vector<double> a({
+           0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,
+           35,40,45,50,55,60,70,80,90,100,110,120,130,
+           150,170,190,210,230,250,300,350,400,450,500,
+           600,1000,2500});
+           TriggerBin = a;
+        }
+
+	std::vector<double> Rs({0.2,.4,0.6,0.8});
         std::vector<double> shaperbins({0., .05, .1, .15,  .2, .25, .3,
                          .35, .4, .45, .5,  .6, .7,  .8,
                           1., 1.5, 2.0, 2.5, 3.0});
-	std::vector<double> zbins({
-                         0., 0.001, 0.002, 
+        //std::vector<double> zbins({
+        //                .00, .0125, .025, .05, .10, .15, .20, .25, .30, .35, .40, .45,
+        //                .50, .55, .60, .65, .70, .75, .80, .85, .90, .95, 1.0});
+        std::vector<double> zbins({
+			0, 0.001, 0.002, 
                          0.0035,.005,.0065,.0085, .01,
                         .012, .016, .02,.025, .03,.04,.05,
                         .07, .09, .120, .15, .20, 
                         .25, .35, .45, .55, .65, .8,
-                        1.});
-        std::vector<double> zpTbins({
+                        1.
+			});
+	std::vector<double> zpTbins({
          0.0, 0.15, 0.3, 0.5       ,   0.70626877,   0.99763116,   1.40919147,
          1.99053585,   2.81170663,   3.97164117,   5.61009227,
          7.92446596,  11.19360569,  15.8113883 ,  22.33417961,
@@ -229,24 +247,24 @@ int main(int argc, char* argv[]){
                 Q0
             );
             for (int i=0; i<args["pythia-events"].as<int>(); i++){
-                event e1;
-		e1.Q0 = Q0;
-                pythiagen.Generate(e1.plist);
-		e1.maxPT = pythiagen.maxPT();
-                e1.sigma = pythiagen.sigma_gen()
-                           /args["pythia-events"].as<int>();  
+		event e1;
+                e1.Q0 = Q0;
+                if (!pythiagen.Generate(e1.plist)) continue;
+                e1.maxPT = pythiagen.maxPT();
+                e1.sigma = pythiagen.sigma_gen()/args["pythia-events"].as<int>();
+
                 e1.x0 = pythiagen.x0();		
                 // freestream form t=0 to tau=tau0
                 // move partciles below tau0 to tau0
                 for (auto & p : e1.plist){
-                    p.Tf = Tf+.001;
-                    if (p.x.x0() >= mini_tau0 ) continue;
-                    else {
-                        double dtau = std::max(mini_tau0, p.tau0);
-                        p.x.a[0] = dtau;
-                        p.x.a[1] += p.p.x()/p.p.t()*dtau;
-                        p.x.a[2] += p.p.y()/p.p.t()*dtau;
-                    }
+                        p.Tf = Tf+.001;
+                        if (p.x.x0() >= mini_tau0) continue;
+                        else {
+                            double dtau = std::max(mini_tau0, p.tau0);
+                            p.x.a[0] = dtau;
+                            p.x.a[1] += p.p.x()/p.p.t()*dtau;
+                            p.x.a[2] += p.p.y()/p.p.t()*dtau;
+                        }
                 }   
                 events.push_back(e1);
             }
@@ -261,7 +279,7 @@ int main(int argc, char* argv[]){
             for (auto & ie : events){
                 std::vector<particle> new_plist, pOut_list;
                 for (auto & p : ie.plist){     
-                    if ( std::abs(p.x.x3())>5. || p.Tf<Tf ){
+                    if ( std::abs(p.x.x3())>6. || p.Tf<Tf){
                         // skip particles at large space-time rapidity
                         new_plist.push_back(p);
                         continue;       
@@ -298,10 +316,14 @@ int main(int argc, char* argv[]){
                 ie.plist = new_plist;
 	    }
         }
-        // free some mem
-	for (auto & ie: events)
-            for (auto & p : ie.plist) 
+        // free some mem and transform back to lab frame
+	for (auto & ie: events) {
+            for (auto & p : ie.plist) { 
                 p.radlist.clear();
+                p.p = p.p.boost_back(0,0,std::tanh(p.x.x3()));
+            }
+	    //ie.hlist = ie.plist;
+        }
 
         for (auto & ie : events){ 
             Hadronizer.hadronize(ie.plist, ie.hlist, ie.thermal_list,
@@ -316,6 +338,7 @@ int main(int argc, char* argv[]){
                 }
 	    }
          }
+
         LOG_INFO << "Jet finding, w/ medium excitation";
         /// use process id to define filename
         int processid = getpid();
@@ -328,8 +351,8 @@ int main(int argc, char* argv[]){
                 jetfinder.set_sigma(ie.sigma);
                 jetfinder.MakeETower(
                      0.6, Tf, args["pTtrack"].as<double>(),
-                     ie.hlist, ie.clist, 10, false);
-                jetfinder.FindJets(Rs, 5., -3., 3., false);
+                     ie.hlist, ie.clist, 10, true);
+                jetfinder.FindJets(Rs, 10., -.9, .9, false);
                 jetfinder.FindHF(ie.hlist);
                 jetfinder.Frag(zbins, zpTbins);
 		jetfinder.LabelFlavor();

@@ -329,7 +329,7 @@ int lido::update_single_particle(
                     pIn.p0 = pIn.p; 
  
                     // this should be the scale in lab frame for vac-like shower
-                    double Scale = std::sqrt(kt21+mD2);
+                    double Scale = std::sqrt(kt21);
                    
                     pIn.Q0 = Scale;
                     pIn.Q00 = Scale;

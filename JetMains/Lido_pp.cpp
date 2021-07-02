@@ -100,22 +100,44 @@ int main(int argc, char* argv[]){
             }
         }
 
-         std::vector<double> TriggerBin({
-           0,2,5,10,20,30,40,60,80,100,
-           120,140,160,180,200,250,300,350,400,500,
-           600,700,800,900,1000,1200,1600,2000,2500});
-	std::vector<double> Rs({.2,.3,.4,.6,.8,1.0});
+        std::vector<double> TriggerBin;
+	if (args["jet"].as<bool>()){
+           std::vector<double> a({10,20,30,40,50,60,70,80,90,100,110,
+           120,140,160,180,200,
+           220,240,260,280,300,400,500,600,800,1000,
+           1500,2000,2500});
+
+
+		TriggerBin = a;
+	} else{
+           std::vector<double> a({
+           0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,
+           35,40,45,50,55,60,70,80,90,100,110,120,130,
+           150,170,190,210,230,250,300,350,400,450,500,
+           600,700,800,1000,1500,2000,2500
+                        });
+	   TriggerBin = a;
+	}
+
+        std::vector<double> Rs({0.2, .4, 0.6, 0.8});
+
         std::vector<double> shaperbins({0., .05, .1, .15,  .2, .25, .3,
                          .35, .4, .45, .5,  .6, .7,  .8,
                           1., 1.5, 2.0, 2.5, 3.0});
-	std::vector<double> zbins({0, 0.001, 0.002, 
+	//std::vector<double> zbins({
+	//		.00, .0125, .025, .05, .10, .15, .20, .25, .30, .35, .40, .45, 
+	//		.50, .55, .60, .65, .70, .75, .80, .85, .90, .95, 1.0});
+                std::vector<double> zbins({
+                        0, 0.001, 0.002,
                          0.0035,.005,.0065,.0085, .01,
                         .012, .016, .02,.025, .03,.04,.05,
-                        .07, .09, .120, .15, .20, 
+                        .07, .09, .120, .15, .20,
                         .25, .35, .45, .55, .65, .8,
-                        1.});
-        std::vector<double> zpTbins({
-         0.0, 0.15, 0.3, 0.5       ,   0.70626877,   0.99763116,   1.40919147,
+                        1.
+                        });
+
+	std::vector<double> zpTbins({
+         0.0, 0.15, 0.3, 0.5,   0.70626877,   0.99763116,   1.40919147,
          1.99053585,   2.81170663,   3.97164117,   5.61009227,
          7.92446596,  11.19360569,  15.8113883 ,  22.33417961,
          31.54786722,  44.56254691,  62.94627059,  88.9139705 ,
@@ -143,10 +165,9 @@ int main(int argc, char* argv[]){
             for (int i=0; i<args["pythia-events"].as<int>(); i++){
                 event e1;
 		e1.Q0 = Q0;
-                pythiagen.Generate(e1.plist);
+                if (!pythiagen.Generate(e1.plist)) continue;
 		e1.maxPT = pythiagen.maxPT();
                 e1.sigma = pythiagen.sigma_gen()/args["pythia-events"].as<int>();
-	        LOG_INFO << pythiagen.sigma_gen() << " " <<e1.sigma;	
                 e1.x0 = pythiagen.x0();		
                 events.push_back(e1);
             }
@@ -157,8 +178,23 @@ int main(int argc, char* argv[]){
             for (auto & p : ie.plist) {
                 p.p = p.p.boost_back(0,0,std::tanh(p.x.x3()));
             }
+	    ie.hlist = ie.plist;
         }
-      
+
+        JetDenseMediumHadronize Hadronizer; 
+	for (auto & ie : events){
+            Hadronizer.hadronize(ie.plist, ie.hlist, ie.thermal_list,
+                                 ie.Q0, 0.165, 1);
+            if (args["jet"].as<bool>()){
+                for(auto & it : ie.thermal_list){
+                    double vz = std::tanh(it.x.x3());
+                    current J;
+                    J.p = it.p.boost_to(0, 0, vz)*(-1.);
+                    J.etas = it.x.x3();
+                    ie.clist.push_back(J);
+                }
+            }
+        }
         LOG_INFO << "Jet finding in pp";
         /// use process id to define filename
         int processid = getpid();
@@ -166,15 +202,15 @@ int main(int argc, char* argv[]){
         fheader << args["output"].as<fs::path>().string() 
                 << "/lido";
         for (auto & ie : events){
-            HadronSample.add_event(ie.plist, ie.sigma);
+            HadronSample.add_event(ie.hlist, ie.sigma);
             ie.clist.clear();
 	    if (args["jet"].as<bool>()) {
                 jetfinder.set_sigma(ie.sigma);
                 jetfinder.MakeETower(
-                     0.6, 0.15, args["pTtrack"].as<double>(),
-                     ie.plist, ie.clist, 10, false);
-                jetfinder.FindJets(Rs, 10., -3., 3., false);
-                jetfinder.FindHF(ie.plist);
+                     0.6, 0.165, args["pTtrack"].as<double>(),
+                     ie.hlist, ie.clist, 10, true);
+                jetfinder.FindJets(Rs, 10., -.9, .9, false);
+                jetfinder.FindHF(ie.hlist);
                 jetfinder.Frag(zbins, zpTbins);
 		jetfinder.LabelFlavor();
                 jetfinder.CalcJetshape(shaperbins);
@@ -183,7 +219,7 @@ int main(int argc, char* argv[]){
 	    }
             ie.plist.clear();
         }
-          LOG_INFO << "Jet finding idone";    
+          LOG_INFO << "Jet finding done";    
         HadronSample.write(fheader.str());
 	if (args["jet"].as<bool>()){
            JetSample.write(fheader.str());

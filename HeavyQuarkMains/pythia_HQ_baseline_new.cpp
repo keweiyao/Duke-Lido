@@ -76,10 +76,7 @@ int main(int argc, char* argv[]){
         }
 
         std::vector<double> TriggerBin({
-           0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,
-           35,40,45,50,55,60,65,70,75,80,85,90,100,
-           110,120,140,160,180,200,
-           240,280,320,360,400,500});
+           0,4,6,8,10,12,14,16,18,20,24,30,40,50,60,80,100,120,150,200,250,300,400,500,600});
 
         double Q0 = args["Q0"].as<double>();
                 
@@ -102,6 +99,7 @@ int main(int argc, char* argv[]){
         }
 
 	for (auto & p : plist) {
+            p.radlist.clear();
             double tau = p.x.x0();
             double etas = p.x.x3();
             p.x.a[0] = tau*std::cosh(etas);
@@ -114,7 +112,6 @@ int main(int argc, char* argv[]){
             p.vcell[0] = p.vcell[0]/gamma/(1+vzcell*p.vcell[2]);
             p.vcell[1] = p.vcell[1]/gamma/(1+vzcell*p.vcell[2]);     
             p.vcell[2] = (vzcell+p.vcell[2])/(1+vzcell*p.vcell[2]);  
-
         }
 
         int processid = getpid();

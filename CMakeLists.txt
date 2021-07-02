@@ -213,7 +213,7 @@ foreach(App "PGunTest" "Lido2DHydro" "Lido_pp")
 	install(TARGETS ${App} DESTINATION bin)
 endforeach()
 
-foreach(App "HQ-2Dhydro-couple" "pythia_HQ_baseline")
+foreach(App "HQ-2Dhydro-couple" "pythia_HQ_baseline" "decay")
 	add_executable(${App} ./HeavyQuarkMains/${App}.cpp)
 	target_link_libraries(${App} ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS ${App} DESTINATION bin)

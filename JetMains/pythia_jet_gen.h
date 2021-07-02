@@ -20,7 +20,7 @@ class PythiaGen{
 public: 
     PythiaGen(std::string f_pythia, std::string f_trento, 
               double pTHL, double pTHH, int iev, double _Q0);
-    void Generate(std::vector<particle> & plist);
+    bool Generate(std::vector<particle> & plist);
     double sigma_gen(void){
         return sigma0;
     }
@@ -87,11 +87,8 @@ TRENToSampler(f_trento, iev)
     // suppress output
     pythia.readString("Print:quiet = on");
     pythia.readString("SoftQCD:all = off");
-    pythia.readString("PromptPhoton:all=off");
     pythia.readString("WeakSingleBoson:all=off");
     pythia.readString("WeakDoubleBoson:all=off");
-    pythia.readString("SpaceShower:QEDshowerByQ=off");
-    pythia.readString("TimeShower:QEDshowerByQ = off");
     pythia.readString("Init:showProcesses = off");  
     pythia.readString("Init:showMultipartonInteractions = off");  
     pythia.readString("Init:showChangedSettings = off");  
@@ -118,22 +115,49 @@ TRENToSampler(f_trento, iev)
     for (int i=0; i<100; i++) pythia.next();
 }
 
-void PythiaGen::Generate(std::vector<particle> & plist){
+bool PythiaGen::Generate(std::vector<particle> & plist){
     double x, y;
     TRENToSampler.SampleXY(y, x);
     plist.clear();
-    pythia.next();
+   
+    pythia.next(); 
+    
+    /*bool triggered = false;
+    // Trigger on isolated photon!
+    for (int j=0; j<pythia.event.size(); j++){
+        auto & p = pythia.event[j];
+        if (p.isFinal() && p.id()==22 && p.pT()>50 && std::abs(p.eta())<2.37) {
+            std::cout  << "Here is a photon" << std::endl;
+            double EThadron = 0.;
+            for (int ih=0; ih<pythia.event.size(); ih++){
+                if (ih==j) continue;
+                auto & h = pythia.event[ih];
+		if (!h.isFinal()) continue;
+                double dphi = std::abs(h.phi()-p.phi());
+                if (dphi>M_PI) dphi = 2*M_PI-dphi;
+                double deta = h.eta()-p.eta();
+                double dR = std::sqrt(dphi*dphi+deta*deta);
+                if (h.isFinal() && dR<0.3) EThadron += h.eT();
+            }
+            if (EThadron<5.0) {
+	        triggered = true;
+	        p.statusCode(666); // label it
+	    }
+        }
+    }
+    if(!triggered) return false;
+    */
     double sg = pythia.info.sigmaGen();
     // convert sigma_hard into hadronic level cross-section
-    if (sg < 1e-4) sigma0 = sg;
-    else{
+    sigma0 = sg;
+    /*if(sigma0 >1e-4){
         double db = 0.005;
         sigma0 = 0.;
         for (int m=0; m<1000; m++){
             double b = db*m;
             sigma0 += (1.-std::exp(-sg*Tpp(b)))*2.*M_PI*b*db;
         }
-    }
+    }*/
     auto & event = pythia.event;
     color_count = event.lastColTag()+1;
     for (size_t i = 0; i < event.size(); ++i) {
@@ -148,12 +172,11 @@ void PythiaGen::Generate(std::vector<particle> & plist){
             // copy charge
             _p.charged = p.isCharged(); 
             // assign mass
-            if (absid==1||absid==2||absid==3||absid==4||absid==5||absid==21)
-	    {    _p.mass = pid2mass(_p.pid);
-		    p0 = put_on_shell(p0, _p.pid);
+            if ((1<=absid && absid<=5)||absid==21){    
+		 _p.mass = pid2mass(_p.pid);
+		 p0 = put_on_shell(p0, _p.pid);
 	    }
-            else 
-                _p.mass = p.m();
+            else _p.mass = p.m();
             // space-time rap:
             double etas = .5*std::log((p0.t()+p0.z())/(p0.t()-p0.z()));
             // space-time coordinate
@@ -187,9 +210,12 @@ void PythiaGen::Generate(std::vector<particle> & plist){
             // clear its radiation list
             _p.radlist.clear();
             // ready to go
+            if (p.status()==666) std::cout << "a good photon" << std::endl;
+	    _p.T0 = -100;
             plist.push_back(_p);
         }
     }
+    return true;
 }
 
 
