@@ -1,0 +1,191 @@
+.TH "tensor" 3 "Thu Jul 1 2021" "Duke-Lido" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tensor
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <lorentz\&.h>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "double \fBtt\fP (void) const"
+.br
+.ti -1c
+.RI "double \fBtx\fP (void) const"
+.br
+.ti -1c
+.RI "double \fBty\fP (void) const"
+.br
+.ti -1c
+.RI "double \fBtz\fP (void) const"
+.br
+.ti -1c
+.RI "double \fBxt\fP (void) const"
+.br
+.ti -1c
+.RI "double \fBxx\fP (void) const"
+.br
+.ti -1c
+.RI "double \fBxy\fP (void) const"
+.br
+.ti -1c
+.RI "double \fBxz\fP (void) const"
+.br
+.ti -1c
+.RI "double \fByt\fP (void) const"
+.br
+.ti -1c
+.RI "double \fByx\fP (void) const"
+.br
+.ti -1c
+.RI "double \fByy\fP (void) const"
+.br
+.ti -1c
+.RI "double \fByz\fP (void) const"
+.br
+.ti -1c
+.RI "double \fBzt\fP (void) const"
+.br
+.ti -1c
+.RI "double \fBzx\fP (void) const"
+.br
+.ti -1c
+.RI "double \fBzy\fP (void) const"
+.br
+.ti -1c
+.RI "double \fBzz\fP (void) const"
+.br
+.ti -1c
+.RI "template<typename U > \fBtensor\fP \fBoperator*\fP (U s)"
+.br
+.ti -1c
+.RI "\fBtensor\fP \fBoperator/\fP (\fBtensor\fP B)"
+.br
+.ti -1c
+.RI "\fBtensor\fP \fBoperator*\fP (\fBtensor\fP B)"
+.br
+.ti -1c
+.RI "\fBtensor\fP \fBboost_to\fP (double vx, double vy, double vz) const"
+.br
+.ti -1c
+.RI "\fBtensor\fP \fBboost_back\fP (double vx, double vy, double vz) const"
+.br
+.ti -1c
+.RI "\fBtensor\fP \fBrotate_back\fP (const \fBfourvec\fP p) const"
+.br
+.ti -1c
+.RI "double \fBtrace\fP (void)"
+.br
+.ti -1c
+.RI "void \fBset\fP (int \fBi\fP, double value)"
+.br
+.ti -1c
+.RI "double \fBget\fP (int \fBi\fP)"
+.br
+.in -1c
+.SS "Static Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "static \fBtensor\fP \fBunity\fP (void)"
+.br
+.ti -1c
+.RI "static size_t \fBsize\fP (void)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "double \fBT\fP [4][4]"
+.br
+.in -1c
+.SS "Friends"
+
+.in +1c
+.ti -1c
+.RI "std::ostream & \fBoperator<<\fP (std::ostream &os, const \fBtensor\fP &A)"
+.br
+.ti -1c
+.RI "\fBtensor\fP \fBoperator+\fP (const \fBtensor\fP &A, const \fBtensor\fP &B)"
+.br
+.ti -1c
+.RI "\fBtensor\fP \fBoperator\-\fP (const \fBtensor\fP &A, const \fBtensor\fP &B)"
+.br
+.in -1c
+.SH "Member Function Documentation"
+.PP 
+.SS "\fBtensor\fP tensor::boost_back (double vx, double vy, double vz) const\fC [inline]\fP"
+
+.SS "\fBtensor\fP tensor::boost_to (double vx, double vy, double vz) const\fC [inline]\fP"
+
+.SS "double tensor::get (int i)\fC [inline]\fP"
+
+.SS "\fBtensor\fP tensor::operator* (\fBtensor\fP B)\fC [inline]\fP"
+
+.SS "template<typename U > \fBtensor\fP tensor::operator* (U s)\fC [inline]\fP"
+
+.SS "\fBtensor\fP tensor::operator/ (\fBtensor\fP B)\fC [inline]\fP"
+
+.SS "\fBtensor\fP tensor::rotate_back (const \fBfourvec\fP p) const\fC [inline]\fP"
+
+.SS "void tensor::set (int i, double value)\fC [inline]\fP"
+
+.SS "static size_t tensor::size (void)\fC [inline]\fP, \fC [static]\fP"
+
+.SS "double tensor::trace (void)\fC [inline]\fP"
+
+.SS "double tensor::tt (void) const\fC [inline]\fP"
+
+.SS "double tensor::tx (void) const\fC [inline]\fP"
+
+.SS "double tensor::ty (void) const\fC [inline]\fP"
+
+.SS "double tensor::tz (void) const\fC [inline]\fP"
+
+.SS "static \fBtensor\fP tensor::unity (void)\fC [inline]\fP, \fC [static]\fP"
+
+.SS "double tensor::xt (void) const\fC [inline]\fP"
+
+.SS "double tensor::xx (void) const\fC [inline]\fP"
+
+.SS "double tensor::xy (void) const\fC [inline]\fP"
+
+.SS "double tensor::xz (void) const\fC [inline]\fP"
+
+.SS "double tensor::yt (void) const\fC [inline]\fP"
+
+.SS "double tensor::yx (void) const\fC [inline]\fP"
+
+.SS "double tensor::yy (void) const\fC [inline]\fP"
+
+.SS "double tensor::yz (void) const\fC [inline]\fP"
+
+.SS "double tensor::zt (void) const\fC [inline]\fP"
+
+.SS "double tensor::zx (void) const\fC [inline]\fP"
+
+.SS "double tensor::zy (void) const\fC [inline]\fP"
+
+.SS "double tensor::zz (void) const\fC [inline]\fP"
+
+.SH "Friends And Related Function Documentation"
+.PP 
+.SS "\fBtensor\fP operator+ (const \fBtensor\fP & A, const \fBtensor\fP & B)\fC [friend]\fP"
+
+.SS "\fBtensor\fP operator\- (const \fBtensor\fP & A, const \fBtensor\fP & B)\fC [friend]\fP"
+
+.SS "std::ostream& operator<< (std::ostream & os, const \fBtensor\fP & A)\fC [friend]\fP"
+
+.SH "Member Data Documentation"
+.PP 
+.SS "double tensor::T[4][4]"
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Duke-Lido from the source code\&.

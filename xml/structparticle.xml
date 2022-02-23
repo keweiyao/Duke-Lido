@@ -1,0 +1,318 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="structparticle" kind="struct" language="C++" prot="public">
+    <compoundname>particle</compoundname>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structparticle_1ae8e4da8837aad9411b21b6de482fbd08" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int particle::pid</definition>
+        <argsstring></argsstring>
+        <name>pid</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="197" column="5" bodyfile="src/predefine.h" bodystart="197" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1a47c87ad55177390d7c045171a6c34aaf" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int particle::col</definition>
+        <argsstring></argsstring>
+        <name>col</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="197" column="9" bodyfile="src/predefine.h" bodystart="197" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1aca4ec1cd674259ab9358994600e1a723" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int particle::acol</definition>
+        <argsstring></argsstring>
+        <name>acol</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="197" column="13" bodyfile="src/predefine.h" bodystart="197" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1a59b95fd651caccf724692c925d7abda3" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool particle::charged</definition>
+        <argsstring></argsstring>
+        <name>charged</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="198" column="6" bodyfile="src/predefine.h" bodystart="198" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1a37f838ffbedd34713ac24784a7f33a80" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double particle::mass</definition>
+        <argsstring></argsstring>
+        <name>mass</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="199" column="8" bodyfile="src/predefine.h" bodystart="199" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1afba94efafdff2e07632cfcb7fc45eff3" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double particle::weight</definition>
+        <argsstring></argsstring>
+        <name>weight</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="199" column="13" bodyfile="src/predefine.h" bodystart="199" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1a344327d61451bada3ff3b4655afdaf2e" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double particle::tau0</definition>
+        <argsstring></argsstring>
+        <name>tau0</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="199" column="20" bodyfile="src/predefine.h" bodystart="199" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1a39e48e171f54c28a4c9fea2d836dc114" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double particle::Q0</definition>
+        <argsstring></argsstring>
+        <name>Q0</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="199" column="25" bodyfile="src/predefine.h" bodystart="199" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1ab8662c5fa94078b820158f609463ff4a" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double particle::Q00</definition>
+        <argsstring></argsstring>
+        <name>Q00</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="199" column="28" bodyfile="src/predefine.h" bodystart="199" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1a3cff6db08f75cf8d6b9842e2d9ac6d3d" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool particle::is_virtual</definition>
+        <argsstring></argsstring>
+        <name>is_virtual</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="200" column="6" bodyfile="src/predefine.h" bodystart="200" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1a311eec4926747eddd2792f1d3172db21" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double particle::T0</definition>
+        <argsstring></argsstring>
+        <name>T0</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="202" column="8" bodyfile="src/predefine.h" bodystart="202" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1a2387a84992a73203932ed7862d00998c" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double particle::mfp0</definition>
+        <argsstring></argsstring>
+        <name>mfp0</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="202" column="11" bodyfile="src/predefine.h" bodystart="202" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1af3c470acc1b92780de363c08f9c46631" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double particle::Tf</definition>
+        <argsstring></argsstring>
+        <name>Tf</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="202" column="16" bodyfile="src/predefine.h" bodystart="202" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1aa3c2c6bcea85bec46503b9ab1a46b873" prot="public" static="no" mutable="no">
+        <type><ref refid="structcoordinate" kindref="compound">coordinate</ref></type>
+        <definition>coordinate particle::x0</definition>
+        <argsstring></argsstring>
+        <name>x0</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="203" column="12" bodyfile="src/predefine.h" bodystart="203" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1afe2479fba44c0b458f04c438240f15b8" prot="public" static="no" mutable="no">
+        <type><ref refid="structcoordinate" kindref="compound">coordinate</ref></type>
+        <definition>coordinate particle::x</definition>
+        <argsstring></argsstring>
+        <name>x</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="204" column="12" bodyfile="src/predefine.h" bodystart="204" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1ace8beac4c6277a3f4b22d0f4e471ca95" prot="public" static="no" mutable="no">
+        <type><ref refid="structfourvec" kindref="compound">fourvec</ref></type>
+        <definition>fourvec particle::p0</definition>
+        <argsstring></argsstring>
+        <name>p0</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="205" column="9" bodyfile="src/predefine.h" bodystart="205" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1a9d13aa1f4d133d94c60dfce11b0990e4" prot="public" static="no" mutable="no">
+        <type><ref refid="structfourvec" kindref="compound">fourvec</ref></type>
+        <definition>fourvec particle::p</definition>
+        <argsstring></argsstring>
+        <name>p</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="206" column="9" bodyfile="src/predefine.h" bodystart="206" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1a868d66c3cd75f6f571e25885ee3b7f9d" prot="public" static="no" mutable="no">
+        <type><ref refid="structfourvec" kindref="compound">fourvec</ref></type>
+        <definition>fourvec particle::mother_p</definition>
+        <argsstring></argsstring>
+        <name>mother_p</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="207" column="17" bodyfile="src/predefine.h" bodystart="207" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1a4027f5488864f716d72fa6971fc57bc2" prot="public" static="no" mutable="no">
+        <type>std::vector&lt; std::vector&lt; <ref refid="structparticle" kindref="compound">particle</ref> &gt; &gt;</type>
+        <definition>std::vector&lt;std::vector&lt;particle&gt; &gt; particle::radlist</definition>
+        <argsstring></argsstring>
+        <name>radlist</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="209" column="13" bodyfile="src/predefine.h" bodystart="209" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structparticle_1a8b1de39a9c532b0d69f2dceb54584ebe" prot="public" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; particle::vcell</definition>
+        <argsstring></argsstring>
+        <name>vcell</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="210" column="13" bodyfile="src/predefine.h" bodystart="210" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="1">
+        <label>particle</label>
+        <link refid="structparticle"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>x</edgelabel>
+          <edgelabel>x0</edgelabel>
+        </childnode>
+        <childnode refid="3" relation="usage">
+          <edgelabel>p0</edgelabel>
+          <edgelabel>p</edgelabel>
+          <edgelabel>mother_p</edgelabel>
+        </childnode>
+      </node>
+      <node id="2">
+        <label>coordinate</label>
+        <link refid="structcoordinate"/>
+      </node>
+      <node id="3">
+        <label>fourvec</label>
+        <link refid="structfourvec"/>
+      </node>
+    </collaborationgraph>
+    <location file="src/predefine.h" line="195" column="15" bodyfile="src/predefine.h" bodystart="195" bodyend="212"/>
+    <listofallmembers>
+      <member refid="structparticle_1aca4ec1cd674259ab9358994600e1a723" prot="public" virt="non-virtual"><scope>particle</scope><name>acol</name></member>
+      <member refid="structparticle_1a59b95fd651caccf724692c925d7abda3" prot="public" virt="non-virtual"><scope>particle</scope><name>charged</name></member>
+      <member refid="structparticle_1a47c87ad55177390d7c045171a6c34aaf" prot="public" virt="non-virtual"><scope>particle</scope><name>col</name></member>
+      <member refid="structparticle_1a3cff6db08f75cf8d6b9842e2d9ac6d3d" prot="public" virt="non-virtual"><scope>particle</scope><name>is_virtual</name></member>
+      <member refid="structparticle_1a37f838ffbedd34713ac24784a7f33a80" prot="public" virt="non-virtual"><scope>particle</scope><name>mass</name></member>
+      <member refid="structparticle_1a2387a84992a73203932ed7862d00998c" prot="public" virt="non-virtual"><scope>particle</scope><name>mfp0</name></member>
+      <member refid="structparticle_1a868d66c3cd75f6f571e25885ee3b7f9d" prot="public" virt="non-virtual"><scope>particle</scope><name>mother_p</name></member>
+      <member refid="structparticle_1a9d13aa1f4d133d94c60dfce11b0990e4" prot="public" virt="non-virtual"><scope>particle</scope><name>p</name></member>
+      <member refid="structparticle_1ace8beac4c6277a3f4b22d0f4e471ca95" prot="public" virt="non-virtual"><scope>particle</scope><name>p0</name></member>
+      <member refid="structparticle_1ae8e4da8837aad9411b21b6de482fbd08" prot="public" virt="non-virtual"><scope>particle</scope><name>pid</name></member>
+      <member refid="structparticle_1a39e48e171f54c28a4c9fea2d836dc114" prot="public" virt="non-virtual"><scope>particle</scope><name>Q0</name></member>
+      <member refid="structparticle_1ab8662c5fa94078b820158f609463ff4a" prot="public" virt="non-virtual"><scope>particle</scope><name>Q00</name></member>
+      <member refid="structparticle_1a4027f5488864f716d72fa6971fc57bc2" prot="public" virt="non-virtual"><scope>particle</scope><name>radlist</name></member>
+      <member refid="structparticle_1a311eec4926747eddd2792f1d3172db21" prot="public" virt="non-virtual"><scope>particle</scope><name>T0</name></member>
+      <member refid="structparticle_1a344327d61451bada3ff3b4655afdaf2e" prot="public" virt="non-virtual"><scope>particle</scope><name>tau0</name></member>
+      <member refid="structparticle_1af3c470acc1b92780de363c08f9c46631" prot="public" virt="non-virtual"><scope>particle</scope><name>Tf</name></member>
+      <member refid="structparticle_1a8b1de39a9c532b0d69f2dceb54584ebe" prot="public" virt="non-virtual"><scope>particle</scope><name>vcell</name></member>
+      <member refid="structparticle_1afba94efafdff2e07632cfcb7fc45eff3" prot="public" virt="non-virtual"><scope>particle</scope><name>weight</name></member>
+      <member refid="structparticle_1afe2479fba44c0b458f04c438240f15b8" prot="public" virt="non-virtual"><scope>particle</scope><name>x</name></member>
+      <member refid="structparticle_1aa3c2c6bcea85bec46503b9ab1a46b873" prot="public" virt="non-virtual"><scope>particle</scope><name>x0</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

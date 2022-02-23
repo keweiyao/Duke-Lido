@@ -1,0 +1,12 @@
+\_form#0:$f=1$
+\_form#1:$N$
+\_form#2:$ \tilde{F} = F[x_i]/f_{\rm approx} (x_i)$
+\_form#3:$ f_{\rm approx} (x)$
+\_form#4:$ N $
+\_form#5:$ 2^N $
+\_form#6:$ \{n_1, n_2, ... n_N\}$
+\_form#7:$ F[i,j,...] $
+\_form#8:$f$
+\_form#9:$F[i,j]/f(x_i, x_j)$
+\_form#10:$f(x,y)$
+\_form#11:$ \{x,y,\cdots\} $

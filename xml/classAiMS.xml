@@ -1,0 +1,249 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="classAiMS" kind="class" language="C++" prot="public">
+    <compoundname>AiMS</compoundname>
+    <templateparamlist>
+      <param>
+        <type>typename F</type>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classAiMS_1afc94c7c7d789a19c745b90b550406252" prot="private" static="no" mutable="no">
+        <type>F</type>
+        <definition>F AiMS&lt; F &gt;::f</definition>
+        <argsstring></argsstring>
+        <name>f</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="77" column="7" bodyfile="src/sampler.h" bodystart="77" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classAiMS_1ae94ab791de433247024f7d0eea7884b9" prot="private" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>size_t AiMS&lt; F &gt;::n_dims</definition>
+        <argsstring></argsstring>
+        <name>n_dims</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="78" column="12" bodyfile="src/sampler.h" bodystart="78" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classAiMS_1a05f7bc862be757eff4e73978d880e214" prot="private" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>size_t AiMS&lt; F &gt;::Nwalker</definition>
+        <argsstring></argsstring>
+        <name>Nwalker</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="78" column="19" bodyfile="src/sampler.h" bodystart="78" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classAiMS_1a20ba96765a57b228ee809bd9c5aa6084" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; <ref refid="structwalker" kindref="compound">walker</ref> &gt;</type>
+        <definition>std::vector&lt;walker&gt; AiMS&lt; F &gt;::walkers</definition>
+        <argsstring></argsstring>
+        <name>walkers</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="79" column="17" bodyfile="src/sampler.h" bodystart="79" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classAiMS_1adcd10084626cffc162c33d1acbdc2a62" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; <ref refid="structwalker" kindref="compound">walker</ref> &gt;</type>
+        <definition>std::vector&lt;walker&gt; AiMS&lt; F &gt;::buff_walkers</definition>
+        <argsstring></argsstring>
+        <name>buff_walkers</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="79" column="25" bodyfile="src/sampler.h" bodystart="79" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classAiMS_1a5494407e19ed2dd4eaf4bc6d3b70d6ab" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double AiMS&lt; F &gt;::maxP</definition>
+        <argsstring></argsstring>
+        <name>maxP</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="80" column="12" bodyfile="src/sampler.h" bodystart="80" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classAiMS_1a038dcc0a2e336e9e95a47d9ce4271fed" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; AiMS&lt; F &gt;::maxloc</definition>
+        <argsstring></argsstring>
+        <name>maxloc</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="81" column="17" bodyfile="src/sampler.h" bodystart="81" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-func">
+      <memberdef kind="function" id="classAiMS_1ad08fcb2508b82309365514399c2d4d3e" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void AiMS&lt; F &gt;::initialize</definition>
+        <argsstring>(std::vector&lt; std::pair&lt; double, double &gt;&gt; range)</argsstring>
+        <name>initialize</name>
+        <param>
+          <type>std::vector&lt; std::pair&lt; double, double &gt;&gt;</type>
+          <declname>range</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="83" column="10" bodyfile="src/sampler.h" bodystart="83" bodyend="97"/>
+      </memberdef>
+      <memberdef kind="function" id="classAiMS_1ae4f66091e25086ece4e7e2fd48bc5774" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void AiMS&lt; F &gt;::update</definition>
+        <argsstring>(void)</argsstring>
+        <name>update</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="98" column="10" bodyfile="src/sampler.h" bodystart="98" bodyend="135"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classAiMS_1a4801ccd61481cd00f135bd38c68f1ee4" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>AiMS&lt; F &gt;::AiMS</definition>
+        <argsstring>(F f_, int n_dims_)</argsstring>
+        <name>AiMS</name>
+        <param>
+          <type>F</type>
+          <declname>f_</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>n_dims_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="138" column="5" bodyfile="src/sampler.h" bodystart="138" bodyend="144"/>
+      </memberdef>
+      <memberdef kind="function" id="classAiMS_1abf0723c9d9bd1048a63f8ea62c319283" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>AiMS&lt; F &gt;::~AiMS</definition>
+        <argsstring>()</argsstring>
+        <name>~AiMS</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="145" column="5" bodyfile="src/sampler.h" bodystart="145" bodyend="148"/>
+      </memberdef>
+      <memberdef kind="function" id="classAiMS_1a5f7b2342f2301691b90fd79432067499" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; AiMS&lt; F &gt;::sample</definition>
+        <argsstring>(std::vector&lt; std::pair&lt; double, double &gt;&gt; const &amp;range_, int steps_)</argsstring>
+        <name>sample</name>
+        <param>
+          <type>std::vector&lt; std::pair&lt; double, double &gt;&gt; const &amp;</type>
+          <declname>range_</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>steps_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="149" column="17" bodyfile="src/sampler.h" bodystart="149" bodyend="156"/>
+      </memberdef>
+      <memberdef kind="function" id="classAiMS_1a041fdb56fdd04788f45a6e72a83365eb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double AiMS&lt; F &gt;::getMax</definition>
+        <argsstring>(void)</argsstring>
+        <name>getMax</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="157" column="12" bodyfile="src/sampler.h" bodystart="157" bodyend="157"/>
+      </memberdef>
+      <memberdef kind="function" id="classAiMS_1a24bdbc2ceace3fde42ed9bf1b13b8040" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; AiMS&lt; F &gt;::getmaxloc</definition>
+        <argsstring>(void)</argsstring>
+        <name>getmaxloc</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="158" column="17" bodyfile="src/sampler.h" bodystart="158" bodyend="158"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/sampler.h" line="75" column="11" bodyfile="src/sampler.h" bodystart="75" bodyend="159"/>
+    <listofallmembers>
+      <member refid="classAiMS_1a4801ccd61481cd00f135bd38c68f1ee4" prot="public" virt="non-virtual"><scope>AiMS</scope><name>AiMS</name></member>
+      <member refid="classAiMS_1adcd10084626cffc162c33d1acbdc2a62" prot="private" virt="non-virtual"><scope>AiMS</scope><name>buff_walkers</name></member>
+      <member refid="classAiMS_1afc94c7c7d789a19c745b90b550406252" prot="private" virt="non-virtual"><scope>AiMS</scope><name>f</name></member>
+      <member refid="classAiMS_1a041fdb56fdd04788f45a6e72a83365eb" prot="public" virt="non-virtual"><scope>AiMS</scope><name>getMax</name></member>
+      <member refid="classAiMS_1a24bdbc2ceace3fde42ed9bf1b13b8040" prot="public" virt="non-virtual"><scope>AiMS</scope><name>getmaxloc</name></member>
+      <member refid="classAiMS_1ad08fcb2508b82309365514399c2d4d3e" prot="private" virt="non-virtual"><scope>AiMS</scope><name>initialize</name></member>
+      <member refid="classAiMS_1a038dcc0a2e336e9e95a47d9ce4271fed" prot="private" virt="non-virtual"><scope>AiMS</scope><name>maxloc</name></member>
+      <member refid="classAiMS_1a5494407e19ed2dd4eaf4bc6d3b70d6ab" prot="private" virt="non-virtual"><scope>AiMS</scope><name>maxP</name></member>
+      <member refid="classAiMS_1ae94ab791de433247024f7d0eea7884b9" prot="private" virt="non-virtual"><scope>AiMS</scope><name>n_dims</name></member>
+      <member refid="classAiMS_1a05f7bc862be757eff4e73978d880e214" prot="private" virt="non-virtual"><scope>AiMS</scope><name>Nwalker</name></member>
+      <member refid="classAiMS_1a5f7b2342f2301691b90fd79432067499" prot="public" virt="non-virtual"><scope>AiMS</scope><name>sample</name></member>
+      <member refid="classAiMS_1ae4f66091e25086ece4e7e2fd48bc5774" prot="private" virt="non-virtual"><scope>AiMS</scope><name>update</name></member>
+      <member refid="classAiMS_1a20ba96765a57b228ee809bd9c5aa6084" prot="private" virt="non-virtual"><scope>AiMS</scope><name>walkers</name></member>
+      <member refid="classAiMS_1abf0723c9d9bd1048a63f8ea62c319283" prot="public" virt="non-virtual"><scope>AiMS</scope><name>~AiMS</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,203 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="simpleLogger_8cpp" kind="file" language="C++">
+    <compoundname>simpleLogger.cpp</compoundname>
+    <includes refid="simpleLogger_8h" local="yes">simpleLogger.h</includes>
+    <includes local="no">boost/log/core/core.hpp</includes>
+    <includes local="no">boost/log/expressions/formatters/date_time.hpp</includes>
+    <includes local="no">boost/log/expressions.hpp</includes>
+    <includes local="no">boost/log/sinks/sync_frontend.hpp</includes>
+    <includes local="no">boost/log/sinks/text_ostream_backend.hpp</includes>
+    <includes local="no">boost/log/sources/severity_logger.hpp</includes>
+    <includes local="no">boost/log/support/date_time.hpp</includes>
+    <includes local="no">boost/log/trivial.hpp</includes>
+    <includes local="no">boost/core/null_deleter.hpp</includes>
+    <includes local="no">boost/log/utility/setup/common_attributes.hpp</includes>
+    <includes local="no">boost/make_shared.hpp</includes>
+    <includes local="no">boost/shared_ptr.hpp</includes>
+    <includes local="no">fstream</includes>
+    <includes local="no">ostream</includes>
+    <incdepgraph>
+      <node id="15">
+        <label>boost/shared_ptr.hpp</label>
+      </node>
+      <node id="11">
+        <label>boost/log/support/date_time.hpp</label>
+      </node>
+      <node id="10">
+        <label>boost/log/sources/severity_logger.hpp</label>
+      </node>
+      <node id="1">
+        <label>src/simpleLogger.cpp</label>
+        <link refid="simpleLogger_8cpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+        <childnode refid="17" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>boost/log/trivial.hpp</label>
+      </node>
+      <node id="8">
+        <label>boost/log/sinks/sync_frontend.hpp</label>
+      </node>
+      <node id="16">
+        <label>fstream</label>
+      </node>
+      <node id="17">
+        <label>ostream</label>
+      </node>
+      <node id="7">
+        <label>boost/log/expressions.hpp</label>
+      </node>
+      <node id="9">
+        <label>boost/log/sinks/text_ostream_backend.hpp</label>
+      </node>
+      <node id="5">
+        <label>boost/log/core/core.hpp</label>
+      </node>
+      <node id="6">
+        <label>boost/log/expressions/formatters/date_time.hpp</label>
+      </node>
+      <node id="4">
+        <label>boost/log/sources/global_logger_storage.hpp</label>
+      </node>
+      <node id="13">
+        <label>boost/log/utility/setup/common_attributes.hpp</label>
+      </node>
+      <node id="14">
+        <label>boost/make_shared.hpp</label>
+      </node>
+      <node id="2">
+        <label>simpleLogger.h</label>
+        <link refid="simpleLogger_8h_source"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="12">
+        <label>boost/core/null_deleter.hpp</label>
+      </node>
+    </incdepgraph>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="simpleLogger_8cpp_1a0d26b6be72544803c78aa051014048e6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>BOOST_LOG_GLOBAL_LOGGER_INIT</definition>
+        <argsstring>(logger, src::severity_logger_mt)</argsstring>
+        <name>BOOST_LOG_GLOBAL_LOGGER_INIT</name>
+        <param>
+          <type>logger</type>
+        </param>
+        <param>
+          <type>src::severity_logger_mt</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/simpleLogger.cpp" line="30" column="1" bodyfile="src/simpleLogger.cpp" bodystart="30" bodyend="65"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>Form<sp/>https://github.com/gklingler/simpleLogger</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;simpleLogger.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/log/core/core.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/log/expressions/formatters/date_time.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/log/expressions.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/log/sinks/sync_frontend.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/log/sinks/text_ostream_backend.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/log/sources/severity_logger.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/log/support/date_time.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/log/trivial.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/core/null_deleter.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/log/utility/setup/common_attributes.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/make_shared.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/shared_ptr.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;fstream&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;ostream&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">logging<sp/>=<sp/>boost::log;</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">src<sp/>=<sp/>boost::log::sources;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">expr<sp/>=<sp/>boost::log::expressions;</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">sinks<sp/>=<sp/>boost::log::sinks;</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">attrs<sp/>=<sp/>boost::log::attributes;</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal">BOOST_LOG_ATTRIBUTE_KEYWORD(line_id,<sp/></highlight><highlight class="stringliteral">&quot;LineID&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="27"><highlight class="normal">BOOST_LOG_ATTRIBUTE_KEYWORD(timestamp,<sp/></highlight><highlight class="stringliteral">&quot;TimeStamp&quot;</highlight><highlight class="normal">,<sp/>boost::posix_time::ptime)</highlight></codeline>
+<codeline lineno="28"><highlight class="normal">BOOST_LOG_ATTRIBUTE_KEYWORD(severity,<sp/></highlight><highlight class="stringliteral">&quot;Severity&quot;</highlight><highlight class="normal">,<sp/>logging::trivial::severity_level)</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal">BOOST_LOG_GLOBAL_LOGGER_INIT(logger,<sp/>src::severity_logger_mt)<sp/>{</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/>src::severity_logger_mt&lt;boost::log::trivial::severity_level&gt;<sp/>logger;</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>add<sp/>attributes</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/>logger.add_attribute(</highlight><highlight class="stringliteral">&quot;LineID&quot;</highlight><highlight class="normal">,<sp/>attrs::counter&lt;unsigned<sp/>int&gt;(1));<sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>lines<sp/>are<sp/>sequentially<sp/>numbered</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/>logger.add_attribute(</highlight><highlight class="stringliteral">&quot;TimeStamp&quot;</highlight><highlight class="normal">,<sp/>attrs::local_clock());<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>each<sp/>log<sp/>line<sp/>gets<sp/>a<sp/>timestamp</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>add<sp/>a<sp/>text<sp/>sink</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>sinks::synchronous_sink&lt;sinks::text_ostream_backend&gt;<sp/>text_sink;</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/>boost::shared_ptr&lt;text_sink&gt;<sp/>sink<sp/>=<sp/>boost::make_shared&lt;text_sink&gt;();</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>add<sp/>a<sp/>logfile<sp/>stream<sp/>to<sp/>our<sp/>sink</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/>sink-&gt;locked_backend()-&gt;add_stream(boost::make_shared&lt;std::ofstream&gt;(LOGFILE));</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>add<sp/>&quot;console&quot;<sp/>output<sp/>stream<sp/>to<sp/>our<sp/>sink</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/>sink-&gt;locked_backend()-&gt;add_stream(boost::shared_ptr&lt;std::ostream&gt;(&amp;std::clog,<sp/>boost::null_deleter()));</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"></highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>specify<sp/>the<sp/>format<sp/>of<sp/>the<sp/>log<sp/>message</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/>logging::formatter<sp/>formatter<sp/>=<sp/>expr::stream</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;&lt;<sp/>std::setw(7)<sp/></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;&lt;<sp/>std::setfill(</highlight><highlight class="charliteral">&apos;0&apos;</highlight><highlight class="normal">)<sp/></highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;&lt;<sp/>line_id<sp/></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;&lt;<sp/>std::setfill(</highlight><highlight class="charliteral">&apos;<sp/>&apos;</highlight><highlight class="normal">)<sp/>&lt;&lt;<sp/></highlight><highlight class="stringliteral">&quot;<sp/>|<sp/>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//&lt;&lt;<sp/>expr::format_date_time(timestamp,<sp/>&quot;%Y-%m-%d,<sp/>%H:%M:%S.%f&quot;)<sp/>&lt;&lt;<sp/>&quot;<sp/>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;&lt;<sp/></highlight><highlight class="stringliteral">&quot;[&quot;</highlight><highlight class="normal"><sp/>&lt;&lt;<sp/>logging::trivial::severity<sp/>&lt;&lt;<sp/></highlight><highlight class="stringliteral">&quot;]&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;&lt;<sp/></highlight><highlight class="stringliteral">&quot;<sp/>-<sp/>&quot;</highlight><highlight class="normal"><sp/>&lt;&lt;<sp/>expr::smessage;</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/>sink-&gt;set_formatter(formatter);</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>only<sp/>messages<sp/>with<sp/>severity<sp/>&gt;=<sp/>SEVERITY_THRESHOLD<sp/>are<sp/>written</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/>sink-&gt;set_filter(severity<sp/>&gt;=<sp/>SEVERITY_THRESHOLD);</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>&quot;register&quot;<sp/>our<sp/>sink</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/>logging::core::get()-&gt;add_sink(sink);</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"></highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>logger;</highlight></codeline>
+<codeline lineno="65"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="src/simpleLogger.cpp"/>
+  </compounddef>
+</doxygen>

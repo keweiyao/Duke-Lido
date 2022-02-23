@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="structrule__s" kind="struct" language="C++" prot="public">
+    <compoundname>rule_s</compoundname>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structrule__s_1af7da963873083001946994f19d2ee426" prot="public" static="no" mutable="no">
+        <type>unsigned</type>
+        <definition>unsigned rule_s::dim</definition>
+        <argsstring></argsstring>
+        <name>dim</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="229" column="15" bodyfile="src/hcubature.cpp" bodystart="229" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule__s_1ac321669761f0fd6a78d86346a340fd70" prot="public" static="no" mutable="no">
+        <type>unsigned</type>
+        <definition>unsigned rule_s::fdim</definition>
+        <argsstring></argsstring>
+        <name>fdim</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="229" column="19" bodyfile="src/hcubature.cpp" bodystart="229" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule__s_1abc7f8b1f5e9043abc4410b9099e34c45" prot="public" static="no" mutable="no">
+        <type>unsigned</type>
+        <definition>unsigned rule_s::num_points</definition>
+        <argsstring></argsstring>
+        <name>num_points</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="230" column="15" bodyfile="src/hcubature.cpp" bodystart="230" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule__s_1a948b420e1a62dd1bee4453c131b23a89" prot="public" static="no" mutable="no">
+        <type>unsigned</type>
+        <definition>unsigned rule_s::num_regions</definition>
+        <argsstring></argsstring>
+        <name>num_regions</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="231" column="15" bodyfile="src/hcubature.cpp" bodystart="231" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule__s_1a4bfdf68a226e1b1c6f3a587441806ee3" prot="public" static="no" mutable="no">
+        <type>double *</type>
+        <definition>double* rule_s::pts</definition>
+        <argsstring></argsstring>
+        <name>pts</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="232" column="13" bodyfile="src/hcubature.cpp" bodystart="232" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule__s_1a383bd3b6a7ef6eb92f1a0267c976b8db" prot="public" static="no" mutable="no">
+        <type>double *</type>
+        <definition>double* rule_s::vals</definition>
+        <argsstring></argsstring>
+        <name>vals</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="233" column="13" bodyfile="src/hcubature.cpp" bodystart="233" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule__s_1aca7209aea519d98d88326c18188f53c3" prot="public" static="no" mutable="no">
+        <type>evalError_func</type>
+        <definition>evalError_func rule_s::evalError</definition>
+        <argsstring></argsstring>
+        <name>evalError</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="234" column="21" bodyfile="src/hcubature.cpp" bodystart="234" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule__s_1a9abdaa3bedc629cd0afa565b824ab39d" prot="public" static="no" mutable="no">
+        <type>destroy_func</type>
+        <definition>destroy_func rule_s::destroy</definition>
+        <argsstring></argsstring>
+        <name>destroy</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="235" column="19" bodyfile="src/hcubature.cpp" bodystart="235" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="1">
+        <label>rule_s</label>
+        <link refid="structrule__s"/>
+        <childnode refid="1" relation="usage">
+          <edgelabel>evalError</edgelabel>
+          <edgelabel>destroy</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="src/hcubature.cpp" line="228" column="21" bodyfile="src/hcubature.cpp" bodystart="228" bodyend="236"/>
+    <listofallmembers>
+      <member refid="structrule__s_1a9abdaa3bedc629cd0afa565b824ab39d" prot="public" virt="non-virtual"><scope>rule_s</scope><name>destroy</name></member>
+      <member refid="structrule__s_1af7da963873083001946994f19d2ee426" prot="public" virt="non-virtual"><scope>rule_s</scope><name>dim</name></member>
+      <member refid="structrule__s_1aca7209aea519d98d88326c18188f53c3" prot="public" virt="non-virtual"><scope>rule_s</scope><name>evalError</name></member>
+      <member refid="structrule__s_1ac321669761f0fd6a78d86346a340fd70" prot="public" virt="non-virtual"><scope>rule_s</scope><name>fdim</name></member>
+      <member refid="structrule__s_1abc7f8b1f5e9043abc4410b9099e34c45" prot="public" virt="non-virtual"><scope>rule_s</scope><name>num_points</name></member>
+      <member refid="structrule__s_1a948b420e1a62dd1bee4453c131b23a89" prot="public" virt="non-virtual"><scope>rule_s</scope><name>num_regions</name></member>
+      <member refid="structrule__s_1a4bfdf68a226e1b1c6f3a587441806ee3" prot="public" virt="non-virtual"><scope>rule_s</scope><name>pts</name></member>
+      <member refid="structrule__s_1a383bd3b6a7ef6eb92f1a0267c976b8db" prot="public" virt="non-virtual"><scope>rule_s</scope><name>vals</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

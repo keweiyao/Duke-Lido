@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="vwrapper_8h" kind="file" language="C++">
+    <compoundname>vwrapper.h</compoundname>
+    <includedby refid="hcubature_8cpp" local="yes">src/hcubature.cpp</includedby>
+    <innerclass refid="structfv__data__s" prot="public">fv_data_s</innerclass>
+      <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="vwrapper_8h_1ab7c92355d17a8cc550e967cb37a76a36" prot="public" static="no">
+        <type>struct <ref refid="structfv__data__s" kindref="compound">fv_data_s</ref></type>
+        <definition>typedef struct fv_data_s fv_data</definition>
+        <argsstring></argsstring>
+        <name>fv_data</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/vwrapper.h" line="2" column="32"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="vwrapper_8h_1a82af804681e1d0c17162c70277c58862" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>static int fv</definition>
+        <argsstring>(unsigned ndim, size_t npt, const double *x, void *d_, unsigned fdim, double *fval)</argsstring>
+        <name>fv</name>
+        <param>
+          <type>unsigned</type>
+          <declname>ndim</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>npt</declname>
+        </param>
+        <param>
+          <type>const double *</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>d_</declname>
+        </param>
+        <param>
+          <type>unsigned</type>
+          <declname>fdim</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>fval</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/vwrapper.h" line="3" column="12" bodyfile="src/vwrapper.h" bodystart="3" bodyend="16"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">/*<sp/>vectorized<sp/>wrapper<sp/>around<sp/>non-vectorized<sp/>integrands<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2" refid="structfv__data__s" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structfv__data__s" kindref="compound">fv_data_s</ref><sp/>{<sp/>integrand<sp/>f;<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*fdata;<sp/>}<sp/><ref refid="structfv__data__s" kindref="compound">fv_data</ref>;</highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>fv(</highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>ndim,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>npt,</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*x,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*d_,</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>fdim,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*fval)</highlight></codeline>
+<codeline lineno="6"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><ref refid="structfv__data__s" kindref="compound">fv_data</ref><sp/>*d<sp/>=<sp/>(<ref refid="structfv__data__s" kindref="compound">fv_data</ref><sp/>*)<sp/>d_;</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>integrand<sp/>f<sp/>=<sp/>d-&gt;f;</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*fdata<sp/>=<sp/>d-&gt;fdata;</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>i;</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>printf(&quot;npt<sp/>=<sp/>%u\n&quot;,<sp/>npt);<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(i<sp/>=<sp/>0;<sp/>i<sp/>&lt;<sp/>npt;<sp/>++i)<sp/></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(f(ndim,<sp/>x<sp/>+<sp/>i*ndim,<sp/>fdata,<sp/>fdim,<sp/>fval<sp/>+<sp/>i*fdim))</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>FAILURE;</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>SUCCESS;</highlight></codeline>
+<codeline lineno="16"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="src/vwrapper.h"/>
+  </compounddef>
+</doxygen>

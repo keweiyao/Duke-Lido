@@ -15,7 +15,7 @@ endif()
 # Find and use Boost.
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost 1.50 REQUIRED COMPONENTS filesystem program_options system log log_setup thread REQUIRED)
+find_package(Boost 1.60 REQUIRED COMPONENTS filesystem program_options system log log_setup thread REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 # find and use gsl
@@ -207,7 +207,7 @@ foreach(App "Lido-TabGen" "Lido-X-tests" "Lido-R-tests" "Lido-Incoherent-tests")
 endforeach()
 
 if(pythia8)
-foreach(App "PGunTest" "Lido2DHydro" "Lido_pp")
+	foreach(App "PGunTest" "Lido2DHydro" "Lido_pp" "Dijet")
 	add_executable(${App} ./JetMains/${App}.cpp)
 	target_link_libraries(${App} ${LIBRARY_NAME} ${LIBRARY_JETFIND} ${PYTHIA8_LIBRARIES} ${FASTJET_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS ${App} DESTINATION bin)

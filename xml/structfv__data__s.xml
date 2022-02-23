@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="structfv__data__s" kind="struct" language="C++" prot="public">
+    <compoundname>fv_data_s</compoundname>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structfv__data__s_1a866511acfe8ff2bfc40f52fdb657c9d5" prot="public" static="no" mutable="no">
+        <type>integrand</type>
+        <definition>integrand fv_data_s::f</definition>
+        <argsstring></argsstring>
+        <name>f</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/vwrapper.h" line="2" column="34" bodyfile="src/vwrapper.h" bodystart="2" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structfv__data__s_1a455fadddddc8e44142efdf3f31409666" prot="public" static="no" mutable="no">
+        <type>void *</type>
+        <definition>void* fv_data_s::fdata</definition>
+        <argsstring></argsstring>
+        <name>fdata</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/vwrapper.h" line="2" column="41" bodyfile="src/vwrapper.h" bodystart="2" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/vwrapper.h" line="2" column="24" bodyfile="src/vwrapper.h" bodystart="2" bodyend="2"/>
+    <listofallmembers>
+      <member refid="structfv__data__s_1a866511acfe8ff2bfc40f52fdb657c9d5" prot="public" virt="non-virtual"><scope>fv_data_s</scope><name>f</name></member>
+      <member refid="structfv__data__s_1a455fadddddc8e44142efdf3f31409666" prot="public" virt="non-virtual"><scope>fv_data_s</scope><name>fdata</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

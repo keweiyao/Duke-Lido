@@ -16,6 +16,7 @@
 #include "lido.h"
 #include "PGunWithShower.h"
 #include "Hadronize.h"
+#include "jet_finding.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -23,15 +24,15 @@ namespace fs = boost::filesystem;
 void output_jet(std::string fname, std::vector<particle> plist){
     std::ofstream f(fname);
     f << "# pid, tau, x, y, etas, pT, phi, eta, M\n";
-    for (auto & p : plist) f << p.pid << " " << p.x << " "
+    for (auto & p : plist) f << p.pid << " "
                              << p.p.xT() << " " << p.p.phi() << " "
-                             << p.p.pseudorap() << " " << p.mass
-                             << std::endl;
+                             << p.p.pseudorap()  << std::endl;
     f.close();
 }
 
 
 int main(int argc, char* argv[]){
+
     using OptDesc = po::options_description;
     OptDesc options{};
     options.add_options()
@@ -81,6 +82,9 @@ int main(int argc, char* argv[]){
           ("eid,j",
            po::value<int>()->value_name("INT")->default_value(0,"0"),
            "trento event id")
+          ("pid",
+           po::value<int>()->value_name("INT")->default_value(1,"1"),
+           "hard id")
           ("hydro",
            po::value<fs::path>()->value_name("PATH")->required(),
            "hydro file")
@@ -136,6 +140,7 @@ int main(int argc, char* argv[]){
         double cut = args["cut"].as<double>();
         double afix = args["afix"].as<double>();
         double Tf = args["Tf"].as<double>();
+        int PID = args["pid"].as<int>();
         std::vector<double> parameters{muT, afix, cut, theta};
         lido A(args["lido-setting"].as<fs::path>().string(), 
                args["lido-table"].as<fs::path>().string(), 
@@ -144,20 +149,63 @@ int main(int argc, char* argv[]){
 
         /// Initialize a simple hadronizer
         JetDenseMediumHadronize Hadronizer;
-
         // Fill in all events
         std::vector<particle> plist, dplist, thermal_list, hlist;
         std::vector<current> clist;
 
         PGunWShower pythiagen(Q0, args["ic"].as<fs::path>().string());
 
+        PGunWShower pythiagen2(0.5, args["ic"].as<fs::path>().string());
+        JetFinder jf(300,300,3., need_response_table, args["response-table"].as<fs::path>().string());
         /// Initialzie a hydro reader
+        std::vector<double> dE0({0,0,0,0,0}), dE({0,0,0,0,0});
         for (int i=0; i<args["nevents"].as<int>(); i++){
+            plist.clear();
+            clist.clear();
+            pythiagen2.Generate(PID, args["E0"].as<double>(), plist);
+            Hadronizer.hadronize(plist, hlist, thermal_list, Q0, Tf, 1);
+            jf.MakeETower(0.6, Tf, 0.01, hlist, clist, 10, false);
+            for (int ir=0; ir<5; ir++){
+               
+                 double rl = ir*.2, rh = (ir+1)*.2;
+                 for (int ieta=0; ieta<300; ieta++){
+                     double eta = -3+ieta*6./299.;
+                     for (int iphi=0; iphi<300; iphi++){
+                         double phi = -M_PI+iphi*2*M_PI/299.;
+                         double R = std::sqrt(2.*(std::cosh(eta)
+                                                 -std::cos(phi)));
+                         if (rl <= R && R<rh) {
+                             dE0[ir] += jf.PT[ieta][iphi];
+                         }
+                     }
+                 }
+            }
+        }
+          std::stringstream fheader1;
+        fheader1 << args["output"].as<fs::path>().string() 
+                 << processid << "-xJ.dat";
+        std::ofstream f1(fheader1.str());
+
+        for (int i=0; i<args["nevents"].as<int>(); i++){
+            LOG_INFO << "___________________________";
             Medium<2> med1(args["hydro"].as<fs::path>().string());
             double mini_tau0 = med1.get_tauH();
             plist.clear();
             clist.clear();
-            pythiagen.Generate(21, args["E0"].as<double>(), plist);
+            pythiagen.Generate(PID, args["E0"].as<double>(), plist);
+
+
+             double Einitial = 0.;
+             for (auto & p : plist){ 
+                 auto p2 = p;
+                 p2.p.boost_back(0., 0., std::tanh(p2.x.x3()));
+                 double R = std::sqrt(2.*(std::cosh(p2.p.pseudorap())
+                                          -std::cos(p2.p.phi())));
+                 if (R<0.3) {
+                     Einitial += p2.p.xT();
+                 }
+             }
+
             // move partciles below tau0 to tau0
             for (auto & p : plist){
                 if (p.x.x0() >= mini_tau0 ) continue;
@@ -200,18 +248,71 @@ int main(int argc, char* argv[]){
                             ploss = ploss - fp.p;
                             new_plist.push_back(fp);
                         }
+                            current J; 
+                            J.p = ploss;
+                            J.etas = p.x.x3();
+                            clist.push_back(J); 
                     }
                 }
                 plist = new_plist;
             }
-            for (auto & p : plist) p.radlist.clear();
-            //Hadronizer.hadronize(plist, hlist, thermal_list, Q0, Tf, 0, 1);
-            std::stringstream fheader;
-            fheader << args["output"].as<fs::path>().string() 
-                    << processid<<"-"<<i << ".dat";
-            std::ofstream f(fheader.str());
-            output_jet(fheader.str(), plist);
+            // back to lab frame
+            for (auto & p : plist) {
+                p.p.boost_back(0., 0., std::tanh(p.x.x3()));
+                p.radlist.clear();
+            }
+            Hadronizer.hadronize(plist, hlist, thermal_list, Q0, Tf, 1);
+
+                for(auto & it : thermal_list){
+                    double vz = std::tanh(it.x.x3());
+                    current J; 
+                    J.p = it.p.boost_to(0, 0, vz)*(-1.);
+                    J.etas = it.x.x3();
+                    clist.push_back(J);  
+                }
+            jf.MakeETower(0.6, Tf, 0.01, hlist, clist, 10, false);
+
+             double Efinal = 0.;
+             for (int ieta=0; ieta<300; ieta++){
+                     double eta = -3+ieta*6./299.;
+                     for (int iphi=0; iphi<300; iphi++){
+                         double phi = -M_PI+iphi*2*M_PI/299.;
+                         double R = std::sqrt(2.*(std::cosh(eta)
+                                                 -std::cos(phi)));
+                         if (R<0.3) {
+                            Efinal += jf.PT[ieta][iphi];
+                         }
+                     }
+                 }
+            f1 << Einitial << " " << Efinal << std::endl;
+            
+            for (int ir=0; ir<5; ir++){
+               
+                 double rl = ir*.2, rh = (ir+1)*.2;
+                 for (int ieta=0; ieta<300; ieta++){
+                     double eta = -3+ieta*6./299.;
+                     for (int iphi=0; iphi<300; iphi++){
+                         double phi = -M_PI+iphi*2*M_PI/299.;
+                         double R = std::sqrt(2.*(std::cosh(eta)
+                                                 -std::cos(phi)));
+                         if (rl <= R && R<rh) {
+                             dE[ir] += jf.PT[ieta][iphi];
+                         }
+                     }
+                 }
+
+            }
         }
+        std::stringstream fheader2;
+        fheader2 << args["output"].as<fs::path>().string() 
+                 << processid << "-PT.dat";
+        std::ofstream f2(fheader2.str());
+        for (int ir=0; ir<5; ir++) 
+            f2 << dE0[ir]/args["nevents"].as<int>() << " ";
+        f2 << std::endl;
+        for (int ir=0; ir<5; ir++) 
+            f2 << dE[ir]/args["nevents"].as<int>() << " ";
+        f2 << std::endl;
     }
     catch (const po::required_option& e){
         std::cout << e.what() << "\n";

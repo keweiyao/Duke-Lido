@@ -1,0 +1,367 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="classTableBase" kind="class" language="C++" prot="public">
+    <compoundname>TableBase</compoundname>
+    <includes refid="TableBase_8h" local="no">TableBase.h</includes>
+    <templateparamlist>
+      <param>
+        <type>typename T</type>
+      </param>
+      <param>
+        <type>size_t</type>
+        <declname>N</declname>
+        <defname>N</defname>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="protected-attrib">
+      <memberdef kind="variable" id="classTableBase_1a7819e5a1863ae762a3b95d98f4e617bd" prot="protected" static="no" mutable="no">
+        <type>const std::string</type>
+        <definition>const std::string TableBase&lt; T, N &gt;::_Name</definition>
+        <argsstring></argsstring>
+        <name>_Name</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>name of the table </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="23" column="23" bodyfile="src/TableBase.h" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTableBase_1abeff960d8c4de4b9c748f25f49f7fd59" prot="protected" static="no" mutable="no">
+        <type>const size_t</type>
+        <definition>const size_t TableBase&lt; T, N &gt;::_rank</definition>
+        <argsstring></argsstring>
+        <name>_rank</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>rank/dim ( <formula id="4">$ N $</formula>) of the table, and size of a unit cube <formula id="5">$ 2^N $</formula> </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="25" column="18" bodyfile="src/TableBase.h" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTableBase_1ad9c0f0e48c7fef73f45c26a416985c4d" prot="protected" static="no" mutable="no">
+        <type>const size_t</type>
+        <definition>const size_t TableBase&lt; T, N &gt;::_power_rank</definition>
+        <argsstring></argsstring>
+        <name>_power_rank</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="25" column="24" bodyfile="src/TableBase.h" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTableBase_1aa06341ad04963a9c84b6b63a82600438" prot="protected" static="no" mutable="no">
+        <type>Svec</type>
+        <definition>Svec TableBase&lt; T, N &gt;::_shape</definition>
+        <argsstring></argsstring>
+        <name>_shape</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>shape of table <formula id="6">$ \{n_1, n_2, ... n_N\}$</formula> </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="27" column="10" bodyfile="src/TableBase.h" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTableBase_1a44db6c5eadcb0c7a1ba956fdf83c6baa" prot="protected" static="no" mutable="no">
+        <type>Dvec</type>
+        <definition>Dvec TableBase&lt; T, N &gt;::_low</definition>
+        <argsstring></argsstring>
+        <name>_low</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Lower, upper bounds, and step size of the table in each dimension </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="29" column="10" bodyfile="src/TableBase.h" bodystart="29" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTableBase_1ad8f2c504d28881c83b013e04cb50b666" prot="protected" static="no" mutable="no">
+        <type>Dvec</type>
+        <definition>Dvec TableBase&lt; T, N &gt;::_high</definition>
+        <argsstring></argsstring>
+        <name>_high</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="29" column="15" bodyfile="src/TableBase.h" bodystart="29" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTableBase_1a7ed0f42c488e9192ed9ea5fe54c4d6ec" prot="protected" static="no" mutable="no">
+        <type>Dvec</type>
+        <definition>Dvec TableBase&lt; T, N &gt;::_step</definition>
+        <argsstring></argsstring>
+        <name>_step</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="29" column="21" bodyfile="src/TableBase.h" bodystart="29" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTableBase_1a723cc538ce6e933c75264df43d0d50fd" prot="protected" static="no" mutable="no">
+        <type>boost::multi_array&lt; T, N &gt;</type>
+        <definition>boost::multi_array&lt;T, N&gt; TableBase&lt; T, N &gt;::_table</definition>
+        <argsstring></argsstring>
+        <name>_table</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>N-dim data-table <formula id="7">$ F[i,j,...] $</formula> </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="31" column="24" bodyfile="src/TableBase.h" bodystart="31" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTableBase_1ac6d71cc7aacc17a1c52f4b2e10ffb38e" prot="protected" static="no" mutable="no">
+        <type>T(*</type>
+        <definition>T(* TableBase&lt; T, N &gt;::ApproximateFunction) (Dvec values)</definition>
+        <argsstring>)(Dvec values)</argsstring>
+        <name>ApproximateFunction</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>an approximating function <formula id="8">$f$</formula> for more effeicient interpolation when the original / function varies a lot in certain regions / For example, if set, the interpolation will first interpolate the grid / <formula id="9">$F[i,j]/f(x_i, x_j)$</formula>, and then multiple the final results by <formula id="10">$f(x,y)$</formula> </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="37" column="5" bodyfile="src/TableBase.h" bodystart="37" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classTableBase_1af6ea1bd7cfe42a93df89dc087d778d6f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>TableBase&lt; T, N &gt;::TableBase</definition>
+        <argsstring>(std::string, Svec, Dvec, Dvec)</argsstring>
+        <name>TableBase</name>
+        <param>
+          <type>std::string</type>
+          <defname>Name</defname>
+        </param>
+        <param>
+          <type>Svec</type>
+          <defname>shape</defname>
+        </param>
+        <param>
+          <type>Dvec</type>
+          <defname>low</defname>
+        </param>
+        <param>
+          <type>Dvec</type>
+          <defname>high</defname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Constructor, pass the nanem, shape, lower and upper bounds </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="40" column="5" bodyfile="src/TableBase.cpp" bodystart="16" bodyend="24"/>
+      </memberdef>
+      <memberdef kind="function" id="classTableBase_1a602c3425a17d1cb44dcd8b46b2fa1e36" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>T</type>
+        <definition>T TableBase&lt; T, N &gt;::InterpolateTable</definition>
+        <argsstring>(Dvec values)</argsstring>
+        <name>InterpolateTable</name>
+        <param>
+          <type>Dvec</type>
+          <declname>values</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Table interpolator (not an extrapolator!), pass the values <formula id="11">$ \{x,y,\cdots\} $</formula> in a c++ vector </para>
+        </detaileddescription>
+        <inbodydescription>
+<para>Input point is cut-off beyond lower bounds or higher bounds</para>
+<para>Use an <formula id="1">$N$</formula>-dim linearly interpolation</para>
+<para>It first interpolate the scaled table <formula id="2">$ \tilde{F} = F[x_i]/f_{\rm approx} (x_i)$</formula></para>
+<para>and then, multiply the results by the value of the approximation function <formula id="3">$ f_{\rm approx} (x)$</formula></para>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="42" column="7" bodyfile="src/TableBase.cpp" bodystart="27" bodyend="55"/>
+      </memberdef>
+      <memberdef kind="function" id="classTableBase_1af76544d2d72a572d7f46cdabbefc0ec1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void TableBase&lt; T, N &gt;::SetTableValue</definition>
+        <argsstring>(Svec index, T v)</argsstring>
+        <name>SetTableValue</name>
+        <param>
+          <type>Svec</type>
+          <declname>index</declname>
+        </param>
+        <param>
+          <type>T</type>
+          <declname>v</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Set the value of an element by indices </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="44" column="10" bodyfile="src/TableBase.cpp" bodystart="58" bodyend="60"/>
+      </memberdef>
+      <memberdef kind="function" id="classTableBase_1ae33656462d9b86455ccbcaf3295880a9" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void TableBase&lt; T, N &gt;::SetApproximateFunction</definition>
+        <argsstring>(T(*f)(Dvec values))</argsstring>
+        <name>SetApproximateFunction</name>
+        <param>
+          <type>T(*)(Dvec values)</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Pass an approximate function for accurate interpoaltion </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="46" column="10" bodyfile="src/TableBase.h" bodystart="46" bodyend="48"/>
+      </memberdef>
+      <memberdef kind="function" id="classTableBase_1ad79f234ef43b112f175479ef561d9fa0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool TableBase&lt; T, N &gt;::Save</definition>
+        <argsstring>(std::string)</argsstring>
+        <name>Save</name>
+        <param>
+          <type>std::string</type>
+          <defname>fname</defname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Save the table to file </para>
+        </detaileddescription>
+        <inbodydescription>
+<para>It will overwrite existing tables with the same name</para>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="50" column="10" bodyfile="src/TableBase.cpp" bodystart="63" bodyend="113"/>
+      </memberdef>
+      <memberdef kind="function" id="classTableBase_1af459d0620d7707c0460263e5d42c2205" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool TableBase&lt; T, N &gt;::Load</definition>
+        <argsstring>(std::string)</argsstring>
+        <name>Load</name>
+        <param>
+          <type>std::string</type>
+          <defname>fname</defname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Load the table, it will check if the dimensional matches or not </para>
+        </detaileddescription>
+        <inbodydescription>
+<para>Mismatched table dimension will result in a fatal error</para>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="52" column="10" bodyfile="src/TableBase.cpp" bodystart="116" bodyend="151"/>
+      </memberdef>
+      <memberdef kind="function" id="classTableBase_1a2fee1edad07934f353b54e893f8ecebc" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t TableBase&lt; T, N &gt;::shape</definition>
+        <argsstring>(size_t i)</argsstring>
+        <name>shape</name>
+        <param>
+          <type>size_t</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="53" column="8" bodyfile="src/TableBase.h" bodystart="53" bodyend="53"/>
+      </memberdef>
+      <memberdef kind="function" id="classTableBase_1a337459c599c5f26d3f3328e68d0af48c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t TableBase&lt; T, N &gt;::rank</definition>
+        <argsstring>(void)</argsstring>
+        <name>rank</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="54" column="8" bodyfile="src/TableBase.h" bodystart="54" bodyend="54"/>
+      </memberdef>
+      <memberdef kind="function" id="classTableBase_1abb10cb245e54250af6335ca9299c4a58" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t TableBase&lt; T, N &gt;::length</definition>
+        <argsstring>(void)</argsstring>
+        <name>length</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="55" column="8" bodyfile="src/TableBase.h" bodystart="55" bodyend="59"/>
+      </memberdef>
+      <memberdef kind="function" id="classTableBase_1a7a34ed5e7a04955533554e74ca2de642" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Dvec</type>
+        <definition>Dvec TableBase&lt; T, N &gt;::parameters</definition>
+        <argsstring>(Svec index)</argsstring>
+        <name>parameters</name>
+        <param>
+          <type>Svec</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/TableBase.h" line="60" column="6" bodyfile="src/TableBase.h" bodystart="60" bodyend="65"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para>The Basic table class: Tabulate type T output in an N-dimensional table Saving / loading to hdf5 format Interpolating, w/ or w/o an approximating function </para>
+    </detaileddescription>
+    <location file="src/TableBase.h" line="20" column="16" bodyfile="src/TableBase.h" bodystart="20" bodyend="66"/>
+    <listofallmembers>
+      <member refid="classTableBase_1ad8f2c504d28881c83b013e04cb50b666" prot="protected" virt="non-virtual"><scope>TableBase</scope><name>_high</name></member>
+      <member refid="classTableBase_1a44db6c5eadcb0c7a1ba956fdf83c6baa" prot="protected" virt="non-virtual"><scope>TableBase</scope><name>_low</name></member>
+      <member refid="classTableBase_1a7819e5a1863ae762a3b95d98f4e617bd" prot="protected" virt="non-virtual"><scope>TableBase</scope><name>_Name</name></member>
+      <member refid="classTableBase_1ad9c0f0e48c7fef73f45c26a416985c4d" prot="protected" virt="non-virtual"><scope>TableBase</scope><name>_power_rank</name></member>
+      <member refid="classTableBase_1abeff960d8c4de4b9c748f25f49f7fd59" prot="protected" virt="non-virtual"><scope>TableBase</scope><name>_rank</name></member>
+      <member refid="classTableBase_1aa06341ad04963a9c84b6b63a82600438" prot="protected" virt="non-virtual"><scope>TableBase</scope><name>_shape</name></member>
+      <member refid="classTableBase_1a7ed0f42c488e9192ed9ea5fe54c4d6ec" prot="protected" virt="non-virtual"><scope>TableBase</scope><name>_step</name></member>
+      <member refid="classTableBase_1a723cc538ce6e933c75264df43d0d50fd" prot="protected" virt="non-virtual"><scope>TableBase</scope><name>_table</name></member>
+      <member refid="classTableBase_1ac6d71cc7aacc17a1c52f4b2e10ffb38e" prot="protected" virt="non-virtual"><scope>TableBase</scope><name>ApproximateFunction</name></member>
+      <member refid="classTableBase_1a602c3425a17d1cb44dcd8b46b2fa1e36" prot="public" virt="non-virtual"><scope>TableBase</scope><name>InterpolateTable</name></member>
+      <member refid="classTableBase_1abb10cb245e54250af6335ca9299c4a58" prot="public" virt="non-virtual"><scope>TableBase</scope><name>length</name></member>
+      <member refid="classTableBase_1af459d0620d7707c0460263e5d42c2205" prot="public" virt="non-virtual"><scope>TableBase</scope><name>Load</name></member>
+      <member refid="classTableBase_1a7a34ed5e7a04955533554e74ca2de642" prot="public" virt="non-virtual"><scope>TableBase</scope><name>parameters</name></member>
+      <member refid="classTableBase_1a337459c599c5f26d3f3328e68d0af48c" prot="public" virt="non-virtual"><scope>TableBase</scope><name>rank</name></member>
+      <member refid="classTableBase_1ad79f234ef43b112f175479ef561d9fa0" prot="public" virt="non-virtual"><scope>TableBase</scope><name>Save</name></member>
+      <member refid="classTableBase_1ae33656462d9b86455ccbcaf3295880a9" prot="public" virt="non-virtual"><scope>TableBase</scope><name>SetApproximateFunction</name></member>
+      <member refid="classTableBase_1af76544d2d72a572d7f46cdabbefc0ec1" prot="public" virt="non-virtual"><scope>TableBase</scope><name>SetTableValue</name></member>
+      <member refid="classTableBase_1a2fee1edad07934f353b54e893f8ecebc" prot="public" virt="non-virtual"><scope>TableBase</scope><name>shape</name></member>
+      <member refid="classTableBase_1af6ea1bd7cfe42a93df89dc087d778d6f" prot="public" virt="non-virtual"><scope>TableBase</scope><name>TableBase</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

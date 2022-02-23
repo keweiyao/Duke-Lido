@@ -353,16 +353,16 @@ void JetFinder::FindJets(std::vector<double> Rs,
 	    }
 	    else{
 	        // trigger on high-pT constituents
-	        bool trigger = false;
+	        /*bool trigger = false;
 	        for (auto & p: plist) {
                     double absdphi = std::abs(Jphi - p.p.phi());
                     if (absdphi>M_PI) absdphi = 2.*M_PI-absdphi;
                     double deta = Jeta-p.p.pseudorap();
                     double dR = std::sqrt(absdphi*absdphi + deta*deta);
                     if ( (dR<J.R) && p.charged && p.p.xT()>5.) trigger = true;
-	        }
-	        if (trigger) 
-		    Jets.push_back(J);   
+	        }*/
+	        //if (trigger) 
+		Jets.push_back(J);   
 	    }
         }
     }
@@ -985,6 +985,7 @@ xJbins({0, .05,  .1, .15,  .2,
     for (int i=0; i<NpT; i++)
         binwidth[i]=pTbins[i+1]-pTbins[i];
 }
+std::ofstream  fdijet("dijet.dat");
 void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec x0){
     // di-jet asymmetry
     std::vector<Fjet> jjs;
@@ -999,7 +1000,9 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
         auto j1 = jjs[0], j2 = jjs[1];
         if (std::abs(j1.eta)<2.1 && std::abs(j2.eta)<2.1) {
             double dphi = j1.phi - j2.phi;
-	    double x = j2.pT/j1.pT;
+            if (std::cos(dphi) < std::cos(7./8.*M_PI))
+                fdijet << j1.pT << " " << j2.pT << " " << sigma_gen << std::endl;
+	    /*double x = j2.pT/j1.pT;
             if ((std::cos(dphi) < std::cos(7./8.*M_PI)) && (x>0.32)) {
 	        // back-to-back dijets
 		int pTindex = -1;
@@ -1029,7 +1032,7 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
 	             if (pTbins[i]<j2.pT && j2.pT< pTbins[i+1])
                         subleading_yield[i] += sigma_gen;
 		}
-            }
+            }*/
         }
     }
     // shape

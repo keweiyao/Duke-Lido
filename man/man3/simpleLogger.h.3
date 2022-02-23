@@ -1,0 +1,72 @@
+.TH "src/simpleLogger.h" 3 "Thu Jul 1 2021" "Duke-Lido" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/simpleLogger.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <boost/log/trivial\&.hpp>\fP
+.br
+\fC#include <boost/log/sources/global_logger_storage\&.hpp>\fP
+.br
+
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBBOOST_LOG_DYN_LINK\fP"
+.br
+.ti -1c
+.RI "#define \fBLOGFILE\fP   'logfile\&.log'"
+.br
+.ti -1c
+.RI "#define \fBSEVERITY_THRESHOLD\fP   logging::trivial::info"
+.br
+.ti -1c
+.RI "#define \fBLOG\fP(severity)   BOOST_LOG_SEV(logger::get(),boost::log::trivial::severity)"
+.br
+.ti -1c
+.RI "#define \fBLOG_TRACE\fP   \fBLOG\fP(trace)"
+.br
+.ti -1c
+.RI "#define \fBLOG_DEBUG\fP   \fBLOG\fP(debug)"
+.br
+.ti -1c
+.RI "#define \fBLOG_INFO\fP   \fBLOG\fP(info)"
+.br
+.ti -1c
+.RI "#define \fBLOG_WARNING\fP   \fBLOG\fP(warning)"
+.br
+.ti -1c
+.RI "#define \fBLOG_ERROR\fP   \fBLOG\fP(error)"
+.br
+.ti -1c
+.RI "#define \fBLOG_FATAL\fP   \fBLOG\fP(fatal)"
+.br
+.in -1c
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define BOOST_LOG_DYN_LINK"
+
+.SS "#define LOG(severity)   BOOST_LOG_SEV(logger::get(),boost::log::trivial::severity)"
+
+.SS "#define LOG_DEBUG   \fBLOG\fP(debug)"
+
+.SS "#define LOG_ERROR   \fBLOG\fP(error)"
+
+.SS "#define LOG_FATAL   \fBLOG\fP(fatal)"
+
+.SS "#define LOG_INFO   \fBLOG\fP(info)"
+
+.SS "#define LOG_TRACE   \fBLOG\fP(trace)"
+
+.SS "#define LOG_WARNING   \fBLOG\fP(warning)"
+
+.SS "#define LOGFILE   'logfile\&.log'"
+
+.SS "#define SEVERITY_THRESHOLD   logging::trivial::info"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Duke-Lido from the source code\&.

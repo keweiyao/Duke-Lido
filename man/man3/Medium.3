@@ -1,0 +1,62 @@
+.TH "Medium< N >" 3 "Thu Jul 1 2021" "Duke-Lido" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Medium< N >
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <Medium_Reader\&.h>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBMedium\fP (std::string filename)"
+.br
+.ti -1c
+.RI "\fB~Medium\fP ()"
+.br
+.ti -1c
+.RI "void \fBinit\fP ()"
+.br
+.ti -1c
+.RI "bool \fBload_next\fP ()"
+.br
+.ti -1c
+.RI "void \fBinterpolate\fP (\fBcoordinate\fP x, double &T, double &vx, double &vy, double &vz)"
+.br
+.ti -1c
+.RI "double \fBget_tauL\fP ()"
+.br
+.ti -1c
+.RI "double \fBget_tauH\fP ()"
+.br
+.ti -1c
+.RI "double \fBget_hydro_time_step\fP ()"
+.br
+.in -1c
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "template<size_t N> \fBMedium\fP< N >::\fBMedium\fP (std::string filename)"
+
+.SS "template<size_t N> \fBMedium\fP< N >::~\fBMedium\fP ()\fC [inline]\fP"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "template<size_t N> double \fBMedium\fP< N >::get_hydro_time_step ()\fC [inline]\fP"
+
+.SS "template<size_t N> double \fBMedium\fP< N >::get_tauH ()\fC [inline]\fP"
+
+.SS "template<size_t N> double \fBMedium\fP< N >::get_tauL ()\fC [inline]\fP"
+
+.SS "template<size_t N> void \fBMedium\fP< N >::init"
+
+.SS "template<size_t N> void \fBMedium\fP< N >::interpolate (\fBcoordinate\fP x, double & T, double & vx, double & vy, double & vz)"
+
+.SS "template<size_t N> bool \fBMedium\fP< N >::load_next"
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Duke-Lido from the source code\&.

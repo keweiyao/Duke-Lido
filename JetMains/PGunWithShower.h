@@ -67,7 +67,7 @@ PGunWShower::PGunWShower(double _Q0, std::string f_trento):TRENToSampler(f_trent
     pythia.readString("PromptPhoton:all=off");
     pythia.readString("WeakSingleBoson:all=off");
     pythia.readString("WeakDoubleBoson:all=off");
-    pythia.readString("SpaceShower:QEDshowerByQ=off");
+    pythia.readString("SpaceShower:QEDshowerByQ = off");
     pythia.readString("TimeShower:QEDshowerByQ = off");
     pythia.readString("ProcessLevel:all = off");
     pythia.readString("HadronLevel:all = on");
@@ -103,12 +103,12 @@ void PGunWShower::Generate(int pid, double pT, std::vector<particle> & plist){
         pythia.event.append(21, 23, 101, 102, 
                          pT, 0., 0., pT, 0.); 
         pythia.event.append(21, 23, 102, 101, 
-                         -pT, 0., 0., pT, 0.); 
+                         -pT, 0, 0, pT, 0.); 
     }else{
         pythia.event.append(pid, 23, 101, 0, 
                          pT, 0., 0., pT, 0.); 
         pythia.event.append(-pid, 23, 0, 101, 
-                         -pT, 0., 0., pT, 0.); 
+                         -pT, 0, 0, pT, 0.); 
     }
     pythia.event[1].scale(pT);
     pythia.event[2].scale(pT);

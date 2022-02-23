@@ -1,0 +1,608 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="classMedium" kind="class" language="C++" prot="public">
+    <compoundname>Medium</compoundname>
+    <templateparamlist>
+      <param>
+        <type>size_t</type>
+        <declname>N</declname>
+        <defname>N</defname>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classMedium_1a8d614685a6f122e599380d5841747257" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::_dtau</definition>
+        <argsstring></argsstring>
+        <name>_dtau</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="18" column="8" bodyfile="src/Medium_Reader.h" bodystart="18" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1ab908b6053452ea093ba5c7c39503daf3" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::_tau0</definition>
+        <argsstring></argsstring>
+        <name>_tau0</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="18" column="13" bodyfile="src/Medium_Reader.h" bodystart="18" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1aa96966640890f37dc66a9e816aab0314" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::_dx</definition>
+        <argsstring></argsstring>
+        <name>_dx</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="19" column="16" bodyfile="src/Medium_Reader.h" bodystart="19" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a6511b312d22be10937afa6a86d515874" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::_dy</definition>
+        <argsstring></argsstring>
+        <name>_dy</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="19" column="19" bodyfile="src/Medium_Reader.h" bodystart="19" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a76a2e374fb2a9f9c7d04af73ea6d8902" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::_deta</definition>
+        <argsstring></argsstring>
+        <name>_deta</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="19" column="22" bodyfile="src/Medium_Reader.h" bodystart="19" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a271eaff7370617ab043151517e1b4143" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::_xl</definition>
+        <argsstring></argsstring>
+        <name>_xl</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="20" column="16" bodyfile="src/Medium_Reader.h" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1ab15a8a4b6870583462dde35198ba470f" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::_xh</definition>
+        <argsstring></argsstring>
+        <name>_xh</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="20" column="20" bodyfile="src/Medium_Reader.h" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1ab856e41bc08cf9c33896242cd274b6ae" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::_yl</definition>
+        <argsstring></argsstring>
+        <name>_yl</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="21" column="16" bodyfile="src/Medium_Reader.h" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1ade773fb9c32530393d193f73f83332a2" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::_yh</definition>
+        <argsstring></argsstring>
+        <name>_yh</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="21" column="20" bodyfile="src/Medium_Reader.h" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1aa354c477c0a2ac9951527af26ba083e9" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::_etal</definition>
+        <argsstring></argsstring>
+        <name>_etal</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="22" column="16" bodyfile="src/Medium_Reader.h" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1aed01830e7a50270cf274cb15ba995e71" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::_etah</definition>
+        <argsstring></argsstring>
+        <name>_etah</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="22" column="22" bodyfile="src/Medium_Reader.h" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1aecf84cc9cd7a4742e99dd8cb7eee2348" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Medium&lt; N &gt;::_iXL</definition>
+        <argsstring></argsstring>
+        <name>_iXL</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="23" column="5" bodyfile="src/Medium_Reader.h" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1ac0b97abaecd1de7efc8e964fb5f1c822" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Medium&lt; N &gt;::_iXH</definition>
+        <argsstring></argsstring>
+        <name>_iXH</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="23" column="10" bodyfile="src/Medium_Reader.h" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a347bc1415ff24072cff2d37224de8ddb" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Medium&lt; N &gt;::_iYL</definition>
+        <argsstring></argsstring>
+        <name>_iYL</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="24" column="13" bodyfile="src/Medium_Reader.h" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1acb6c04d7f0a0b0902fa249ffa5011565" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Medium&lt; N &gt;::_iYH</definition>
+        <argsstring></argsstring>
+        <name>_iYH</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="24" column="18" bodyfile="src/Medium_Reader.h" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a888b908b5d951846d469339558d448ca" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Medium&lt; N &gt;::_iETAL</definition>
+        <argsstring></argsstring>
+        <name>_iETAL</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="25" column="13" bodyfile="src/Medium_Reader.h" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1acdf807499557c53a14a6ecad4839c920" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Medium&lt; N &gt;::_iETAH</definition>
+        <argsstring></argsstring>
+        <name>_iETAH</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="25" column="20" bodyfile="src/Medium_Reader.h" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a471a1f40e2be2e31cb43b10999360727" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; size_t &gt;</type>
+        <definition>std::vector&lt;size_t&gt; Medium&lt; N &gt;::_shape</definition>
+        <argsstring></argsstring>
+        <name>_shape</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="26" column="13" bodyfile="src/Medium_Reader.h" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1adfeb0abdaf4a95028c67ecdd92751cc3" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; Medium&lt; N &gt;::_xl_limits</definition>
+        <argsstring></argsstring>
+        <name>_xl_limits</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="27" column="13" bodyfile="src/Medium_Reader.h" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a9b7d8142192a1fb11ae389d80ebfe3c1" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; Medium&lt; N &gt;::_xh_limits</definition>
+        <argsstring></argsstring>
+        <name>_xh_limits</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="27" column="24" bodyfile="src/Medium_Reader.h" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1ac95c8c2f09e8bcb052281a9a102d07b8" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; Medium&lt; N &gt;::_x_steps</definition>
+        <argsstring></argsstring>
+        <name>_x_steps</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="27" column="35" bodyfile="src/Medium_Reader.h" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a7b01b3c561efba347fe8ea37fd9f491b" prot="private" static="no" mutable="no">
+        <type>const std::string</type>
+        <definition>const std::string Medium&lt; N &gt;::_filename</definition>
+        <argsstring></argsstring>
+        <name>_filename</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="28" column="19" bodyfile="src/Medium_Reader.h" bodystart="28" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1ae68cc8251a4aaeeff079a19d18e9ac56" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Medium&lt; N &gt;::_frame_count</definition>
+        <argsstring></argsstring>
+        <name>_frame_count</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="29" column="5" bodyfile="src/Medium_Reader.h" bodystart="29" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1ad1e01b6d3ae2ddaaeab29bc5578fc552" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Medium&lt; N &gt;::_number_of_frames</definition>
+        <argsstring></argsstring>
+        <name>_number_of_frames</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="29" column="18" bodyfile="src/Medium_Reader.h" bodystart="29" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1af1491e4bb2b8838d37962ae48ea6f28d" prot="private" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>size_t Medium&lt; N &gt;::_power_rank</definition>
+        <argsstring></argsstring>
+        <name>_power_rank</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="30" column="8" bodyfile="src/Medium_Reader.h" bodystart="30" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1aba766e56252ee378cf09b6c8b4b8bda0" prot="private" static="no" mutable="no">
+        <type>H5::H5File</type>
+        <definition>H5::H5File Medium&lt; N &gt;::_file</definition>
+        <argsstring></argsstring>
+        <name>_file</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="31" column="12" bodyfile="src/Medium_Reader.h" bodystart="31" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a19161d031e12db9b99e573db0d96127c" prot="private" static="no" mutable="no">
+        <type>H5::Group</type>
+        <definition>H5::Group Medium&lt; N &gt;::_event</definition>
+        <argsstring></argsstring>
+        <name>_event</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="32" column="11" bodyfile="src/Medium_Reader.h" bodystart="32" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a85922dfe31db48924673e36cc263d7c8" prot="private" static="no" mutable="no">
+        <type>boost::multi_array&lt; double, N &gt;</type>
+        <definition>boost::multi_array&lt;double, N&gt; Medium&lt; N &gt;::_buffer</definition>
+        <argsstring></argsstring>
+        <name>_buffer</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="33" column="20" bodyfile="src/Medium_Reader.h" bodystart="33" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1af8f39dbaa066f37ad9aea9e33abd5ce4" prot="private" static="no" mutable="no">
+        <type>boost::multi_array&lt; double, N+1 &gt;</type>
+        <definition>boost::multi_array&lt;double, N+1&gt; Medium&lt; N &gt;::_Temp</definition>
+        <argsstring></argsstring>
+        <name>_Temp</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="34" column="28" bodyfile="src/Medium_Reader.h" bodystart="34" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a1dd4fcdda839a45acf5a734bf5678170" prot="private" static="no" mutable="no">
+        <type>boost::multi_array&lt; double, N+1 &gt;</type>
+        <definition>boost::multi_array&lt;double, N+1&gt; Medium&lt; N &gt;::_Vx</definition>
+        <argsstring></argsstring>
+        <name>_Vx</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="35" column="28" bodyfile="src/Medium_Reader.h" bodystart="35" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a65a96c64c65d6845a40b0b34d67c702c" prot="private" static="no" mutable="no">
+        <type>boost::multi_array&lt; double, N+1 &gt;</type>
+        <definition>boost::multi_array&lt;double, N+1&gt; Medium&lt; N &gt;::_Vy</definition>
+        <argsstring></argsstring>
+        <name>_Vy</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="36" column="20" bodyfile="src/Medium_Reader.h" bodystart="36" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMedium_1a8ef5f90f6fcecfa2d0b990aad7cb20a9" prot="private" static="no" mutable="no">
+        <type>boost::multi_array&lt; double, N+1 &gt;</type>
+        <definition>boost::multi_array&lt;double, N+1&gt; Medium&lt; N &gt;::_Vz</definition>
+        <argsstring></argsstring>
+        <name>_Vz</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="37" column="20" bodyfile="src/Medium_Reader.h" bodystart="37" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classMedium_1a2e000a59fd612e8cc5fccdc5c17ba0a8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>Medium&lt; N &gt;::Medium</definition>
+        <argsstring>(std::string filename)</argsstring>
+        <name>Medium</name>
+        <param>
+          <type>std::string</type>
+          <declname>filename</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="39" column="1" bodyfile="src/Medium_Reader.cpp" bodystart="9" bodyend="15"/>
+      </memberdef>
+      <memberdef kind="function" id="classMedium_1a0caedb0bb2d429e49b76004cad5903df" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Medium&lt; N &gt;::~Medium</definition>
+        <argsstring>()</argsstring>
+        <name>~Medium</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="40" column="1" bodyfile="src/Medium_Reader.h" bodystart="40" bodyend="40"/>
+      </memberdef>
+      <memberdef kind="function" id="classMedium_1add2ed4dde41b88786f51b18f4b509aa2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Medium&lt; N &gt;::init</definition>
+        <argsstring>()</argsstring>
+        <name>init</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="41" column="6" bodyfile="src/Medium_Reader.cpp" bodystart="18" bodyend="86"/>
+      </memberdef>
+      <memberdef kind="function" id="classMedium_1aa005862fe00febc93ab7c7c47af38763" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool Medium&lt; N &gt;::load_next</definition>
+        <argsstring>()</argsstring>
+        <name>load_next</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="42" column="6" bodyfile="src/Medium_Reader.cpp" bodystart="89" bodyend="157"/>
+      </memberdef>
+      <memberdef kind="function" id="classMedium_1a7b00e4805b867053056560df38778b51" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Medium&lt; N &gt;::interpolate</definition>
+        <argsstring>(coordinate x, double &amp;T, double &amp;vx, double &amp;vy, double &amp;vz)</argsstring>
+        <name>interpolate</name>
+        <param>
+          <type><ref refid="structcoordinate" kindref="compound">coordinate</ref></type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>double &amp;</type>
+          <declname>T</declname>
+        </param>
+        <param>
+          <type>double &amp;</type>
+          <declname>vx</declname>
+        </param>
+        <param>
+          <type>double &amp;</type>
+          <declname>vy</declname>
+        </param>
+        <param>
+          <type>double &amp;</type>
+          <declname>vz</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="43" column="6" bodyfile="src/Medium_Reader.cpp" bodystart="160" bodyend="222"/>
+      </memberdef>
+      <memberdef kind="function" id="classMedium_1a82dbf5dddd209eb26aba365037a2ec92" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::get_tauL</definition>
+        <argsstring>()</argsstring>
+        <name>get_tauL</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="44" column="8" bodyfile="src/Medium_Reader.h" bodystart="44" bodyend="44"/>
+      </memberdef>
+      <memberdef kind="function" id="classMedium_1aa69eeecdfc7c562ccf1dacedbc0dcc09" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::get_tauH</definition>
+        <argsstring>()</argsstring>
+        <name>get_tauH</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="45" column="8" bodyfile="src/Medium_Reader.h" bodystart="45" bodyend="45"/>
+      </memberdef>
+      <memberdef kind="function" id="classMedium_1a08f3e2e4e136b81b3fa62cd934a332e5" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double Medium&lt; N &gt;::get_hydro_time_step</definition>
+        <argsstring>()</argsstring>
+        <name>get_hydro_time_step</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Medium_Reader.h" line="46" column="8" bodyfile="src/Medium_Reader.h" bodystart="46" bodyend="46"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/Medium_Reader.h" line="16" column="13" bodyfile="src/Medium_Reader.h" bodystart="16" bodyend="47"/>
+    <listofallmembers>
+      <member refid="classMedium_1a85922dfe31db48924673e36cc263d7c8" prot="private" virt="non-virtual"><scope>Medium</scope><name>_buffer</name></member>
+      <member refid="classMedium_1a76a2e374fb2a9f9c7d04af73ea6d8902" prot="private" virt="non-virtual"><scope>Medium</scope><name>_deta</name></member>
+      <member refid="classMedium_1a8d614685a6f122e599380d5841747257" prot="private" virt="non-virtual"><scope>Medium</scope><name>_dtau</name></member>
+      <member refid="classMedium_1aa96966640890f37dc66a9e816aab0314" prot="private" virt="non-virtual"><scope>Medium</scope><name>_dx</name></member>
+      <member refid="classMedium_1a6511b312d22be10937afa6a86d515874" prot="private" virt="non-virtual"><scope>Medium</scope><name>_dy</name></member>
+      <member refid="classMedium_1aed01830e7a50270cf274cb15ba995e71" prot="private" virt="non-virtual"><scope>Medium</scope><name>_etah</name></member>
+      <member refid="classMedium_1aa354c477c0a2ac9951527af26ba083e9" prot="private" virt="non-virtual"><scope>Medium</scope><name>_etal</name></member>
+      <member refid="classMedium_1a19161d031e12db9b99e573db0d96127c" prot="private" virt="non-virtual"><scope>Medium</scope><name>_event</name></member>
+      <member refid="classMedium_1aba766e56252ee378cf09b6c8b4b8bda0" prot="private" virt="non-virtual"><scope>Medium</scope><name>_file</name></member>
+      <member refid="classMedium_1a7b01b3c561efba347fe8ea37fd9f491b" prot="private" virt="non-virtual"><scope>Medium</scope><name>_filename</name></member>
+      <member refid="classMedium_1ae68cc8251a4aaeeff079a19d18e9ac56" prot="private" virt="non-virtual"><scope>Medium</scope><name>_frame_count</name></member>
+      <member refid="classMedium_1acdf807499557c53a14a6ecad4839c920" prot="private" virt="non-virtual"><scope>Medium</scope><name>_iETAH</name></member>
+      <member refid="classMedium_1a888b908b5d951846d469339558d448ca" prot="private" virt="non-virtual"><scope>Medium</scope><name>_iETAL</name></member>
+      <member refid="classMedium_1ac0b97abaecd1de7efc8e964fb5f1c822" prot="private" virt="non-virtual"><scope>Medium</scope><name>_iXH</name></member>
+      <member refid="classMedium_1aecf84cc9cd7a4742e99dd8cb7eee2348" prot="private" virt="non-virtual"><scope>Medium</scope><name>_iXL</name></member>
+      <member refid="classMedium_1acb6c04d7f0a0b0902fa249ffa5011565" prot="private" virt="non-virtual"><scope>Medium</scope><name>_iYH</name></member>
+      <member refid="classMedium_1a347bc1415ff24072cff2d37224de8ddb" prot="private" virt="non-virtual"><scope>Medium</scope><name>_iYL</name></member>
+      <member refid="classMedium_1ad1e01b6d3ae2ddaaeab29bc5578fc552" prot="private" virt="non-virtual"><scope>Medium</scope><name>_number_of_frames</name></member>
+      <member refid="classMedium_1af1491e4bb2b8838d37962ae48ea6f28d" prot="private" virt="non-virtual"><scope>Medium</scope><name>_power_rank</name></member>
+      <member refid="classMedium_1a471a1f40e2be2e31cb43b10999360727" prot="private" virt="non-virtual"><scope>Medium</scope><name>_shape</name></member>
+      <member refid="classMedium_1ab908b6053452ea093ba5c7c39503daf3" prot="private" virt="non-virtual"><scope>Medium</scope><name>_tau0</name></member>
+      <member refid="classMedium_1af8f39dbaa066f37ad9aea9e33abd5ce4" prot="private" virt="non-virtual"><scope>Medium</scope><name>_Temp</name></member>
+      <member refid="classMedium_1a1dd4fcdda839a45acf5a734bf5678170" prot="private" virt="non-virtual"><scope>Medium</scope><name>_Vx</name></member>
+      <member refid="classMedium_1a65a96c64c65d6845a40b0b34d67c702c" prot="private" virt="non-virtual"><scope>Medium</scope><name>_Vy</name></member>
+      <member refid="classMedium_1a8ef5f90f6fcecfa2d0b990aad7cb20a9" prot="private" virt="non-virtual"><scope>Medium</scope><name>_Vz</name></member>
+      <member refid="classMedium_1ac95c8c2f09e8bcb052281a9a102d07b8" prot="private" virt="non-virtual"><scope>Medium</scope><name>_x_steps</name></member>
+      <member refid="classMedium_1ab15a8a4b6870583462dde35198ba470f" prot="private" virt="non-virtual"><scope>Medium</scope><name>_xh</name></member>
+      <member refid="classMedium_1a9b7d8142192a1fb11ae389d80ebfe3c1" prot="private" virt="non-virtual"><scope>Medium</scope><name>_xh_limits</name></member>
+      <member refid="classMedium_1a271eaff7370617ab043151517e1b4143" prot="private" virt="non-virtual"><scope>Medium</scope><name>_xl</name></member>
+      <member refid="classMedium_1adfeb0abdaf4a95028c67ecdd92751cc3" prot="private" virt="non-virtual"><scope>Medium</scope><name>_xl_limits</name></member>
+      <member refid="classMedium_1ade773fb9c32530393d193f73f83332a2" prot="private" virt="non-virtual"><scope>Medium</scope><name>_yh</name></member>
+      <member refid="classMedium_1ab856e41bc08cf9c33896242cd274b6ae" prot="private" virt="non-virtual"><scope>Medium</scope><name>_yl</name></member>
+      <member refid="classMedium_1a08f3e2e4e136b81b3fa62cd934a332e5" prot="public" virt="non-virtual"><scope>Medium</scope><name>get_hydro_time_step</name></member>
+      <member refid="classMedium_1aa69eeecdfc7c562ccf1dacedbc0dcc09" prot="public" virt="non-virtual"><scope>Medium</scope><name>get_tauH</name></member>
+      <member refid="classMedium_1a82dbf5dddd209eb26aba365037a2ec92" prot="public" virt="non-virtual"><scope>Medium</scope><name>get_tauL</name></member>
+      <member refid="classMedium_1add2ed4dde41b88786f51b18f4b509aa2" prot="public" virt="non-virtual"><scope>Medium</scope><name>init</name></member>
+      <member refid="classMedium_1a7b00e4805b867053056560df38778b51" prot="public" virt="non-virtual"><scope>Medium</scope><name>interpolate</name></member>
+      <member refid="classMedium_1aa005862fe00febc93ab7c7c47af38763" prot="public" virt="non-virtual"><scope>Medium</scope><name>load_next</name></member>
+      <member refid="classMedium_1a2e000a59fd612e8cc5fccdc5c17ba0a8" prot="public" virt="non-virtual"><scope>Medium</scope><name>Medium</name></member>
+      <member refid="classMedium_1a0caedb0bb2d429e49b76004cad5903df" prot="public" virt="non-virtual"><scope>Medium</scope><name>~Medium</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

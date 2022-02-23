@@ -1,0 +1,158 @@
+\hypertarget{matrix__elements__2-3_8cpp}{}\doxysection{src/matrix\+\_\+elements\+\_\+2-\/3.cpp File Reference}
+\label{matrix__elements__2-3_8cpp}\index{src/matrix\_elements\_2-\/3.cpp@{src/matrix\_elements\_2-\/3.cpp}}
+{\ttfamily \#include $<$cmath$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include \char`\"{}predefine.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}matrix\+\_\+elements.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}lorentz.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}simple\+Logger.\+h\char`\"{}}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{matrix__elements__2-3_8cpp_a8bede1394bd7e14f3785a9fde47bcf25}{unpack\+\_\+three\+\_\+body\+\_\+phase\+\_\+space}} (const double $\ast$x\+\_\+, void $\ast$params\+\_\+, double \&kx, double \&ky, double \&yk, double \&qx, double \&qy, double \&xbar, double \&t, double \&Jacobian, bool \&status)
+\item 
+void \mbox{\hyperlink{matrix__elements__2-3_8cpp_a7ff99d0a68b011180fe98a7a547c6757}{unpack\+\_\+three\+\_\+body\+\_\+phase\+\_\+space\+\_\+same}} (const double $\ast$x\+\_\+, void $\ast$params\+\_\+, double \&kx, double \&ky, double \&yk, double \&qx, double \&qy, double \&xbar, double \&t, double \&Jacobian, bool \&status)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_acb7c5341561b79ca938fa317f22139e3}{M2\+\_\+qq2qqg}} (const double $\ast$x\+\_\+, void $\ast$params\+\_\+)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_a5fac20a3b68f1e3740d58ca446300041}{d\+X\+\_\+qq2qqg}} (const double $\ast$x\+\_\+, void $\ast$params)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_a17a14a4b743a7ae1f48a9f09083aba5f}{M2\+\_\+qg2qgg}} (const double $\ast$x\+\_\+, void $\ast$params\+\_\+)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_a23ea1e23d7c29bd311e41ae117185f7c}{d\+X\+\_\+qg2qgg}} (const double $\ast$x\+\_\+, void $\ast$params)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_aad36bb70e027ae75ac77a43abfb611d0}{M2\+\_\+qg2qqqbar}} (const double $\ast$x\+\_\+, void $\ast$params\+\_\+)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_a8a41a45cce2357ead899a5529958328e}{d\+X\+\_\+qg2qqqbar}} (const double $\ast$x\+\_\+, void $\ast$params)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_a4991c97a5c6a687bdcdcc3559ec79301}{M2\+\_\+gq2gqg}} (const double $\ast$x\+\_\+, void $\ast$params\+\_\+)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_aa3bc93931330e448d7b2796288b65455}{d\+X\+\_\+gq2gqg}} (const double $\ast$x\+\_\+, void $\ast$params)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_a76aa70a7b177044acc04f1af95a05082}{M2\+\_\+gg2ggg}} (const double $\ast$x\+\_\+, void $\ast$params\+\_\+)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_a130d4f186c9cae2e038f6631fe67eaae}{d\+X\+\_\+gg2ggg}} (const double $\ast$x\+\_\+, void $\ast$params)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_af36700ebc0b195c509851caa0f1d7f7a}{M2\+\_\+gq2qqqbar}} (const double $\ast$x\+\_\+, void $\ast$params\+\_\+)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_a859bce4292a32c0af174917b85da76fe}{d\+X\+\_\+gq2qqqbar}} (const double $\ast$x\+\_\+, void $\ast$params)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_a8799feb91e354f4ac437eb7adffd5a16}{M2\+\_\+gg2qgqbar}} (const double $\ast$x\+\_\+, void $\ast$params\+\_\+)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_a8b283af90063c7cb466f8a6d2cbeb44e}{d\+X\+\_\+gg2qgqbar}} (const double $\ast$x\+\_\+, void $\ast$params)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_af376aa505ae2e1bfa6c99f13c3dae561}{M2\+\_\+gg2gqqbar}} (const double $\ast$x\+\_\+, void $\ast$params\+\_\+)
+\item 
+double \mbox{\hyperlink{matrix__elements__2-3_8cpp_a65510e95c231a7a78673447bb3b73f34}{d\+X\+\_\+gg2gqqbar}} (const double $\ast$x\+\_\+, void $\ast$params)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a130d4f186c9cae2e038f6631fe67eaae}\label{matrix__elements__2-3_8cpp_a130d4f186c9cae2e038f6631fe67eaae}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!dX\_gg2ggg@{dX\_gg2ggg}}
+\index{dX\_gg2ggg@{dX\_gg2ggg}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{dX\_gg2ggg()}{dX\_gg2ggg()}}
+{\footnotesize\ttfamily double d\+X\+\_\+gg2ggg (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a65510e95c231a7a78673447bb3b73f34}\label{matrix__elements__2-3_8cpp_a65510e95c231a7a78673447bb3b73f34}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!dX\_gg2gqqbar@{dX\_gg2gqqbar}}
+\index{dX\_gg2gqqbar@{dX\_gg2gqqbar}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{dX\_gg2gqqbar()}{dX\_gg2gqqbar()}}
+{\footnotesize\ttfamily double d\+X\+\_\+gg2gqqbar (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a8b283af90063c7cb466f8a6d2cbeb44e}\label{matrix__elements__2-3_8cpp_a8b283af90063c7cb466f8a6d2cbeb44e}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!dX\_gg2qgqbar@{dX\_gg2qgqbar}}
+\index{dX\_gg2qgqbar@{dX\_gg2qgqbar}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{dX\_gg2qgqbar()}{dX\_gg2qgqbar()}}
+{\footnotesize\ttfamily double d\+X\+\_\+gg2qgqbar (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_aa3bc93931330e448d7b2796288b65455}\label{matrix__elements__2-3_8cpp_aa3bc93931330e448d7b2796288b65455}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!dX\_gq2gqg@{dX\_gq2gqg}}
+\index{dX\_gq2gqg@{dX\_gq2gqg}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{dX\_gq2gqg()}{dX\_gq2gqg()}}
+{\footnotesize\ttfamily double d\+X\+\_\+gq2gqg (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a859bce4292a32c0af174917b85da76fe}\label{matrix__elements__2-3_8cpp_a859bce4292a32c0af174917b85da76fe}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!dX\_gq2qqqbar@{dX\_gq2qqqbar}}
+\index{dX\_gq2qqqbar@{dX\_gq2qqqbar}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{dX\_gq2qqqbar()}{dX\_gq2qqqbar()}}
+{\footnotesize\ttfamily double d\+X\+\_\+gq2qqqbar (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a23ea1e23d7c29bd311e41ae117185f7c}\label{matrix__elements__2-3_8cpp_a23ea1e23d7c29bd311e41ae117185f7c}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!dX\_qg2qgg@{dX\_qg2qgg}}
+\index{dX\_qg2qgg@{dX\_qg2qgg}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{dX\_qg2qgg()}{dX\_qg2qgg()}}
+{\footnotesize\ttfamily double d\+X\+\_\+qg2qgg (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a8a41a45cce2357ead899a5529958328e}\label{matrix__elements__2-3_8cpp_a8a41a45cce2357ead899a5529958328e}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!dX\_qg2qqqbar@{dX\_qg2qqqbar}}
+\index{dX\_qg2qqqbar@{dX\_qg2qqqbar}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{dX\_qg2qqqbar()}{dX\_qg2qqqbar()}}
+{\footnotesize\ttfamily double d\+X\+\_\+qg2qqqbar (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a5fac20a3b68f1e3740d58ca446300041}\label{matrix__elements__2-3_8cpp_a5fac20a3b68f1e3740d58ca446300041}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!dX\_qq2qqg@{dX\_qq2qqg}}
+\index{dX\_qq2qqg@{dX\_qq2qqg}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{dX\_qq2qqg()}{dX\_qq2qqg()}}
+{\footnotesize\ttfamily double d\+X\+\_\+qq2qqg (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a76aa70a7b177044acc04f1af95a05082}\label{matrix__elements__2-3_8cpp_a76aa70a7b177044acc04f1af95a05082}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!M2\_gg2ggg@{M2\_gg2ggg}}
+\index{M2\_gg2ggg@{M2\_gg2ggg}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{M2\_gg2ggg()}{M2\_gg2ggg()}}
+{\footnotesize\ttfamily double M2\+\_\+gg2ggg (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params\+\_\+ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_af376aa505ae2e1bfa6c99f13c3dae561}\label{matrix__elements__2-3_8cpp_af376aa505ae2e1bfa6c99f13c3dae561}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!M2\_gg2gqqbar@{M2\_gg2gqqbar}}
+\index{M2\_gg2gqqbar@{M2\_gg2gqqbar}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{M2\_gg2gqqbar()}{M2\_gg2gqqbar()}}
+{\footnotesize\ttfamily double M2\+\_\+gg2gqqbar (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params\+\_\+ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a8799feb91e354f4ac437eb7adffd5a16}\label{matrix__elements__2-3_8cpp_a8799feb91e354f4ac437eb7adffd5a16}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!M2\_gg2qgqbar@{M2\_gg2qgqbar}}
+\index{M2\_gg2qgqbar@{M2\_gg2qgqbar}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{M2\_gg2qgqbar()}{M2\_gg2qgqbar()}}
+{\footnotesize\ttfamily double M2\+\_\+gg2qgqbar (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params\+\_\+ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a4991c97a5c6a687bdcdcc3559ec79301}\label{matrix__elements__2-3_8cpp_a4991c97a5c6a687bdcdcc3559ec79301}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!M2\_gq2gqg@{M2\_gq2gqg}}
+\index{M2\_gq2gqg@{M2\_gq2gqg}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{M2\_gq2gqg()}{M2\_gq2gqg()}}
+{\footnotesize\ttfamily double M2\+\_\+gq2gqg (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params\+\_\+ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_af36700ebc0b195c509851caa0f1d7f7a}\label{matrix__elements__2-3_8cpp_af36700ebc0b195c509851caa0f1d7f7a}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!M2\_gq2qqqbar@{M2\_gq2qqqbar}}
+\index{M2\_gq2qqqbar@{M2\_gq2qqqbar}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{M2\_gq2qqqbar()}{M2\_gq2qqqbar()}}
+{\footnotesize\ttfamily double M2\+\_\+gq2qqqbar (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params\+\_\+ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a17a14a4b743a7ae1f48a9f09083aba5f}\label{matrix__elements__2-3_8cpp_a17a14a4b743a7ae1f48a9f09083aba5f}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!M2\_qg2qgg@{M2\_qg2qgg}}
+\index{M2\_qg2qgg@{M2\_qg2qgg}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{M2\_qg2qgg()}{M2\_qg2qgg()}}
+{\footnotesize\ttfamily double M2\+\_\+qg2qgg (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params\+\_\+ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_aad36bb70e027ae75ac77a43abfb611d0}\label{matrix__elements__2-3_8cpp_aad36bb70e027ae75ac77a43abfb611d0}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!M2\_qg2qqqbar@{M2\_qg2qqqbar}}
+\index{M2\_qg2qqqbar@{M2\_qg2qqqbar}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{M2\_qg2qqqbar()}{M2\_qg2qqqbar()}}
+{\footnotesize\ttfamily double M2\+\_\+qg2qqqbar (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params\+\_\+ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_acb7c5341561b79ca938fa317f22139e3}\label{matrix__elements__2-3_8cpp_acb7c5341561b79ca938fa317f22139e3}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!M2\_qq2qqg@{M2\_qq2qqg}}
+\index{M2\_qq2qqg@{M2\_qq2qqg}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{M2\_qq2qqg()}{M2\_qq2qqg()}}
+{\footnotesize\ttfamily double M2\+\_\+qq2qqg (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params\+\_\+ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a8bede1394bd7e14f3785a9fde47bcf25}\label{matrix__elements__2-3_8cpp_a8bede1394bd7e14f3785a9fde47bcf25}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!unpack\_three\_body\_phase\_space@{unpack\_three\_body\_phase\_space}}
+\index{unpack\_three\_body\_phase\_space@{unpack\_three\_body\_phase\_space}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{unpack\_three\_body\_phase\_space()}{unpack\_three\_body\_phase\_space()}}
+{\footnotesize\ttfamily void unpack\+\_\+three\+\_\+body\+\_\+phase\+\_\+space (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params\+\_\+,  }\item[{double \&}]{kx,  }\item[{double \&}]{ky,  }\item[{double \&}]{yk,  }\item[{double \&}]{qx,  }\item[{double \&}]{qy,  }\item[{double \&}]{xbar,  }\item[{double \&}]{t,  }\item[{double \&}]{Jacobian,  }\item[{bool \&}]{status }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{matrix__elements__2-3_8cpp_a7ff99d0a68b011180fe98a7a547c6757}\label{matrix__elements__2-3_8cpp_a7ff99d0a68b011180fe98a7a547c6757}} 
+\index{matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}!unpack\_three\_body\_phase\_space\_same@{unpack\_three\_body\_phase\_space\_same}}
+\index{unpack\_three\_body\_phase\_space\_same@{unpack\_three\_body\_phase\_space\_same}!matrix\_elements\_2-\/3.cpp@{matrix\_elements\_2-\/3.cpp}}
+\doxysubsubsection{\texorpdfstring{unpack\_three\_body\_phase\_space\_same()}{unpack\_three\_body\_phase\_space\_same()}}
+{\footnotesize\ttfamily void unpack\+\_\+three\+\_\+body\+\_\+phase\+\_\+space\+\_\+same (\begin{DoxyParamCaption}\item[{const double $\ast$}]{x\+\_\+,  }\item[{void $\ast$}]{params\+\_\+,  }\item[{double \&}]{kx,  }\item[{double \&}]{ky,  }\item[{double \&}]{yk,  }\item[{double \&}]{qx,  }\item[{double \&}]{qy,  }\item[{double \&}]{xbar,  }\item[{double \&}]{t,  }\item[{double \&}]{Jacobian,  }\item[{bool \&}]{status }\end{DoxyParamCaption})}
+

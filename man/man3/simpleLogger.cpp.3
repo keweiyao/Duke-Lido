@@ -1,0 +1,131 @@
+.TH "src/simpleLogger.cpp" 3 "Thu Jul 1 2021" "Duke-Lido" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/simpleLogger.cpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'simpleLogger\&.h'\fP
+.br
+\fC#include <boost/log/core/core\&.hpp>\fP
+.br
+\fC#include <boost/log/expressions/formatters/date_time\&.hpp>\fP
+.br
+\fC#include <boost/log/expressions\&.hpp>\fP
+.br
+\fC#include <boost/log/sinks/sync_frontend\&.hpp>\fP
+.br
+\fC#include <boost/log/sinks/text_ostream_backend\&.hpp>\fP
+.br
+\fC#include <boost/log/sources/severity_logger\&.hpp>\fP
+.br
+\fC#include <boost/log/support/date_time\&.hpp>\fP
+.br
+\fC#include <boost/log/trivial\&.hpp>\fP
+.br
+\fC#include <boost/core/null_deleter\&.hpp>\fP
+.br
+\fC#include <boost/log/utility/setup/common_attributes\&.hpp>\fP
+.br
+\fC#include <boost/make_shared\&.hpp>\fP
+.br
+\fC#include <boost/shared_ptr\&.hpp>\fP
+.br
+\fC#include <fstream>\fP
+.br
+\fC#include <ostream>\fP
+.br
+
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef sinks::synchronous_sink< sinks::text_ostream_backend > \fBtext_sink\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBBOOST_LOG_ATTRIBUTE_KEYWORD\fP (line_id, 'LineID', unsigned int) BOOST_LOG_ATTRIBUTE_KEYWORD(\fBtimestamp\fP"
+.br
+.ti -1c
+.RI "boost::posix_time::ptime \fBBOOST_LOG_ATTRIBUTE_KEYWORD\fP (severity, 'Severity', logging::trivial::severity_level) BOOST_LOG_GLOBAL_LOGGER_INIT(\fBlogger\fP"
+.br
+.ti -1c
+.RI "\fBlogger\fP \fBadd_attribute\fP ('LineID', attrs::counter< unsigned int >(1))"
+.br
+.ti -1c
+.RI "\fBlogger\fP \fBadd_attribute\fP ('TimeStamp', attrs::local_clock())"
+.br
+.ti -1c
+.RI "\fBsink\fP \fBlocked_backend\fP () \-> add_stream(boost::make_shared< std::ofstream >(\fBLOGFILE\fP))"
+.br
+.ti -1c
+.RI "\fBsink\fP \fBset_formatter\fP (\fBformatter\fP)"
+.br
+.ti -1c
+.RI "\fBsink\fP \fBset_filter\fP (severity >=\fBSEVERITY_THRESHOLD\fP)"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBTimeStamp\fP"
+.br
+.ti -1c
+.RI "boost::shared_ptr< \fBtext_sink\fP > \fBsink\fP = boost::make_shared<\fBtext_sink\fP>()"
+.br
+.ti -1c
+.RI "logging::formatter \fBformatter\fP"
+.br
+.ti -1c
+.RI "\fBreturn\fP \fBlogger\fP"
+.br
+.in -1c
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef sinks::synchronous_sink<sinks::text_ostream_backend> \fBtext_sink\fP"
+
+.SH "Function Documentation"
+.PP 
+.SS "\fBlogger\fP add_attribute ('LineID', attrs::counter< unsigned int >1)"
+
+.SS "\fBlogger\fP add_attribute ('TimeStamp', attrs::local_clock())"
+
+.SS "BOOST_LOG_ATTRIBUTE_KEYWORD (line_id, 'LineID', unsigned int)"
+
+.SS "boost::posix_time::ptime BOOST_LOG_ATTRIBUTE_KEYWORD (severity, 'Severity', logging::trivial::severity_level)"
+
+.SS "\fBsink\fP locked_backend () \->  add_stream(boost::make_shared< std::ofstream >(\fBLOGFILE\fP))"
+
+.SS "\fBsink\fP set_filter (severity >= SEVERITY_THRESHOLD)"
+
+.SS "\fBsink\fP set_formatter (\fBformatter\fP)"
+
+.SH "Variable Documentation"
+.PP 
+.SS "logging::formatter formatter"
+\fBInitial value:\fP
+.PP
+.nf
+= expr::stream
+        << std::setw(7) 
+        << std::setfill('0') 
+        << line_id 
+        << std::setfill(' ') << " | "
+        
+        << "[" << logging::trivial::severity << "]"
+        << " - " << expr::smessage
+.fi
+.SS "\fBreturn\fP logger"
+
+.SS "boost::shared_ptr<\fBtext_sink\fP> sink = boost::make_shared<\fBtext_sink\fP>()"
+
+.SS "TimeStamp"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Duke-Lido from the source code\&.

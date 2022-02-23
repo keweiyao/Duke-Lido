@@ -1,0 +1,51 @@
+\hypertarget{sampler_8h}{}\doxysection{src/sampler.h File Reference}
+\label{sampler_8h}\index{src/sampler.h@{src/sampler.h}}
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$cmath$>$}\newline
+{\ttfamily \#include $<$functional$>$}\newline
+{\ttfamily \#include $<$memory$>$}\newline
+{\ttfamily \#include $<$utility$>$}\newline
+{\ttfamily \#include \char`\"{}random.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}simple\+Logger.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}stat.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}predefine.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structwalker}{walker}}
+\item 
+class \mbox{\hyperlink{classAiMS}{Ai\+M\+S$<$ F $>$}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename F $>$ }\\double \mbox{\hyperlink{sampler_8h_a0e563084d961492c9730e84fb48cef05}{sample\+\_\+1d}} (F \mbox{\hyperlink{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}{f}}, std\+::pair$<$ double, double $>$ const \&range, double fmax, bool \&status)
+\item 
+{\footnotesize template$<$typename F $>$ }\\std\+::vector$<$ double $>$ \mbox{\hyperlink{sampler_8h_ab7f970dfbe0c3ad3d257f03b4438f118}{sample\+\_\+nd}} (F \mbox{\hyperlink{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}{f}}, int dim, std\+::vector$<$ std\+::pair$<$ double, double $>$$>$ const \&range, double fmax, bool \&status)
+\item 
+{\footnotesize template$<$typename F $>$ }\\std\+::vector$<$ double $>$ \mbox{\hyperlink{sampler_8h_a294e017ef0b6940ac1aa09a85705f3f6}{M\+C\+\_\+sample}} (F f\+\_\+, int n\+\_\+dims\+\_\+, std\+::vector$<$ std\+::pair$<$ double, double $>$$>$ const \&range, int steps=20)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{sampler_8h_a294e017ef0b6940ac1aa09a85705f3f6}\label{sampler_8h_a294e017ef0b6940ac1aa09a85705f3f6}} 
+\index{sampler.h@{sampler.h}!MC\_sample@{MC\_sample}}
+\index{MC\_sample@{MC\_sample}!sampler.h@{sampler.h}}
+\doxysubsubsection{\texorpdfstring{MC\_sample()}{MC\_sample()}}
+{\footnotesize\ttfamily template$<$typename F $>$ \\
+std\+::vector$<$double$>$ M\+C\+\_\+sample (\begin{DoxyParamCaption}\item[{F}]{f\+\_\+,  }\item[{int}]{n\+\_\+dims\+\_\+,  }\item[{std\+::vector$<$ std\+::pair$<$ double, double $>$$>$ const \&}]{range,  }\item[{int}]{steps = {\ttfamily 20} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{sampler_8h_a0e563084d961492c9730e84fb48cef05}\label{sampler_8h_a0e563084d961492c9730e84fb48cef05}} 
+\index{sampler.h@{sampler.h}!sample\_1d@{sample\_1d}}
+\index{sample\_1d@{sample\_1d}!sampler.h@{sampler.h}}
+\doxysubsubsection{\texorpdfstring{sample\_1d()}{sample\_1d()}}
+{\footnotesize\ttfamily template$<$typename F $>$ \\
+double sample\+\_\+1d (\begin{DoxyParamCaption}\item[{F}]{f,  }\item[{std\+::pair$<$ double, double $>$ const \&}]{range,  }\item[{double}]{fmax,  }\item[{bool \&}]{status }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{sampler_8h_ab7f970dfbe0c3ad3d257f03b4438f118}\label{sampler_8h_ab7f970dfbe0c3ad3d257f03b4438f118}} 
+\index{sampler.h@{sampler.h}!sample\_nd@{sample\_nd}}
+\index{sample\_nd@{sample\_nd}!sampler.h@{sampler.h}}
+\doxysubsubsection{\texorpdfstring{sample\_nd()}{sample\_nd()}}
+{\footnotesize\ttfamily template$<$typename F $>$ \\
+std\+::vector$<$double$>$ sample\+\_\+nd (\begin{DoxyParamCaption}\item[{F}]{f,  }\item[{int}]{dim,  }\item[{std\+::vector$<$ std\+::pair$<$ double, double $>$$>$ const \&}]{range,  }\item[{double}]{fmax,  }\item[{bool \&}]{status }\end{DoxyParamCaption})}
+

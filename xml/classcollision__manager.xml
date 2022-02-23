@@ -1,0 +1,199 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="classcollision__manager" kind="class" language="C++" prot="public">
+    <compoundname>collision_manager</compoundname>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classcollision__manager_1ae0828fa89f896df708add61c89aeab4f" prot="private" static="no" mutable="no">
+        <type>std::map&lt; int, std::vector&lt; Process &gt; &gt;</type>
+        <definition>std::map&lt;int, std::vector&lt;Process&gt; &gt; collision_manager::AllProcesses</definition>
+        <argsstring></argsstring>
+        <name>AllProcesses</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/collision_manager.h" line="17" column="14" bodyfile="src/collision_manager.h" bodystart="17" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-func">
+      <memberdef kind="function" id="classcollision__manager_1a7ed5de40342c10bad9ed46cc0a0c295f" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void collision_manager::init_process</definition>
+        <argsstring>(Process &amp;r, std::string mode, std::string table_path)</argsstring>
+        <name>init_process</name>
+        <param>
+          <type>Process &amp;</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>mode</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>table_path</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/collision_manager.h" line="18" column="10" bodyfile="src/collision_manager.cpp" bodystart="207" bodyend="244"/>
+      </memberdef>
+      <memberdef kind="function" id="classcollision__manager_1a1a36ab973e42bdf6b5c101c366d29a44" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double collision_manager::get_effective_mfp_soft</definition>
+        <argsstring>(double Ecell, double x, int idA, int idB, int idC, double Temp)</argsstring>
+        <name>get_effective_mfp_soft</name>
+        <param>
+          <type>double</type>
+          <declname>Ecell</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>idA</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>idB</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>idC</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>Temp</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/collision_manager.h" line="19" column="12" bodyfile="src/collision_manager.cpp" bodystart="120" bodyend="131"/>
+      </memberdef>
+      <memberdef kind="function" id="classcollision__manager_1a1381137dac41a3eff0a231fe3bb98bf3" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double collision_manager::get_effective_mfp_hard</definition>
+        <argsstring>(double Ecell, double x, int idA, int idB, int idC, double Temp)</argsstring>
+        <name>get_effective_mfp_hard</name>
+        <param>
+          <type>double</type>
+          <declname>Ecell</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>idA</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>idB</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>idC</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>Temp</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/collision_manager.h" line="24" column="12" bodyfile="src/collision_manager.cpp" bodystart="133" bodyend="205"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classcollision__manager_1a70eeff95c737d3ee78cf1fbb624641b4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>collision_manager::collision_manager</definition>
+        <argsstring>(std::string mode, std::string setting_path, std::string table_path, std::vector&lt; double &gt; parameters)</argsstring>
+        <name>collision_manager</name>
+        <param>
+          <type>std::string</type>
+          <declname>mode</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>setting_path</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>table_path</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; double &gt;</type>
+          <declname>parameters</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/collision_manager.h" line="30" column="5" bodyfile="src/collision_manager.cpp" bodystart="12" bodyend="118"/>
+      </memberdef>
+      <memberdef kind="function" id="classcollision__manager_1af9326d3b6570c8a39abb337e8519a089" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int collision_manager::sample</definition>
+        <argsstring>(particle &amp;pIn, std::vector&lt; particle &gt; &amp;pOut_list, double Temp, std::vector&lt; double &gt; v3cell, double dt_lab)</argsstring>
+        <name>sample</name>
+        <param>
+          <type><ref refid="structparticle" kindref="compound">particle</ref> &amp;</type>
+          <declname>pIn</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; <ref refid="structparticle" kindref="compound">particle</ref> &gt; &amp;</type>
+          <declname>pOut_list</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>Temp</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; double &gt;</type>
+          <declname>v3cell</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>dt_lab</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/collision_manager.h" line="32" column="9" bodyfile="src/collision_manager.cpp" bodystart="246" bodyend="443"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/collision_manager.h" line="15" column="24" bodyfile="src/collision_manager.h" bodystart="15" bodyend="38"/>
+    <listofallmembers>
+      <member refid="classcollision__manager_1ae0828fa89f896df708add61c89aeab4f" prot="private" virt="non-virtual"><scope>collision_manager</scope><name>AllProcesses</name></member>
+      <member refid="classcollision__manager_1a70eeff95c737d3ee78cf1fbb624641b4" prot="public" virt="non-virtual"><scope>collision_manager</scope><name>collision_manager</name></member>
+      <member refid="classcollision__manager_1a1381137dac41a3eff0a231fe3bb98bf3" prot="private" virt="non-virtual"><scope>collision_manager</scope><name>get_effective_mfp_hard</name></member>
+      <member refid="classcollision__manager_1a1a36ab973e42bdf6b5c101c366d29a44" prot="private" virt="non-virtual"><scope>collision_manager</scope><name>get_effective_mfp_soft</name></member>
+      <member refid="classcollision__manager_1a7ed5de40342c10bad9ed46cc0a0c295f" prot="private" virt="non-virtual"><scope>collision_manager</scope><name>init_process</name></member>
+      <member refid="classcollision__manager_1af9326d3b6570c8a39abb337e8519a089" prot="public" virt="non-virtual"><scope>collision_manager</scope><name>sample</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,68 @@
+.TH "src/integrator.h" 3 "Thu Jul 1 2021" "Duke-Lido" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/integrator.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <iostream>\fP
+.br
+\fC#include <cmath>\fP
+.br
+\fC#include <functional>\fP
+.br
+\fC#include <memory>\fP
+.br
+\fC#include <utility>\fP
+.br
+\fC#include <gsl/gsl_errno\&.h>\fP
+.br
+\fC#include <gsl/gsl_integration\&.h>\fP
+.br
+\fC#include <gsl/gsl_math\&.h>\fP
+.br
+\fC#include <gsl/gsl_monte\&.h>\fP
+.br
+\fC#include <gsl/gsl_monte_vegas\&.h>\fP
+.br
+\fC#include 'cubature\&.h'\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBgsl_quad_1d< F >\fP"
+.br
+.ti -1c
+.RI "class \fBgsl_vegas< F >\fP"
+.br
+.ti -1c
+.RI "class \fBcubeture_nd< F >\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "template<typename F > double \fBquad_1d\fP (F func, std::pair< double, double > const &range, double &error, double epsabs=1\&.e\-4, double epsrel=1\&.e\-4, int limit=1000)"
+.br
+.ti -1c
+.RI "template<typename F > double \fBvegas\fP (F func, int dim, double *xmin, double *xmax, double &error, int limit=5000)"
+.br
+.ti -1c
+.RI "template<typename F > std::vector< double > \fBquad_nd\fP (F func, unsigned ndim, unsigned ndimf, const double *min, const double *max, double &error, double epsabs=0\&., double epsrel=1e\-2, int limit=10000)"
+.br
+.in -1c
+.SH "Function Documentation"
+.PP 
+.SS "template<typename F > double quad_1d (F func, std::pair< double, double > const & range, double & error, double epsabs = \fC1\&.e\-4\fP, double epsrel = \fC1\&.e\-4\fP, int limit = \fC1000\fP)"
+
+.SS "template<typename F > std::vector<double> quad_nd (F func, unsigned ndim, unsigned ndimf, const double * min, const double * max, double & error, double epsabs = \fC0\&.\fP, double epsrel = \fC1e\-2\fP, int limit = \fC10000\fP)"
+
+.SS "template<typename F > double vegas (F func, int dim, double * xmin, double * xmax, double & error, int limit = \fC5000\fP)"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Duke-Lido from the source code\&.

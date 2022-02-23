@@ -329,7 +329,7 @@ double M2_qg2qqqbar(const double * x_, void * params_){
             * one_minus_xbar * xbar
             * ( P_g2qqbar(xbar)*( CF*A2 + CF*B2 - (2*CF-CA)*AB ) // anti-spin
               + m3*m3/2. * ( CF*A2M + CF*B2M - (2*CF-CA)*ABM ) // para-spin
-            ) /CF;
+            ) /CA;
 
     }
     return Msq_12*Msq_22*Jacobian;

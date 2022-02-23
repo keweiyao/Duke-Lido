@@ -1,0 +1,400 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="namespaceSrandom" kind="namespace" language="C++">
+    <compoundname>Srandom</compoundname>
+      <sectiondef kind="var">
+      <memberdef kind="variable" id="random_8cpp_1a9b4f829a62e25cccc3ed9e6d1500e143" prot="public" static="no" mutable="no">
+        <type>const double</type>
+        <definition>const double Srandom::AMC</definition>
+        <argsstring></argsstring>
+        <name>AMC</name>
+        <initializer>= 4.0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="13" column="14" bodyfile="src/random.cpp" bodystart="13" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="random_8h_1ad3e3c4b3d936a9d248ae5a8f35f61349" prot="public" static="no" mutable="no">
+        <type>std::mt19937</type>
+        <definition>std::mt19937 Srandom::gen</definition>
+        <argsstring></argsstring>
+        <name>gen</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.h" line="7" column="21" declfile="src/random.h" declline="7" declcolumn="21"/>
+      </memberdef>
+      <memberdef kind="variable" id="random_8h_1ad1128128dad6359d0313c854ae13d6b1" prot="public" static="no" mutable="no">
+        <type>std::uniform_real_distribution&lt; double &gt;</type>
+        <definition>std::uniform_real_distribution&lt;double&gt; Srandom::sqrtZ</definition>
+        <argsstring></argsstring>
+        <name>sqrtZ</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.h" line="8" column="39" declfile="src/random.h" declline="8" declcolumn="39"/>
+      </memberdef>
+      <memberdef kind="variable" id="random_8h_1aa8465b902433a025abd3150a319f21a3" prot="public" static="no" mutable="no">
+        <type>std::uniform_real_distribution&lt; double &gt;</type>
+        <definition>std::uniform_real_distribution&lt;double&gt; Srandom::rejection</definition>
+        <argsstring></argsstring>
+        <name>rejection</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.h" line="9" column="39" declfile="src/random.h" declline="9" declcolumn="39"/>
+      </memberdef>
+      <memberdef kind="variable" id="random_8h_1a53d1ec89ecfb7e76f57b059339f693dd" prot="public" static="no" mutable="no">
+        <type>std::uniform_real_distribution&lt; double &gt;</type>
+        <definition>std::uniform_real_distribution&lt;double&gt; Srandom::init_dis</definition>
+        <argsstring></argsstring>
+        <name>init_dis</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.h" line="10" column="39" declfile="src/random.h" declline="10" declcolumn="39"/>
+      </memberdef>
+      <memberdef kind="variable" id="random_8h_1a8fd3ec77ae920ff171c2ae4c1f0854fe" prot="public" static="no" mutable="no">
+        <type>std::uniform_real_distribution&lt; double &gt;</type>
+        <definition>std::uniform_real_distribution&lt;double&gt; Srandom::dist_phi</definition>
+        <argsstring></argsstring>
+        <name>dist_phi</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.h" line="11" column="39" declfile="src/random.h" declline="11" declcolumn="39"/>
+      </memberdef>
+      <memberdef kind="variable" id="random_8h_1abc72a0cd845716e2cf7dbc10de23a646" prot="public" static="no" mutable="no">
+        <type>std::uniform_real_distribution&lt; double &gt;</type>
+        <definition>std::uniform_real_distribution&lt;double&gt; Srandom::dist_costheta</definition>
+        <argsstring></argsstring>
+        <name>dist_costheta</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.h" line="12" column="39" declfile="src/random.h" declline="12" declcolumn="39"/>
+      </memberdef>
+      <memberdef kind="variable" id="random_8h_1a25ea6b64bd544db03da10d4655616d55" prot="public" static="no" mutable="no">
+        <type>std::normal_distribution&lt; double &gt;</type>
+        <definition>std::normal_distribution&lt;double&gt; Srandom::white_noise</definition>
+        <argsstring></argsstring>
+        <name>white_noise</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.h" line="13" column="33" declfile="src/random.h" declline="13" declcolumn="33"/>
+      </memberdef>
+      <memberdef kind="variable" id="random_8h_1a0e05d8a706b2e5376fab35f5bdbee1e0" prot="public" static="no" mutable="no">
+        <type>std::gamma_distribution&lt; double &gt;</type>
+        <definition>std::gamma_distribution&lt;double&gt; Srandom::sample_E_over_T</definition>
+        <argsstring></argsstring>
+        <name>sample_E_over_T</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.h" line="14" column="32" declfile="src/random.h" declline="14" declcolumn="32"/>
+      </memberdef>
+      <memberdef kind="variable" id="random_8h_1a430cafd75eb099fb444194baadd8850f" prot="public" static="no" mutable="no">
+        <type>std::gamma_distribution&lt; double &gt;</type>
+        <definition>std::gamma_distribution&lt;double&gt; Srandom::exp_dist</definition>
+        <argsstring></argsstring>
+        <name>exp_dist</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.h" line="15" column="32" declfile="src/random.h" declline="15" declcolumn="32"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="random_8cpp_1a16bd4d4c5c3882522eccc68e21b7ea6d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int Srandom::getEnvSeed</definition>
+        <argsstring>()</argsstring>
+        <name>getEnvSeed</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="6" column="5" bodyfile="src/random.cpp" bodystart="6" bodyend="11" declfile="src/random.h" declline="6" declcolumn="5"/>
+      </memberdef>
+      <memberdef kind="function" id="random_8cpp_1a4c626e591a4f470b250fd6c6645f4572" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::mt19937</type>
+        <definition>std::mt19937 Srandom::gen</definition>
+        <argsstring>((getEnvSeed()&lt; 0) ? std::random_device{}() :getEnvSeed())</argsstring>
+        <name>gen</name>
+        <param>
+          <type>(getEnvSeed()&lt; 0) ? std::random_device{}() :getEnvSeed()</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="12" column="14" declfile="src/random.cpp" declline="12" declcolumn="14"/>
+      </memberdef>
+      <memberdef kind="function" id="random_8cpp_1a9ddf89d0da16820a06546d7cc32328f5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::uniform_real_distribution&lt; double &gt;</type>
+        <definition>std::uniform_real_distribution&lt;double&gt; Srandom::sqrtZ</definition>
+        <argsstring>(std::sqrt(1./AMC), std::sqrt(AMC))</argsstring>
+        <name>sqrtZ</name>
+        <param>
+          <type>std::sqrt(1./AMC)</type>
+        </param>
+        <param>
+          <type>std::sqrt(AMC)</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="14" column="32" declfile="src/random.cpp" declline="14" declcolumn="32"/>
+      </memberdef>
+      <memberdef kind="function" id="random_8cpp_1a4f72c242592e88ea648f9cfbbd7d3899" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::uniform_real_distribution&lt; double &gt;</type>
+        <definition>std::uniform_real_distribution&lt;double&gt; Srandom::rejection</definition>
+        <argsstring>(0.0, 1.0)</argsstring>
+        <name>rejection</name>
+        <param>
+          <type>0.</type>
+          <declname>0</declname>
+        </param>
+        <param>
+          <type>1.</type>
+          <declname>0</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="17" column="32" declfile="src/random.cpp" declline="17" declcolumn="32"/>
+      </memberdef>
+      <memberdef kind="function" id="random_8cpp_1a811586f65d14d855bb9ca4b177312f87" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::uniform_real_distribution&lt; double &gt;</type>
+        <definition>std::uniform_real_distribution&lt;double&gt; Srandom::init_dis</definition>
+        <argsstring>(0.0, 1.0)</argsstring>
+        <name>init_dis</name>
+        <param>
+          <type>0.</type>
+          <declname>0</declname>
+        </param>
+        <param>
+          <type>1.</type>
+          <declname>0</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="18" column="32" declfile="src/random.cpp" declline="18" declcolumn="32"/>
+      </memberdef>
+      <memberdef kind="function" id="random_8cpp_1a2b7dcf93aede02d5f0a1b43a80d872ef" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::uniform_real_distribution&lt; double &gt;</type>
+        <definition>std::uniform_real_distribution&lt;double&gt; Srandom::dist_phi</definition>
+        <argsstring>(0.0, 2.0 *M_PI)</argsstring>
+        <name>dist_phi</name>
+        <param>
+          <type>0.</type>
+          <declname>0</declname>
+        </param>
+        <param>
+          <type>2.0 *</type>
+          <declname>M_PI</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="19" column="32" declfile="src/random.cpp" declline="19" declcolumn="32"/>
+      </memberdef>
+      <memberdef kind="function" id="random_8cpp_1ad32508c28b8bb14050afc41c811a7a77" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::uniform_real_distribution&lt; double &gt;</type>
+        <definition>std::uniform_real_distribution&lt;double&gt; Srandom::dist_costheta</definition>
+        <argsstring>(-1.0, 1.0)</argsstring>
+        <name>dist_costheta</name>
+        <param>
+          <type>-1.</type>
+          <declname>0</declname>
+        </param>
+        <param>
+          <type>1.</type>
+          <declname>0</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="20" column="32" declfile="src/random.cpp" declline="20" declcolumn="32"/>
+      </memberdef>
+      <memberdef kind="function" id="random_8cpp_1a393d6e84abf3ce36f079db17b7a247a0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::gamma_distribution&lt; double &gt;</type>
+        <definition>std::gamma_distribution&lt;double&gt; Srandom::sample_E_over_T</definition>
+        <argsstring>(3.0, 1.0)</argsstring>
+        <name>sample_E_over_T</name>
+        <param>
+          <type>3.</type>
+          <declname>0</declname>
+        </param>
+        <param>
+          <type>1.</type>
+          <declname>0</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="21" column="25" declfile="src/random.cpp" declline="21" declcolumn="25"/>
+      </memberdef>
+      <memberdef kind="function" id="random_8cpp_1a4b0f202e451bb0a889f3eb0db10c1e0d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::gamma_distribution&lt; double &gt;</type>
+        <definition>std::gamma_distribution&lt;double&gt; Srandom::exp_dist</definition>
+        <argsstring>(1.0, 1.0)</argsstring>
+        <name>exp_dist</name>
+        <param>
+          <type>1.</type>
+          <declname>0</declname>
+        </param>
+        <param>
+          <type>1.</type>
+          <declname>0</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="22" column="25" declfile="src/random.cpp" declline="22" declcolumn="25"/>
+      </memberdef>
+      <memberdef kind="function" id="random_8cpp_1a996bd8522509db0e18bfd63d96a1accb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::normal_distribution&lt; double &gt;</type>
+        <definition>std::normal_distribution&lt;double&gt; Srandom::white_noise</definition>
+        <argsstring>(0.0, 1.0)</argsstring>
+        <name>white_noise</name>
+        <param>
+          <type>0.</type>
+          <declname>0</declname>
+        </param>
+        <param>
+          <type>1.</type>
+          <declname>0</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="23" column="26" declfile="src/random.cpp" declline="23" declcolumn="26"/>
+      </memberdef>
+      <memberdef kind="function" id="random_8cpp_1a625e630f7e60030bcafdfd2650057d32" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int Srandom::sample_flavor</definition>
+        <argsstring>(int Nf)</argsstring>
+        <name>sample_flavor</name>
+        <param>
+          <type>int</type>
+          <declname>Nf</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="24" column="5" bodyfile="src/random.cpp" bodystart="24" bodyend="30" declfile="src/random.h" declline="16" declcolumn="5"/>
+      </memberdef>
+      <memberdef kind="function" id="random_8cpp_1a6047a504301a4f7a331edb095cd41cd8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool Srandom::binary_choice</definition>
+        <argsstring>()</argsstring>
+        <name>binary_choice</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="31" column="6" bodyfile="src/random.cpp" bodystart="31" bodyend="34" declfile="src/random.h" declline="17" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="random_8cpp_1a427c64676c7529855a83a62e641c5286" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="structfourvec" kindref="compound">fourvec</ref></type>
+        <definition>fourvec Srandom::generate_thermal_parton_with_boost</definition>
+        <argsstring>(double T, double vx, double vy, double vz)</argsstring>
+        <name>generate_thermal_parton_with_boost</name>
+        <param>
+          <type>double</type>
+          <declname>T</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>vx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>vy</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>vz</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/random.cpp" line="35" column="9" bodyfile="src/random.cpp" bodystart="35" bodyend="46" declfile="src/random.h" declline="18" declcolumn="9"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/random.cpp" line="5" column="17"/>
+  </compounddef>
+</doxygen>

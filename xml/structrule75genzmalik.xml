@@ -1,0 +1,158 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="structrule75genzmalik" kind="struct" language="C++" prot="public">
+    <compoundname>rule75genzmalik</compoundname>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structrule75genzmalik_1aeffb31786d8a171e472cb48dec5f545c" prot="public" static="no" mutable="no">
+        <type><ref refid="structrule__s" kindref="compound">rule</ref></type>
+        <definition>rule rule75genzmalik::parent</definition>
+        <argsstring></argsstring>
+        <name>parent</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="432" column="11" bodyfile="src/hcubature.cpp" bodystart="432" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule75genzmalik_1aaa747674033b69d1aab6611421966d87" prot="public" static="no" mutable="no">
+        <type>double *</type>
+        <definition>double* rule75genzmalik::widthLambda</definition>
+        <argsstring></argsstring>
+        <name>widthLambda</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="435" column="13" bodyfile="src/hcubature.cpp" bodystart="435" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule75genzmalik_1a62ad8543676887c17584558f4333222f" prot="public" static="no" mutable="no">
+        <type>double *</type>
+        <definition>double * rule75genzmalik::widthLambda2</definition>
+        <argsstring></argsstring>
+        <name>widthLambda2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="435" column="25" bodyfile="src/hcubature.cpp" bodystart="435" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule75genzmalik_1ab9d55c48ef81fa2f1d37ebdd6e9a355f" prot="public" static="no" mutable="no">
+        <type>double *</type>
+        <definition>double * rule75genzmalik::p</definition>
+        <argsstring></argsstring>
+        <name>p</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="435" column="38" bodyfile="src/hcubature.cpp" bodystart="435" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule75genzmalik_1a73d2f3e0e5104dc2ada745c8b5d4db1e" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double rule75genzmalik::weight1</definition>
+        <argsstring></argsstring>
+        <name>weight1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="438" column="13" bodyfile="src/hcubature.cpp" bodystart="438" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule75genzmalik_1a8cf27a3a74cdaa0e1e8c9cd3518ef2c6" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double rule75genzmalik::weight3</definition>
+        <argsstring></argsstring>
+        <name>weight3</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="438" column="21" bodyfile="src/hcubature.cpp" bodystart="438" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule75genzmalik_1a34652e891cfa17fcdd9d7659abcd4ac1" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double rule75genzmalik::weight5</definition>
+        <argsstring></argsstring>
+        <name>weight5</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="438" column="29" bodyfile="src/hcubature.cpp" bodystart="438" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule75genzmalik_1a63288748846879f0559dd815608207c9" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double rule75genzmalik::weightE1</definition>
+        <argsstring></argsstring>
+        <name>weightE1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="439" column="13" bodyfile="src/hcubature.cpp" bodystart="439" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrule75genzmalik_1a8109bd5ce3b5cbcbd53a533ee96ed832" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double rule75genzmalik::weightE3</definition>
+        <argsstring></argsstring>
+        <name>weightE3</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="439" column="22" bodyfile="src/hcubature.cpp" bodystart="439" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="2">
+        <label>rule_s</label>
+        <link refid="structrule__s"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>evalError</edgelabel>
+          <edgelabel>destroy</edgelabel>
+        </childnode>
+      </node>
+      <node id="1">
+        <label>rule75genzmalik</label>
+        <link refid="structrule75genzmalik"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>parent</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="src/hcubature.cpp" line="431" column="15" bodyfile="src/hcubature.cpp" bodystart="431" bodyend="440"/>
+    <listofallmembers>
+      <member refid="structrule75genzmalik_1ab9d55c48ef81fa2f1d37ebdd6e9a355f" prot="public" virt="non-virtual"><scope>rule75genzmalik</scope><name>p</name></member>
+      <member refid="structrule75genzmalik_1aeffb31786d8a171e472cb48dec5f545c" prot="public" virt="non-virtual"><scope>rule75genzmalik</scope><name>parent</name></member>
+      <member refid="structrule75genzmalik_1a73d2f3e0e5104dc2ada745c8b5d4db1e" prot="public" virt="non-virtual"><scope>rule75genzmalik</scope><name>weight1</name></member>
+      <member refid="structrule75genzmalik_1a8cf27a3a74cdaa0e1e8c9cd3518ef2c6" prot="public" virt="non-virtual"><scope>rule75genzmalik</scope><name>weight3</name></member>
+      <member refid="structrule75genzmalik_1a34652e891cfa17fcdd9d7659abcd4ac1" prot="public" virt="non-virtual"><scope>rule75genzmalik</scope><name>weight5</name></member>
+      <member refid="structrule75genzmalik_1a63288748846879f0559dd815608207c9" prot="public" virt="non-virtual"><scope>rule75genzmalik</scope><name>weightE1</name></member>
+      <member refid="structrule75genzmalik_1a8109bd5ce3b5cbcbd53a533ee96ed832" prot="public" virt="non-virtual"><scope>rule75genzmalik</scope><name>weightE3</name></member>
+      <member refid="structrule75genzmalik_1aaa747674033b69d1aab6611421966d87" prot="public" virt="non-virtual"><scope>rule75genzmalik</scope><name>widthLambda</name></member>
+      <member refid="structrule75genzmalik_1a62ad8543676887c17584558f4333222f" prot="public" virt="non-virtual"><scope>rule75genzmalik</scope><name>widthLambda2</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

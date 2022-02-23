@@ -1,0 +1,321 @@
+.TH "src/hcubature.cpp" 3 "Thu Jul 1 2021" "Duke-Lido" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/hcubature.cpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdio\&.h>\fP
+.br
+\fC#include <stdlib\&.h>\fP
+.br
+\fC#include <string\&.h>\fP
+.br
+\fC#include <math\&.h>\fP
+.br
+\fC#include <limits\&.h>\fP
+.br
+\fC#include <float\&.h>\fP
+.br
+\fC#include 'cubature\&.h'\fP
+.br
+\fC#include 'converged\&.h'\fP
+.br
+\fC#include 'vwrapper\&.h'\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBesterr\fP"
+.br
+.ti -1c
+.RI "struct \fBhypercube\fP"
+.br
+.ti -1c
+.RI "struct \fBregion\fP"
+.br
+.ti -1c
+.RI "struct \fBrule_s\fP"
+.br
+.ti -1c
+.RI "struct \fBrule75genzmalik\fP"
+.br
+.ti -1c
+.RI "struct \fBheap\fP"
+.br
+.in -1c
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBSUCCESS\fP   0"
+.br
+.ti -1c
+.RI "#define \fBFAILURE\fP   1"
+.br
+.ti -1c
+.RI "#define \fBnum0_0\fP(dim)   (1U)"
+.br
+.ti -1c
+.RI "#define \fBnumR0_0fs\fP(dim)   (2 * (dim))"
+.br
+.ti -1c
+.RI "#define \fBnumRR0_0fs\fP(dim)   (2 * (dim) * (dim\-1))"
+.br
+.ti -1c
+.RI "#define \fBnumR_Rfs\fP(dim)   (1U << (dim))"
+.br
+.ti -1c
+.RI "#define \fBreal\fP(x)   ((double)(x))"
+.br
+.ti -1c
+.RI "#define \fBto_int\fP(n)   ((int)(n))"
+.br
+.ti -1c
+.RI "#define \fBVALS\fP(\fBi\fP)   v[\fBfdim\fP*(\fBi\fP)]"
+.br
+.ti -1c
+.RI "#define \fBKEY\fP(hi)   ((hi)\&.errmax)"
+.br
+.ti -1c
+.RI "#define \fBERR\fP(\fBj\fP)   \fBee\fP[\fBj\fP]\&.\fBerr\fP"
+.br
+.ti -1c
+.RI "#define \fBVAL\fP(\fBj\fP)   \fBee\fP[\fBj\fP]\&.\fBval\fP"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef int(* \fBevalError_func\fP) (struct \fBrule_s\fP *r, unsigned \fBfdim\fP, \fBintegrand_v\fP \fBf\fP, void *\fBfdata\fP, unsigned nR, \fBregion\fP *\fBR\fP)"
+.br
+.ti -1c
+.RI "typedef void(* \fBdestroy_func\fP) (struct \fBrule_s\fP *r)"
+.br
+.ti -1c
+.RI "typedef struct \fBrule_s\fP \fBrule\fP"
+.br
+.ti -1c
+.RI "typedef \fBregion\fP \fBheap_item\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBif\fP (\fBfdim\fP<=1) \fBnorm\fP"
+.br
+.ti -1c
+.RI "\fBif\fP (\fBnorm\fP< 0||\fBnorm\fP > \fBERROR_LINF\fP) \fBreturn\fP \fBFAILURE\fP"
+.br
+.ti -1c
+.RI "\fBif\fP (!\fBregions\&.ee\fP||!regions\&.items) goto bad"
+.br
+.ti -1c
+.RI "\fBif\fP (!\fBee\fP) goto bad"
+.br
+.ti -1c
+.RI "\fBif\fP (!\fBR\fP[0]\&.\fBee\fP||eval_regions(1, \fBR\fP, \fBf\fP, \fBfdata\fP, r)||heap_push(&\fBregions\fP, \fBR\fP[0])) goto bad"
+.br
+.ti -1c
+.RI "\fBwhile\fP (\fBnumEval\fP< \fBmaxEval\fP||!\fBmaxEval\fP)"
+.br
+.ti -1c
+.RI "\fBfor\fP (\fBj\fP=0;\fBj\fP< \fBfdim\fP;++\fBj\fP) \fBval\fP[\fBj\fP]"
+.br
+.ti -1c
+.RI "\fBfree\fP (\fBee\fP)"
+.br
+.ti -1c
+.RI "\fBfree\fP (\fBR\fP)"
+.br
+.ti -1c
+.RI "int \fBhcubature_v\fP (unsigned \fBfdim\fP, \fBintegrand_v\fP \fBf\fP, void *\fBfdata\fP, unsigned dim, const double *xmin, const double *xmax, size_t \fBmaxEval\fP, double \fBreqAbsError\fP, double \fBreqRelError\fP, \fBerror_norm\fP \fBnorm\fP, double *\fBval\fP, double *\fBerr\fP)"
+.br
+.ti -1c
+.RI "int \fBhcubature\fP (unsigned \fBfdim\fP, \fBintegrand\fP \fBf\fP, void *\fBfdata\fP, unsigned dim, const double *xmin, const double *xmax, size_t \fBmaxEval\fP, double \fBreqAbsError\fP, double \fBreqRelError\fP, \fBerror_norm\fP \fBnorm\fP, double *\fBval\fP, double *\fBerr\fP)"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "static int unsigned \fBfdim\fP"
+.br
+.ti -1c
+.RI "static int unsigned \fBintegrand_v\fP \fBf\fP"
+.br
+.ti -1c
+.RI "static int unsigned \fBintegrand_v\fP void * \fBfdata\fP"
+.br
+.ti -1c
+.RI "static int unsigned \fBintegrand_v\fP void const \fBhypercube\fP * \fBh\fP"
+.br
+.ti -1c
+.RI "static int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t \fBmaxEval\fP"
+.br
+.ti -1c
+.RI "static int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t double \fBreqAbsError\fP"
+.br
+.ti -1c
+.RI "static int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t double double \fBreqRelError\fP"
+.br
+.ti -1c
+.RI "static int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t double double \fBerror_norm\fP \fBnorm\fP"
+.br
+.ti -1c
+.RI "static int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t double double \fBerror_norm\fP double * \fBval\fP"
+.br
+.ti -1c
+.RI "static int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t double double \fBerror_norm\fP double double * \fBerr\fP"
+.br
+.ti -1c
+.RI "static int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t double double \fBerror_norm\fP double double int \fBparallel\fP"
+.br
+.ti -1c
+.RI "\fBheap\fP \fBregions\fP = heap_alloc(1, \fBfdim\fP)"
+.br
+.ti -1c
+.RI "unsigned \fBi\fP"
+.br
+.ti -1c
+.RI "unsigned \fBj\fP"
+.br
+.ti -1c
+.RI "\fBregion\fP * \fBR\fP = NULL"
+.br
+.ti -1c
+.RI "size_t \fBnR_alloc\fP = 0"
+.br
+.ti -1c
+.RI "\fBesterr\fP * \fBee\fP = NULL"
+.br
+.ti -1c
+.RI "\fBnumEval\fP = r\->num_points"
+.br
+.ti -1c
+.RI "\fBreturn\fP \fBSUCCESS\fP"
+.br
+.ti -1c
+.RI "bad \fB__pad0__\fP"
+.br
+.ti -1c
+.RI "\fBreturn\fP \fBFAILURE\fP"
+.br
+.in -1c
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define ERR(\fBj\fP)   \fBee\fP[\fBj\fP]\&.\fBerr\fP"
+
+.SS "#define FAILURE   1"
+
+.SS "#define KEY(hi)   ((hi)\&.errmax)"
+
+.SS "#define num0_0(dim)   (1U)"
+
+.SS "#define numR0_0fs(dim)   (2 * (dim))"
+
+.SS "#define numR_Rfs(dim)   (1U << (dim))"
+
+.SS "#define numRR0_0fs(dim)   (2 * (dim) * (dim\-1))"
+
+.SS "#define real(x)   ((double)(x))"
+
+.SS "#define SUCCESS   0"
+
+.SS "#define to_int(n)   ((int)(n))"
+
+.SS "#define VAL(\fBj\fP)   \fBee\fP[\fBj\fP]\&.\fBval\fP"
+
+.SS "#define VALS(\fBi\fP)   v[\fBfdim\fP*(\fBi\fP)]"
+
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef void(* destroy_func) (struct \fBrule_s\fP *r)"
+
+.SS "typedef int(* evalError_func) (struct \fBrule_s\fP *r, unsigned \fBfdim\fP, \fBintegrand_v\fP \fBf\fP, void *\fBfdata\fP, unsigned nR, \fBregion\fP *\fBR\fP)"
+
+.SS "typedef \fBregion\fP \fBheap_item\fP"
+
+.SS "typedef struct \fBrule_s\fP \fBrule\fP"
+
+.SH "Function Documentation"
+.PP 
+.SS "for ()"
+
+.SS "free (\fBee\fP)"
+
+.SS "free (\fBR\fP)"
+
+.SS "int hcubature (unsigned fdim, \fBintegrand\fP f, void * fdata, unsigned dim, const double * xmin, const double * xmax, size_t maxEval, double reqAbsError, double reqRelError, \fBerror_norm\fP norm, double * val, double * err)"
+
+.SS "int hcubature_v (unsigned fdim, \fBintegrand_v\fP f, void * fdata, unsigned dim, const double * xmin, const double * xmax, size_t maxEval, double reqAbsError, double reqRelError, \fBerror_norm\fP norm, double * val, double * err)"
+
+.SS "if (! ee)"
+
+.SS "if (!\fBR\&.ee\fP||eval_regions(1, \fBR\fP, \fBf\fP, \fBfdata\fP, r)||heap_push &, [0] R[0])"
+
+.SS "if (!\fBregions\&.ee\fP||!regions\&. items)"
+
+.SS "if (\fBfdim\fP<= 1)"
+
+.SS "if (\fBnorm\fP< 0||\fBnorm\fP > ERROR_LINF)"
+
+.SS "while ()"
+
+.SH "Variable Documentation"
+.PP 
+.SS "bad __pad0__"
+
+.SS "ee = NULL"
+
+.SS "int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t double double \fBerror_norm\fP double double* err"
+
+.SS "int unsigned \fBintegrand_v\fP f"
+
+.SS "\fBreturn\fP FAILURE"
+
+.SS "int unsigned \fBintegrand_v\fP void* fdata"
+
+.SS "int unsigned fdim"
+
+.SS "int unsigned \fBintegrand_v\fP void const \fBhypercube\fP* h"
+
+.SS "unsigned i"
+
+.SS "unsigned j"
+
+.SS "int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t maxEval"
+
+.SS "int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t double double \fBerror_norm\fP norm"
+
+.SS "nR_alloc = 0"
+
+.SS "numEval = r\->num_points"
+
+.SS "int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t double double \fBerror_norm\fP double double int parallel"
+\fBInitial value:\fP
+.PP
+.nf
+{
+     size_t numEval = 0
+.fi
+.SS "R[0] = NULL"
+
+.SS "heap_free & regions = heap_alloc(1, \fBfdim\fP)"
+
+.SS "int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t double reqAbsError"
+
+.SS "int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t double double reqRelError"
+
+.SS "\fBreturn\fP SUCCESS"
+
+.SS "int unsigned \fBintegrand_v\fP void const \fBhypercube\fP size_t double double \fBerror_norm\fP double* val"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Duke-Lido from the source code\&.

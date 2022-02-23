@@ -1,0 +1,37 @@
+.TH "gsl_minimize_nd< F >" 3 "Thu Jul 1 2021" "Duke-Lido" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+gsl_minimize_nd< F >
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <minimizer\&.h>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBgsl_minimize_nd\fP (F f, const size_t dim)"
+.br
+.ti -1c
+.RI "\fB~gsl_minimize_nd\fP ()"
+.br
+.ti -1c
+.RI "double \fBminimize\fP (std::vector< double > start, std::vector< double > step, int max_iter, double eps)"
+.br
+.in -1c
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "template<typename F > \fBgsl_minimize_nd\fP< F >::\fBgsl_minimize_nd\fP (F f, const size_t dim)\fC [inline]\fP"
+
+.SS "template<typename F > \fBgsl_minimize_nd\fP< F >::~\fBgsl_minimize_nd\fP ()\fC [inline]\fP"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "template<typename F > double \fBgsl_minimize_nd\fP< F >::minimize (std::vector< double > start, std::vector< double > step, int max_iter, double eps)\fC [inline]\fP"
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Duke-Lido from the source code\&.

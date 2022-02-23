@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="CMakeLists_8txt" kind="file" language="C++">
+    <compoundname>CMakeLists.txt</compoundname>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="CMakeLists_8txt_1a0948235f732e73f3d09bd30c9255cdd9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>add_library</definition>
+        <argsstring>(${LIBRARY_NAME} STATIC TableBase.cpp StochasticBase.cpp Xsection.cpp Rate.cpp matrix_elements_1-2.cpp matrix_elements_2-2.cpp matrix_elements_2-3.cpp hcubature.cpp random.cpp simpleLogger.cpp stat.cpp approx_functions.cpp lido.cpp Langevin.cpp predefine.cpp lorentz.cpp Medium_Reader.cpp Hadronize.cpp collision_manager.cpp) set_target_properties($</argsstring>
+        <name>add_library</name>
+        <param>
+          <declname>${LIBRARY_NAME} STATIC TableBase.cpp StochasticBase.cpp Xsection.cpp Rate.cpp matrix_elements_1-2.cpp matrix_elements_2-2.cpp matrix_elements_2-3.cpp hcubature.cpp random.cpp simpleLogger.cpp stat.cpp approx_functions.cpp lido.cpp Langevin.cpp predefine.cpp lorentz.cpp Medium_Reader.cpp Hadronize.cpp collision_manager.</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/CMakeLists.txt" line="3" column="1" bodyfile="src/CMakeLists.txt" bodystart="3" bodyend="25"/>
+      </memberdef>
+      <memberdef kind="function" id="CMakeLists_8txt_1ac0c04d1c6bfe8add00a35b09e3e7692a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>PROPERTIES PREFIX</type>
+        <definition>PROPERTIES PREFIX add_executable</definition>
+        <argsstring>(${PROJECT_NAME} main.cpp) target_link_libraries($</argsstring>
+        <name>add_executable</name>
+        <param>
+          <declname>${PROJECT_NAME} main.</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/CMakeLists.txt" line="28" column="1" bodyfile="src/CMakeLists.txt" bodystart="28" bodyend="29"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#<sp/>compile<sp/>everything<sp/>except<sp/>the<sp/>main<sp/>source<sp/>file<sp/>into<sp/>a<sp/>statis<sp/>lib<sp/>to<sp/>be<sp/>linked</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#<sp/>to<sp/>the<sp/>main<sp/>executable</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal">add_library(${LIBRARY_NAME}<sp/>STATIC</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"><ref refid="classTableBase" kindref="compound">TableBase</ref>.cpp</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"><ref refid="classStochasticBase" kindref="compound">StochasticBase</ref>.cpp</highlight></codeline>
+<codeline lineno="6"><highlight class="normal"><ref refid="classXsection" kindref="compound">Xsection</ref>.cpp</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"><ref refid="classRate" kindref="compound">Rate</ref>.cpp</highlight></codeline>
+<codeline lineno="8"><highlight class="normal">matrix_elements_1-2.cpp</highlight></codeline>
+<codeline lineno="9"><highlight class="normal">matrix_elements_2-2.cpp</highlight></codeline>
+<codeline lineno="10"><highlight class="normal">matrix_elements_2-3.cpp</highlight></codeline>
+<codeline lineno="11"><highlight class="normal">hcubature.cpp</highlight></codeline>
+<codeline lineno="12"><highlight class="normal">random.cpp</highlight></codeline>
+<codeline lineno="13"><highlight class="normal">simpleLogger.cpp</highlight></codeline>
+<codeline lineno="14"><highlight class="normal">stat.cpp</highlight></codeline>
+<codeline lineno="15"><highlight class="normal">approx_functions.cpp</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><ref refid="classlido" kindref="compound">lido</ref>.cpp</highlight></codeline>
+<codeline lineno="17"><highlight class="normal">Langevin.cpp</highlight></codeline>
+<codeline lineno="18"><highlight class="normal">predefine.cpp</highlight></codeline>
+<codeline lineno="19"><highlight class="normal">lorentz.cpp</highlight></codeline>
+<codeline lineno="20"><highlight class="normal">Medium_Reader.cpp</highlight></codeline>
+<codeline lineno="21"><highlight class="normal">Hadronize.cpp</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><ref refid="classcollision__manager" kindref="compound">collision_manager</ref>.cpp</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal">set_target_properties(${LIBRARY_NAME}<sp/>PROPERTIES<sp/>PREFIX<sp/></highlight><highlight class="stringliteral">&quot;&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal">#<sp/>compile<sp/>the<sp/>actual<sp/>executable</highlight></codeline>
+<codeline lineno="28"><highlight class="normal">add_executable(${PROJECT_NAME}<sp/>main.cpp)</highlight></codeline>
+<codeline lineno="29"><highlight class="normal">target_link_libraries(${PROJECT_NAME}<sp/>${LIBRARY_NAME}<sp/>${PYTHIA8_LIBRARIES}<sp/>${GSL_LIBRARIES}<sp/>${GSLCALAS_LIBRARIES}<sp/>${HDF5_LIBRARIES}<sp/>${Boost_LIBRARIES}<sp/>-pthread<sp/>-lpthread)</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal">#<sp/>install<sp/>executable</highlight></codeline>
+<codeline lineno="32"><highlight class="normal">install(TARGETS<sp/>${PROJECT_NAME}<sp/>DESTINATION<sp/>bin)</highlight></codeline>
+<codeline lineno="33"><highlight class="normal">#<sp/>also<sp/>install<sp/>the<sp/>generated<sp/>c++<sp/>shared<sp/>library</highlight></codeline>
+<codeline lineno="34"><highlight class="normal">install(TARGETS<sp/>${LIBRARY_NAME}<sp/>DESTINATION<sp/>lib/${LIBRARY_NAME})</highlight></codeline>
+<codeline lineno="35"><highlight class="normal">#<sp/>install<sp/>the<sp/>library<sp/>headers</highlight></codeline>
+<codeline lineno="36"><highlight class="normal">file(GLOB<sp/>HEADERS<sp/>*.h)</highlight></codeline>
+<codeline lineno="37"><highlight class="normal">install(FILES<sp/>${HEADERS}<sp/>DESTINATION<sp/>include/${LIBRARY_NAME})</highlight></codeline>
+    </programlisting>
+    <location file="src/CMakeLists.txt"/>
+  </compounddef>
+</doxygen>

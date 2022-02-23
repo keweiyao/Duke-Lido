@@ -1,0 +1,67 @@
+.TH "src/Langevin.h" 3 "Thu Jul 1 2021" "Duke-Lido" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/Langevin.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <vector>\fP
+.br
+\fC#include 'lorentz\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "double \fBdelta_qhat\fP (int pid, double E, double M, double T)"
+.br
+.ti -1c
+.RI "double \fBqhat_small_angle_LOpQCD\fP (int pid, double E, double M, double T)"
+.br
+.ti -1c
+.RI "double \fBqhat_L_small_angle_LOpQCD\fP (int pid, double E, double M, double T)"
+.br
+.ti -1c
+.RI "double \fBqhat\fP (int pid, double E, double M, double T)"
+.br
+.ti -1c
+.RI "double \fBqhat_L\fP (int pid, double E, double M, double T)"
+.br
+.ti -1c
+.RI "double \fBdqhat_L_dp2\fP (int pid, double E, double M, double T)"
+.br
+.ti -1c
+.RI "void \fBIto_update_rest\fP (int pid, double dt, double M, double T, std::vector< double > v, const \fBfourvec\fP &pIn, \fBfourvec\fP &pOut, bool is_virtual)"
+.br
+.ti -1c
+.RI "void \fBIto_update_lab\fP (int pid, double dt, double M, double T, std::vector< double > v, const \fBfourvec\fP &pIn, \fBfourvec\fP &pOut)"
+.br
+.ti -1c
+.RI "void \fBIto_update_rest\fP (int pid, double dt, double M, double T, const \fBfourvec\fP &pIn, \fBfourvec\fP &pOut)"
+.br
+.in -1c
+.SH "Function Documentation"
+.PP 
+.SS "double delta_qhat (int pid, double E, double M, double T)"
+
+.SS "double dqhat_L_dp2 (int pid, double E, double M, double T)"
+
+.SS "void Ito_update_lab (int pid, double dt, double M, double T, std::vector< double > v, const \fBfourvec\fP & pIn, \fBfourvec\fP & pOut)"
+
+.SS "void Ito_update_rest (int pid, double dt, double M, double T, const \fBfourvec\fP & pIn, \fBfourvec\fP & pOut)"
+
+.SS "void Ito_update_rest (int pid, double dt, double M, double T, std::vector< double > v, const \fBfourvec\fP & pIn, \fBfourvec\fP & pOut, bool is_virtual)"
+
+.SS "double qhat (int pid, double E, double M, double T)"
+
+.SS "double qhat_L (int pid, double E, double M, double T)"
+
+.SS "double qhat_L_small_angle_LOpQCD (int pid, double E, double M, double T)"
+
+.SS "double qhat_small_angle_LOpQCD (int pid, double E, double M, double T)"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Duke-Lido from the source code\&.

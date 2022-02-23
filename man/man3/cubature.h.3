@@ -1,0 +1,85 @@
+.TH "src/cubature.h" 3 "Thu Jul 1 2021" "Duke-Lido" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/cubature.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdlib\&.h>\fP
+.br
+
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef int(* \fBintegrand\fP) (unsigned ndim, const double *x, void *, unsigned \fBfdim\fP, double *fval)"
+.br
+.ti -1c
+.RI "typedef int(* \fBintegrand_v\fP) (unsigned ndim, size_t npt, const double *x, void *, unsigned \fBfdim\fP, double *fval)"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBerror_norm\fP { \fBERROR_INDIVIDUAL\fP = 0, \fBERROR_PAIRED\fP, \fBERROR_L2\fP, \fBERROR_L1\fP, \fBERROR_LINF\fP }"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBhcubature\fP (unsigned \fBfdim\fP, \fBintegrand\fP \fBf\fP, void *\fBfdata\fP, unsigned dim, const double *xmin, const double *xmax, size_t \fBmaxEval\fP, double \fBreqAbsError\fP, double \fBreqRelError\fP, \fBerror_norm\fP \fBnorm\fP, double *\fBval\fP, double *\fBerr\fP)"
+.br
+.ti -1c
+.RI "int \fBhcubature_v\fP (unsigned \fBfdim\fP, \fBintegrand_v\fP \fBf\fP, void *\fBfdata\fP, unsigned dim, const double *xmin, const double *xmax, size_t \fBmaxEval\fP, double \fBreqAbsError\fP, double \fBreqRelError\fP, \fBerror_norm\fP \fBnorm\fP, double *\fBval\fP, double *\fBerr\fP)"
+.br
+.ti -1c
+.RI "int \fBpcubature_v_buf\fP (unsigned \fBfdim\fP, \fBintegrand_v\fP \fBf\fP, void *\fBfdata\fP, unsigned dim, const double *xmin, const double *xmax, size_t \fBmaxEval\fP, double \fBreqAbsError\fP, double \fBreqRelError\fP, \fBerror_norm\fP \fBnorm\fP, unsigned *m, double **buf, size_t *nbuf, size_t max_nbuf, double *\fBval\fP, double *\fBerr\fP)"
+.br
+.ti -1c
+.RI "int \fBpcubature_v\fP (unsigned \fBfdim\fP, \fBintegrand_v\fP \fBf\fP, void *\fBfdata\fP, unsigned dim, const double *xmin, const double *xmax, size_t \fBmaxEval\fP, double \fBreqAbsError\fP, double \fBreqRelError\fP, \fBerror_norm\fP \fBnorm\fP, double *\fBval\fP, double *\fBerr\fP)"
+.br
+.ti -1c
+.RI "int \fBpcubature\fP (unsigned \fBfdim\fP, \fBintegrand\fP \fBf\fP, void *\fBfdata\fP, unsigned dim, const double *xmin, const double *xmax, size_t \fBmaxEval\fP, double \fBreqAbsError\fP, double \fBreqRelError\fP, \fBerror_norm\fP \fBnorm\fP, double *\fBval\fP, double *\fBerr\fP)"
+.br
+.in -1c
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef int(* integrand) (unsigned ndim, const double *x, void *, unsigned \fBfdim\fP, double *fval)"
+
+.SS "typedef int(* integrand_v) (unsigned ndim, size_t npt, const double *x, void *, unsigned \fBfdim\fP, double *fval)"
+
+.SH "Enumeration Type Documentation"
+.PP 
+.SS "enum \fBerror_norm\fP"
+
+.PP
+\fBEnumerator\fP
+.in +1c
+.TP
+\fB\fIERROR_INDIVIDUAL \fP\fP
+.TP
+\fB\fIERROR_PAIRED \fP\fP
+.TP
+\fB\fIERROR_L2 \fP\fP
+.TP
+\fB\fIERROR_L1 \fP\fP
+.TP
+\fB\fIERROR_LINF \fP\fP
+.SH "Function Documentation"
+.PP 
+.SS "int hcubature (unsigned fdim, \fBintegrand\fP f, void * fdata, unsigned dim, const double * xmin, const double * xmax, size_t maxEval, double reqAbsError, double reqRelError, \fBerror_norm\fP norm, double * val, double * err)"
+
+.SS "int hcubature_v (unsigned fdim, \fBintegrand_v\fP f, void * fdata, unsigned dim, const double * xmin, const double * xmax, size_t maxEval, double reqAbsError, double reqRelError, \fBerror_norm\fP norm, double * val, double * err)"
+
+.SS "int pcubature (unsigned fdim, \fBintegrand\fP f, void * fdata, unsigned dim, const double * xmin, const double * xmax, size_t maxEval, double reqAbsError, double reqRelError, \fBerror_norm\fP norm, double * val, double * err)"
+
+.SS "int pcubature_v (unsigned fdim, \fBintegrand_v\fP f, void * fdata, unsigned dim, const double * xmin, const double * xmax, size_t maxEval, double reqAbsError, double reqRelError, \fBerror_norm\fP norm, double * val, double * err)"
+
+.SS "int pcubature_v_buf (unsigned fdim, \fBintegrand_v\fP f, void * fdata, unsigned dim, const double * xmin, const double * xmax, size_t maxEval, double reqAbsError, double reqRelError, \fBerror_norm\fP norm, unsigned * m, double ** buf, size_t * nbuf, size_t max_nbuf, double * val, double * err)"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Duke-Lido from the source code\&.

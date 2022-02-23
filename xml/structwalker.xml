@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="structwalker" kind="struct" language="C++" prot="public">
+    <compoundname>walker</compoundname>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structwalker_1a30ea610984187a20afce95edfc794c4b" prot="public" static="no" mutable="no">
+        <type>double *</type>
+        <definition>double* walker::posi</definition>
+        <argsstring></argsstring>
+        <name>posi</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="70" column="13" bodyfile="src/sampler.h" bodystart="70" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structwalker_1a55afe2c28487fb2087b7b9e27dba7356" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double walker::P</definition>
+        <argsstring></argsstring>
+        <name>P</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/sampler.h" line="71" column="12" bodyfile="src/sampler.h" bodystart="71" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/sampler.h" line="69" column="13" bodyfile="src/sampler.h" bodystart="69" bodyend="72"/>
+    <listofallmembers>
+      <member refid="structwalker_1a55afe2c28487fb2087b7b9e27dba7356" prot="public" virt="non-virtual"><scope>walker</scope><name>P</name></member>
+      <member refid="structwalker_1a30ea610984187a20afce95edfc794c4b" prot="public" virt="non-virtual"><scope>walker</scope><name>posi</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

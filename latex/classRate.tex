@@ -1,0 +1,135 @@
+\hypertarget{classRate}{}\doxysection{Rate$<$ str, N1, N2, F $>$ Class Template Reference}
+\label{classRate}\index{Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}}
+
+
+{\ttfamily \#include $<$Rate.\+h$>$}
+
+Inheritance diagram for Rate$<$ str, N1, N2, F $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classRate}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classRate_a54987ef646e12f7e9f0978853bd01645}{Rate}} (std\+::string Name, std\+::string configfile, F \mbox{\hyperlink{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}{f}})
+\item 
+bool \mbox{\hyperlink{classRate_a25152267c70f1b5bf221da27f7eb3c1c}{sample}} (std\+::vector$<$ double $>$ arg, int incoming\+\_\+hard\+\_\+pid, std\+::vector$<$ \mbox{\hyperlink{structfourvec}{fourvec}} $>$ \&FS, std\+::vector$<$ int $>$ \&pids)
+\item 
+void \mbox{\hyperlink{classRate_a88904f31f75ceee0869ae646da57cd21}{initX}} (std\+::string fname)
+\item 
+void \mbox{\hyperlink{classRate_ab0cd8a1c58f9d53c0d974b8a9f4c2e25}{loadX}} (std\+::string fname)
+\item 
+bool \mbox{\hyperlink{classRate_a14ce8c26fe946a84555529ef65c17bd7}{Is\+Active}} (void)
+\item 
+int \mbox{\hyperlink{classRate_a576f8b5510a9c24fb403d7268881c20b}{process\+\_\+id}} (void)
+\item 
+const char $\ast$ \mbox{\hyperlink{classRate_a55fd679d0a520ed21ca0c25922dc184e}{which\+\_\+implementation}} () const
+\item 
+\mbox{\hyperlink{classRate_a5c00e0b04d3616331eab63ce8aeef3fb}{Rate}} (std\+::string Name, std\+::string configfile, double($\ast$\mbox{\hyperlink{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}{f}})(const double, void $\ast$))
+\item 
+\mbox{\hyperlink{classRate_abd48776ac2378076a6d355e9354bba78}{Rate}} (std\+::string Name, std\+::string configfile, double($\ast$\mbox{\hyperlink{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}{f}})(const double $\ast$, void $\ast$))
+\item 
+bool \mbox{\hyperlink{classRate_a50743f15d1a3a53f06aa08c03861db4b}{sample}} (std\+::vector$<$ double $>$ parameters, int incoming\+\_\+hard\+\_\+pid, std\+::vector$<$ \mbox{\hyperlink{structfourvec}{fourvec}} $>$ \&final\+\_\+states, std\+::vector$<$ int $>$ \&pids)
+\item 
+bool \mbox{\hyperlink{classRate_a09f352d7608e2ac0017e2f4a43e9efd0}{sample}} (std\+::vector$<$ double $>$ parameters, int incoming\+\_\+hard\+\_\+pid, std\+::vector$<$ \mbox{\hyperlink{structfourvec}{fourvec}} $>$ \&final\+\_\+states, std\+::vector$<$ int $>$ \&pids)
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classRate_a54987ef646e12f7e9f0978853bd01645}\label{classRate_a54987ef646e12f7e9f0978853bd01645}} 
+\index{Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}!Rate@{Rate}}
+\index{Rate@{Rate}!Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}}
+\doxysubsubsection{\texorpdfstring{Rate()}{Rate()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily template$<$char const $\ast$ str, size\+\_\+t N1, size\+\_\+t N2, typename F $>$ \\
+\mbox{\hyperlink{classRate}{Rate}}$<$ str, N1, N2, F $>$\+::\mbox{\hyperlink{classRate}{Rate}} (\begin{DoxyParamCaption}\item[{std\+::string}]{Name,  }\item[{std\+::string}]{configfile,  }\item[{F}]{f }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classRate_a5c00e0b04d3616331eab63ce8aeef3fb}\label{classRate_a5c00e0b04d3616331eab63ce8aeef3fb}} 
+\index{Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}!Rate@{Rate}}
+\index{Rate@{Rate}!Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}}
+\doxysubsubsection{\texorpdfstring{Rate()}{Rate()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classRate}{Rate}}$<$ \mbox{\hyperlink{predefine_8h_a304f1dcba9400d774bf0f790d5e3f138}{H\+S2\+PP}}, 2, 2, double($\ast$)(const double, void $\ast$)$>$\+::\mbox{\hyperlink{classRate}{Rate}} (\begin{DoxyParamCaption}\item[{std\+::string}]{Name,  }\item[{std\+::string}]{configfile,  }\item[{double($\ast$)(const double, void $\ast$)}]{f }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classRate_abd48776ac2378076a6d355e9354bba78}\label{classRate_abd48776ac2378076a6d355e9354bba78}} 
+\index{Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}!Rate@{Rate}}
+\index{Rate@{Rate}!Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}}
+\doxysubsubsection{\texorpdfstring{Rate()}{Rate()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classRate}{Rate}}$<$ \mbox{\hyperlink{predefine_8h_a1cb068537e886b9258580d8ed5fb5373}{H\+S2\+P\+PP}}, 2, 2, double($\ast$)(const double $\ast$, void $\ast$)$>$\+::\mbox{\hyperlink{classRate}{Rate}} (\begin{DoxyParamCaption}\item[{std\+::string}]{Name,  }\item[{std\+::string}]{configfile,  }\item[{double($\ast$)(const double $\ast$, void $\ast$)}]{f }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classRate_a88904f31f75ceee0869ae646da57cd21}\label{classRate_a88904f31f75ceee0869ae646da57cd21}} 
+\index{Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}!initX@{initX}}
+\index{initX@{initX}!Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}}
+\doxysubsubsection{\texorpdfstring{initX()}{initX()}}
+{\footnotesize\ttfamily template$<$char const $\ast$ str, size\+\_\+t N1, size\+\_\+t N2, typename F $>$ \\
+void \mbox{\hyperlink{classRate}{Rate}}$<$ str, N1, N2, F $>$\+::initX (\begin{DoxyParamCaption}\item[{std\+::string}]{fname }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classRate_a14ce8c26fe946a84555529ef65c17bd7}\label{classRate_a14ce8c26fe946a84555529ef65c17bd7}} 
+\index{Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}!IsActive@{IsActive}}
+\index{IsActive@{IsActive}!Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}}
+\doxysubsubsection{\texorpdfstring{IsActive()}{IsActive()}}
+{\footnotesize\ttfamily template$<$char const $\ast$ str, size\+\_\+t N1, size\+\_\+t N2, typename F $>$ \\
+bool \mbox{\hyperlink{classRate}{Rate}}$<$ str, N1, N2, F $>$\+::Is\+Active (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classRate_ab0cd8a1c58f9d53c0d974b8a9f4c2e25}\label{classRate_ab0cd8a1c58f9d53c0d974b8a9f4c2e25}} 
+\index{Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}!loadX@{loadX}}
+\index{loadX@{loadX}!Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}}
+\doxysubsubsection{\texorpdfstring{loadX()}{loadX()}}
+{\footnotesize\ttfamily template$<$char const $\ast$ str, size\+\_\+t N1, size\+\_\+t N2, typename F $>$ \\
+void \mbox{\hyperlink{classRate}{Rate}}$<$ str, N1, N2, F $>$\+::loadX (\begin{DoxyParamCaption}\item[{std\+::string}]{fname }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classRate_a576f8b5510a9c24fb403d7268881c20b}\label{classRate_a576f8b5510a9c24fb403d7268881c20b}} 
+\index{Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}!process\_id@{process\_id}}
+\index{process\_id@{process\_id}!Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}}
+\doxysubsubsection{\texorpdfstring{process\_id()}{process\_id()}}
+{\footnotesize\ttfamily template$<$char const $\ast$ str, size\+\_\+t N1, size\+\_\+t N2, typename F $>$ \\
+int \mbox{\hyperlink{classRate}{Rate}}$<$ str, N1, N2, F $>$\+::process\+\_\+id (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classRate_a25152267c70f1b5bf221da27f7eb3c1c}\label{classRate_a25152267c70f1b5bf221da27f7eb3c1c}} 
+\index{Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}!sample@{sample}}
+\index{sample@{sample}!Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}}
+\doxysubsubsection{\texorpdfstring{sample()}{sample()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily template$<$char const $\ast$ str, size\+\_\+t N1, size\+\_\+t N2, typename F $>$ \\
+bool \mbox{\hyperlink{classRate}{Rate}}$<$ str, N1, N2, F $>$\+::sample (\begin{DoxyParamCaption}\item[{std\+::vector$<$ double $>$}]{arg,  }\item[{int}]{incoming\+\_\+hard\+\_\+pid,  }\item[{std\+::vector$<$ \mbox{\hyperlink{structfourvec}{fourvec}} $>$ \&}]{FS,  }\item[{std\+::vector$<$ int $>$ \&}]{pids }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classStochasticBase_a8f4f2a4dc9dae1bfa2005817d1689ae1}{Stochastic\+Base$<$ N1 $>$}}.
+
+\mbox{\Hypertarget{classRate_a50743f15d1a3a53f06aa08c03861db4b}\label{classRate_a50743f15d1a3a53f06aa08c03861db4b}} 
+\index{Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}!sample@{sample}}
+\index{sample@{sample}!Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}}
+\doxysubsubsection{\texorpdfstring{sample()}{sample()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily bool \mbox{\hyperlink{classRate}{Rate}}$<$ \mbox{\hyperlink{predefine_8h_a304f1dcba9400d774bf0f790d5e3f138}{H\+S2\+PP}}, 2, 2, double($\ast$)(const double, void $\ast$)$>$\+::sample (\begin{DoxyParamCaption}\item[{std\+::vector$<$ double $>$}]{parameters,  }\item[{int}]{incoming\+\_\+hard\+\_\+pid,  }\item[{std\+::vector$<$ \mbox{\hyperlink{structfourvec}{fourvec}} $>$ \&}]{final\+\_\+states,  }\item[{std\+::vector$<$ int $>$ \&}]{pids }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classStochasticBase_a8f4f2a4dc9dae1bfa2005817d1689ae1}{Stochastic\+Base$<$ N1 $>$}}.
+
+\mbox{\Hypertarget{classRate_a09f352d7608e2ac0017e2f4a43e9efd0}\label{classRate_a09f352d7608e2ac0017e2f4a43e9efd0}} 
+\index{Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}!sample@{sample}}
+\index{sample@{sample}!Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}}
+\doxysubsubsection{\texorpdfstring{sample()}{sample()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily bool \mbox{\hyperlink{classRate}{Rate}}$<$ \mbox{\hyperlink{predefine_8h_a1cb068537e886b9258580d8ed5fb5373}{H\+S2\+P\+PP}}, 2, 2, double($\ast$)(const double $\ast$, void $\ast$)$>$\+::sample (\begin{DoxyParamCaption}\item[{std\+::vector$<$ double $>$}]{parameters,  }\item[{int}]{incoming\+\_\+hard\+\_\+pid,  }\item[{std\+::vector$<$ \mbox{\hyperlink{structfourvec}{fourvec}} $>$ \&}]{final\+\_\+states,  }\item[{std\+::vector$<$ int $>$ \&}]{pids }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classStochasticBase_a8f4f2a4dc9dae1bfa2005817d1689ae1}{Stochastic\+Base$<$ N1 $>$}}.
+
+\mbox{\Hypertarget{classRate_a55fd679d0a520ed21ca0c25922dc184e}\label{classRate_a55fd679d0a520ed21ca0c25922dc184e}} 
+\index{Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}!which\_implementation@{which\_implementation}}
+\index{which\_implementation@{which\_implementation}!Rate$<$ str, N1, N2, F $>$@{Rate$<$ str, N1, N2, F $>$}}
+\doxysubsubsection{\texorpdfstring{which\_implementation()}{which\_implementation()}}
+{\footnotesize\ttfamily template$<$char const $\ast$ str, size\+\_\+t N1, size\+\_\+t N2, typename F $>$ \\
+const char$\ast$ \mbox{\hyperlink{classRate}{Rate}}$<$ str, N1, N2, F $>$\+::which\+\_\+implementation (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/\mbox{\hyperlink{Rate_8h}{Rate.\+h}}\item 
+src/\mbox{\hyperlink{Rate_8cpp}{Rate.\+cpp}}\end{DoxyCompactItemize}

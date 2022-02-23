@@ -1,0 +1,90 @@
+\hypertarget{simpleLogger_8h}{}\doxysection{src/simple\+Logger.h File Reference}
+\label{simpleLogger_8h}\index{src/simpleLogger.h@{src/simpleLogger.h}}
+{\ttfamily \#include $<$boost/log/trivial.\+hpp$>$}\newline
+{\ttfamily \#include $<$boost/log/sources/global\+\_\+logger\+\_\+storage.\+hpp$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{simpleLogger_8h_aad6fe6f21d1c647548b1e2cb79197363}{B\+O\+O\+S\+T\+\_\+\+L\+O\+G\+\_\+\+D\+Y\+N\+\_\+\+L\+I\+NK}}
+\item 
+\#define \mbox{\hyperlink{simpleLogger_8h_a6d3fef197146b932f5ad01fce683a66b}{L\+O\+G\+F\+I\+LE}}~\char`\"{}logfile.\+log\char`\"{}
+\item 
+\#define \mbox{\hyperlink{simpleLogger_8h_a0e734cc8af2f223f9ca3ab3f9d6fa018}{S\+E\+V\+E\+R\+I\+T\+Y\+\_\+\+T\+H\+R\+E\+S\+H\+O\+LD}}~logging\+::trivial\+::info
+\item 
+\#define \mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(severity)~B\+O\+O\+S\+T\+\_\+\+L\+O\+G\+\_\+\+S\+EV(logger\+::get(),boost\+::log\+::trivial\+::severity)
+\item 
+\#define \mbox{\hyperlink{simpleLogger_8h_af7abc145380f1916838e42f9272aa0f6}{L\+O\+G\+\_\+\+T\+R\+A\+CE}}~\mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(trace)
+\item 
+\#define \mbox{\hyperlink{simpleLogger_8h_a6ff63e8955665c4a58b1598f2b07c51a}{L\+O\+G\+\_\+\+D\+E\+B\+UG}}~\mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(debug)
+\item 
+\#define \mbox{\hyperlink{simpleLogger_8h_aeb4f36db01bd128c7afeac5889dac311}{L\+O\+G\+\_\+\+I\+N\+FO}}~\mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(info)
+\item 
+\#define \mbox{\hyperlink{simpleLogger_8h_adf4476a6a4ea6c74231c826e899d7189}{L\+O\+G\+\_\+\+W\+A\+R\+N\+I\+NG}}~\mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(warning)
+\item 
+\#define \mbox{\hyperlink{simpleLogger_8h_aced66975c154ea0e2a8ec3bc818b4e08}{L\+O\+G\+\_\+\+E\+R\+R\+OR}}~\mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(error)
+\item 
+\#define \mbox{\hyperlink{simpleLogger_8h_ac2164369b4d2bf72296f8ba6ea576ecf}{L\+O\+G\+\_\+\+F\+A\+T\+AL}}~\mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(fatal)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{simpleLogger_8h_aad6fe6f21d1c647548b1e2cb79197363}\label{simpleLogger_8h_aad6fe6f21d1c647548b1e2cb79197363}} 
+\index{simpleLogger.h@{simpleLogger.h}!BOOST\_LOG\_DYN\_LINK@{BOOST\_LOG\_DYN\_LINK}}
+\index{BOOST\_LOG\_DYN\_LINK@{BOOST\_LOG\_DYN\_LINK}!simpleLogger.h@{simpleLogger.h}}
+\doxysubsubsection{\texorpdfstring{BOOST\_LOG\_DYN\_LINK}{BOOST\_LOG\_DYN\_LINK}}
+{\footnotesize\ttfamily \#define B\+O\+O\+S\+T\+\_\+\+L\+O\+G\+\_\+\+D\+Y\+N\+\_\+\+L\+I\+NK}
+
+\mbox{\Hypertarget{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}\label{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}} 
+\index{simpleLogger.h@{simpleLogger.h}!LOG@{LOG}}
+\index{LOG@{LOG}!simpleLogger.h@{simpleLogger.h}}
+\doxysubsubsection{\texorpdfstring{LOG}{LOG}}
+{\footnotesize\ttfamily \#define L\+OG(\begin{DoxyParamCaption}\item[{}]{severity }\end{DoxyParamCaption})~B\+O\+O\+S\+T\+\_\+\+L\+O\+G\+\_\+\+S\+EV(logger\+::get(),boost\+::log\+::trivial\+::severity)}
+
+\mbox{\Hypertarget{simpleLogger_8h_a6ff63e8955665c4a58b1598f2b07c51a}\label{simpleLogger_8h_a6ff63e8955665c4a58b1598f2b07c51a}} 
+\index{simpleLogger.h@{simpleLogger.h}!LOG\_DEBUG@{LOG\_DEBUG}}
+\index{LOG\_DEBUG@{LOG\_DEBUG}!simpleLogger.h@{simpleLogger.h}}
+\doxysubsubsection{\texorpdfstring{LOG\_DEBUG}{LOG\_DEBUG}}
+{\footnotesize\ttfamily \#define L\+O\+G\+\_\+\+D\+E\+B\+UG~\mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(debug)}
+
+\mbox{\Hypertarget{simpleLogger_8h_aced66975c154ea0e2a8ec3bc818b4e08}\label{simpleLogger_8h_aced66975c154ea0e2a8ec3bc818b4e08}} 
+\index{simpleLogger.h@{simpleLogger.h}!LOG\_ERROR@{LOG\_ERROR}}
+\index{LOG\_ERROR@{LOG\_ERROR}!simpleLogger.h@{simpleLogger.h}}
+\doxysubsubsection{\texorpdfstring{LOG\_ERROR}{LOG\_ERROR}}
+{\footnotesize\ttfamily \#define L\+O\+G\+\_\+\+E\+R\+R\+OR~\mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(error)}
+
+\mbox{\Hypertarget{simpleLogger_8h_ac2164369b4d2bf72296f8ba6ea576ecf}\label{simpleLogger_8h_ac2164369b4d2bf72296f8ba6ea576ecf}} 
+\index{simpleLogger.h@{simpleLogger.h}!LOG\_FATAL@{LOG\_FATAL}}
+\index{LOG\_FATAL@{LOG\_FATAL}!simpleLogger.h@{simpleLogger.h}}
+\doxysubsubsection{\texorpdfstring{LOG\_FATAL}{LOG\_FATAL}}
+{\footnotesize\ttfamily \#define L\+O\+G\+\_\+\+F\+A\+T\+AL~\mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(fatal)}
+
+\mbox{\Hypertarget{simpleLogger_8h_aeb4f36db01bd128c7afeac5889dac311}\label{simpleLogger_8h_aeb4f36db01bd128c7afeac5889dac311}} 
+\index{simpleLogger.h@{simpleLogger.h}!LOG\_INFO@{LOG\_INFO}}
+\index{LOG\_INFO@{LOG\_INFO}!simpleLogger.h@{simpleLogger.h}}
+\doxysubsubsection{\texorpdfstring{LOG\_INFO}{LOG\_INFO}}
+{\footnotesize\ttfamily \#define L\+O\+G\+\_\+\+I\+N\+FO~\mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(info)}
+
+\mbox{\Hypertarget{simpleLogger_8h_af7abc145380f1916838e42f9272aa0f6}\label{simpleLogger_8h_af7abc145380f1916838e42f9272aa0f6}} 
+\index{simpleLogger.h@{simpleLogger.h}!LOG\_TRACE@{LOG\_TRACE}}
+\index{LOG\_TRACE@{LOG\_TRACE}!simpleLogger.h@{simpleLogger.h}}
+\doxysubsubsection{\texorpdfstring{LOG\_TRACE}{LOG\_TRACE}}
+{\footnotesize\ttfamily \#define L\+O\+G\+\_\+\+T\+R\+A\+CE~\mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(trace)}
+
+\mbox{\Hypertarget{simpleLogger_8h_adf4476a6a4ea6c74231c826e899d7189}\label{simpleLogger_8h_adf4476a6a4ea6c74231c826e899d7189}} 
+\index{simpleLogger.h@{simpleLogger.h}!LOG\_WARNING@{LOG\_WARNING}}
+\index{LOG\_WARNING@{LOG\_WARNING}!simpleLogger.h@{simpleLogger.h}}
+\doxysubsubsection{\texorpdfstring{LOG\_WARNING}{LOG\_WARNING}}
+{\footnotesize\ttfamily \#define L\+O\+G\+\_\+\+W\+A\+R\+N\+I\+NG~\mbox{\hyperlink{simpleLogger_8h_accad43a85d781d53381cd53a9894b6ae}{L\+OG}}(warning)}
+
+\mbox{\Hypertarget{simpleLogger_8h_a6d3fef197146b932f5ad01fce683a66b}\label{simpleLogger_8h_a6d3fef197146b932f5ad01fce683a66b}} 
+\index{simpleLogger.h@{simpleLogger.h}!LOGFILE@{LOGFILE}}
+\index{LOGFILE@{LOGFILE}!simpleLogger.h@{simpleLogger.h}}
+\doxysubsubsection{\texorpdfstring{LOGFILE}{LOGFILE}}
+{\footnotesize\ttfamily \#define L\+O\+G\+F\+I\+LE~\char`\"{}logfile.\+log\char`\"{}}
+
+\mbox{\Hypertarget{simpleLogger_8h_a0e734cc8af2f223f9ca3ab3f9d6fa018}\label{simpleLogger_8h_a0e734cc8af2f223f9ca3ab3f9d6fa018}} 
+\index{simpleLogger.h@{simpleLogger.h}!SEVERITY\_THRESHOLD@{SEVERITY\_THRESHOLD}}
+\index{SEVERITY\_THRESHOLD@{SEVERITY\_THRESHOLD}!simpleLogger.h@{simpleLogger.h}}
+\doxysubsubsection{\texorpdfstring{SEVERITY\_THRESHOLD}{SEVERITY\_THRESHOLD}}
+{\footnotesize\ttfamily \#define S\+E\+V\+E\+R\+I\+T\+Y\+\_\+\+T\+H\+R\+E\+S\+H\+O\+LD~logging\+::trivial\+::info}
+

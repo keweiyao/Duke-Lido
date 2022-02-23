@@ -1,0 +1,440 @@
+\hypertarget{hcubature_8cpp}{}\doxysection{src/hcubature.cpp File Reference}
+\label{hcubature_8cpp}\index{src/hcubature.cpp@{src/hcubature.cpp}}
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$math.\+h$>$}\newline
+{\ttfamily \#include $<$limits.\+h$>$}\newline
+{\ttfamily \#include $<$float.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}cubature.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}converged.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}vwrapper.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structesterr}{esterr}}
+\item 
+struct \mbox{\hyperlink{structhypercube}{hypercube}}
+\item 
+struct \mbox{\hyperlink{structregion}{region}}
+\item 
+struct \mbox{\hyperlink{structrule__s}{rule\+\_\+s}}
+\item 
+struct \mbox{\hyperlink{structrule75genzmalik}{rule75genzmalik}}
+\item 
+struct \mbox{\hyperlink{structheap}{heap}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{hcubature_8cpp_aa90cac659d18e8ef6294c7ae337f6b58}{S\+U\+C\+C\+E\+SS}}~0
+\item 
+\#define \mbox{\hyperlink{hcubature_8cpp_a6d58f9ac447476b4e084d7ca383f5183}{F\+A\+I\+L\+U\+RE}}~1
+\item 
+\#define \mbox{\hyperlink{hcubature_8cpp_a46a93ad5a840e2ebf85371ee68dfdd30}{num0\+\_\+0}}(dim)~(1U)
+\item 
+\#define \mbox{\hyperlink{hcubature_8cpp_a93d2daad3a6a67b35535f685ccb47e05}{num\+R0\+\_\+0fs}}(dim)~(2 $\ast$ (dim))
+\item 
+\#define \mbox{\hyperlink{hcubature_8cpp_aaf38ff3648534ca2a5d4158cfaeef4cc}{num\+R\+R0\+\_\+0fs}}(dim)~(2 $\ast$ (dim) $\ast$ (dim-\/1))
+\item 
+\#define \mbox{\hyperlink{hcubature_8cpp_ab40d68352eadf82cdb3cb986a028be13}{num\+R\+\_\+\+Rfs}}(dim)~(1U $<$$<$ (dim))
+\item 
+\#define \mbox{\hyperlink{hcubature_8cpp_ab4cafb1ab351d520eb09a05ebd0a1e13}{real}}(x)~((double)(x))
+\item 
+\#define \mbox{\hyperlink{hcubature_8cpp_ab8dd298f9033091ef1d92dde601e2c76}{to\+\_\+int}}(n)~((int)(n))
+\item 
+\#define \mbox{\hyperlink{hcubature_8cpp_af5b6c9023110ec7196962284ee14a8b3}{V\+A\+LS}}(\mbox{\hyperlink{hcubature_8cpp_ac23062089f3a5a2693cbb4ce7a75f1e5}{i}})~v\mbox{[}\mbox{\hyperlink{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}{fdim}}$\ast$(\mbox{\hyperlink{hcubature_8cpp_ac23062089f3a5a2693cbb4ce7a75f1e5}{i}})\mbox{]}
+\item 
+\#define \mbox{\hyperlink{hcubature_8cpp_adcaf3cd6c918fe13873c1a7585ff3054}{K\+EY}}(hi)~((hi).errmax)
+\item 
+\#define \mbox{\hyperlink{hcubature_8cpp_aeeab8fbd26c52f7582ceac56f8c53076}{E\+RR}}(\mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}})~\mbox{\hyperlink{hcubature_8cpp_a670da91be64127c92faac35c8300e814}{ee}}\mbox{[}\mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}}\mbox{]}.\mbox{\hyperlink{hcubature_8cpp_af208ea0774962f86bc560d4f949fba76}{err}}
+\item 
+\#define \mbox{\hyperlink{hcubature_8cpp_a53800dab89b6b085340813d59c796bfa}{V\+AL}}(\mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}})~\mbox{\hyperlink{hcubature_8cpp_a670da91be64127c92faac35c8300e814}{ee}}\mbox{[}\mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}}\mbox{]}.\mbox{\hyperlink{hcubature_8cpp_ada65af0916682d0dd357df9da3af27b0}{val}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef int($\ast$ \mbox{\hyperlink{hcubature_8cpp_a842ca4c35f50ce74052565579ad3a2a9}{eval\+Error\+\_\+func}}) (struct \mbox{\hyperlink{structrule__s}{rule\+\_\+s}} $\ast$r, unsigned \mbox{\hyperlink{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}{fdim}}, \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} \mbox{\hyperlink{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}{f}}, void $\ast$\mbox{\hyperlink{hcubature_8cpp_af9c4cd57d41446133be84239ba6fcb35}{fdata}}, unsigned nR, \mbox{\hyperlink{structregion}{region}} $\ast$\mbox{\hyperlink{hcubature_8cpp_a09bc594fe13bba38c1fb83020dbafcc9}{R}})
+\item 
+typedef void($\ast$ \mbox{\hyperlink{hcubature_8cpp_aba4657cb4d54c6538e3c2561f2fd7aae}{destroy\+\_\+func}}) (struct \mbox{\hyperlink{structrule__s}{rule\+\_\+s}} $\ast$r)
+\item 
+typedef struct \mbox{\hyperlink{structrule__s}{rule\+\_\+s}} \mbox{\hyperlink{hcubature_8cpp_ae648232412b13de3ed777a59b4d80128}{rule}}
+\item 
+typedef \mbox{\hyperlink{structregion}{region}} \mbox{\hyperlink{hcubature_8cpp_a53548373573084fcad054978605c2277}{heap\+\_\+item}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{hcubature_8cpp_a37e91582e436a1b80bb541ade27cae6e}{if}} (\mbox{\hyperlink{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}{fdim}}$<$=1) \mbox{\hyperlink{hcubature_8cpp_a83a5030c0d61d8c57b35b08bea178e4f}{norm}}
+\item 
+\mbox{\hyperlink{hcubature_8cpp_a98f47dc17f13588c299da762038e71c1}{if}} (\mbox{\hyperlink{hcubature_8cpp_a83a5030c0d61d8c57b35b08bea178e4f}{norm}}$<$ 0$\vert$$\vert$\mbox{\hyperlink{hcubature_8cpp_a83a5030c0d61d8c57b35b08bea178e4f}{norm}} $>$ \mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01ea3cde64a07665c549e17180d08ea06183}{E\+R\+R\+O\+R\+\_\+\+L\+I\+NF}}) \mbox{\hyperlink{converged_8h_a9717e7bbecb906637e86cef6da3d83c2}{return}} \mbox{\hyperlink{hcubature_8cpp_a5e8b3ef25c2112d665103be1e3618041}{F\+A\+I\+L\+U\+RE}}
+\item 
+\mbox{\hyperlink{hcubature_8cpp_af3ee6c55007bc4ebc7dff86288016575}{if}} (!\mbox{\hyperlink{hcubature_8cpp_a670da91be64127c92faac35c8300e814}{regions.\+ee}}$\vert$$\vert$!regions.\+items) goto bad
+\item 
+\mbox{\hyperlink{hcubature_8cpp_a58bc1bef5988ead2aabaf7895badee37}{if}} (!\mbox{\hyperlink{hcubature_8cpp_a670da91be64127c92faac35c8300e814}{ee}}) goto bad
+\item 
+\mbox{\hyperlink{hcubature_8cpp_a95e408aca2c7ad2ebe9c68dc1eee4a52}{if}} (!\mbox{\hyperlink{hcubature_8cpp_a09bc594fe13bba38c1fb83020dbafcc9}{R}}\mbox{[}0\mbox{]}.\mbox{\hyperlink{hcubature_8cpp_a670da91be64127c92faac35c8300e814}{ee}}$\vert$$\vert$eval\+\_\+regions(1, \mbox{\hyperlink{hcubature_8cpp_a09bc594fe13bba38c1fb83020dbafcc9}{R}}, \mbox{\hyperlink{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}{f}}, \mbox{\hyperlink{hcubature_8cpp_af9c4cd57d41446133be84239ba6fcb35}{fdata}}, r)$\vert$$\vert$heap\+\_\+push(\&\mbox{\hyperlink{hcubature_8cpp_a9d211cb4044c5e843759496cb408e0e2}{regions}}, \mbox{\hyperlink{hcubature_8cpp_a09bc594fe13bba38c1fb83020dbafcc9}{R}}\mbox{[}0\mbox{]})) goto bad
+\item 
+\mbox{\hyperlink{hcubature_8cpp_a031cf79bdb7e33f7b3e57ba0383c8bb9}{while}} (\mbox{\hyperlink{hcubature_8cpp_a40f6b3a2061883919852d0311c370324}{num\+Eval}}$<$ \mbox{\hyperlink{hcubature_8cpp_a80c2052155894f3bb6ec690b40cf4138}{max\+Eval}}$\vert$$\vert$!\mbox{\hyperlink{hcubature_8cpp_a80c2052155894f3bb6ec690b40cf4138}{max\+Eval}})
+\item 
+\mbox{\hyperlink{hcubature_8cpp_a7be0be7a3c84472ca5f9efd574d7457b}{for}} (\mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}}=0;\mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}}$<$ \mbox{\hyperlink{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}{fdim}};++\mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}}) \mbox{\hyperlink{hcubature_8cpp_ada65af0916682d0dd357df9da3af27b0}{val}}\mbox{[}\mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}}\mbox{]}
+\item 
+\mbox{\hyperlink{hcubature_8cpp_ab6d346c6c83c24582977c152216fbcac}{free}} (\mbox{\hyperlink{hcubature_8cpp_a670da91be64127c92faac35c8300e814}{ee}})
+\item 
+\mbox{\hyperlink{hcubature_8cpp_a70462968783e3a31779a86972a356d85}{free}} (\mbox{\hyperlink{hcubature_8cpp_a09bc594fe13bba38c1fb83020dbafcc9}{R}})
+\item 
+int \mbox{\hyperlink{hcubature_8cpp_aa662b8ef163a773bad94ba16c3e5abdd}{hcubature\+\_\+v}} (unsigned \mbox{\hyperlink{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}{fdim}}, \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} \mbox{\hyperlink{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}{f}}, void $\ast$\mbox{\hyperlink{hcubature_8cpp_af9c4cd57d41446133be84239ba6fcb35}{fdata}}, unsigned dim, const double $\ast$xmin, const double $\ast$xmax, size\+\_\+t \mbox{\hyperlink{hcubature_8cpp_a80c2052155894f3bb6ec690b40cf4138}{max\+Eval}}, double \mbox{\hyperlink{hcubature_8cpp_a913428b94f48098066a986506c0de65c}{req\+Abs\+Error}}, double \mbox{\hyperlink{hcubature_8cpp_aa5d70d093dbdb1854485dd9f464d7a37}{req\+Rel\+Error}}, \mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01e}{error\+\_\+norm}} \mbox{\hyperlink{hcubature_8cpp_a83a5030c0d61d8c57b35b08bea178e4f}{norm}}, double $\ast$\mbox{\hyperlink{hcubature_8cpp_ada65af0916682d0dd357df9da3af27b0}{val}}, double $\ast$\mbox{\hyperlink{hcubature_8cpp_af208ea0774962f86bc560d4f949fba76}{err}})
+\item 
+int \mbox{\hyperlink{hcubature_8cpp_a8917735ee20270de7aafbaeacfab2137}{hcubature}} (unsigned \mbox{\hyperlink{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}{fdim}}, \mbox{\hyperlink{cubature_8h_a6a50ebe3c97e7055cbbb3d54db589451}{integrand}} \mbox{\hyperlink{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}{f}}, void $\ast$\mbox{\hyperlink{hcubature_8cpp_af9c4cd57d41446133be84239ba6fcb35}{fdata}}, unsigned dim, const double $\ast$xmin, const double $\ast$xmax, size\+\_\+t \mbox{\hyperlink{hcubature_8cpp_a80c2052155894f3bb6ec690b40cf4138}{max\+Eval}}, double \mbox{\hyperlink{hcubature_8cpp_a913428b94f48098066a986506c0de65c}{req\+Abs\+Error}}, double \mbox{\hyperlink{hcubature_8cpp_aa5d70d093dbdb1854485dd9f464d7a37}{req\+Rel\+Error}}, \mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01e}{error\+\_\+norm}} \mbox{\hyperlink{hcubature_8cpp_a83a5030c0d61d8c57b35b08bea178e4f}{norm}}, double $\ast$\mbox{\hyperlink{hcubature_8cpp_ada65af0916682d0dd357df9da3af27b0}{val}}, double $\ast$\mbox{\hyperlink{hcubature_8cpp_af208ea0774962f86bc560d4f949fba76}{err}})
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+static int unsigned \mbox{\hyperlink{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}{fdim}}
+\item 
+static int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} \mbox{\hyperlink{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}{f}}
+\item 
+static int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void $\ast$ \mbox{\hyperlink{hcubature_8cpp_af9c4cd57d41446133be84239ba6fcb35}{fdata}}
+\item 
+static int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} $\ast$ \mbox{\hyperlink{hcubature_8cpp_a6f757c6ac1179b9cac478b18da8f48ff}{h}}
+\item 
+static int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t \mbox{\hyperlink{hcubature_8cpp_a80c2052155894f3bb6ec690b40cf4138}{max\+Eval}}
+\item 
+static int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t double \mbox{\hyperlink{hcubature_8cpp_a913428b94f48098066a986506c0de65c}{req\+Abs\+Error}}
+\item 
+static int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t double double \mbox{\hyperlink{hcubature_8cpp_aa5d70d093dbdb1854485dd9f464d7a37}{req\+Rel\+Error}}
+\item 
+static int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t double double \mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01e}{error\+\_\+norm}} \mbox{\hyperlink{hcubature_8cpp_a83a5030c0d61d8c57b35b08bea178e4f}{norm}}
+\item 
+static int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t double double \mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01e}{error\+\_\+norm}} double $\ast$ \mbox{\hyperlink{hcubature_8cpp_ada65af0916682d0dd357df9da3af27b0}{val}}
+\item 
+static int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t double double \mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01e}{error\+\_\+norm}} double double $\ast$ \mbox{\hyperlink{hcubature_8cpp_af208ea0774962f86bc560d4f949fba76}{err}}
+\item 
+static int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t double double \mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01e}{error\+\_\+norm}} double double int \mbox{\hyperlink{hcubature_8cpp_aabe36ff13d6e9f6e53663cb20d139340}{parallel}}
+\item 
+\mbox{\hyperlink{structheap}{heap}} \mbox{\hyperlink{hcubature_8cpp_a9d211cb4044c5e843759496cb408e0e2}{regions}} = heap\+\_\+alloc(1, \mbox{\hyperlink{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}{fdim}})
+\item 
+unsigned \mbox{\hyperlink{hcubature_8cpp_ac23062089f3a5a2693cbb4ce7a75f1e5}{i}}
+\item 
+unsigned \mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}}
+\item 
+\mbox{\hyperlink{structregion}{region}} $\ast$ \mbox{\hyperlink{hcubature_8cpp_a09bc594fe13bba38c1fb83020dbafcc9}{R}} = N\+U\+LL
+\item 
+size\+\_\+t \mbox{\hyperlink{hcubature_8cpp_af3e9be5f99c9f3bb1de1b64f0d91aa99}{n\+R\+\_\+alloc}} = 0
+\item 
+\mbox{\hyperlink{structesterr}{esterr}} $\ast$ \mbox{\hyperlink{hcubature_8cpp_a670da91be64127c92faac35c8300e814}{ee}} = N\+U\+LL
+\item 
+\mbox{\hyperlink{hcubature_8cpp_a40f6b3a2061883919852d0311c370324}{num\+Eval}} = r-\/$>$num\+\_\+points
+\item 
+\mbox{\hyperlink{converged_8h_a9717e7bbecb906637e86cef6da3d83c2}{return}} \mbox{\hyperlink{hcubature_8cpp_a48b99cf368a45012ab09b826df3b90a4}{S\+U\+C\+C\+E\+SS}}
+\item 
+bad \mbox{\hyperlink{hcubature_8cpp_a9c1de8d7d3a5f420ee40985f0f7a5bcb}{\+\_\+\+\_\+pad0\+\_\+\+\_\+}}
+\item 
+\mbox{\hyperlink{converged_8h_a9717e7bbecb906637e86cef6da3d83c2}{return}} \mbox{\hyperlink{hcubature_8cpp_a5e8b3ef25c2112d665103be1e3618041}{F\+A\+I\+L\+U\+RE}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{hcubature_8cpp_aeeab8fbd26c52f7582ceac56f8c53076}\label{hcubature_8cpp_aeeab8fbd26c52f7582ceac56f8c53076}} 
+\index{hcubature.cpp@{hcubature.cpp}!ERR@{ERR}}
+\index{ERR@{ERR}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{ERR}{ERR}}
+{\footnotesize\ttfamily \#define E\+RR(\begin{DoxyParamCaption}\item[{}]{\mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}} }\end{DoxyParamCaption})~\mbox{\hyperlink{hcubature_8cpp_a670da91be64127c92faac35c8300e814}{ee}}\mbox{[}\mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}}\mbox{]}.\mbox{\hyperlink{hcubature_8cpp_af208ea0774962f86bc560d4f949fba76}{err}}}
+
+\mbox{\Hypertarget{hcubature_8cpp_a6d58f9ac447476b4e084d7ca383f5183}\label{hcubature_8cpp_a6d58f9ac447476b4e084d7ca383f5183}} 
+\index{hcubature.cpp@{hcubature.cpp}!FAILURE@{FAILURE}}
+\index{FAILURE@{FAILURE}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{FAILURE}{FAILURE}}
+{\footnotesize\ttfamily \#define F\+A\+I\+L\+U\+RE~1}
+
+\mbox{\Hypertarget{hcubature_8cpp_adcaf3cd6c918fe13873c1a7585ff3054}\label{hcubature_8cpp_adcaf3cd6c918fe13873c1a7585ff3054}} 
+\index{hcubature.cpp@{hcubature.cpp}!KEY@{KEY}}
+\index{KEY@{KEY}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{KEY}{KEY}}
+{\footnotesize\ttfamily \#define K\+EY(\begin{DoxyParamCaption}\item[{}]{hi }\end{DoxyParamCaption})~((hi).errmax)}
+
+\mbox{\Hypertarget{hcubature_8cpp_a46a93ad5a840e2ebf85371ee68dfdd30}\label{hcubature_8cpp_a46a93ad5a840e2ebf85371ee68dfdd30}} 
+\index{hcubature.cpp@{hcubature.cpp}!num0\_0@{num0\_0}}
+\index{num0\_0@{num0\_0}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{num0\_0}{num0\_0}}
+{\footnotesize\ttfamily \#define num0\+\_\+0(\begin{DoxyParamCaption}\item[{}]{dim }\end{DoxyParamCaption})~(1U)}
+
+\mbox{\Hypertarget{hcubature_8cpp_a93d2daad3a6a67b35535f685ccb47e05}\label{hcubature_8cpp_a93d2daad3a6a67b35535f685ccb47e05}} 
+\index{hcubature.cpp@{hcubature.cpp}!numR0\_0fs@{numR0\_0fs}}
+\index{numR0\_0fs@{numR0\_0fs}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{numR0\_0fs}{numR0\_0fs}}
+{\footnotesize\ttfamily \#define num\+R0\+\_\+0fs(\begin{DoxyParamCaption}\item[{}]{dim }\end{DoxyParamCaption})~(2 $\ast$ (dim))}
+
+\mbox{\Hypertarget{hcubature_8cpp_ab40d68352eadf82cdb3cb986a028be13}\label{hcubature_8cpp_ab40d68352eadf82cdb3cb986a028be13}} 
+\index{hcubature.cpp@{hcubature.cpp}!numR\_Rfs@{numR\_Rfs}}
+\index{numR\_Rfs@{numR\_Rfs}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{numR\_Rfs}{numR\_Rfs}}
+{\footnotesize\ttfamily \#define num\+R\+\_\+\+Rfs(\begin{DoxyParamCaption}\item[{}]{dim }\end{DoxyParamCaption})~(1U $<$$<$ (dim))}
+
+\mbox{\Hypertarget{hcubature_8cpp_aaf38ff3648534ca2a5d4158cfaeef4cc}\label{hcubature_8cpp_aaf38ff3648534ca2a5d4158cfaeef4cc}} 
+\index{hcubature.cpp@{hcubature.cpp}!numRR0\_0fs@{numRR0\_0fs}}
+\index{numRR0\_0fs@{numRR0\_0fs}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{numRR0\_0fs}{numRR0\_0fs}}
+{\footnotesize\ttfamily \#define num\+R\+R0\+\_\+0fs(\begin{DoxyParamCaption}\item[{}]{dim }\end{DoxyParamCaption})~(2 $\ast$ (dim) $\ast$ (dim-\/1))}
+
+\mbox{\Hypertarget{hcubature_8cpp_ab4cafb1ab351d520eb09a05ebd0a1e13}\label{hcubature_8cpp_ab4cafb1ab351d520eb09a05ebd0a1e13}} 
+\index{hcubature.cpp@{hcubature.cpp}!real@{real}}
+\index{real@{real}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{real}{real}}
+{\footnotesize\ttfamily \#define real(\begin{DoxyParamCaption}\item[{}]{x }\end{DoxyParamCaption})~((double)(x))}
+
+\mbox{\Hypertarget{hcubature_8cpp_aa90cac659d18e8ef6294c7ae337f6b58}\label{hcubature_8cpp_aa90cac659d18e8ef6294c7ae337f6b58}} 
+\index{hcubature.cpp@{hcubature.cpp}!SUCCESS@{SUCCESS}}
+\index{SUCCESS@{SUCCESS}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{SUCCESS}{SUCCESS}}
+{\footnotesize\ttfamily \#define S\+U\+C\+C\+E\+SS~0}
+
+\mbox{\Hypertarget{hcubature_8cpp_ab8dd298f9033091ef1d92dde601e2c76}\label{hcubature_8cpp_ab8dd298f9033091ef1d92dde601e2c76}} 
+\index{hcubature.cpp@{hcubature.cpp}!to\_int@{to\_int}}
+\index{to\_int@{to\_int}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{to\_int}{to\_int}}
+{\footnotesize\ttfamily \#define to\+\_\+int(\begin{DoxyParamCaption}\item[{}]{n }\end{DoxyParamCaption})~((int)(n))}
+
+\mbox{\Hypertarget{hcubature_8cpp_a53800dab89b6b085340813d59c796bfa}\label{hcubature_8cpp_a53800dab89b6b085340813d59c796bfa}} 
+\index{hcubature.cpp@{hcubature.cpp}!VAL@{VAL}}
+\index{VAL@{VAL}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{VAL}{VAL}}
+{\footnotesize\ttfamily \#define V\+AL(\begin{DoxyParamCaption}\item[{}]{\mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}} }\end{DoxyParamCaption})~\mbox{\hyperlink{hcubature_8cpp_a670da91be64127c92faac35c8300e814}{ee}}\mbox{[}\mbox{\hyperlink{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}{j}}\mbox{]}.\mbox{\hyperlink{hcubature_8cpp_ada65af0916682d0dd357df9da3af27b0}{val}}}
+
+\mbox{\Hypertarget{hcubature_8cpp_af5b6c9023110ec7196962284ee14a8b3}\label{hcubature_8cpp_af5b6c9023110ec7196962284ee14a8b3}} 
+\index{hcubature.cpp@{hcubature.cpp}!VALS@{VALS}}
+\index{VALS@{VALS}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{VALS}{VALS}}
+{\footnotesize\ttfamily \#define V\+A\+LS(\begin{DoxyParamCaption}\item[{}]{\mbox{\hyperlink{hcubature_8cpp_ac23062089f3a5a2693cbb4ce7a75f1e5}{i}} }\end{DoxyParamCaption})~v\mbox{[}\mbox{\hyperlink{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}{fdim}}$\ast$(\mbox{\hyperlink{hcubature_8cpp_ac23062089f3a5a2693cbb4ce7a75f1e5}{i}})\mbox{]}}
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{hcubature_8cpp_aba4657cb4d54c6538e3c2561f2fd7aae}\label{hcubature_8cpp_aba4657cb4d54c6538e3c2561f2fd7aae}} 
+\index{hcubature.cpp@{hcubature.cpp}!destroy\_func@{destroy\_func}}
+\index{destroy\_func@{destroy\_func}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{destroy\_func}{destroy\_func}}
+{\footnotesize\ttfamily typedef void($\ast$ destroy\+\_\+func) (struct \mbox{\hyperlink{structrule__s}{rule\+\_\+s}} $\ast$r)}
+
+\mbox{\Hypertarget{hcubature_8cpp_a842ca4c35f50ce74052565579ad3a2a9}\label{hcubature_8cpp_a842ca4c35f50ce74052565579ad3a2a9}} 
+\index{hcubature.cpp@{hcubature.cpp}!evalError\_func@{evalError\_func}}
+\index{evalError\_func@{evalError\_func}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{evalError\_func}{evalError\_func}}
+{\footnotesize\ttfamily typedef int($\ast$ eval\+Error\+\_\+func) (struct \mbox{\hyperlink{structrule__s}{rule\+\_\+s}} $\ast$r, unsigned \mbox{\hyperlink{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}{fdim}}, \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} \mbox{\hyperlink{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}{f}}, void $\ast$\mbox{\hyperlink{hcubature_8cpp_af9c4cd57d41446133be84239ba6fcb35}{fdata}}, unsigned nR, \mbox{\hyperlink{structregion}{region}} $\ast$\mbox{\hyperlink{hcubature_8cpp_a09bc594fe13bba38c1fb83020dbafcc9}{R}})}
+
+\mbox{\Hypertarget{hcubature_8cpp_a53548373573084fcad054978605c2277}\label{hcubature_8cpp_a53548373573084fcad054978605c2277}} 
+\index{hcubature.cpp@{hcubature.cpp}!heap\_item@{heap\_item}}
+\index{heap\_item@{heap\_item}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{heap\_item}{heap\_item}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{structregion}{region}} \mbox{\hyperlink{hcubature_8cpp_a53548373573084fcad054978605c2277}{heap\+\_\+item}}}
+
+\mbox{\Hypertarget{hcubature_8cpp_ae648232412b13de3ed777a59b4d80128}\label{hcubature_8cpp_ae648232412b13de3ed777a59b4d80128}} 
+\index{hcubature.cpp@{hcubature.cpp}!rule@{rule}}
+\index{rule@{rule}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{rule}{rule}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structrule__s}{rule\+\_\+s}} \mbox{\hyperlink{hcubature_8cpp_ae648232412b13de3ed777a59b4d80128}{rule}}}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{hcubature_8cpp_a7be0be7a3c84472ca5f9efd574d7457b}\label{hcubature_8cpp_a7be0be7a3c84472ca5f9efd574d7457b}} 
+\index{hcubature.cpp@{hcubature.cpp}!for@{for}}
+\index{for@{for}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{for()}{for()}}
+{\footnotesize\ttfamily for (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{hcubature_8cpp_ab6d346c6c83c24582977c152216fbcac}\label{hcubature_8cpp_ab6d346c6c83c24582977c152216fbcac}} 
+\index{hcubature.cpp@{hcubature.cpp}!free@{free}}
+\index{free@{free}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{free()}{free()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{hcubature_8cpp_a670da91be64127c92faac35c8300e814}{ee}}}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{hcubature_8cpp_a70462968783e3a31779a86972a356d85}\label{hcubature_8cpp_a70462968783e3a31779a86972a356d85}} 
+\index{hcubature.cpp@{hcubature.cpp}!free@{free}}
+\index{free@{free}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{free()}{free()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{hcubature_8cpp_a09bc594fe13bba38c1fb83020dbafcc9}{R}}}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{hcubature_8cpp_a8917735ee20270de7aafbaeacfab2137}\label{hcubature_8cpp_a8917735ee20270de7aafbaeacfab2137}} 
+\index{hcubature.cpp@{hcubature.cpp}!hcubature@{hcubature}}
+\index{hcubature@{hcubature}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{hcubature()}{hcubature()}}
+{\footnotesize\ttfamily int hcubature (\begin{DoxyParamCaption}\item[{unsigned}]{fdim,  }\item[{\mbox{\hyperlink{cubature_8h_a6a50ebe3c97e7055cbbb3d54db589451}{integrand}}}]{f,  }\item[{void $\ast$}]{fdata,  }\item[{unsigned}]{dim,  }\item[{const double $\ast$}]{xmin,  }\item[{const double $\ast$}]{xmax,  }\item[{size\+\_\+t}]{max\+Eval,  }\item[{double}]{req\+Abs\+Error,  }\item[{double}]{req\+Rel\+Error,  }\item[{\mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01e}{error\+\_\+norm}}}]{norm,  }\item[{double $\ast$}]{val,  }\item[{double $\ast$}]{err }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{hcubature_8cpp_aa662b8ef163a773bad94ba16c3e5abdd}\label{hcubature_8cpp_aa662b8ef163a773bad94ba16c3e5abdd}} 
+\index{hcubature.cpp@{hcubature.cpp}!hcubature\_v@{hcubature\_v}}
+\index{hcubature\_v@{hcubature\_v}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{hcubature\_v()}{hcubature\_v()}}
+{\footnotesize\ttfamily int hcubature\+\_\+v (\begin{DoxyParamCaption}\item[{unsigned}]{fdim,  }\item[{\mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}}}]{f,  }\item[{void $\ast$}]{fdata,  }\item[{unsigned}]{dim,  }\item[{const double $\ast$}]{xmin,  }\item[{const double $\ast$}]{xmax,  }\item[{size\+\_\+t}]{max\+Eval,  }\item[{double}]{req\+Abs\+Error,  }\item[{double}]{req\+Rel\+Error,  }\item[{\mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01e}{error\+\_\+norm}}}]{norm,  }\item[{double $\ast$}]{val,  }\item[{double $\ast$}]{err }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{hcubature_8cpp_a58bc1bef5988ead2aabaf7895badee37}\label{hcubature_8cpp_a58bc1bef5988ead2aabaf7895badee37}} 
+\index{hcubature.cpp@{hcubature.cpp}!if@{if}}
+\index{if@{if}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{if()}{if()}\hspace{0.1cm}{\footnotesize\ttfamily [1/5]}}
+{\footnotesize\ttfamily if (\begin{DoxyParamCaption}\item[{!}]{ee }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{hcubature_8cpp_a95e408aca2c7ad2ebe9c68dc1eee4a52}\label{hcubature_8cpp_a95e408aca2c7ad2ebe9c68dc1eee4a52}} 
+\index{hcubature.cpp@{hcubature.cpp}!if@{if}}
+\index{if@{if}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{if()}{if()}\hspace{0.1cm}{\footnotesize\ttfamily [2/5]}}
+{\footnotesize\ttfamily if (\begin{DoxyParamCaption}\item[{!\mbox{\hyperlink{hcubature_8cpp_a670da91be64127c92faac35c8300e814}{R.\+ee}}$\vert$$\vert$eval\+\_\+regions(1, \mbox{\hyperlink{hcubature_8cpp_a09bc594fe13bba38c1fb83020dbafcc9}{R}}, \mbox{\hyperlink{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}{f}}, \mbox{\hyperlink{hcubature_8cpp_af9c4cd57d41446133be84239ba6fcb35}{fdata}}, r)$\vert$$\vert$heap\+\_\+push \&, \mbox{[}0\mbox{]}}]{R\mbox{[}0\mbox{]} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{hcubature_8cpp_af3ee6c55007bc4ebc7dff86288016575}\label{hcubature_8cpp_af3ee6c55007bc4ebc7dff86288016575}} 
+\index{hcubature.cpp@{hcubature.cpp}!if@{if}}
+\index{if@{if}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{if()}{if()}\hspace{0.1cm}{\footnotesize\ttfamily [3/5]}}
+{\footnotesize\ttfamily if (\begin{DoxyParamCaption}\item[{!\mbox{\hyperlink{hcubature_8cpp_a670da91be64127c92faac35c8300e814}{regions.\+ee}}$\vert$$\vert$!regions.}]{items }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{hcubature_8cpp_a37e91582e436a1b80bb541ade27cae6e}\label{hcubature_8cpp_a37e91582e436a1b80bb541ade27cae6e}} 
+\index{hcubature.cpp@{hcubature.cpp}!if@{if}}
+\index{if@{if}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{if()}{if()}\hspace{0.1cm}{\footnotesize\ttfamily [4/5]}}
+{\footnotesize\ttfamily if (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}{fdim}}$<$=}]{1 }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{hcubature_8cpp_a98f47dc17f13588c299da762038e71c1}\label{hcubature_8cpp_a98f47dc17f13588c299da762038e71c1}} 
+\index{hcubature.cpp@{hcubature.cpp}!if@{if}}
+\index{if@{if}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{if()}{if()}\hspace{0.1cm}{\footnotesize\ttfamily [5/5]}}
+{\footnotesize\ttfamily if (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{hcubature_8cpp_a83a5030c0d61d8c57b35b08bea178e4f}{norm}}$<$ 0$\vert$$\vert$\mbox{\hyperlink{hcubature_8cpp_a83a5030c0d61d8c57b35b08bea178e4f}{norm}} $>$}]{E\+R\+R\+O\+R\+\_\+\+L\+I\+NF }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{hcubature_8cpp_a031cf79bdb7e33f7b3e57ba0383c8bb9}\label{hcubature_8cpp_a031cf79bdb7e33f7b3e57ba0383c8bb9}} 
+\index{hcubature.cpp@{hcubature.cpp}!while@{while}}
+\index{while@{while}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{while()}{while()}}
+{\footnotesize\ttfamily while (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{hcubature_8cpp_a9c1de8d7d3a5f420ee40985f0f7a5bcb}\label{hcubature_8cpp_a9c1de8d7d3a5f420ee40985f0f7a5bcb}} 
+\index{hcubature.cpp@{hcubature.cpp}!\_\_pad0\_\_@{\_\_pad0\_\_}}
+\index{\_\_pad0\_\_@{\_\_pad0\_\_}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{\_\_pad0\_\_}{\_\_pad0\_\_}}
+{\footnotesize\ttfamily bad \+\_\+\+\_\+pad0\+\_\+\+\_\+}
+
+\mbox{\Hypertarget{hcubature_8cpp_a670da91be64127c92faac35c8300e814}\label{hcubature_8cpp_a670da91be64127c92faac35c8300e814}} 
+\index{hcubature.cpp@{hcubature.cpp}!ee@{ee}}
+\index{ee@{ee}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{ee}{ee}}
+{\footnotesize\ttfamily ee = N\+U\+LL}
+
+\mbox{\Hypertarget{hcubature_8cpp_af208ea0774962f86bc560d4f949fba76}\label{hcubature_8cpp_af208ea0774962f86bc560d4f949fba76}} 
+\index{hcubature.cpp@{hcubature.cpp}!err@{err}}
+\index{err@{err}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{err}{err}}
+{\footnotesize\ttfamily int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t double double \mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01e}{error\+\_\+norm}} double double$\ast$ err}
+
+\mbox{\Hypertarget{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}\label{hcubature_8cpp_ac48d1042c1e921157302b1311139a4fc}} 
+\index{hcubature.cpp@{hcubature.cpp}!f@{f}}
+\index{f@{f}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{f}{f}}
+{\footnotesize\ttfamily int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} f}
+
+\mbox{\Hypertarget{hcubature_8cpp_a5e8b3ef25c2112d665103be1e3618041}\label{hcubature_8cpp_a5e8b3ef25c2112d665103be1e3618041}} 
+\index{hcubature.cpp@{hcubature.cpp}!FAILURE@{FAILURE}}
+\index{FAILURE@{FAILURE}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{FAILURE}{FAILURE}}
+{\footnotesize\ttfamily \mbox{\hyperlink{converged_8h_a9717e7bbecb906637e86cef6da3d83c2}{return}} F\+A\+I\+L\+U\+RE}
+
+\mbox{\Hypertarget{hcubature_8cpp_af9c4cd57d41446133be84239ba6fcb35}\label{hcubature_8cpp_af9c4cd57d41446133be84239ba6fcb35}} 
+\index{hcubature.cpp@{hcubature.cpp}!fdata@{fdata}}
+\index{fdata@{fdata}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{fdata}{fdata}}
+{\footnotesize\ttfamily int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void$\ast$ fdata}
+
+\mbox{\Hypertarget{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}\label{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}} 
+\index{hcubature.cpp@{hcubature.cpp}!fdim@{fdim}}
+\index{fdim@{fdim}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{fdim}{fdim}}
+{\footnotesize\ttfamily int unsigned fdim}
+
+\mbox{\Hypertarget{hcubature_8cpp_a6f757c6ac1179b9cac478b18da8f48ff}\label{hcubature_8cpp_a6f757c6ac1179b9cac478b18da8f48ff}} 
+\index{hcubature.cpp@{hcubature.cpp}!h@{h}}
+\index{h@{h}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{h}{h}}
+{\footnotesize\ttfamily int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}}$\ast$ h}
+
+\mbox{\Hypertarget{hcubature_8cpp_ac23062089f3a5a2693cbb4ce7a75f1e5}\label{hcubature_8cpp_ac23062089f3a5a2693cbb4ce7a75f1e5}} 
+\index{hcubature.cpp@{hcubature.cpp}!i@{i}}
+\index{i@{i}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{i}{i}}
+{\footnotesize\ttfamily unsigned i}
+
+\mbox{\Hypertarget{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}\label{hcubature_8cpp_ab4f6b3aed51d8a9b2ada1ad5390fb569}} 
+\index{hcubature.cpp@{hcubature.cpp}!j@{j}}
+\index{j@{j}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{j}{j}}
+{\footnotesize\ttfamily unsigned j}
+
+\mbox{\Hypertarget{hcubature_8cpp_a80c2052155894f3bb6ec690b40cf4138}\label{hcubature_8cpp_a80c2052155894f3bb6ec690b40cf4138}} 
+\index{hcubature.cpp@{hcubature.cpp}!maxEval@{maxEval}}
+\index{maxEval@{maxEval}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{maxEval}{maxEval}}
+{\footnotesize\ttfamily int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t max\+Eval}
+
+\mbox{\Hypertarget{hcubature_8cpp_a83a5030c0d61d8c57b35b08bea178e4f}\label{hcubature_8cpp_a83a5030c0d61d8c57b35b08bea178e4f}} 
+\index{hcubature.cpp@{hcubature.cpp}!norm@{norm}}
+\index{norm@{norm}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{norm}{norm}}
+{\footnotesize\ttfamily int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t double double \mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01e}{error\+\_\+norm}} norm}
+
+\mbox{\Hypertarget{hcubature_8cpp_af3e9be5f99c9f3bb1de1b64f0d91aa99}\label{hcubature_8cpp_af3e9be5f99c9f3bb1de1b64f0d91aa99}} 
+\index{hcubature.cpp@{hcubature.cpp}!nR\_alloc@{nR\_alloc}}
+\index{nR\_alloc@{nR\_alloc}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{nR\_alloc}{nR\_alloc}}
+{\footnotesize\ttfamily n\+R\+\_\+alloc = 0}
+
+\mbox{\Hypertarget{hcubature_8cpp_a40f6b3a2061883919852d0311c370324}\label{hcubature_8cpp_a40f6b3a2061883919852d0311c370324}} 
+\index{hcubature.cpp@{hcubature.cpp}!numEval@{numEval}}
+\index{numEval@{numEval}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{numEval}{numEval}}
+{\footnotesize\ttfamily num\+Eval = r-\/$>$num\+\_\+points}
+
+\mbox{\Hypertarget{hcubature_8cpp_aabe36ff13d6e9f6e53663cb20d139340}\label{hcubature_8cpp_aabe36ff13d6e9f6e53663cb20d139340}} 
+\index{hcubature.cpp@{hcubature.cpp}!parallel@{parallel}}
+\index{parallel@{parallel}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{parallel}{parallel}}
+{\footnotesize\ttfamily int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t double double \mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01e}{error\+\_\+norm}} double double int parallel}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{     \textcolor{keywordtype}{size\_t} \mbox{\hyperlink{hcubature_8cpp_a40f6b3a2061883919852d0311c370324}{numEval}} = 0}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{hcubature_8cpp_a09bc594fe13bba38c1fb83020dbafcc9}\label{hcubature_8cpp_a09bc594fe13bba38c1fb83020dbafcc9}} 
+\index{hcubature.cpp@{hcubature.cpp}!R@{R}}
+\index{R@{R}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{R}{R}}
+{\footnotesize\ttfamily R\mbox{[}0\mbox{]} = N\+U\+LL}
+
+\mbox{\Hypertarget{hcubature_8cpp_a9d211cb4044c5e843759496cb408e0e2}\label{hcubature_8cpp_a9d211cb4044c5e843759496cb408e0e2}} 
+\index{hcubature.cpp@{hcubature.cpp}!regions@{regions}}
+\index{regions@{regions}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{regions}{regions}}
+{\footnotesize\ttfamily heap\+\_\+free \& regions = heap\+\_\+alloc(1, \mbox{\hyperlink{hcubature_8cpp_afa4a7fee02568f49ae64ee71e2011144}{fdim}})}
+
+\mbox{\Hypertarget{hcubature_8cpp_a913428b94f48098066a986506c0de65c}\label{hcubature_8cpp_a913428b94f48098066a986506c0de65c}} 
+\index{hcubature.cpp@{hcubature.cpp}!reqAbsError@{reqAbsError}}
+\index{reqAbsError@{reqAbsError}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{reqAbsError}{reqAbsError}}
+{\footnotesize\ttfamily int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t double req\+Abs\+Error}
+
+\mbox{\Hypertarget{hcubature_8cpp_aa5d70d093dbdb1854485dd9f464d7a37}\label{hcubature_8cpp_aa5d70d093dbdb1854485dd9f464d7a37}} 
+\index{hcubature.cpp@{hcubature.cpp}!reqRelError@{reqRelError}}
+\index{reqRelError@{reqRelError}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{reqRelError}{reqRelError}}
+{\footnotesize\ttfamily int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t double double req\+Rel\+Error}
+
+\mbox{\Hypertarget{hcubature_8cpp_a48b99cf368a45012ab09b826df3b90a4}\label{hcubature_8cpp_a48b99cf368a45012ab09b826df3b90a4}} 
+\index{hcubature.cpp@{hcubature.cpp}!SUCCESS@{SUCCESS}}
+\index{SUCCESS@{SUCCESS}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{SUCCESS}{SUCCESS}}
+{\footnotesize\ttfamily \mbox{\hyperlink{converged_8h_a9717e7bbecb906637e86cef6da3d83c2}{return}} S\+U\+C\+C\+E\+SS}
+
+\mbox{\Hypertarget{hcubature_8cpp_ada65af0916682d0dd357df9da3af27b0}\label{hcubature_8cpp_ada65af0916682d0dd357df9da3af27b0}} 
+\index{hcubature.cpp@{hcubature.cpp}!val@{val}}
+\index{val@{val}!hcubature.cpp@{hcubature.cpp}}
+\doxysubsubsection{\texorpdfstring{val}{val}}
+{\footnotesize\ttfamily int unsigned \mbox{\hyperlink{cubature_8h_ae45e2c385bd846f242fd13b4f1acf5fb}{integrand\+\_\+v}} void const \mbox{\hyperlink{structhypercube}{hypercube}} size\+\_\+t double double \mbox{\hyperlink{cubature_8h_ae62d94a2e4f87baa598e16539278b01e}{error\+\_\+norm}} double$\ast$ val}
+

@@ -1,0 +1,151 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="classDebye__mass" kind="class" language="C++" prot="public">
+    <compoundname>Debye_mass</compoundname>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classDebye__mass_1ae127f31ba4affc9cc2de0d0e414c24b2" prot="private" static="no" mutable="no">
+        <type>const double</type>
+        <definition>const double Debye_mass::TL</definition>
+        <argsstring></argsstring>
+        <name>TL</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="70" column="22" bodyfile="src/predefine.h" bodystart="70" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classDebye__mass_1ab4a61d8d6978bede949fea793761bcea" prot="private" static="no" mutable="no">
+        <type>const double</type>
+        <definition>const double Debye_mass::TH</definition>
+        <argsstring></argsstring>
+        <name>TH</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="70" column="25" bodyfile="src/predefine.h" bodystart="70" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classDebye__mass_1ab624eb9369df374eafbf378e68bf0720" prot="private" static="no" mutable="no">
+        <type>const size_t</type>
+        <definition>const size_t Debye_mass::NT</definition>
+        <argsstring></argsstring>
+        <name>NT</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="71" column="22" bodyfile="src/predefine.h" bodystart="71" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classDebye__mass_1a8c1f53626a272116559b1cabff72145d" prot="private" static="no" mutable="no">
+        <type>const double</type>
+        <definition>const double Debye_mass::dT</definition>
+        <argsstring></argsstring>
+        <name>dT</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="72" column="22" bodyfile="src/predefine.h" bodystart="72" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classDebye__mass_1aae45fc038ef85b5e985b4cc13887d6f6" prot="private" static="no" mutable="no">
+        <type>const unsigned int</type>
+        <definition>const unsigned int Debye_mass::type</definition>
+        <argsstring></argsstring>
+        <name>type</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="73" column="28" bodyfile="src/predefine.h" bodystart="73" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classDebye__mass_1a071f9369eed185641f385dc3dee16edf" prot="private" static="no" mutable="no">
+        <type>double *</type>
+        <definition>double* Debye_mass::mD2</definition>
+        <argsstring></argsstring>
+        <name>mD2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="74" column="17" bodyfile="src/predefine.h" bodystart="74" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classDebye__mass_1aa679eaf60c2e0667f0143cd09641dbe7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>Debye_mass::Debye_mass</definition>
+        <argsstring>(const unsigned int _type)</argsstring>
+        <name>Debye_mass</name>
+        <param>
+          <type>const unsigned int</type>
+          <declname>_type</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="76" column="9" bodyfile="src/predefine.cpp" bodystart="86" bodyend="118"/>
+      </memberdef>
+      <memberdef kind="function" id="classDebye__mass_1af69f8adfba324654405270a7b5f7adc4" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Debye_mass::~Debye_mass</definition>
+        <argsstring>()</argsstring>
+        <name>~Debye_mass</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="77" column="9" bodyfile="src/predefine.h" bodystart="77" bodyend="77"/>
+      </memberdef>
+      <memberdef kind="function" id="classDebye__mass_1a94b0f54c6cd57189b69653a2f3653ef9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double Debye_mass::get_mD2</definition>
+        <argsstring>(double T)</argsstring>
+        <name>get_mD2</name>
+        <param>
+          <type>double</type>
+          <declname>T</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/predefine.h" line="78" column="16" bodyfile="src/predefine.cpp" bodystart="120" bodyend="127"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/predefine.h" line="68" column="17" bodyfile="src/predefine.h" bodystart="68" bodyend="79"/>
+    <listofallmembers>
+      <member refid="classDebye__mass_1aa679eaf60c2e0667f0143cd09641dbe7" prot="public" virt="non-virtual"><scope>Debye_mass</scope><name>Debye_mass</name></member>
+      <member refid="classDebye__mass_1a8c1f53626a272116559b1cabff72145d" prot="private" virt="non-virtual"><scope>Debye_mass</scope><name>dT</name></member>
+      <member refid="classDebye__mass_1a94b0f54c6cd57189b69653a2f3653ef9" prot="public" virt="non-virtual"><scope>Debye_mass</scope><name>get_mD2</name></member>
+      <member refid="classDebye__mass_1a071f9369eed185641f385dc3dee16edf" prot="private" virt="non-virtual"><scope>Debye_mass</scope><name>mD2</name></member>
+      <member refid="classDebye__mass_1ab624eb9369df374eafbf378e68bf0720" prot="private" virt="non-virtual"><scope>Debye_mass</scope><name>NT</name></member>
+      <member refid="classDebye__mass_1ab4a61d8d6978bede949fea793761bcea" prot="private" virt="non-virtual"><scope>Debye_mass</scope><name>TH</name></member>
+      <member refid="classDebye__mass_1ae127f31ba4affc9cc2de0d0e414c24b2" prot="private" virt="non-virtual"><scope>Debye_mass</scope><name>TL</name></member>
+      <member refid="classDebye__mass_1aae45fc038ef85b5e985b4cc13887d6f6" prot="private" virt="non-virtual"><scope>Debye_mass</scope><name>type</name></member>
+      <member refid="classDebye__mass_1af69f8adfba324654405270a7b5f7adc4" prot="public" virt="non-virtual"><scope>Debye_mass</scope><name>~Debye_mass</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,198 @@
+\hypertarget{namespaceSrandom}{}\doxysection{Srandom Namespace Reference}
+\label{namespaceSrandom}\index{Srandom@{Srandom}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{namespaceSrandom_a16bd4d4c5c3882522eccc68e21b7ea6d}{get\+Env\+Seed}} ()
+\item 
+std\+::mt19937 \mbox{\hyperlink{namespaceSrandom_a4c626e591a4f470b250fd6c6645f4572}{gen}} ((\mbox{\hyperlink{namespaceSrandom_a16bd4d4c5c3882522eccc68e21b7ea6d}{get\+Env\+Seed}}()$<$ 0) ? std\+::random\+\_\+device\{\}() \+:\mbox{\hyperlink{namespaceSrandom_a16bd4d4c5c3882522eccc68e21b7ea6d}{get\+Env\+Seed}}())
+\item 
+std\+::uniform\+\_\+real\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_a9ddf89d0da16820a06546d7cc32328f5}{sqrtZ}} (std\+::sqrt(1./\mbox{\hyperlink{namespaceSrandom_a9b4f829a62e25cccc3ed9e6d1500e143}{A\+MC}}), std\+::sqrt(\mbox{\hyperlink{namespaceSrandom_a9b4f829a62e25cccc3ed9e6d1500e143}{A\+MC}}))
+\item 
+std\+::uniform\+\_\+real\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_a4f72c242592e88ea648f9cfbbd7d3899}{rejection}} (0.\+0, 1.\+0)
+\item 
+std\+::uniform\+\_\+real\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_a811586f65d14d855bb9ca4b177312f87}{init\+\_\+dis}} (0.\+0, 1.\+0)
+\item 
+std\+::uniform\+\_\+real\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_a2b7dcf93aede02d5f0a1b43a80d872ef}{dist\+\_\+phi}} (0.\+0, 2.\+0 $\ast$M\+\_\+\+PI)
+\item 
+std\+::uniform\+\_\+real\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_ad32508c28b8bb14050afc41c811a7a77}{dist\+\_\+costheta}} (-\/1.\+0, 1.\+0)
+\item 
+std\+::gamma\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_a393d6e84abf3ce36f079db17b7a247a0}{sample\+\_\+\+E\+\_\+over\+\_\+T}} (3.\+0, 1.\+0)
+\item 
+std\+::gamma\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_a4b0f202e451bb0a889f3eb0db10c1e0d}{exp\+\_\+dist}} (1.\+0, 1.\+0)
+\item 
+std\+::normal\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_a996bd8522509db0e18bfd63d96a1accb}{white\+\_\+noise}} (0.\+0, 1.\+0)
+\item 
+int \mbox{\hyperlink{namespaceSrandom_a625e630f7e60030bcafdfd2650057d32}{sample\+\_\+flavor}} (int Nf)
+\item 
+bool \mbox{\hyperlink{namespaceSrandom_a6047a504301a4f7a331edb095cd41cd8}{binary\+\_\+choice}} ()
+\item 
+\mbox{\hyperlink{structfourvec}{fourvec}} \mbox{\hyperlink{namespaceSrandom_a427c64676c7529855a83a62e641c5286}{generate\+\_\+thermal\+\_\+parton\+\_\+with\+\_\+boost}} (double T, double vx, double vy, double vz)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const double \mbox{\hyperlink{namespaceSrandom_a9b4f829a62e25cccc3ed9e6d1500e143}{A\+MC}} = 4.\+0
+\item 
+std\+::mt19937 \mbox{\hyperlink{namespaceSrandom_ad3e3c4b3d936a9d248ae5a8f35f61349}{gen}}
+\item 
+std\+::uniform\+\_\+real\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_ad1128128dad6359d0313c854ae13d6b1}{sqrtZ}}
+\item 
+std\+::uniform\+\_\+real\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_aa8465b902433a025abd3150a319f21a3}{rejection}}
+\item 
+std\+::uniform\+\_\+real\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_a53d1ec89ecfb7e76f57b059339f693dd}{init\+\_\+dis}}
+\item 
+std\+::uniform\+\_\+real\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_a8fd3ec77ae920ff171c2ae4c1f0854fe}{dist\+\_\+phi}}
+\item 
+std\+::uniform\+\_\+real\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_abc72a0cd845716e2cf7dbc10de23a646}{dist\+\_\+costheta}}
+\item 
+std\+::normal\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_a25ea6b64bd544db03da10d4655616d55}{white\+\_\+noise}}
+\item 
+std\+::gamma\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_a0e05d8a706b2e5376fab35f5bdbee1e0}{sample\+\_\+\+E\+\_\+over\+\_\+T}}
+\item 
+std\+::gamma\+\_\+distribution$<$ double $>$ \mbox{\hyperlink{namespaceSrandom_a430cafd75eb099fb444194baadd8850f}{exp\+\_\+dist}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespaceSrandom_a6047a504301a4f7a331edb095cd41cd8}\label{namespaceSrandom_a6047a504301a4f7a331edb095cd41cd8}} 
+\index{Srandom@{Srandom}!binary\_choice@{binary\_choice}}
+\index{binary\_choice@{binary\_choice}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{binary\_choice()}{binary\_choice()}}
+{\footnotesize\ttfamily bool Srandom\+::binary\+\_\+choice (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespaceSrandom_ad32508c28b8bb14050afc41c811a7a77}\label{namespaceSrandom_ad32508c28b8bb14050afc41c811a7a77}} 
+\index{Srandom@{Srandom}!dist\_costheta@{dist\_costheta}}
+\index{dist\_costheta@{dist\_costheta}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{dist\_costheta()}{dist\_costheta()}}
+{\footnotesize\ttfamily std\+::uniform\+\_\+real\+\_\+distribution$<$double$>$ Srandom\+::dist\+\_\+costheta (\begin{DoxyParamCaption}\item[{-\/1.}]{0,  }\item[{1.}]{0 }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespaceSrandom_a2b7dcf93aede02d5f0a1b43a80d872ef}\label{namespaceSrandom_a2b7dcf93aede02d5f0a1b43a80d872ef}} 
+\index{Srandom@{Srandom}!dist\_phi@{dist\_phi}}
+\index{dist\_phi@{dist\_phi}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{dist\_phi()}{dist\_phi()}}
+{\footnotesize\ttfamily std\+::uniform\+\_\+real\+\_\+distribution$<$double$>$ Srandom\+::dist\+\_\+phi (\begin{DoxyParamCaption}\item[{0.}]{0,  }\item[{2.\+0 $\ast$}]{M\+\_\+\+PI }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespaceSrandom_a4b0f202e451bb0a889f3eb0db10c1e0d}\label{namespaceSrandom_a4b0f202e451bb0a889f3eb0db10c1e0d}} 
+\index{Srandom@{Srandom}!exp\_dist@{exp\_dist}}
+\index{exp\_dist@{exp\_dist}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{exp\_dist()}{exp\_dist()}}
+{\footnotesize\ttfamily std\+::gamma\+\_\+distribution$<$double$>$ Srandom\+::exp\+\_\+dist (\begin{DoxyParamCaption}\item[{1.}]{0,  }\item[{1.}]{0 }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespaceSrandom_a4c626e591a4f470b250fd6c6645f4572}\label{namespaceSrandom_a4c626e591a4f470b250fd6c6645f4572}} 
+\index{Srandom@{Srandom}!gen@{gen}}
+\index{gen@{gen}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{gen()}{gen()}}
+{\footnotesize\ttfamily std\+::mt19937 Srandom\+::gen (\begin{DoxyParamCaption}\item[{(\mbox{\hyperlink{namespaceSrandom_a16bd4d4c5c3882522eccc68e21b7ea6d}{get\+Env\+Seed}}()$<$ 0) ? std\+::random\+\_\+device\{\}() \+:\mbox{\hyperlink{namespaceSrandom_a16bd4d4c5c3882522eccc68e21b7ea6d}{get\+Env\+Seed}}()}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespaceSrandom_a427c64676c7529855a83a62e641c5286}\label{namespaceSrandom_a427c64676c7529855a83a62e641c5286}} 
+\index{Srandom@{Srandom}!generate\_thermal\_parton\_with\_boost@{generate\_thermal\_parton\_with\_boost}}
+\index{generate\_thermal\_parton\_with\_boost@{generate\_thermal\_parton\_with\_boost}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{generate\_thermal\_parton\_with\_boost()}{generate\_thermal\_parton\_with\_boost()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structfourvec}{fourvec}} Srandom\+::generate\+\_\+thermal\+\_\+parton\+\_\+with\+\_\+boost (\begin{DoxyParamCaption}\item[{double}]{T,  }\item[{double}]{vx,  }\item[{double}]{vy,  }\item[{double}]{vz }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespaceSrandom_a16bd4d4c5c3882522eccc68e21b7ea6d}\label{namespaceSrandom_a16bd4d4c5c3882522eccc68e21b7ea6d}} 
+\index{Srandom@{Srandom}!getEnvSeed@{getEnvSeed}}
+\index{getEnvSeed@{getEnvSeed}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{getEnvSeed()}{getEnvSeed()}}
+{\footnotesize\ttfamily int Srandom\+::get\+Env\+Seed (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespaceSrandom_a811586f65d14d855bb9ca4b177312f87}\label{namespaceSrandom_a811586f65d14d855bb9ca4b177312f87}} 
+\index{Srandom@{Srandom}!init\_dis@{init\_dis}}
+\index{init\_dis@{init\_dis}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{init\_dis()}{init\_dis()}}
+{\footnotesize\ttfamily std\+::uniform\+\_\+real\+\_\+distribution$<$double$>$ Srandom\+::init\+\_\+dis (\begin{DoxyParamCaption}\item[{0.}]{0,  }\item[{1.}]{0 }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespaceSrandom_a4f72c242592e88ea648f9cfbbd7d3899}\label{namespaceSrandom_a4f72c242592e88ea648f9cfbbd7d3899}} 
+\index{Srandom@{Srandom}!rejection@{rejection}}
+\index{rejection@{rejection}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{rejection()}{rejection()}}
+{\footnotesize\ttfamily std\+::uniform\+\_\+real\+\_\+distribution$<$double$>$ Srandom\+::rejection (\begin{DoxyParamCaption}\item[{0.}]{0,  }\item[{1.}]{0 }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespaceSrandom_a393d6e84abf3ce36f079db17b7a247a0}\label{namespaceSrandom_a393d6e84abf3ce36f079db17b7a247a0}} 
+\index{Srandom@{Srandom}!sample\_E\_over\_T@{sample\_E\_over\_T}}
+\index{sample\_E\_over\_T@{sample\_E\_over\_T}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{sample\_E\_over\_T()}{sample\_E\_over\_T()}}
+{\footnotesize\ttfamily std\+::gamma\+\_\+distribution$<$double$>$ Srandom\+::sample\+\_\+\+E\+\_\+over\+\_\+T (\begin{DoxyParamCaption}\item[{3.}]{0,  }\item[{1.}]{0 }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespaceSrandom_a625e630f7e60030bcafdfd2650057d32}\label{namespaceSrandom_a625e630f7e60030bcafdfd2650057d32}} 
+\index{Srandom@{Srandom}!sample\_flavor@{sample\_flavor}}
+\index{sample\_flavor@{sample\_flavor}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{sample\_flavor()}{sample\_flavor()}}
+{\footnotesize\ttfamily int Srandom\+::sample\+\_\+flavor (\begin{DoxyParamCaption}\item[{int}]{Nf }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespaceSrandom_a9ddf89d0da16820a06546d7cc32328f5}\label{namespaceSrandom_a9ddf89d0da16820a06546d7cc32328f5}} 
+\index{Srandom@{Srandom}!sqrtZ@{sqrtZ}}
+\index{sqrtZ@{sqrtZ}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{sqrtZ()}{sqrtZ()}}
+{\footnotesize\ttfamily std\+::uniform\+\_\+real\+\_\+distribution$<$double$>$ Srandom\+::sqrtZ (\begin{DoxyParamCaption}\item[{std\+::sqrt(1./\mbox{\hyperlink{namespaceSrandom_a9b4f829a62e25cccc3ed9e6d1500e143}{A\+MC}})}]{,  }\item[{std\+::sqrt(\mbox{\hyperlink{namespaceSrandom_a9b4f829a62e25cccc3ed9e6d1500e143}{A\+MC}})}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespaceSrandom_a996bd8522509db0e18bfd63d96a1accb}\label{namespaceSrandom_a996bd8522509db0e18bfd63d96a1accb}} 
+\index{Srandom@{Srandom}!white\_noise@{white\_noise}}
+\index{white\_noise@{white\_noise}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{white\_noise()}{white\_noise()}}
+{\footnotesize\ttfamily std\+::normal\+\_\+distribution$<$double$>$ Srandom\+::white\+\_\+noise (\begin{DoxyParamCaption}\item[{0.}]{0,  }\item[{1.}]{0 }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{namespaceSrandom_a9b4f829a62e25cccc3ed9e6d1500e143}\label{namespaceSrandom_a9b4f829a62e25cccc3ed9e6d1500e143}} 
+\index{Srandom@{Srandom}!AMC@{AMC}}
+\index{AMC@{AMC}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{AMC}{AMC}}
+{\footnotesize\ttfamily const double Srandom\+::\+A\+MC = 4.\+0}
+
+\mbox{\Hypertarget{namespaceSrandom_abc72a0cd845716e2cf7dbc10de23a646}\label{namespaceSrandom_abc72a0cd845716e2cf7dbc10de23a646}} 
+\index{Srandom@{Srandom}!dist\_costheta@{dist\_costheta}}
+\index{dist\_costheta@{dist\_costheta}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{dist\_costheta}{dist\_costheta}}
+{\footnotesize\ttfamily std\+::uniform\+\_\+real\+\_\+distribution$<$double$>$ Srandom\+::dist\+\_\+costheta}
+
+\mbox{\Hypertarget{namespaceSrandom_a8fd3ec77ae920ff171c2ae4c1f0854fe}\label{namespaceSrandom_a8fd3ec77ae920ff171c2ae4c1f0854fe}} 
+\index{Srandom@{Srandom}!dist\_phi@{dist\_phi}}
+\index{dist\_phi@{dist\_phi}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{dist\_phi}{dist\_phi}}
+{\footnotesize\ttfamily std\+::uniform\+\_\+real\+\_\+distribution$<$double$>$ Srandom\+::dist\+\_\+phi}
+
+\mbox{\Hypertarget{namespaceSrandom_a430cafd75eb099fb444194baadd8850f}\label{namespaceSrandom_a430cafd75eb099fb444194baadd8850f}} 
+\index{Srandom@{Srandom}!exp\_dist@{exp\_dist}}
+\index{exp\_dist@{exp\_dist}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{exp\_dist}{exp\_dist}}
+{\footnotesize\ttfamily std\+::gamma\+\_\+distribution$<$double$>$ Srandom\+::exp\+\_\+dist}
+
+\mbox{\Hypertarget{namespaceSrandom_ad3e3c4b3d936a9d248ae5a8f35f61349}\label{namespaceSrandom_ad3e3c4b3d936a9d248ae5a8f35f61349}} 
+\index{Srandom@{Srandom}!gen@{gen}}
+\index{gen@{gen}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{gen}{gen}}
+{\footnotesize\ttfamily std\+::mt19937 Srandom\+::gen}
+
+\mbox{\Hypertarget{namespaceSrandom_a53d1ec89ecfb7e76f57b059339f693dd}\label{namespaceSrandom_a53d1ec89ecfb7e76f57b059339f693dd}} 
+\index{Srandom@{Srandom}!init\_dis@{init\_dis}}
+\index{init\_dis@{init\_dis}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{init\_dis}{init\_dis}}
+{\footnotesize\ttfamily std\+::uniform\+\_\+real\+\_\+distribution$<$double$>$ Srandom\+::init\+\_\+dis}
+
+\mbox{\Hypertarget{namespaceSrandom_aa8465b902433a025abd3150a319f21a3}\label{namespaceSrandom_aa8465b902433a025abd3150a319f21a3}} 
+\index{Srandom@{Srandom}!rejection@{rejection}}
+\index{rejection@{rejection}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{rejection}{rejection}}
+{\footnotesize\ttfamily std\+::uniform\+\_\+real\+\_\+distribution$<$double$>$ Srandom\+::rejection}
+
+\mbox{\Hypertarget{namespaceSrandom_a0e05d8a706b2e5376fab35f5bdbee1e0}\label{namespaceSrandom_a0e05d8a706b2e5376fab35f5bdbee1e0}} 
+\index{Srandom@{Srandom}!sample\_E\_over\_T@{sample\_E\_over\_T}}
+\index{sample\_E\_over\_T@{sample\_E\_over\_T}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{sample\_E\_over\_T}{sample\_E\_over\_T}}
+{\footnotesize\ttfamily std\+::gamma\+\_\+distribution$<$double$>$ Srandom\+::sample\+\_\+\+E\+\_\+over\+\_\+T}
+
+\mbox{\Hypertarget{namespaceSrandom_ad1128128dad6359d0313c854ae13d6b1}\label{namespaceSrandom_ad1128128dad6359d0313c854ae13d6b1}} 
+\index{Srandom@{Srandom}!sqrtZ@{sqrtZ}}
+\index{sqrtZ@{sqrtZ}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{sqrtZ}{sqrtZ}}
+{\footnotesize\ttfamily std\+::uniform\+\_\+real\+\_\+distribution$<$double$>$ Srandom\+::sqrtZ}
+
+\mbox{\Hypertarget{namespaceSrandom_a25ea6b64bd544db03da10d4655616d55}\label{namespaceSrandom_a25ea6b64bd544db03da10d4655616d55}} 
+\index{Srandom@{Srandom}!white\_noise@{white\_noise}}
+\index{white\_noise@{white\_noise}!Srandom@{Srandom}}
+\doxysubsubsection{\texorpdfstring{white\_noise}{white\_noise}}
+{\footnotesize\ttfamily std\+::normal\+\_\+distribution$<$double$>$ Srandom\+::white\+\_\+noise}
+

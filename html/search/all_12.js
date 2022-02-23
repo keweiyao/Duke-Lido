@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['r_329',['R',['../hcubature_8cpp.html#a09bc594fe13bba38c1fb83020dbafcc9',1,'hcubature.cpp']]],
+  ['radlist_330',['radlist',['../structparticle.html#a4027f5488864f716d72fa6971fc57bc2',1,'particle']]],
+  ['random_2ecpp_331',['random.cpp',['../random_8cpp.html',1,'']]],
+  ['random_2eh_332',['random.h',['../random_8h.html',1,'']]],
+  ['rank_333',['rank',['../classTableBase.html#a337459c599c5f26d3f3328e68d0af48c',1,'TableBase']]],
+  ['rap_334',['rap',['../structfourvec.html#a9ff00c42696997c6e629fe3843d764c0',1,'fourvec']]],
+  ['rate_335',['Rate',['../classRate.html',1,'Rate&lt; str, N1, N2, F &gt;'],['../classRate.html#a54987ef646e12f7e9f0978853bd01645',1,'Rate::Rate(std::string Name, std::string configfile, F f)'],['../classRate.html#a5c00e0b04d3616331eab63ce8aeef3fb',1,'Rate::Rate(std::string Name, std::string configfile, double(*f)(const double, void *))'],['../classRate.html#abd48776ac2378076a6d355e9354bba78',1,'Rate::Rate(std::string Name, std::string configfile, double(*f)(const double *, void *))']]],
+  ['rate_2ecpp_336',['Rate.cpp',['../Rate_8cpp.html',1,'']]],
+  ['rate_2eh_337',['Rate.h',['../Rate_8h.html',1,'']]],
+  ['rate12_338',['Rate12',['../collision__manager_8h.html#a17905225037080392ccdfe5dd165bdb2',1,'collision_manager.h']]],
+  ['rate22_339',['Rate22',['../collision__manager_8h.html#ac64d7f65d518fd5d0e756982947242df',1,'collision_manager.h']]],
+  ['rate23_340',['Rate23',['../collision__manager_8h.html#a1190f759c5dd134306d7174be9f66981',1,'collision_manager.h']]],
+  ['real_341',['real',['../hcubature_8cpp.html#ab4cafb1ab351d520eb09a05ebd0a1e13',1,'hcubature.cpp']]],
+  ['region_342',['region',['../structregion.html',1,'']]],
+  ['regions_343',['regions',['../hcubature_8cpp.html#a9d211cb4044c5e843759496cb408e0e2',1,'hcubature.cpp']]],
+  ['rejection_344',['rejection',['../namespaceSrandom.html#aa8465b902433a025abd3150a319f21a3',1,'Srandom::rejection()'],['../namespaceSrandom.html#a4f72c242592e88ea648f9cfbbd7d3899',1,'Srandom::rejection(0.0, 1.0)']]],
+  ['reqabserror_345',['reqAbsError',['../hcubature_8cpp.html#a913428b94f48098066a986506c0de65c',1,'hcubature.cpp']]],
+  ['reqrelerror_346',['reqRelError',['../hcubature_8cpp.html#aa5d70d093dbdb1854485dd9f464d7a37',1,'hcubature.cpp']]],
+  ['return_347',['return',['../converged_8h.html#a9717e7bbecb906637e86cef6da3d83c2',1,'converged.h']]],
+  ['rotate_5faround_5fpz_348',['rotate_around_pz',['../structfourvec.html#a40c7a6c0d41f8efd1dad8b5e78c25e55',1,'fourvec']]],
+  ['rotate_5fback_349',['rotate_back',['../structfourvec.html#a6213c64a62b4127f8c25fd95efb5034b',1,'fourvec::rotate_back()'],['../structtensor.html#a60ac5df77a9dbeb377acc3364aaa0319',1,'tensor::rotate_back()']]],
+  ['rule_350',['rule',['../hcubature_8cpp.html#ae648232412b13de3ed777a59b4d80128',1,'hcubature.cpp']]],
+  ['rule75genzmalik_351',['rule75genzmalik',['../structrule75genzmalik.html',1,'']]],
+  ['rule_5fs_352',['rule_s',['../structrule__s.html',1,'']]]
+];

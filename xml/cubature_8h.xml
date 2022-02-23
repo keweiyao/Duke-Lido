@@ -1,0 +1,562 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="cubature_8h" kind="file" language="C++">
+    <compoundname>cubature.h</compoundname>
+    <includes local="no">stdlib.h</includes>
+    <includedby refid="hcubature_8cpp" local="yes">src/hcubature.cpp</includedby>
+    <includedby refid="integrator_8h" local="yes">src/integrator.h</includedby>
+    <incdepgraph>
+      <node id="2">
+        <label>stdlib.h</label>
+      </node>
+      <node id="1">
+        <label>src/cubature.h</label>
+        <link refid="cubature_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1">
+        <label>src/cubature.h</label>
+        <link refid="cubature_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>src/integrator.h</label>
+        <link refid="integrator_8h_source"/>
+      </node>
+    </invincdepgraph>
+      <sectiondef kind="enum">
+      <memberdef kind="enum" id="cubature_8h_1ae62d94a2e4f87baa598e16539278b01e" prot="public" static="no" strong="no">
+        <type></type>
+        <name>error_norm</name>
+        <enumvalue id="cubature_8h_1ae62d94a2e4f87baa598e16539278b01ea823b774c5171021d7a1b7d3ed7456064" prot="public">
+          <name>ERROR_INDIVIDUAL</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="cubature_8h_1ae62d94a2e4f87baa598e16539278b01eabe2e9ecff8bfadad19eec75021206998" prot="public">
+          <name>ERROR_PAIRED</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="cubature_8h_1ae62d94a2e4f87baa598e16539278b01ea0f15c19ea8dc0cdb4c1d418576f7b20d" prot="public">
+          <name>ERROR_L2</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="cubature_8h_1ae62d94a2e4f87baa598e16539278b01ea1d5cc2c8d87212d2dbd7002230053625" prot="public">
+          <name>ERROR_L1</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="cubature_8h_1ae62d94a2e4f87baa598e16539278b01ea3cde64a07665c549e17180d08ea06183" prot="public">
+          <name>ERROR_LINF</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cubature.h" line="63" column="14" bodyfile="src/cubature.h" bodystart="63" bodyend="70"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="cubature_8h_1a6a50ebe3c97e7055cbbb3d54db589451" prot="public" static="no">
+        <type>int(*</type>
+        <definition>typedef int(* integrand) (unsigned ndim, const double *x, void *, unsigned fdim, double *fval)</definition>
+        <argsstring>)(unsigned ndim, const double *x, void *, unsigned fdim, double *fval)</argsstring>
+        <name>integrand</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cubature.h" line="48" column="9" bodyfile="src/cubature.h" bodystart="48" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="cubature_8h_1ae45e2c385bd846f242fd13b4f1acf5fb" prot="public" static="no">
+        <type>int(*</type>
+        <definition>typedef int(* integrand_v) (unsigned ndim, size_t npt, const double *x, void *, unsigned fdim, double *fval)</definition>
+        <argsstring>)(unsigned ndim, size_t npt, const double *x, void *, unsigned fdim, double *fval)</argsstring>
+        <name>integrand_v</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cubature.h" line="55" column="9" bodyfile="src/cubature.h" bodystart="55" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="cubature_8h_1a8917735ee20270de7aafbaeacfab2137" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int hcubature</definition>
+        <argsstring>(unsigned fdim, integrand f, void *fdata, unsigned dim, const double *xmin, const double *xmax, size_t maxEval, double reqAbsError, double reqRelError, error_norm norm, double *val, double *err)</argsstring>
+        <name>hcubature</name>
+        <param>
+          <type>unsigned</type>
+          <declname>fdim</declname>
+        </param>
+        <param>
+          <type>integrand</type>
+          <declname>f</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>fdata</declname>
+        </param>
+        <param>
+          <type>unsigned</type>
+          <declname>dim</declname>
+        </param>
+        <param>
+          <type>const double *</type>
+          <declname>xmin</declname>
+        </param>
+        <param>
+          <type>const double *</type>
+          <declname>xmax</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>maxEval</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>reqAbsError</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>reqRelError</declname>
+        </param>
+        <param>
+          <type>error_norm</type>
+          <declname>norm</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>val</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>err</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cubature.h" line="83" column="5" bodyfile="src/hcubature.cpp" bodystart="1071" bodyend="1086" declfile="src/cubature.h" declline="83" declcolumn="5"/>
+      </memberdef>
+      <memberdef kind="function" id="cubature_8h_1aa662b8ef163a773bad94ba16c3e5abdd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int hcubature_v</definition>
+        <argsstring>(unsigned fdim, integrand_v f, void *fdata, unsigned dim, const double *xmin, const double *xmax, size_t maxEval, double reqAbsError, double reqRelError, error_norm norm, double *val, double *err)</argsstring>
+        <name>hcubature_v</name>
+        <param>
+          <type>unsigned</type>
+          <declname>fdim</declname>
+        </param>
+        <param>
+          <type>integrand_v</type>
+          <declname>f</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>fdata</declname>
+        </param>
+        <param>
+          <type>unsigned</type>
+          <declname>dim</declname>
+        </param>
+        <param>
+          <type>const double *</type>
+          <declname>xmin</declname>
+        </param>
+        <param>
+          <type>const double *</type>
+          <declname>xmax</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>maxEval</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>reqAbsError</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>reqRelError</declname>
+        </param>
+        <param>
+          <type>error_norm</type>
+          <declname>norm</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>val</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>err</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cubature.h" line="90" column="5" bodyfile="src/hcubature.cpp" bodystart="1059" bodyend="1067" declfile="src/cubature.h" declline="90" declcolumn="5"/>
+      </memberdef>
+      <memberdef kind="function" id="cubature_8h_1acd5ea890dae3d5f7f7d43d9886359079" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int pcubature_v_buf</definition>
+        <argsstring>(unsigned fdim, integrand_v f, void *fdata, unsigned dim, const double *xmin, const double *xmax, size_t maxEval, double reqAbsError, double reqRelError, error_norm norm, unsigned *m, double **buf, size_t *nbuf, size_t max_nbuf, double *val, double *err)</argsstring>
+        <name>pcubature_v_buf</name>
+        <param>
+          <type>unsigned</type>
+          <declname>fdim</declname>
+        </param>
+        <param>
+          <type>integrand_v</type>
+          <declname>f</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>fdata</declname>
+        </param>
+        <param>
+          <type>unsigned</type>
+          <declname>dim</declname>
+        </param>
+        <param>
+          <type>const double *</type>
+          <declname>xmin</declname>
+        </param>
+        <param>
+          <type>const double *</type>
+          <declname>xmax</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>maxEval</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>reqAbsError</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>reqRelError</declname>
+        </param>
+        <param>
+          <type>error_norm</type>
+          <declname>norm</declname>
+        </param>
+        <param>
+          <type>unsigned *</type>
+          <declname>m</declname>
+        </param>
+        <param>
+          <type>double **</type>
+          <declname>buf</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>nbuf</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>max_nbuf</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>val</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>err</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cubature.h" line="100" column="5" declfile="src/cubature.h" declline="100" declcolumn="5"/>
+      </memberdef>
+      <memberdef kind="function" id="cubature_8h_1aa2d6310b8038bbea79d9d3841f9da457" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int pcubature_v</definition>
+        <argsstring>(unsigned fdim, integrand_v f, void *fdata, unsigned dim, const double *xmin, const double *xmax, size_t maxEval, double reqAbsError, double reqRelError, error_norm norm, double *val, double *err)</argsstring>
+        <name>pcubature_v</name>
+        <param>
+          <type>unsigned</type>
+          <declname>fdim</declname>
+        </param>
+        <param>
+          <type>integrand_v</type>
+          <declname>f</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>fdata</declname>
+        </param>
+        <param>
+          <type>unsigned</type>
+          <declname>dim</declname>
+        </param>
+        <param>
+          <type>const double *</type>
+          <declname>xmin</declname>
+        </param>
+        <param>
+          <type>const double *</type>
+          <declname>xmax</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>maxEval</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>reqAbsError</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>reqRelError</declname>
+        </param>
+        <param>
+          <type>error_norm</type>
+          <declname>norm</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>val</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>err</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cubature.h" line="108" column="5" declfile="src/cubature.h" declline="108" declcolumn="5"/>
+      </memberdef>
+      <memberdef kind="function" id="cubature_8h_1af57f12edd4e9e086a9e1bf8be6e7e328" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int pcubature</definition>
+        <argsstring>(unsigned fdim, integrand f, void *fdata, unsigned dim, const double *xmin, const double *xmax, size_t maxEval, double reqAbsError, double reqRelError, error_norm norm, double *val, double *err)</argsstring>
+        <name>pcubature</name>
+        <param>
+          <type>unsigned</type>
+          <declname>fdim</declname>
+        </param>
+        <param>
+          <type>integrand</type>
+          <declname>f</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>fdata</declname>
+        </param>
+        <param>
+          <type>unsigned</type>
+          <declname>dim</declname>
+        </param>
+        <param>
+          <type>const double *</type>
+          <declname>xmin</declname>
+        </param>
+        <param>
+          <type>const double *</type>
+          <declname>xmax</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>maxEval</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>reqAbsError</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>reqRelError</declname>
+        </param>
+        <param>
+          <type>error_norm</type>
+          <declname>norm</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>val</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>err</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cubature.h" line="113" column="5" declfile="src/cubature.h" declline="113" declcolumn="5"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">/*<sp/>Adaptive<sp/>multidimensional<sp/>integration<sp/>of<sp/>a<sp/>vector<sp/>of<sp/>integrands.</highlight></codeline>
+<codeline lineno="2"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="3"><highlight class="comment"><sp/>*<sp/>Copyright<sp/>(c)<sp/>2005-2013<sp/>Steven<sp/>G.<sp/>Johnson</highlight></codeline>
+<codeline lineno="4"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="5"><highlight class="comment"><sp/>*<sp/>Portions<sp/>(see<sp/>comments)<sp/>based<sp/>on<sp/>HIntLib<sp/>(also<sp/>distributed<sp/>under</highlight></codeline>
+<codeline lineno="6"><highlight class="comment"><sp/>*<sp/>the<sp/>GNU<sp/>GPL,<sp/>v2<sp/>or<sp/>later),<sp/>copyright<sp/>(c)<sp/>2002-2005<sp/>Rudolf<sp/>Schuerer.</highlight></codeline>
+<codeline lineno="7"><highlight class="comment"><sp/>*<sp/><sp/><sp/><sp/><sp/>(http://www.cosy.sbg.ac.at/~rschuer/hintlib/)</highlight></codeline>
+<codeline lineno="8"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="9"><highlight class="comment"><sp/>*<sp/>Portions<sp/>(see<sp/>comments)<sp/>based<sp/>on<sp/>GNU<sp/>GSL<sp/>(also<sp/>distributed<sp/>under</highlight></codeline>
+<codeline lineno="10"><highlight class="comment"><sp/>*<sp/>the<sp/>GNU<sp/>GPL,<sp/>v2<sp/>or<sp/>later),<sp/>copyright<sp/>(c)<sp/>1996-2000<sp/>Brian<sp/>Gough.</highlight></codeline>
+<codeline lineno="11"><highlight class="comment"><sp/>*<sp/><sp/><sp/><sp/><sp/>(http://www.gnu.org/software/gsl/)</highlight></codeline>
+<codeline lineno="12"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="13"><highlight class="comment"><sp/>*<sp/>This<sp/>program<sp/>is<sp/>free<sp/>software;<sp/>you<sp/>can<sp/>redistribute<sp/>it<sp/>and/or<sp/>modify</highlight></codeline>
+<codeline lineno="14"><highlight class="comment"><sp/>*<sp/>it<sp/>under<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>GNU<sp/>General<sp/>Public<sp/>License<sp/>as<sp/>published<sp/>by</highlight></codeline>
+<codeline lineno="15"><highlight class="comment"><sp/>*<sp/>the<sp/>Free<sp/>Software<sp/>Foundation;<sp/>either<sp/>version<sp/>2<sp/>of<sp/>the<sp/>License,<sp/>or</highlight></codeline>
+<codeline lineno="16"><highlight class="comment"><sp/>*<sp/>(at<sp/>your<sp/>option)<sp/>any<sp/>later<sp/>version.</highlight></codeline>
+<codeline lineno="17"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="18"><highlight class="comment"><sp/>*<sp/>This<sp/>program<sp/>is<sp/>distributed<sp/>in<sp/>the<sp/>hope<sp/>that<sp/>it<sp/>will<sp/>be<sp/>useful,</highlight></codeline>
+<codeline lineno="19"><highlight class="comment"><sp/>*<sp/>but<sp/>WITHOUT<sp/>ANY<sp/>WARRANTY;<sp/>without<sp/>even<sp/>the<sp/>implied<sp/>warranty<sp/>of</highlight></codeline>
+<codeline lineno="20"><highlight class="comment"><sp/>*<sp/>MERCHANTABILITY<sp/>or<sp/>FITNESS<sp/>FOR<sp/>A<sp/>PARTICULAR<sp/>PURPOSE.<sp/><sp/>See<sp/>the</highlight></codeline>
+<codeline lineno="21"><highlight class="comment"><sp/>*<sp/>GNU<sp/>General<sp/>Public<sp/>License<sp/>for<sp/>more<sp/>details.</highlight></codeline>
+<codeline lineno="22"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="23"><highlight class="comment"><sp/>*<sp/>You<sp/>should<sp/>have<sp/>received<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>GNU<sp/>General<sp/>Public<sp/>License</highlight></codeline>
+<codeline lineno="24"><highlight class="comment"><sp/>*<sp/>along<sp/>with<sp/>this<sp/>program;<sp/>if<sp/>not,<sp/>write<sp/>to<sp/>the<sp/>Free<sp/>Software</highlight></codeline>
+<codeline lineno="25"><highlight class="comment"><sp/>*<sp/>Foundation,<sp/>Inc.,<sp/>59<sp/>Temple<sp/>Place,<sp/>Suite<sp/>330,<sp/>Boston,<sp/>MA<sp/><sp/>02111-1307<sp/><sp/>USA</highlight></codeline>
+<codeline lineno="26"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="27"><highlight class="comment"><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>CUBATURE_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>CUBATURE_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;stdlib.h&gt;</highlight><highlight class="normal"><sp/></highlight><highlight class="comment">/*<sp/>for<sp/>size_t<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight><highlight class="preprocessor">#ifdef<sp/>__cplusplus</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;C&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>__cplusplus<sp/>*/</highlight><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>USAGE:<sp/>Call<sp/>hcubature<sp/>or<sp/>pcubature<sp/>with<sp/>your<sp/>function<sp/>as<sp/>described</highlight></codeline>
+<codeline lineno="40"><highlight class="comment"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>in<sp/>the<sp/>README<sp/>file.<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>a<sp/>vector<sp/>integrand<sp/>-<sp/>evaluates<sp/>the<sp/>function<sp/>at<sp/>the<sp/>given<sp/>point<sp/>x</highlight></codeline>
+<codeline lineno="43"><highlight class="comment"><sp/><sp/><sp/>(an<sp/>array<sp/>of<sp/>length<sp/>ndim)<sp/>and<sp/>returns<sp/>the<sp/>result<sp/>in<sp/>fval<sp/>(an<sp/>array</highlight></codeline>
+<codeline lineno="44"><highlight class="comment"><sp/><sp/><sp/>of<sp/>length<sp/>fdim).<sp/><sp/><sp/>The<sp/>void*<sp/>parameter<sp/>is<sp/>there<sp/>in<sp/>case<sp/>you<sp/>have</highlight></codeline>
+<codeline lineno="45"><highlight class="comment"><sp/><sp/><sp/>to<sp/>pass<sp/>any<sp/>additional<sp/>data<sp/>through<sp/>to<sp/>your<sp/>function<sp/>(it<sp/>corresponds</highlight></codeline>
+<codeline lineno="46"><highlight class="comment"><sp/><sp/><sp/>to<sp/>the<sp/>fdata<sp/>parameter<sp/>you<sp/>pass<sp/>to<sp/>cubature).<sp/><sp/>Return<sp/>0<sp/>on</highlight></codeline>
+<codeline lineno="47"><highlight class="comment"><sp/><sp/><sp/>success<sp/>or<sp/>nonzero<sp/>to<sp/>terminate<sp/>the<sp/>integration.<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>int<sp/>(*integrand)<sp/>(</highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>ndim,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*x,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*,</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>fdim,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*fval);</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"></highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>a<sp/>vector<sp/>integrand<sp/>of<sp/>a<sp/>vector<sp/>of<sp/>npt<sp/>points:<sp/>x[i*ndim<sp/>+<sp/>j]<sp/>is<sp/>the</highlight></codeline>
+<codeline lineno="52"><highlight class="comment"><sp/><sp/><sp/>j-th<sp/>coordinate<sp/>of<sp/>the<sp/>i-th<sp/>point,<sp/>and<sp/>the<sp/>k-th<sp/>function<sp/>evaluation</highlight></codeline>
+<codeline lineno="53"><highlight class="comment"><sp/><sp/><sp/>for<sp/>the<sp/>i-th<sp/>point<sp/>is<sp/>returned<sp/>in<sp/>fval[i*fdim<sp/>+<sp/>k].<sp/><sp/>Return<sp/>0<sp/>on<sp/>success</highlight></codeline>
+<codeline lineno="54"><highlight class="comment"><sp/><sp/><sp/>or<sp/>nonzero<sp/>to<sp/>terminate<sp/>the<sp/>integration.<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>int<sp/>(*integrand_v)<sp/>(</highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>ndim,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>npt,</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*x,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*,</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>fdim,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*fval);</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"></highlight></codeline>
+<codeline lineno="59"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Different<sp/>ways<sp/>of<sp/>measuring<sp/>the<sp/>absolute<sp/>and<sp/>relative<sp/>error<sp/>when</highlight></codeline>
+<codeline lineno="60"><highlight class="comment"><sp/><sp/><sp/>we<sp/>have<sp/>multiple<sp/>integrands,<sp/>given<sp/>a<sp/>vector<sp/>e<sp/>of<sp/>error<sp/>estimates</highlight></codeline>
+<codeline lineno="61"><highlight class="comment"><sp/><sp/><sp/>in<sp/>the<sp/>individual<sp/>components<sp/>of<sp/>a<sp/>vector<sp/>v<sp/>of<sp/>integrands.<sp/><sp/>These</highlight></codeline>
+<codeline lineno="62"><highlight class="comment"><sp/><sp/><sp/>are<sp/>all<sp/>equivalent<sp/>when<sp/>there<sp/>is<sp/>only<sp/>a<sp/>single<sp/>integrand.<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>ERROR_INDIVIDUAL<sp/>=<sp/>0,<sp/></highlight><highlight class="comment">/*<sp/>individual<sp/>relerr<sp/>criteria<sp/>in<sp/>each<sp/>component<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>ERROR_PAIRED,<sp/></highlight><highlight class="comment">/*<sp/>paired<sp/>L2<sp/>norms<sp/>of<sp/>errors<sp/>in<sp/>each<sp/>component,</highlight></codeline>
+<codeline lineno="66"><highlight class="comment"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mainly<sp/>for<sp/>integrating<sp/>vectors<sp/>of<sp/>complex<sp/>numbers<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>ERROR_L2,<sp/></highlight><highlight class="comment">/*<sp/>abserr<sp/>is<sp/>L_2<sp/>norm<sp/>|e|,<sp/>and<sp/>relerr<sp/>is<sp/>|e|/|v|<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>ERROR_L1,<sp/></highlight><highlight class="comment">/*<sp/>abserr<sp/>is<sp/>L_1<sp/>norm<sp/>|e|,<sp/>and<sp/>relerr<sp/>is<sp/>|e|/|v|<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>ERROR_LINF<sp/></highlight><highlight class="comment">/*<sp/>abserr<sp/>is<sp/>L_\infty<sp/>norm<sp/>|e|,<sp/>and<sp/>relerr<sp/>is<sp/>|e|/|v|<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="70"><highlight class="normal">}<sp/>error_norm;</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"></highlight></codeline>
+<codeline lineno="72"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Integrate<sp/>the<sp/>function<sp/>f<sp/>from<sp/>xmin[dim]<sp/>to<sp/>xmax[dim],<sp/>with<sp/>at<sp/>most</highlight></codeline>
+<codeline lineno="73"><highlight class="comment"><sp/><sp/><sp/>maxEval<sp/>function<sp/>evaluations<sp/>(0<sp/>for<sp/>no<sp/>limit),<sp/>until<sp/>the<sp/>given</highlight></codeline>
+<codeline lineno="74"><highlight class="comment"><sp/><sp/><sp/>absolute<sp/>or<sp/>relative<sp/>error<sp/>is<sp/>achieved.<sp/><sp/>val<sp/>returns<sp/>the<sp/>integral,</highlight></codeline>
+<codeline lineno="75"><highlight class="comment"><sp/><sp/><sp/>and<sp/>err<sp/>returns<sp/>the<sp/>estimate<sp/>for<sp/>the<sp/>absolute<sp/>error<sp/>in<sp/>val;<sp/>both</highlight></codeline>
+<codeline lineno="76"><highlight class="comment"><sp/><sp/><sp/>of<sp/>these<sp/>are<sp/>arrays<sp/>of<sp/>length<sp/>fdim,<sp/>the<sp/>dimension<sp/>of<sp/>the<sp/>vector</highlight></codeline>
+<codeline lineno="77"><highlight class="comment"><sp/><sp/><sp/>integrand<sp/>f(x).<sp/>The<sp/>return<sp/>value<sp/>of<sp/>the<sp/>function<sp/>is<sp/>0<sp/>on<sp/>success</highlight></codeline>
+<codeline lineno="78"><highlight class="comment"><sp/><sp/><sp/>and<sp/>non-zero<sp/>if<sp/>there<sp/><sp/>was<sp/>an<sp/>error.<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"></highlight></codeline>
+<codeline lineno="80"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>adapative<sp/>integration<sp/>by<sp/>partitioning<sp/>the<sp/>integration<sp/>domain<sp/>(&quot;h-adaptive&quot;)</highlight></codeline>
+<codeline lineno="81"><highlight class="comment"><sp/><sp/><sp/>and<sp/>using<sp/>the<sp/>same<sp/>fixed-degree<sp/>quadrature<sp/>in<sp/>each<sp/>subdomain,<sp/>recursively,</highlight></codeline>
+<codeline lineno="82"><highlight class="comment"><sp/><sp/><sp/>until<sp/>convergence<sp/>is<sp/>achieved.<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="83"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>hcubature(</highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>fdim,<sp/>integrand<sp/>f,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*fdata,</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>dim,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*xmin,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*xmax,<sp/></highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>maxEval,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>reqAbsError,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>reqRelError,<sp/></highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>error_norm<sp/>norm,</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*val,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*err);</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"></highlight></codeline>
+<codeline lineno="89"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>as<sp/>hcubature,<sp/>but<sp/>vectorized<sp/>integrand<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="90"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>hcubature_v(</highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>fdim,<sp/>integrand_v<sp/>f,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*fdata,</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>dim,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*xmin,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*xmax,<sp/></highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>maxEval,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>reqAbsError,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>reqRelError,<sp/></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>error_norm<sp/>norm,</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*val,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*err);</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"></highlight></codeline>
+<codeline lineno="96"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>adaptive<sp/>integration<sp/>by<sp/>increasing<sp/>the<sp/>degree<sp/>of<sp/>(tensor-product</highlight></codeline>
+<codeline lineno="97"><highlight class="comment"><sp/><sp/><sp/>Clenshaw-Curtis)<sp/>quadrature<sp/>rules<sp/>(&quot;p-adaptive&quot;),<sp/>rather<sp/>than</highlight></codeline>
+<codeline lineno="98"><highlight class="comment"><sp/><sp/><sp/>subdividing<sp/>the<sp/>domain<sp/>(&quot;h-adaptive&quot;).<sp/><sp/>Possibly<sp/>better<sp/>for</highlight></codeline>
+<codeline lineno="99"><highlight class="comment"><sp/><sp/><sp/>smooth<sp/>integrands<sp/>in<sp/>low<sp/>dimensions.<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="100"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>pcubature_v_buf(</highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>fdim,<sp/>integrand_v<sp/>f,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*fdata,</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>dim,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*xmin,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*xmax,</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>maxEval,<sp/></highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>reqAbsError,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>reqRelError,</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>error_norm<sp/>norm,</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>*m,</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>**buf,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>*nbuf,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>max_nbuf,</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*val,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*err);</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>pcubature_v(</highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>fdim,<sp/>integrand_v<sp/>f,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*fdata,</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>dim,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*xmin,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*xmax,<sp/></highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>maxEval,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>reqAbsError,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>reqRelError,<sp/></highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>error_norm<sp/>norm,</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*val,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*err);</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>pcubature(</highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>fdim,<sp/>integrand<sp/>f,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*fdata,</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/>dim,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*xmin,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*xmax,<sp/></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>maxEval,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>reqAbsError,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>reqRelError,<sp/></highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>error_norm<sp/>norm,</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*val,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*err);</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"></highlight></codeline>
+<codeline lineno="119"><highlight class="normal"></highlight><highlight class="preprocessor">#ifdef<sp/>__cplusplus</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="120"><highlight class="normal">}<sp/><sp/></highlight><highlight class="comment">/*<sp/>extern<sp/>&quot;C&quot;<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="121"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>__cplusplus<sp/>*/</highlight><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="122"><highlight class="normal"></highlight></codeline>
+<codeline lineno="123"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>CUBATURE_H<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="src/cubature.h"/>
+  </compounddef>
+</doxygen>

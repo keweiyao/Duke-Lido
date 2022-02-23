@@ -1,0 +1,205 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="simpleLogger_8h" kind="file" language="C++">
+    <compoundname>simpleLogger.h</compoundname>
+    <includes local="no">boost/log/trivial.hpp</includes>
+    <includes local="no">boost/log/sources/global_logger_storage.hpp</includes>
+    <includedby refid="collision__manager_8cpp" local="yes">src/collision_manager.cpp</includedby>
+    <includedby refid="Hadronize_8cpp" local="yes">src/Hadronize.cpp</includedby>
+    <includedby refid="lido_8cpp" local="yes">src/lido.cpp</includedby>
+    <includedby refid="matrix__elements__1-2_8cpp" local="yes">src/matrix_elements_1-2.cpp</includedby>
+    <includedby refid="matrix__elements__2-2_8cpp" local="yes">src/matrix_elements_2-2.cpp</includedby>
+    <includedby refid="matrix__elements__2-3_8cpp" local="yes">src/matrix_elements_2-3.cpp</includedby>
+    <includedby refid="Medium__Reader_8cpp" local="yes">src/Medium_Reader.cpp</includedby>
+    <includedby refid="sampler_8h" local="yes">src/sampler.h</includedby>
+    <includedby refid="minimizer_8h" local="yes">src/minimizer.h</includedby>
+    <includedby refid="predefine_8cpp" local="yes">src/predefine.cpp</includedby>
+    <includedby refid="simpleLogger_8cpp" local="yes">src/simpleLogger.cpp</includedby>
+    <includedby refid="StochasticBase_8cpp" local="yes">src/StochasticBase.cpp</includedby>
+    <includedby refid="TableBase_8cpp" local="yes">src/TableBase.cpp</includedby>
+    <incdepgraph>
+      <node id="2">
+        <label>boost/log/trivial.hpp</label>
+      </node>
+      <node id="3">
+        <label>boost/log/sources/global_logger_storage.hpp</label>
+      </node>
+      <node id="1">
+        <label>src/simpleLogger.h</label>
+        <link refid="simpleLogger_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="3">
+        <label>src/minimizer.h</label>
+        <link refid="minimizer_8h_source"/>
+      </node>
+      <node id="2">
+        <label>src/sampler.h</label>
+        <link refid="sampler_8h_source"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>src/simpleLogger.h</label>
+        <link refid="simpleLogger_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="simpleLogger_8h_1aad6fe6f21d1c647548b1e2cb79197363" prot="public" static="no">
+        <name>BOOST_LOG_DYN_LINK</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/simpleLogger.h" line="4" column="9" bodyfile="src/simpleLogger.h" bodystart="4" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="simpleLogger_8h_1a6d3fef197146b932f5ad01fce683a66b" prot="public" static="no">
+        <name>LOGFILE</name>
+        <initializer>&quot;logfile.log&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/simpleLogger.h" line="10" column="9" bodyfile="src/simpleLogger.h" bodystart="10" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="simpleLogger_8h_1a0e734cc8af2f223f9ca3ab3f9d6fa018" prot="public" static="no">
+        <name>SEVERITY_THRESHOLD</name>
+        <initializer>logging::trivial::info</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/simpleLogger.h" line="13" column="9" bodyfile="src/simpleLogger.h" bodystart="13" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="simpleLogger_8h_1accad43a85d781d53381cd53a9894b6ae" prot="public" static="no">
+        <name>LOG</name>
+        <param><defname>severity</defname></param>
+        <initializer>BOOST_LOG_SEV(logger::get(),boost::log::trivial::severity)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/simpleLogger.h" line="19" column="9" bodyfile="src/simpleLogger.h" bodystart="19" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="simpleLogger_8h_1af7abc145380f1916838e42f9272aa0f6" prot="public" static="no">
+        <name>LOG_TRACE</name>
+        <initializer>LOG(trace)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/simpleLogger.h" line="22" column="9" bodyfile="src/simpleLogger.h" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="simpleLogger_8h_1a6ff63e8955665c4a58b1598f2b07c51a" prot="public" static="no">
+        <name>LOG_DEBUG</name>
+        <initializer>LOG(debug)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/simpleLogger.h" line="23" column="9" bodyfile="src/simpleLogger.h" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="simpleLogger_8h_1aeb4f36db01bd128c7afeac5889dac311" prot="public" static="no">
+        <name>LOG_INFO</name>
+        <initializer>LOG(info)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/simpleLogger.h" line="24" column="9" bodyfile="src/simpleLogger.h" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="simpleLogger_8h_1adf4476a6a4ea6c74231c826e899d7189" prot="public" static="no">
+        <name>LOG_WARNING</name>
+        <initializer>LOG(warning)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/simpleLogger.h" line="25" column="9" bodyfile="src/simpleLogger.h" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="simpleLogger_8h_1aced66975c154ea0e2a8ec3bc818b4e08" prot="public" static="no">
+        <name>LOG_ERROR</name>
+        <initializer>LOG(error)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/simpleLogger.h" line="26" column="9" bodyfile="src/simpleLogger.h" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="simpleLogger_8h_1ac2164369b4d2bf72296f8ba6ea576ecf" prot="public" static="no">
+        <name>LOG_FATAL</name>
+        <initializer>LOG(fatal)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/simpleLogger.h" line="27" column="9" bodyfile="src/simpleLogger.h" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>simpleLogger_h__</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>simpleLogger_h__</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>BOOST_LOG_DYN_LINK<sp/>//<sp/>necessary<sp/>when<sp/>linking<sp/>the<sp/>boost_log<sp/>library<sp/>dynamically</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/log/trivial.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;boost/log/sources/global_logger_storage.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>the<sp/>logs<sp/>are<sp/>also<sp/>written<sp/>to<sp/>LOGFILE</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LOGFILE<sp/>&quot;logfile.log&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="comment">//<sp/>just<sp/>log<sp/>messages<sp/>with<sp/>severity<sp/>&gt;=<sp/>SEVERITY_THRESHOLD<sp/>are<sp/>written</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>SEVERITY_THRESHOLD<sp/>logging::trivial::info</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="comment">//<sp/>register<sp/>a<sp/>global<sp/>logger</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal">BOOST_LOG_GLOBAL_LOGGER(logger,<sp/>boost::log::sources::severity_logger_mt&lt;boost::log::trivial::severity_level&gt;)</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="comment">//<sp/>just<sp/>a<sp/>helper<sp/>macro<sp/>used<sp/>by<sp/>the<sp/>macros<sp/>below<sp/>-<sp/>don&apos;t<sp/>use<sp/>it<sp/>in<sp/>your<sp/>code</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LOG(severity)<sp/>BOOST_LOG_SEV(logger::get(),boost::log::trivial::severity)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=====<sp/>log<sp/>macros<sp/>=====</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LOG_TRACE<sp/><sp/><sp/>LOG(trace)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LOG_DEBUG<sp/><sp/><sp/>LOG(debug)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LOG_INFO<sp/><sp/><sp/><sp/>LOG(info)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LOG_WARNING<sp/>LOG(warning)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LOG_ERROR<sp/><sp/><sp/>LOG(error)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LOG_FATAL<sp/><sp/><sp/>LOG(fatal)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="src/simpleLogger.h"/>
+  </compounddef>
+</doxygen>

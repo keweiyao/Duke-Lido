@@ -120,7 +120,12 @@ int lido::update_single_particle(
         pIn.radlist.clear();
         return pOut_list.size();
     }
- 
+    if (T<0.15) {
+        pIn.radlist.clear();
+        pOut_list.push_back(pIn);
+        return pOut_list.size();
+    }
+
     //---B---: If the pareton is not yet formed,
     // skip its interactions
     bool formed_from_vac = (pIn.x.x0()>=pIn.tau0);

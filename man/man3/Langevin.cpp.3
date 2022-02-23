@@ -1,0 +1,75 @@
+.TH "src/Langevin.cpp" 3 "Thu Jul 1 2021" "Duke-Lido" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/Langevin.cpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'Langevin\&.h'\fP
+.br
+\fC#include 'random\&.h'\fP
+.br
+\fC#include 'predefine\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "double \fBdeltaQhat\fP (double T, double M, double E)"
+.br
+.ti -1c
+.RI "double \fBqhat_small_angle_LOpQCD\fP (int pid, double E, double M, double T)"
+.br
+.ti -1c
+.RI "double \fBqhat_L_small_angle_LOpQCD\fP (int pid, double E, double M, double T)"
+.br
+.ti -1c
+.RI "double \fBqhat\fP (int pid, double E, double M, double T)"
+.br
+.ti -1c
+.RI "double \fBqhat_L\fP (int pid, double E, double M, double T)"
+.br
+.ti -1c
+.RI "double \fBdqhat_L_dp2\fP (int pid, double E, double M, double T)"
+.br
+.ti -1c
+.RI "void \fBIto_update_lab\fP (int pid, double dt_lab, double M, double T, std::vector< double > v, const \fBfourvec\fP &pIn, \fBfourvec\fP &pOut)"
+.br
+.ti -1c
+.RI "void \fBIto_update_rest\fP (int pid, double dt, double M, double T, const \fBfourvec\fP &pIn, \fBfourvec\fP &pOut)"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "const double \fBtiny\fP = 1e\-10"
+.br
+.in -1c
+.SH "Function Documentation"
+.PP 
+.SS "double deltaQhat (double T, double M, double E)\fC [inline]\fP"
+
+.SS "double dqhat_L_dp2 (int pid, double E, double M, double T)"
+
+.SS "void Ito_update_lab (int pid, double dt_lab, double M, double T, std::vector< double > v, const \fBfourvec\fP & pIn, \fBfourvec\fP & pOut)"
+
+.SS "void Ito_update_rest (int pid, double dt, double M, double T, const \fBfourvec\fP & pIn, \fBfourvec\fP & pOut)"
+
+.SS "double qhat (int pid, double E, double M, double T)"
+
+.SS "double qhat_L (int pid, double E, double M, double T)"
+
+.SS "double qhat_L_small_angle_LOpQCD (int pid, double E, double M, double T)"
+
+.SS "double qhat_small_angle_LOpQCD (int pid, double E, double M, double T)"
+
+.SH "Variable Documentation"
+.PP 
+.SS "const double tiny = 1e\-10"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Duke-Lido from the source code\&.

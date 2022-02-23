@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="classgsl__quad__1d" kind="class" language="C++" prot="public">
+    <compoundname>gsl_quad_1d</compoundname>
+    <templateparamlist>
+      <param>
+        <type>typename F</type>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classgsl__quad__1d_1a89b087944ecd8fe660cebe3ceaa05edd" prot="private" static="no" mutable="no">
+        <type>F</type>
+        <definition>F gsl_quad_1d&lt; F &gt;::f</definition>
+        <argsstring></argsstring>
+        <name>f</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/integrator.h" line="30" column="5" bodyfile="src/integrator.h" bodystart="30" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgsl__quad__1d_1a4290957bdb6b78af7b2cd5c89a73ad3b" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gsl_quad_1d&lt; F &gt;::limit</definition>
+        <argsstring></argsstring>
+        <name>limit</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/integrator.h" line="31" column="7" bodyfile="src/integrator.h" bodystart="31" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgsl__quad__1d_1a44933189dc5eb8919ad2e500fe6cadfe" prot="private" static="no" mutable="no">
+        <type>std::unique_ptr&lt; gsl_integration_workspace, std::function&lt; void(gsl_integration_workspace *) &gt; &gt;</type>
+        <definition>std::unique_ptr&lt; gsl_integration_workspace, std::function &lt; void(gsl_integration_workspace*) &gt; &gt; gsl_quad_1d&lt; F &gt;::workspace</definition>
+        <argsstring></argsstring>
+        <name>workspace</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/integrator.h" line="34" column="2" bodyfile="src/integrator.h" bodystart="34" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-static-func">
+      <memberdef kind="function" id="classgsl__quad__1d_1a86466760e8fecd8d5c88193c264d7f9f" prot="private" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>static double gsl_quad_1d&lt; F &gt;::gsl_wrapper</definition>
+        <argsstring>(double x, void *p)</argsstring>
+        <name>gsl_wrapper</name>
+        <param>
+          <type>double</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>p</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/integrator.h" line="36" column="17" bodyfile="src/integrator.h" bodystart="36" bodyend="40"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classgsl__quad__1d_1a3615eb0130d4bcf15c6937293e981523" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>gsl_quad_1d&lt; F &gt;::gsl_quad_1d</definition>
+        <argsstring>(F f, int limit)</argsstring>
+        <name>gsl_quad_1d</name>
+        <param>
+          <type>F</type>
+          <declname>f</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>limit</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/integrator.h" line="43" column="3" bodyfile="src/integrator.h" bodystart="43" bodyend="46"/>
+      </memberdef>
+      <memberdef kind="function" id="classgsl__quad__1d_1ad04c075b17114718274c1b5d97d96ca1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double gsl_quad_1d&lt; F &gt;::integrate</definition>
+        <argsstring>(double min, double max, double epsabs, double epsrel, double &amp;error)</argsstring>
+        <name>integrate</name>
+        <param>
+          <type>double</type>
+          <declname>min</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>max</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>epsabs</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>epsrel</declname>
+        </param>
+        <param>
+          <type>double &amp;</type>
+          <declname>error</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/integrator.h" line="48" column="10" bodyfile="src/integrator.h" bodystart="48" bodyend="76"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/integrator.h" line="29" column="18" bodyfile="src/integrator.h" bodystart="29" bodyend="77"/>
+    <listofallmembers>
+      <member refid="classgsl__quad__1d_1a89b087944ecd8fe660cebe3ceaa05edd" prot="private" virt="non-virtual"><scope>gsl_quad_1d</scope><name>f</name></member>
+      <member refid="classgsl__quad__1d_1a3615eb0130d4bcf15c6937293e981523" prot="public" virt="non-virtual"><scope>gsl_quad_1d</scope><name>gsl_quad_1d</name></member>
+      <member refid="classgsl__quad__1d_1a86466760e8fecd8d5c88193c264d7f9f" prot="private" virt="non-virtual"><scope>gsl_quad_1d</scope><name>gsl_wrapper</name></member>
+      <member refid="classgsl__quad__1d_1ad04c075b17114718274c1b5d97d96ca1" prot="public" virt="non-virtual"><scope>gsl_quad_1d</scope><name>integrate</name></member>
+      <member refid="classgsl__quad__1d_1a4290957bdb6b78af7b2cd5c89a73ad3b" prot="private" virt="non-virtual"><scope>gsl_quad_1d</scope><name>limit</name></member>
+      <member refid="classgsl__quad__1d_1a44933189dc5eb8919ad2e500fe6cadfe" prot="private" virt="non-virtual"><scope>gsl_quad_1d</scope><name>workspace</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

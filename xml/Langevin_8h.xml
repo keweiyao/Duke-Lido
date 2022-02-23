@@ -1,0 +1,367 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="Langevin_8h" kind="file" language="C++">
+    <compoundname>Langevin.h</compoundname>
+    <includes local="no">vector</includes>
+    <includes refid="lorentz_8h" local="yes">lorentz.h</includes>
+    <includedby refid="collision__manager_8cpp" local="yes">src/collision_manager.cpp</includedby>
+    <includedby refid="Langevin_8cpp" local="yes">src/Langevin.cpp</includedby>
+    <includedby refid="lido_8cpp" local="yes">src/lido.cpp</includedby>
+    <includedby refid="Rate_8cpp" local="yes">src/Rate.cpp</includedby>
+    <incdepgraph>
+      <node id="4">
+        <label>cmath</label>
+      </node>
+      <node id="3">
+        <label>lorentz.h</label>
+        <link refid="lorentz_8h_source"/>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>vector</label>
+      </node>
+      <node id="5">
+        <label>cstdlib</label>
+      </node>
+      <node id="6">
+        <label>iostream</label>
+      </node>
+      <node id="1">
+        <label>src/Langevin.h</label>
+        <link refid="Langevin_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="Langevin_8h_1a31e87199256f1270c2c125405a59955c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double delta_qhat</definition>
+        <argsstring>(int pid, double E, double M, double T)</argsstring>
+        <name>delta_qhat</name>
+        <param>
+          <type>int</type>
+          <declname>pid</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>E</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>M</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>T</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Langevin.h" line="7" column="8" declfile="src/Langevin.h" declline="7" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="Langevin_8h_1a281892c97d43da034f27f15951e049b8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double qhat_small_angle_LOpQCD</definition>
+        <argsstring>(int pid, double E, double M, double T)</argsstring>
+        <name>qhat_small_angle_LOpQCD</name>
+        <param>
+          <type>int</type>
+          <declname>pid</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>E</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>M</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>T</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Langevin.h" line="8" column="8" bodyfile="src/Langevin.cpp" bodystart="9" bodyend="15" declfile="src/Langevin.h" declline="8" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="Langevin_8h_1a1fece6acfb44b662bf63503ced542c47" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double qhat_L_small_angle_LOpQCD</definition>
+        <argsstring>(int pid, double E, double M, double T)</argsstring>
+        <name>qhat_L_small_angle_LOpQCD</name>
+        <param>
+          <type>int</type>
+          <declname>pid</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>E</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>M</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>T</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Langevin.h" line="9" column="8" bodyfile="src/Langevin.cpp" bodystart="17" bodyend="23" declfile="src/Langevin.h" declline="9" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="Langevin_8h_1ae3d68ff6d026425a8bc0b8efdc83f6f7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double qhat</definition>
+        <argsstring>(int pid, double E, double M, double T)</argsstring>
+        <name>qhat</name>
+        <param>
+          <type>int</type>
+          <declname>pid</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>E</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>M</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>T</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Langevin.h" line="10" column="8" bodyfile="src/Langevin.cpp" bodystart="26" bodyend="28" declfile="src/Langevin.h" declline="10" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="Langevin_8h_1a0b7ca63860cb4f8d190cd0fbdd336c8c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double qhat_L</definition>
+        <argsstring>(int pid, double E, double M, double T)</argsstring>
+        <name>qhat_L</name>
+        <param>
+          <type>int</type>
+          <declname>pid</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>E</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>M</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>T</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Langevin.h" line="11" column="8" bodyfile="src/Langevin.cpp" bodystart="31" bodyend="33" declfile="src/Langevin.h" declline="11" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="Langevin_8h_1a210206e12e211ac60389b60596e00319" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dqhat_L_dp2</definition>
+        <argsstring>(int pid, double E, double M, double T)</argsstring>
+        <name>dqhat_L_dp2</name>
+        <param>
+          <type>int</type>
+          <declname>pid</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>E</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>M</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>T</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Langevin.h" line="12" column="8" bodyfile="src/Langevin.cpp" bodystart="35" bodyend="40" declfile="src/Langevin.h" declline="12" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="Langevin_8h_1a2ea67138307b28a0f549dd86c4d736e2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Ito_update_rest</definition>
+        <argsstring>(int pid, double dt, double M, double T, std::vector&lt; double &gt; v, const fourvec &amp;pIn, fourvec &amp;pOut, bool is_virtual)</argsstring>
+        <name>Ito_update_rest</name>
+        <param>
+          <type>int</type>
+          <declname>pid</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>dt</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>M</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>T</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; double &gt;</type>
+          <declname>v</declname>
+        </param>
+        <param>
+          <type>const <ref refid="structfourvec" kindref="compound">fourvec</ref> &amp;</type>
+          <declname>pIn</declname>
+        </param>
+        <param>
+          <type><ref refid="structfourvec" kindref="compound">fourvec</ref> &amp;</type>
+          <declname>pOut</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>is_virtual</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Langevin.h" line="13" column="6" declfile="src/Langevin.h" declline="13" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="Langevin_8h_1a9e64be85af3b4df755ef14f780bc5126" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Ito_update_lab</definition>
+        <argsstring>(int pid, double dt, double M, double T, std::vector&lt; double &gt; v, const fourvec &amp;pIn, fourvec &amp;pOut)</argsstring>
+        <name>Ito_update_lab</name>
+        <param>
+          <type>int</type>
+          <declname>pid</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>dt</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>M</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>T</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; double &gt;</type>
+          <declname>v</declname>
+        </param>
+        <param>
+          <type>const <ref refid="structfourvec" kindref="compound">fourvec</ref> &amp;</type>
+          <declname>pIn</declname>
+        </param>
+        <param>
+          <type><ref refid="structfourvec" kindref="compound">fourvec</ref> &amp;</type>
+          <declname>pOut</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Langevin.h" line="14" column="6" bodyfile="src/Langevin.cpp" bodystart="42" bodyend="69" declfile="src/Langevin.h" declline="14" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="Langevin_8h_1af213ad677b22742728be0b59120daf27" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Ito_update_rest</definition>
+        <argsstring>(int pid, double dt, double M, double T, const fourvec &amp;pIn, fourvec &amp;pOut)</argsstring>
+        <name>Ito_update_rest</name>
+        <param>
+          <type>int</type>
+          <declname>pid</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>dt</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>M</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>T</declname>
+        </param>
+        <param>
+          <type>const <ref refid="structfourvec" kindref="compound">fourvec</ref> &amp;</type>
+          <declname>pIn</declname>
+        </param>
+        <param>
+          <type><ref refid="structfourvec" kindref="compound">fourvec</ref> &amp;</type>
+          <declname>pOut</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/Langevin.h" line="15" column="6" bodyfile="src/Langevin.cpp" bodystart="71" bodyend="89" declfile="src/Langevin.h" declline="15" declcolumn="6"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>LANGEVIN_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LANGEVIN_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;vector&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;lorentz.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>delta_qhat(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>pid,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>E,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>T);</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>qhat_small_angle_LOpQCD(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>pid,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>E,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>T);</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>qhat_L_small_angle_LOpQCD(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>pid,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>E,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>T);</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>qhat(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>pid,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>E,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>T);</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>qhat_L(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>pid,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>E,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>T);</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dqhat_L_dp2(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>pid,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>E,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>T);</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>Ito_update_rest(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>pid,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dt,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>T,<sp/>std::vector&lt;double&gt;<sp/>v,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="structfourvec" kindref="compound">fourvec</ref><sp/>&amp;<sp/>pIn,<sp/><ref refid="structfourvec" kindref="compound">fourvec</ref><sp/>&amp;<sp/>pOut,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>is_virtual);</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>Ito_update_lab(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>pid,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dt,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>T,<sp/>std::vector&lt;double&gt;<sp/>v,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="structfourvec" kindref="compound">fourvec</ref><sp/>&amp;<sp/>pIn,<sp/><ref refid="structfourvec" kindref="compound">fourvec</ref><sp/>&amp;<sp/>pOut);</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>Ito_update_rest(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>pid,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dt,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>T,<sp/></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="structfourvec" kindref="compound">fourvec</ref><sp/>&amp;<sp/>pIn,<sp/><ref refid="structfourvec" kindref="compound">fourvec</ref><sp/>&amp;<sp/>pOut);</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="src/Langevin.h"/>
+  </compounddef>
+</doxygen>

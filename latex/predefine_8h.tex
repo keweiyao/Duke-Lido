@@ -1,0 +1,624 @@
+\hypertarget{predefine_8h}{}\doxysection{src/predefine.h File Reference}
+\label{predefine_8h}\index{src/predefine.h@{src/predefine.h}}
+{\ttfamily \#include $<$cmath$>$}\newline
+{\ttfamily \#include $<$H5\+Cpp.\+h$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$iomanip$>$}\newline
+{\ttfamily \#include $<$sstream$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include \char`\"{}lorentz.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classDebye__mass}{Debye\+\_\+mass}}
+\item 
+class \mbox{\hyperlink{classff}{ff}}
+\item 
+struct \mbox{\hyperlink{structparticle}{particle}}
+\item 
+struct \mbox{\hyperlink{structcurrent}{current}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{predefine_8h_af96a197ecd645991042ccc5d4908be2a}{initialize\+\_\+m\+D\+\_\+and\+\_\+scale}} (int \+\_\+m\+D\+\_\+type, double \+\_\+mu, double \+\_\+afix, double \+\_\+theta, double \+\_\+cut)
+\item 
+double \mbox{\hyperlink{predefine_8h_a4cc8c754657f5d03a79b1d05c8d8019f}{alpha\+\_\+s}} (double Q2, double T)
+\item 
+void \mbox{\hyperlink{predefine_8h_a3e6385ae9f437476c2107640b25d7d4a}{echo}} (void)
+\item 
+double \mbox{\hyperlink{predefine_8h_af2defe967be37c9d4b70fae6e1ce6f04}{P\+\_\+q2qg}} (double x)
+\item 
+double \mbox{\hyperlink{predefine_8h_a9f6d8c5e2ec4079333a92f9984521f64}{P\+\_\+q2gq}} (double x)
+\item 
+double \mbox{\hyperlink{predefine_8h_a722402bff3eee1fa7cdce563cdd8eed7}{P\+\_\+g2gg}} (double x)
+\item 
+double \mbox{\hyperlink{predefine_8h_ac3e19a8697d7434d8f9c505fc3073a82}{P\+\_\+g2qqbar}} (double x)
+\item 
+double \mbox{\hyperlink{predefine_8h_aaecf660a76882ed9c189e1376bac5895}{pid2mass}} (int pid)
+\item 
+\mbox{\hyperlink{structfourvec}{fourvec}} \mbox{\hyperlink{predefine_8h_ad36709657da2605155d7435809fb786e}{put\+\_\+on\+\_\+shell}} (\mbox{\hyperlink{structfourvec}{fourvec}} p, int pid)
+\item 
+{\footnotesize template$<$typename T $>$ }\\const H5\+::\+Pred\+Type \& \mbox{\hyperlink{predefine_8h_a340bd12d3fe162c8abeb36f32d0f3c21}{type}} ()
+\item 
+template$<$$>$ const H5\+::\+Pred\+Type \& \mbox{\hyperlink{predefine_8h_ab31c29284c669cc7fb73444a22c3a01c}{type$<$ size\+\_\+t $>$}} ()
+\item 
+template$<$$>$ const H5\+::\+Pred\+Type \& \mbox{\hyperlink{predefine_8h_a4fb7f43e0d81a2bbc8dc8c1e7c79f484}{type$<$ double $>$}} ()
+\item 
+template$<$$>$ const H5\+::\+Pred\+Type \& \mbox{\hyperlink{predefine_8h_a222e07166f363b53a4aa2961f22f6456}{type$<$ int $>$}} ()
+\item 
+{\footnotesize template$<$typename T $>$ }\\void \mbox{\hyperlink{predefine_8h_a9a70308b06c7b3adfbf579f6714a6669}{hdf5\+\_\+add\+\_\+scalar\+\_\+attr}} (const H5\+::\+Group \&gp, const std\+::string \&name, const T \&value)
+\item 
+{\footnotesize template$<$typename T $>$ }\\void \mbox{\hyperlink{predefine_8h_aa00e6eedf151686781dd9db6671a4d5e}{hdf5\+\_\+read\+\_\+scalar\+\_\+attr}} (const H5\+::\+Group \&gp, const std\+::string \&name, T \&value)
+\item 
+bool \mbox{\hyperlink{predefine_8h_a905aec1b6dc442789e877bf7684f2035}{is1to2}} (int prcid)
+\item 
+bool \mbox{\hyperlink{predefine_8h_ab8f935f4dd5da1c876d8ead4a23cb85b}{is2to2}} (int prcid)
+\item 
+bool \mbox{\hyperlink{predefine_8h_a3e3dffd95f865315b73f8858cf569bd1}{is2to2\+\_\+nlo}} (int prcid)
+\item 
+bool \mbox{\hyperlink{predefine_8h_a5b08ee8bc67f687c82daa32054dc32c0}{is\+\_\+classical}} (int prcid)
+\item 
+bool \mbox{\hyperlink{predefine_8h_aff5c8e9300f94a0e3db9c654c6281157}{is2to3}} (int prcid)
+\item 
+bool \mbox{\hyperlink{predefine_8h_af2862d88e92fd1aa5df16d105c4829c1}{is\+Pair\+Production}} (int prcid)
+\item 
+void \mbox{\hyperlink{predefine_8h_a7a39c0ecfa6436ce76e200080064b70b}{assign\+\_\+1to2\+\_\+pid}} (int process\+\_\+id, int incoming\+\_\+hard\+\_\+id, std\+::vector$<$ int $>$ \&pids)
+\item 
+void \mbox{\hyperlink{predefine_8h_a56ea243101ecb34e3f3d7206cff37a11}{assign\+\_\+2to2\+\_\+pid}} (int process\+\_\+id, int incoming\+\_\+hard\+\_\+id, std\+::vector$<$ int $>$ \&pids)
+\item 
+void \mbox{\hyperlink{predefine_8h_a762c2568459e46b790dc02c5310e4369}{assign\+\_\+2to3\+\_\+pid}} (int process\+\_\+id, int incoming\+\_\+hard\+\_\+id, std\+::vector$<$ int $>$ \&pids, bool forward)
+\item 
+void \mbox{\hyperlink{predefine_8h_a7f4c01ab274216a6424f728d84682aa9}{assign\+\_\+2to2\+\_\+color}} (int process\+\_\+id, int pidA, int pid1, int pid2, int Ca, int a\+Ca, int \&C1, int \&a\+C1, int \&C2, int \&a\+C2)
+\item 
+void \mbox{\hyperlink{predefine_8h_aeb98a0fb88ef87b31ae945695812aa47}{assign\+\_\+2to2\+\_\+nlo\+\_\+color}} (int process\+\_\+id, int pidA, int pid1, int pid2, int pid3, int Ca, int a\+Ca, int \&C1, int \&a\+C1, int \&C2, int \&a\+C2, int \&C3, int \&a\+C3)
+\item 
+void \mbox{\hyperlink{predefine_8h_ac0eae77f72ec11df3b3035b0f588ed26}{assign\+\_\+n2np1\+\_\+color}} (int pidA, int pid1, int pid2, int Ca, int a\+Ca, int \&C1, int \&a\+C1, int \&C2, int \&a\+C2)
+\item 
+bool \mbox{\hyperlink{predefine_8h_a0fe7f7a962476be7c7b53e0d91b136d4}{is\+\_\+file\+\_\+exist}} (std\+::string file\+Name)
+\item 
+int \mbox{\hyperlink{predefine_8h_a0aef430687ab317c067b83e826821623}{get\+\_\+process\+\_\+info}} (std\+::string p, std\+::vector$<$ double $>$ \&\+\_\+\+IM, std\+::vector$<$ double $>$ \&\+\_\+\+FM, std\+::vector$<$ int $>$ \&\+\_\+\+IT, std\+::vector$<$ int $>$ \&\+\_\+\+FT)
+\item 
+\mbox{\hyperlink{structparticle}{particle}} \mbox{\hyperlink{predefine_8h_a66bb32998f850799a857a6a2072d6670}{make\+\_\+parton}} (int pid, int col, int anticol, double \mbox{\hyperlink{predefine_8h_a80d402d10e8341004c0caf10133b80ab}{scale}}, \mbox{\hyperlink{structfourvec}{fourvec}} pmu, \mbox{\hyperlink{structparticle}{particle}} \&mother, double T, std\+::vector$<$ double $>$ vcell)
+\item 
+\mbox{\hyperlink{structparticle}{particle}} \mbox{\hyperlink{predefine_8h_a6e0cfe01eb19eebf9019012f65550a9b}{make\+\_\+parton}} (int pid, int col, int acol, double \mbox{\hyperlink{predefine_8h_a80d402d10e8341004c0caf10133b80ab}{scale}}, \mbox{\hyperlink{structfourvec}{fourvec}} pmu, \mbox{\hyperlink{structcoordinate}{coordinate}} x)
+\item 
+void \mbox{\hyperlink{predefine_8h_aa46d8085c71934a51d8f97c11f9bf8ae}{formation\+\_\+time}} (double \&tauf, double \&Q2, int idA, int idB, int idC, \mbox{\hyperlink{structfourvec}{fourvec}} pA, \mbox{\hyperlink{structfourvec}{fourvec}} pB, \mbox{\hyperlink{structfourvec}{fourvec}} pC, double T, \mbox{\hyperlink{structfourvec}{fourvec}} p0)
+\item 
+double \mbox{\hyperlink{predefine_8h_a1b8245037b0b80cace34acda3556cbb5}{compute\+\_\+realtime\+\_\+to\+\_\+propagate}} (double dt, \mbox{\hyperlink{structcoordinate}{coordinate}} x, \mbox{\hyperlink{structfourvec}{fourvec}} p, int \mbox{\hyperlink{predefine_8h_a340bd12d3fe162c8abeb36f32d0f3c21}{type}})
+\item 
+void \mbox{\hyperlink{predefine_8h_a7df928eedf2811423be552465090aa4d}{output\+\_\+oscar}} (const std\+::vector$<$ \mbox{\hyperlink{structparticle}{particle}} $>$ plist, int abspid, std\+::string fname)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+char \mbox{\hyperlink{predefine_8h_a304f1dcba9400d774bf0f790d5e3f138}{H\+S2\+PP}} \mbox{[}$\,$\mbox{]}
+\item 
+char \mbox{\hyperlink{predefine_8h_a1cb068537e886b9258580d8ed5fb5373}{H\+S2\+P\+PP}} \mbox{[}$\,$\mbox{]}
+\item 
+char \mbox{\hyperlink{predefine_8h_a1c75f22bfb9c494b0fa57af136aa5cca}{H\+S\+S2\+PP}} \mbox{[}$\,$\mbox{]}
+\item 
+bool \mbox{\hyperlink{predefine_8h_aa407dfd58fbf35d8db5986c225e43b59}{type1\+\_\+warned}}
+\item 
+bool \mbox{\hyperlink{predefine_8h_a5266d80be471692fcb524ec24b91bd83}{type2\+\_\+warned}}
+\item 
+bool \mbox{\hyperlink{predefine_8h_ac9b5264b5467017de7679becdf61df98}{type3\+\_\+warned}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a6bec4f2790de7d539eb09dd3544eb4f4}{c2pi}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a035608b8c87df54e0f4e3fe16981d4b0}{c4d9}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_ae137361dce7c85a8df2cdddaa21d6f08}{c1d9}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_ae44fde3ed734d626b58234b6812f841e}{c8pi}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a353af8fe7e4cc22d62a1f831b3d3cbca}{c16pi}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_ad26bb9894bc338e7e7f0120896e2cc26}{c48pi}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_aa14911688dfb4b614afd050f1d81b84c}{c16pi2}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_ac2cf5fd03843384e1ad3abb9cd5edbe7}{c72pi2}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a2f17c7473f4fa200d97957f8eb706e80}{c32pi3}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_aa0889504017b89a67010a9b49249761b}{c64d9pi2}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_af562084997bc513070ddf811b2079ad3}{c256pi4}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a747d307a0fb946dd06d26182ae280333}{fmc\+\_\+to\+\_\+\+Ge\+V\+\_\+m1}}
+\item 
+const int \mbox{\hyperlink{predefine_8h_a22d0daadaf4a81b8dae28ae6b533e13c}{Nc}}
+\item 
+const int \mbox{\hyperlink{predefine_8h_af501b9b181d27b38e44fb8f166266e9d}{nf}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a41bca0fdef97004c93e39c768aa71206}{CF}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_aefd3a506c7fe38bf0d44973941498ac8}{CA}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a528e3ba6ab4416d503d263eb86e5c5a9}{C\+F\+\_\+over\+\_\+\+CA}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a837d611f72e495b5ae8b93a978b6a378}{TR}}
+\item 
+int \mbox{\hyperlink{predefine_8h_ad99d2a0b5a335e334b306c2a38a80c52}{color\+\_\+count}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a06f095b54145e3175d5f7e0f46d1cb2d}{pf\+\_\+g}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a99ae2276e840bf2517c91e97b6e0de6c}{alpha0}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a0874ea73264f5b0989ab8b77b7252344}{alpha\+\_\+max}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_ae711f5d52549c57a7378be819bb7e779}{Lambda}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a33a95e5568b62fe39e6b13453c4a3e5e}{Lambda2}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a4dcfdacad0380a6fbdfcf1ac88e7e1a5}{mu2\+\_\+\+NP}}
+\item 
+double \mbox{\hyperlink{predefine_8h_a80d402d10e8341004c0caf10133b80ab}{scale}}
+\item 
+double \mbox{\hyperlink{predefine_8h_a26c600a9afef06b790be07d4ef26b998}{afix}}
+\item 
+double \mbox{\hyperlink{predefine_8h_aa494ef8d006a704e644829885785458d}{cut}}
+\item 
+double \mbox{\hyperlink{predefine_8h_aefd8df84bd08e0ad26e3b9b61bc89eb0}{Lido\+\_\+\+Ecut}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_ab1851c42e4a750b9ae5a551c84f505a4}{L\+P\+M\+\_\+prefactor}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_afbaea8eaebde60864311dd5582d4ad80}{Mc}}
+\item 
+const double \mbox{\hyperlink{predefine_8h_a1fedee55570a0d90fed7ab820afd21e3}{Mb}}
+\item 
+\mbox{\hyperlink{classDebye__mass}{Debye\+\_\+mass}} $\ast$ \mbox{\hyperlink{predefine_8h_afaf0bfd9c032a00337e2276e404314d5}{t\+\_\+channel\+\_\+m\+D2}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{predefine_8h_a4cc8c754657f5d03a79b1d05c8d8019f}\label{predefine_8h_a4cc8c754657f5d03a79b1d05c8d8019f}} 
+\index{predefine.h@{predefine.h}!alpha\_s@{alpha\_s}}
+\index{alpha\_s@{alpha\_s}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{alpha\_s()}{alpha\_s()}}
+{\footnotesize\ttfamily double alpha\+\_\+s (\begin{DoxyParamCaption}\item[{double}]{Q2,  }\item[{double}]{T }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a7a39c0ecfa6436ce76e200080064b70b}\label{predefine_8h_a7a39c0ecfa6436ce76e200080064b70b}} 
+\index{predefine.h@{predefine.h}!assign\_1to2\_pid@{assign\_1to2\_pid}}
+\index{assign\_1to2\_pid@{assign\_1to2\_pid}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{assign\_1to2\_pid()}{assign\_1to2\_pid()}}
+{\footnotesize\ttfamily void assign\+\_\+1to2\+\_\+pid (\begin{DoxyParamCaption}\item[{int}]{process\+\_\+id,  }\item[{int}]{incoming\+\_\+hard\+\_\+id,  }\item[{std\+::vector$<$ int $>$ \&}]{pids }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a7f4c01ab274216a6424f728d84682aa9}\label{predefine_8h_a7f4c01ab274216a6424f728d84682aa9}} 
+\index{predefine.h@{predefine.h}!assign\_2to2\_color@{assign\_2to2\_color}}
+\index{assign\_2to2\_color@{assign\_2to2\_color}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{assign\_2to2\_color()}{assign\_2to2\_color()}}
+{\footnotesize\ttfamily void assign\+\_\+2to2\+\_\+color (\begin{DoxyParamCaption}\item[{int}]{process\+\_\+id,  }\item[{int}]{pidA,  }\item[{int}]{pid1,  }\item[{int}]{pid2,  }\item[{int}]{Ca,  }\item[{int}]{a\+Ca,  }\item[{int \&}]{C1,  }\item[{int \&}]{a\+C1,  }\item[{int \&}]{C2,  }\item[{int \&}]{a\+C2 }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_aeb98a0fb88ef87b31ae945695812aa47}\label{predefine_8h_aeb98a0fb88ef87b31ae945695812aa47}} 
+\index{predefine.h@{predefine.h}!assign\_2to2\_nlo\_color@{assign\_2to2\_nlo\_color}}
+\index{assign\_2to2\_nlo\_color@{assign\_2to2\_nlo\_color}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{assign\_2to2\_nlo\_color()}{assign\_2to2\_nlo\_color()}}
+{\footnotesize\ttfamily void assign\+\_\+2to2\+\_\+nlo\+\_\+color (\begin{DoxyParamCaption}\item[{int}]{process\+\_\+id,  }\item[{int}]{pidA,  }\item[{int}]{pid1,  }\item[{int}]{pid2,  }\item[{int}]{pid3,  }\item[{int}]{Ca,  }\item[{int}]{a\+Ca,  }\item[{int \&}]{C1,  }\item[{int \&}]{a\+C1,  }\item[{int \&}]{C2,  }\item[{int \&}]{a\+C2,  }\item[{int \&}]{C3,  }\item[{int \&}]{a\+C3 }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a56ea243101ecb34e3f3d7206cff37a11}\label{predefine_8h_a56ea243101ecb34e3f3d7206cff37a11}} 
+\index{predefine.h@{predefine.h}!assign\_2to2\_pid@{assign\_2to2\_pid}}
+\index{assign\_2to2\_pid@{assign\_2to2\_pid}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{assign\_2to2\_pid()}{assign\_2to2\_pid()}}
+{\footnotesize\ttfamily void assign\+\_\+2to2\+\_\+pid (\begin{DoxyParamCaption}\item[{int}]{process\+\_\+id,  }\item[{int}]{incoming\+\_\+hard\+\_\+id,  }\item[{std\+::vector$<$ int $>$ \&}]{pids }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a762c2568459e46b790dc02c5310e4369}\label{predefine_8h_a762c2568459e46b790dc02c5310e4369}} 
+\index{predefine.h@{predefine.h}!assign\_2to3\_pid@{assign\_2to3\_pid}}
+\index{assign\_2to3\_pid@{assign\_2to3\_pid}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{assign\_2to3\_pid()}{assign\_2to3\_pid()}}
+{\footnotesize\ttfamily void assign\+\_\+2to3\+\_\+pid (\begin{DoxyParamCaption}\item[{int}]{process\+\_\+id,  }\item[{int}]{incoming\+\_\+hard\+\_\+id,  }\item[{std\+::vector$<$ int $>$ \&}]{pids,  }\item[{bool}]{forward }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_ac0eae77f72ec11df3b3035b0f588ed26}\label{predefine_8h_ac0eae77f72ec11df3b3035b0f588ed26}} 
+\index{predefine.h@{predefine.h}!assign\_n2np1\_color@{assign\_n2np1\_color}}
+\index{assign\_n2np1\_color@{assign\_n2np1\_color}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{assign\_n2np1\_color()}{assign\_n2np1\_color()}}
+{\footnotesize\ttfamily void assign\+\_\+n2np1\+\_\+color (\begin{DoxyParamCaption}\item[{int}]{pidA,  }\item[{int}]{pid1,  }\item[{int}]{pid2,  }\item[{int}]{Ca,  }\item[{int}]{a\+Ca,  }\item[{int \&}]{C1,  }\item[{int \&}]{a\+C1,  }\item[{int \&}]{C2,  }\item[{int \&}]{a\+C2 }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a1b8245037b0b80cace34acda3556cbb5}\label{predefine_8h_a1b8245037b0b80cace34acda3556cbb5}} 
+\index{predefine.h@{predefine.h}!compute\_realtime\_to\_propagate@{compute\_realtime\_to\_propagate}}
+\index{compute\_realtime\_to\_propagate@{compute\_realtime\_to\_propagate}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{compute\_realtime\_to\_propagate()}{compute\_realtime\_to\_propagate()}}
+{\footnotesize\ttfamily double compute\+\_\+realtime\+\_\+to\+\_\+propagate (\begin{DoxyParamCaption}\item[{double}]{dt,  }\item[{\mbox{\hyperlink{structcoordinate}{coordinate}}}]{x,  }\item[{\mbox{\hyperlink{structfourvec}{fourvec}}}]{p,  }\item[{int}]{type }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a3e6385ae9f437476c2107640b25d7d4a}\label{predefine_8h_a3e6385ae9f437476c2107640b25d7d4a}} 
+\index{predefine.h@{predefine.h}!echo@{echo}}
+\index{echo@{echo}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{echo()}{echo()}}
+{\footnotesize\ttfamily void echo (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_aa46d8085c71934a51d8f97c11f9bf8ae}\label{predefine_8h_aa46d8085c71934a51d8f97c11f9bf8ae}} 
+\index{predefine.h@{predefine.h}!formation\_time@{formation\_time}}
+\index{formation\_time@{formation\_time}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{formation\_time()}{formation\_time()}}
+{\footnotesize\ttfamily void formation\+\_\+time (\begin{DoxyParamCaption}\item[{double \&}]{tauf,  }\item[{double \&}]{Q2,  }\item[{int}]{idA,  }\item[{int}]{idB,  }\item[{int}]{idC,  }\item[{\mbox{\hyperlink{structfourvec}{fourvec}}}]{pA,  }\item[{\mbox{\hyperlink{structfourvec}{fourvec}}}]{pB,  }\item[{\mbox{\hyperlink{structfourvec}{fourvec}}}]{pC,  }\item[{double}]{T,  }\item[{\mbox{\hyperlink{structfourvec}{fourvec}}}]{p0 }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a0aef430687ab317c067b83e826821623}\label{predefine_8h_a0aef430687ab317c067b83e826821623}} 
+\index{predefine.h@{predefine.h}!get\_process\_info@{get\_process\_info}}
+\index{get\_process\_info@{get\_process\_info}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{get\_process\_info()}{get\_process\_info()}}
+{\footnotesize\ttfamily int get\+\_\+process\+\_\+info (\begin{DoxyParamCaption}\item[{std\+::string}]{p,  }\item[{std\+::vector$<$ double $>$ \&}]{\+\_\+\+IM,  }\item[{std\+::vector$<$ double $>$ \&}]{\+\_\+\+FM,  }\item[{std\+::vector$<$ int $>$ \&}]{\+\_\+\+IT,  }\item[{std\+::vector$<$ int $>$ \&}]{\+\_\+\+FT }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a9a70308b06c7b3adfbf579f6714a6669}\label{predefine_8h_a9a70308b06c7b3adfbf579f6714a6669}} 
+\index{predefine.h@{predefine.h}!hdf5\_add\_scalar\_attr@{hdf5\_add\_scalar\_attr}}
+\index{hdf5\_add\_scalar\_attr@{hdf5\_add\_scalar\_attr}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{hdf5\_add\_scalar\_attr()}{hdf5\_add\_scalar\_attr()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+void hdf5\+\_\+add\+\_\+scalar\+\_\+attr (\begin{DoxyParamCaption}\item[{const H5\+::\+Group \&}]{gp,  }\item[{const std\+::string \&}]{name,  }\item[{const T \&}]{value }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_aa00e6eedf151686781dd9db6671a4d5e}\label{predefine_8h_aa00e6eedf151686781dd9db6671a4d5e}} 
+\index{predefine.h@{predefine.h}!hdf5\_read\_scalar\_attr@{hdf5\_read\_scalar\_attr}}
+\index{hdf5\_read\_scalar\_attr@{hdf5\_read\_scalar\_attr}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{hdf5\_read\_scalar\_attr()}{hdf5\_read\_scalar\_attr()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+void hdf5\+\_\+read\+\_\+scalar\+\_\+attr (\begin{DoxyParamCaption}\item[{const H5\+::\+Group \&}]{gp,  }\item[{const std\+::string \&}]{name,  }\item[{T \&}]{value }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_af96a197ecd645991042ccc5d4908be2a}\label{predefine_8h_af96a197ecd645991042ccc5d4908be2a}} 
+\index{predefine.h@{predefine.h}!initialize\_mD\_and\_scale@{initialize\_mD\_and\_scale}}
+\index{initialize\_mD\_and\_scale@{initialize\_mD\_and\_scale}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{initialize\_mD\_and\_scale()}{initialize\_mD\_and\_scale()}}
+{\footnotesize\ttfamily void initialize\+\_\+m\+D\+\_\+and\+\_\+scale (\begin{DoxyParamCaption}\item[{int}]{\+\_\+m\+D\+\_\+type,  }\item[{double}]{\+\_\+mu,  }\item[{double}]{\+\_\+afix,  }\item[{double}]{\+\_\+theta,  }\item[{double}]{\+\_\+cut }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a905aec1b6dc442789e877bf7684f2035}\label{predefine_8h_a905aec1b6dc442789e877bf7684f2035}} 
+\index{predefine.h@{predefine.h}!is1to2@{is1to2}}
+\index{is1to2@{is1to2}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{is1to2()}{is1to2()}}
+{\footnotesize\ttfamily bool is1to2 (\begin{DoxyParamCaption}\item[{int}]{prcid }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_ab8f935f4dd5da1c876d8ead4a23cb85b}\label{predefine_8h_ab8f935f4dd5da1c876d8ead4a23cb85b}} 
+\index{predefine.h@{predefine.h}!is2to2@{is2to2}}
+\index{is2to2@{is2to2}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{is2to2()}{is2to2()}}
+{\footnotesize\ttfamily bool is2to2 (\begin{DoxyParamCaption}\item[{int}]{prcid }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a3e3dffd95f865315b73f8858cf569bd1}\label{predefine_8h_a3e3dffd95f865315b73f8858cf569bd1}} 
+\index{predefine.h@{predefine.h}!is2to2\_nlo@{is2to2\_nlo}}
+\index{is2to2\_nlo@{is2to2\_nlo}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{is2to2\_nlo()}{is2to2\_nlo()}}
+{\footnotesize\ttfamily bool is2to2\+\_\+nlo (\begin{DoxyParamCaption}\item[{int}]{prcid }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_aff5c8e9300f94a0e3db9c654c6281157}\label{predefine_8h_aff5c8e9300f94a0e3db9c654c6281157}} 
+\index{predefine.h@{predefine.h}!is2to3@{is2to3}}
+\index{is2to3@{is2to3}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{is2to3()}{is2to3()}}
+{\footnotesize\ttfamily bool is2to3 (\begin{DoxyParamCaption}\item[{int}]{prcid }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a5b08ee8bc67f687c82daa32054dc32c0}\label{predefine_8h_a5b08ee8bc67f687c82daa32054dc32c0}} 
+\index{predefine.h@{predefine.h}!is\_classical@{is\_classical}}
+\index{is\_classical@{is\_classical}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{is\_classical()}{is\_classical()}}
+{\footnotesize\ttfamily bool is\+\_\+classical (\begin{DoxyParamCaption}\item[{int}]{prcid }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a0fe7f7a962476be7c7b53e0d91b136d4}\label{predefine_8h_a0fe7f7a962476be7c7b53e0d91b136d4}} 
+\index{predefine.h@{predefine.h}!is\_file\_exist@{is\_file\_exist}}
+\index{is\_file\_exist@{is\_file\_exist}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{is\_file\_exist()}{is\_file\_exist()}}
+{\footnotesize\ttfamily bool is\+\_\+file\+\_\+exist (\begin{DoxyParamCaption}\item[{std\+::string}]{file\+Name }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_af2862d88e92fd1aa5df16d105c4829c1}\label{predefine_8h_af2862d88e92fd1aa5df16d105c4829c1}} 
+\index{predefine.h@{predefine.h}!isPairProduction@{isPairProduction}}
+\index{isPairProduction@{isPairProduction}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{isPairProduction()}{isPairProduction()}}
+{\footnotesize\ttfamily bool is\+Pair\+Production (\begin{DoxyParamCaption}\item[{int}]{prcid }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a6e0cfe01eb19eebf9019012f65550a9b}\label{predefine_8h_a6e0cfe01eb19eebf9019012f65550a9b}} 
+\index{predefine.h@{predefine.h}!make\_parton@{make\_parton}}
+\index{make\_parton@{make\_parton}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{make\_parton()}{make\_parton()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structparticle}{particle}} make\+\_\+parton (\begin{DoxyParamCaption}\item[{int}]{pid,  }\item[{int}]{col,  }\item[{int}]{acol,  }\item[{double}]{scale,  }\item[{\mbox{\hyperlink{structfourvec}{fourvec}}}]{pmu,  }\item[{\mbox{\hyperlink{structcoordinate}{coordinate}}}]{x }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a66bb32998f850799a857a6a2072d6670}\label{predefine_8h_a66bb32998f850799a857a6a2072d6670}} 
+\index{predefine.h@{predefine.h}!make\_parton@{make\_parton}}
+\index{make\_parton@{make\_parton}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{make\_parton()}{make\_parton()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structparticle}{particle}} make\+\_\+parton (\begin{DoxyParamCaption}\item[{int}]{pid,  }\item[{int}]{col,  }\item[{int}]{anticol,  }\item[{double}]{scale,  }\item[{\mbox{\hyperlink{structfourvec}{fourvec}}}]{pmu,  }\item[{\mbox{\hyperlink{structparticle}{particle}} \&}]{mother,  }\item[{double}]{T,  }\item[{std\+::vector$<$ double $>$}]{vcell }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a7df928eedf2811423be552465090aa4d}\label{predefine_8h_a7df928eedf2811423be552465090aa4d}} 
+\index{predefine.h@{predefine.h}!output\_oscar@{output\_oscar}}
+\index{output\_oscar@{output\_oscar}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{output\_oscar()}{output\_oscar()}}
+{\footnotesize\ttfamily void output\+\_\+oscar (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ \mbox{\hyperlink{structparticle}{particle}} $>$}]{plist,  }\item[{int}]{abspid,  }\item[{std\+::string}]{fname }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a722402bff3eee1fa7cdce563cdd8eed7}\label{predefine_8h_a722402bff3eee1fa7cdce563cdd8eed7}} 
+\index{predefine.h@{predefine.h}!P\_g2gg@{P\_g2gg}}
+\index{P\_g2gg@{P\_g2gg}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{P\_g2gg()}{P\_g2gg()}}
+{\footnotesize\ttfamily double P\+\_\+g2gg (\begin{DoxyParamCaption}\item[{double}]{x }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_ac3e19a8697d7434d8f9c505fc3073a82}\label{predefine_8h_ac3e19a8697d7434d8f9c505fc3073a82}} 
+\index{predefine.h@{predefine.h}!P\_g2qqbar@{P\_g2qqbar}}
+\index{P\_g2qqbar@{P\_g2qqbar}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{P\_g2qqbar()}{P\_g2qqbar()}}
+{\footnotesize\ttfamily double P\+\_\+g2qqbar (\begin{DoxyParamCaption}\item[{double}]{x }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a9f6d8c5e2ec4079333a92f9984521f64}\label{predefine_8h_a9f6d8c5e2ec4079333a92f9984521f64}} 
+\index{predefine.h@{predefine.h}!P\_q2gq@{P\_q2gq}}
+\index{P\_q2gq@{P\_q2gq}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{P\_q2gq()}{P\_q2gq()}}
+{\footnotesize\ttfamily double P\+\_\+q2gq (\begin{DoxyParamCaption}\item[{double}]{x }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_af2defe967be37c9d4b70fae6e1ce6f04}\label{predefine_8h_af2defe967be37c9d4b70fae6e1ce6f04}} 
+\index{predefine.h@{predefine.h}!P\_q2qg@{P\_q2qg}}
+\index{P\_q2qg@{P\_q2qg}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{P\_q2qg()}{P\_q2qg()}}
+{\footnotesize\ttfamily double P\+\_\+q2qg (\begin{DoxyParamCaption}\item[{double}]{x }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_aaecf660a76882ed9c189e1376bac5895}\label{predefine_8h_aaecf660a76882ed9c189e1376bac5895}} 
+\index{predefine.h@{predefine.h}!pid2mass@{pid2mass}}
+\index{pid2mass@{pid2mass}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{pid2mass()}{pid2mass()}}
+{\footnotesize\ttfamily double pid2mass (\begin{DoxyParamCaption}\item[{int}]{pid }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_ad36709657da2605155d7435809fb786e}\label{predefine_8h_ad36709657da2605155d7435809fb786e}} 
+\index{predefine.h@{predefine.h}!put\_on\_shell@{put\_on\_shell}}
+\index{put\_on\_shell@{put\_on\_shell}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{put\_on\_shell()}{put\_on\_shell()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structfourvec}{fourvec}} put\+\_\+on\+\_\+shell (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structfourvec}{fourvec}}}]{p,  }\item[{int}]{pid }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{predefine_8h_a340bd12d3fe162c8abeb36f32d0f3c21}\label{predefine_8h_a340bd12d3fe162c8abeb36f32d0f3c21}} 
+\index{predefine.h@{predefine.h}!type@{type}}
+\index{type@{type}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{type()}{type()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+const H5\+::\+Pred\+Type\& type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{predefine_8h_a4fb7f43e0d81a2bbc8dc8c1e7c79f484}\label{predefine_8h_a4fb7f43e0d81a2bbc8dc8c1e7c79f484}} 
+\index{predefine.h@{predefine.h}!type$<$ double $>$@{type$<$ double $>$}}
+\index{type$<$ double $>$@{type$<$ double $>$}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{type$<$ double $>$()}{type< double >()}}
+{\footnotesize\ttfamily template$<$$>$ \\
+const H5\+::\+Pred\+Type\& \mbox{\hyperlink{predefine_8h_a340bd12d3fe162c8abeb36f32d0f3c21}{type}}$<$ double $>$ (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{predefine_8h_a222e07166f363b53a4aa2961f22f6456}\label{predefine_8h_a222e07166f363b53a4aa2961f22f6456}} 
+\index{predefine.h@{predefine.h}!type$<$ int $>$@{type$<$ int $>$}}
+\index{type$<$ int $>$@{type$<$ int $>$}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{type$<$ int $>$()}{type< int >()}}
+{\footnotesize\ttfamily template$<$$>$ \\
+const H5\+::\+Pred\+Type\& \mbox{\hyperlink{predefine_8h_a340bd12d3fe162c8abeb36f32d0f3c21}{type}}$<$ int $>$ (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{predefine_8h_ab31c29284c669cc7fb73444a22c3a01c}\label{predefine_8h_ab31c29284c669cc7fb73444a22c3a01c}} 
+\index{predefine.h@{predefine.h}!type$<$ size\_t $>$@{type$<$ size\_t $>$}}
+\index{type$<$ size\_t $>$@{type$<$ size\_t $>$}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{type$<$ size\_t $>$()}{type< size\_t >()}}
+{\footnotesize\ttfamily template$<$$>$ \\
+const H5\+::\+Pred\+Type\& \mbox{\hyperlink{predefine_8h_a340bd12d3fe162c8abeb36f32d0f3c21}{type}}$<$ size\+\_\+t $>$ (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{predefine_8h_a26c600a9afef06b790be07d4ef26b998}\label{predefine_8h_a26c600a9afef06b790be07d4ef26b998}} 
+\index{predefine.h@{predefine.h}!afix@{afix}}
+\index{afix@{afix}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{afix}{afix}}
+{\footnotesize\ttfamily double afix}
+
+\mbox{\Hypertarget{predefine_8h_a99ae2276e840bf2517c91e97b6e0de6c}\label{predefine_8h_a99ae2276e840bf2517c91e97b6e0de6c}} 
+\index{predefine.h@{predefine.h}!alpha0@{alpha0}}
+\index{alpha0@{alpha0}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{alpha0}{alpha0}}
+{\footnotesize\ttfamily const double alpha0}
+
+\mbox{\Hypertarget{predefine_8h_a0874ea73264f5b0989ab8b77b7252344}\label{predefine_8h_a0874ea73264f5b0989ab8b77b7252344}} 
+\index{predefine.h@{predefine.h}!alpha\_max@{alpha\_max}}
+\index{alpha\_max@{alpha\_max}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{alpha\_max}{alpha\_max}}
+{\footnotesize\ttfamily const double alpha\+\_\+max}
+
+\mbox{\Hypertarget{predefine_8h_a353af8fe7e4cc22d62a1f831b3d3cbca}\label{predefine_8h_a353af8fe7e4cc22d62a1f831b3d3cbca}} 
+\index{predefine.h@{predefine.h}!c16pi@{c16pi}}
+\index{c16pi@{c16pi}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{c16pi}{c16pi}}
+{\footnotesize\ttfamily const double c16pi}
+
+\mbox{\Hypertarget{predefine_8h_aa14911688dfb4b614afd050f1d81b84c}\label{predefine_8h_aa14911688dfb4b614afd050f1d81b84c}} 
+\index{predefine.h@{predefine.h}!c16pi2@{c16pi2}}
+\index{c16pi2@{c16pi2}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{c16pi2}{c16pi2}}
+{\footnotesize\ttfamily const double c16pi2}
+
+\mbox{\Hypertarget{predefine_8h_ae137361dce7c85a8df2cdddaa21d6f08}\label{predefine_8h_ae137361dce7c85a8df2cdddaa21d6f08}} 
+\index{predefine.h@{predefine.h}!c1d9@{c1d9}}
+\index{c1d9@{c1d9}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{c1d9}{c1d9}}
+{\footnotesize\ttfamily const double c1d9}
+
+\mbox{\Hypertarget{predefine_8h_af562084997bc513070ddf811b2079ad3}\label{predefine_8h_af562084997bc513070ddf811b2079ad3}} 
+\index{predefine.h@{predefine.h}!c256pi4@{c256pi4}}
+\index{c256pi4@{c256pi4}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{c256pi4}{c256pi4}}
+{\footnotesize\ttfamily const double c256pi4}
+
+\mbox{\Hypertarget{predefine_8h_a6bec4f2790de7d539eb09dd3544eb4f4}\label{predefine_8h_a6bec4f2790de7d539eb09dd3544eb4f4}} 
+\index{predefine.h@{predefine.h}!c2pi@{c2pi}}
+\index{c2pi@{c2pi}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{c2pi}{c2pi}}
+{\footnotesize\ttfamily const double c2pi}
+
+\mbox{\Hypertarget{predefine_8h_a2f17c7473f4fa200d97957f8eb706e80}\label{predefine_8h_a2f17c7473f4fa200d97957f8eb706e80}} 
+\index{predefine.h@{predefine.h}!c32pi3@{c32pi3}}
+\index{c32pi3@{c32pi3}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{c32pi3}{c32pi3}}
+{\footnotesize\ttfamily const double c32pi3}
+
+\mbox{\Hypertarget{predefine_8h_ad26bb9894bc338e7e7f0120896e2cc26}\label{predefine_8h_ad26bb9894bc338e7e7f0120896e2cc26}} 
+\index{predefine.h@{predefine.h}!c48pi@{c48pi}}
+\index{c48pi@{c48pi}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{c48pi}{c48pi}}
+{\footnotesize\ttfamily const double c48pi}
+
+\mbox{\Hypertarget{predefine_8h_a035608b8c87df54e0f4e3fe16981d4b0}\label{predefine_8h_a035608b8c87df54e0f4e3fe16981d4b0}} 
+\index{predefine.h@{predefine.h}!c4d9@{c4d9}}
+\index{c4d9@{c4d9}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{c4d9}{c4d9}}
+{\footnotesize\ttfamily const double c4d9}
+
+\mbox{\Hypertarget{predefine_8h_aa0889504017b89a67010a9b49249761b}\label{predefine_8h_aa0889504017b89a67010a9b49249761b}} 
+\index{predefine.h@{predefine.h}!c64d9pi2@{c64d9pi2}}
+\index{c64d9pi2@{c64d9pi2}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{c64d9pi2}{c64d9pi2}}
+{\footnotesize\ttfamily const double c64d9pi2}
+
+\mbox{\Hypertarget{predefine_8h_ac2cf5fd03843384e1ad3abb9cd5edbe7}\label{predefine_8h_ac2cf5fd03843384e1ad3abb9cd5edbe7}} 
+\index{predefine.h@{predefine.h}!c72pi2@{c72pi2}}
+\index{c72pi2@{c72pi2}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{c72pi2}{c72pi2}}
+{\footnotesize\ttfamily const double c72pi2}
+
+\mbox{\Hypertarget{predefine_8h_ae44fde3ed734d626b58234b6812f841e}\label{predefine_8h_ae44fde3ed734d626b58234b6812f841e}} 
+\index{predefine.h@{predefine.h}!c8pi@{c8pi}}
+\index{c8pi@{c8pi}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{c8pi}{c8pi}}
+{\footnotesize\ttfamily const double c8pi}
+
+\mbox{\Hypertarget{predefine_8h_aefd3a506c7fe38bf0d44973941498ac8}\label{predefine_8h_aefd3a506c7fe38bf0d44973941498ac8}} 
+\index{predefine.h@{predefine.h}!CA@{CA}}
+\index{CA@{CA}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{CA}{CA}}
+{\footnotesize\ttfamily const double CA}
+
+\mbox{\Hypertarget{predefine_8h_a41bca0fdef97004c93e39c768aa71206}\label{predefine_8h_a41bca0fdef97004c93e39c768aa71206}} 
+\index{predefine.h@{predefine.h}!CF@{CF}}
+\index{CF@{CF}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{CF}{CF}}
+{\footnotesize\ttfamily const double CF}
+
+\mbox{\Hypertarget{predefine_8h_a528e3ba6ab4416d503d263eb86e5c5a9}\label{predefine_8h_a528e3ba6ab4416d503d263eb86e5c5a9}} 
+\index{predefine.h@{predefine.h}!CF\_over\_CA@{CF\_over\_CA}}
+\index{CF\_over\_CA@{CF\_over\_CA}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{CF\_over\_CA}{CF\_over\_CA}}
+{\footnotesize\ttfamily const double C\+F\+\_\+over\+\_\+\+CA}
+
+\mbox{\Hypertarget{predefine_8h_ad99d2a0b5a335e334b306c2a38a80c52}\label{predefine_8h_ad99d2a0b5a335e334b306c2a38a80c52}} 
+\index{predefine.h@{predefine.h}!color\_count@{color\_count}}
+\index{color\_count@{color\_count}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{color\_count}{color\_count}}
+{\footnotesize\ttfamily int color\+\_\+count}
+
+\mbox{\Hypertarget{predefine_8h_aa494ef8d006a704e644829885785458d}\label{predefine_8h_aa494ef8d006a704e644829885785458d}} 
+\index{predefine.h@{predefine.h}!cut@{cut}}
+\index{cut@{cut}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{cut}{cut}}
+{\footnotesize\ttfamily double cut}
+
+\mbox{\Hypertarget{predefine_8h_a747d307a0fb946dd06d26182ae280333}\label{predefine_8h_a747d307a0fb946dd06d26182ae280333}} 
+\index{predefine.h@{predefine.h}!fmc\_to\_GeV\_m1@{fmc\_to\_GeV\_m1}}
+\index{fmc\_to\_GeV\_m1@{fmc\_to\_GeV\_m1}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{fmc\_to\_GeV\_m1}{fmc\_to\_GeV\_m1}}
+{\footnotesize\ttfamily const double fmc\+\_\+to\+\_\+\+Ge\+V\+\_\+m1}
+
+\mbox{\Hypertarget{predefine_8h_a304f1dcba9400d774bf0f790d5e3f138}\label{predefine_8h_a304f1dcba9400d774bf0f790d5e3f138}} 
+\index{predefine.h@{predefine.h}!HS2PP@{HS2PP}}
+\index{HS2PP@{HS2PP}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{HS2PP}{HS2PP}}
+{\footnotesize\ttfamily char H\+S2\+PP\mbox{[}$\,$\mbox{]}}
+
+\mbox{\Hypertarget{predefine_8h_a1cb068537e886b9258580d8ed5fb5373}\label{predefine_8h_a1cb068537e886b9258580d8ed5fb5373}} 
+\index{predefine.h@{predefine.h}!HS2PPP@{HS2PPP}}
+\index{HS2PPP@{HS2PPP}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{HS2PPP}{HS2PPP}}
+{\footnotesize\ttfamily char H\+S2\+P\+PP\mbox{[}$\,$\mbox{]}}
+
+\mbox{\Hypertarget{predefine_8h_a1c75f22bfb9c494b0fa57af136aa5cca}\label{predefine_8h_a1c75f22bfb9c494b0fa57af136aa5cca}} 
+\index{predefine.h@{predefine.h}!HSS2PP@{HSS2PP}}
+\index{HSS2PP@{HSS2PP}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{HSS2PP}{HSS2PP}}
+{\footnotesize\ttfamily char H\+S\+S2\+PP\mbox{[}$\,$\mbox{]}}
+
+\mbox{\Hypertarget{predefine_8h_ae711f5d52549c57a7378be819bb7e779}\label{predefine_8h_ae711f5d52549c57a7378be819bb7e779}} 
+\index{predefine.h@{predefine.h}!Lambda@{Lambda}}
+\index{Lambda@{Lambda}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{Lambda}{Lambda}}
+{\footnotesize\ttfamily const double Lambda}
+
+\mbox{\Hypertarget{predefine_8h_a33a95e5568b62fe39e6b13453c4a3e5e}\label{predefine_8h_a33a95e5568b62fe39e6b13453c4a3e5e}} 
+\index{predefine.h@{predefine.h}!Lambda2@{Lambda2}}
+\index{Lambda2@{Lambda2}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{Lambda2}{Lambda2}}
+{\footnotesize\ttfamily const double Lambda2}
+
+\mbox{\Hypertarget{predefine_8h_aefd8df84bd08e0ad26e3b9b61bc89eb0}\label{predefine_8h_aefd8df84bd08e0ad26e3b9b61bc89eb0}} 
+\index{predefine.h@{predefine.h}!Lido\_Ecut@{Lido\_Ecut}}
+\index{Lido\_Ecut@{Lido\_Ecut}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{Lido\_Ecut}{Lido\_Ecut}}
+{\footnotesize\ttfamily double Lido\+\_\+\+Ecut}
+
+\mbox{\Hypertarget{predefine_8h_ab1851c42e4a750b9ae5a551c84f505a4}\label{predefine_8h_ab1851c42e4a750b9ae5a551c84f505a4}} 
+\index{predefine.h@{predefine.h}!LPM\_prefactor@{LPM\_prefactor}}
+\index{LPM\_prefactor@{LPM\_prefactor}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{LPM\_prefactor}{LPM\_prefactor}}
+{\footnotesize\ttfamily const double L\+P\+M\+\_\+prefactor}
+
+\mbox{\Hypertarget{predefine_8h_a1fedee55570a0d90fed7ab820afd21e3}\label{predefine_8h_a1fedee55570a0d90fed7ab820afd21e3}} 
+\index{predefine.h@{predefine.h}!Mb@{Mb}}
+\index{Mb@{Mb}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{Mb}{Mb}}
+{\footnotesize\ttfamily const double Mb}
+
+\mbox{\Hypertarget{predefine_8h_afbaea8eaebde60864311dd5582d4ad80}\label{predefine_8h_afbaea8eaebde60864311dd5582d4ad80}} 
+\index{predefine.h@{predefine.h}!Mc@{Mc}}
+\index{Mc@{Mc}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{Mc}{Mc}}
+{\footnotesize\ttfamily const double Mc}
+
+\mbox{\Hypertarget{predefine_8h_a4dcfdacad0380a6fbdfcf1ac88e7e1a5}\label{predefine_8h_a4dcfdacad0380a6fbdfcf1ac88e7e1a5}} 
+\index{predefine.h@{predefine.h}!mu2\_NP@{mu2\_NP}}
+\index{mu2\_NP@{mu2\_NP}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{mu2\_NP}{mu2\_NP}}
+{\footnotesize\ttfamily const double mu2\+\_\+\+NP}
+
+\mbox{\Hypertarget{predefine_8h_a22d0daadaf4a81b8dae28ae6b533e13c}\label{predefine_8h_a22d0daadaf4a81b8dae28ae6b533e13c}} 
+\index{predefine.h@{predefine.h}!Nc@{Nc}}
+\index{Nc@{Nc}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{Nc}{Nc}}
+{\footnotesize\ttfamily const int Nc}
+
+\mbox{\Hypertarget{predefine_8h_af501b9b181d27b38e44fb8f166266e9d}\label{predefine_8h_af501b9b181d27b38e44fb8f166266e9d}} 
+\index{predefine.h@{predefine.h}!nf@{nf}}
+\index{nf@{nf}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{nf}{nf}}
+{\footnotesize\ttfamily const int nf}
+
+\mbox{\Hypertarget{predefine_8h_a06f095b54145e3175d5f7e0f46d1cb2d}\label{predefine_8h_a06f095b54145e3175d5f7e0f46d1cb2d}} 
+\index{predefine.h@{predefine.h}!pf\_g@{pf\_g}}
+\index{pf\_g@{pf\_g}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{pf\_g}{pf\_g}}
+{\footnotesize\ttfamily const double pf\+\_\+g}
+
+\mbox{\Hypertarget{predefine_8h_a80d402d10e8341004c0caf10133b80ab}\label{predefine_8h_a80d402d10e8341004c0caf10133b80ab}} 
+\index{predefine.h@{predefine.h}!scale@{scale}}
+\index{scale@{scale}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{scale}{scale}}
+{\footnotesize\ttfamily double scale}
+
+\mbox{\Hypertarget{predefine_8h_afaf0bfd9c032a00337e2276e404314d5}\label{predefine_8h_afaf0bfd9c032a00337e2276e404314d5}} 
+\index{predefine.h@{predefine.h}!t\_channel\_mD2@{t\_channel\_mD2}}
+\index{t\_channel\_mD2@{t\_channel\_mD2}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{t\_channel\_mD2}{t\_channel\_mD2}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classDebye__mass}{Debye\+\_\+mass}}$\ast$ t\+\_\+channel\+\_\+m\+D2}
+
+\mbox{\Hypertarget{predefine_8h_a837d611f72e495b5ae8b93a978b6a378}\label{predefine_8h_a837d611f72e495b5ae8b93a978b6a378}} 
+\index{predefine.h@{predefine.h}!TR@{TR}}
+\index{TR@{TR}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{TR}{TR}}
+{\footnotesize\ttfamily const double TR}
+
+\mbox{\Hypertarget{predefine_8h_aa407dfd58fbf35d8db5986c225e43b59}\label{predefine_8h_aa407dfd58fbf35d8db5986c225e43b59}} 
+\index{predefine.h@{predefine.h}!type1\_warned@{type1\_warned}}
+\index{type1\_warned@{type1\_warned}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{type1\_warned}{type1\_warned}}
+{\footnotesize\ttfamily bool type1\+\_\+warned}
+
+\mbox{\Hypertarget{predefine_8h_a5266d80be471692fcb524ec24b91bd83}\label{predefine_8h_a5266d80be471692fcb524ec24b91bd83}} 
+\index{predefine.h@{predefine.h}!type2\_warned@{type2\_warned}}
+\index{type2\_warned@{type2\_warned}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{type2\_warned}{type2\_warned}}
+{\footnotesize\ttfamily bool type2\+\_\+warned}
+
+\mbox{\Hypertarget{predefine_8h_ac9b5264b5467017de7679becdf61df98}\label{predefine_8h_ac9b5264b5467017de7679becdf61df98}} 
+\index{predefine.h@{predefine.h}!type3\_warned@{type3\_warned}}
+\index{type3\_warned@{type3\_warned}!predefine.h@{predefine.h}}
+\doxysubsubsection{\texorpdfstring{type3\_warned}{type3\_warned}}
+{\footnotesize\ttfamily bool type3\+\_\+warned}
+

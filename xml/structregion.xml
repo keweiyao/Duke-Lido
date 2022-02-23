@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="structregion" kind="struct" language="C++" prot="public">
+    <compoundname>region</compoundname>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structregion_1abfda19a8491b7417a31a9d6b30bdbe9a" prot="public" static="no" mutable="no">
+        <type><ref refid="structhypercube" kindref="compound">hypercube</ref></type>
+        <definition>hypercube region::h</definition>
+        <argsstring></argsstring>
+        <name>h</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="181" column="16" bodyfile="src/hcubature.cpp" bodystart="181" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structregion_1a2d63d993b4832f859834b40e0c8f9a3d" prot="public" static="no" mutable="no">
+        <type>unsigned</type>
+        <definition>unsigned region::splitDim</definition>
+        <argsstring></argsstring>
+        <name>splitDim</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="182" column="15" bodyfile="src/hcubature.cpp" bodystart="182" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structregion_1a2fd989f56c0ce31c3a44f8c64c93ea5b" prot="public" static="no" mutable="no">
+        <type>unsigned</type>
+        <definition>unsigned region::fdim</definition>
+        <argsstring></argsstring>
+        <name>fdim</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="183" column="15" bodyfile="src/hcubature.cpp" bodystart="183" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structregion_1a9f26e00f2193fe8f18687b37c78888e1" prot="public" static="no" mutable="no">
+        <type><ref refid="structesterr" kindref="compound">esterr</ref> *</type>
+        <definition>esterr* region::ee</definition>
+        <argsstring></argsstring>
+        <name>ee</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="184" column="13" bodyfile="src/hcubature.cpp" bodystart="184" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structregion_1a6b8017501de197f23ccb412c350b8894" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double region::errmax</definition>
+        <argsstring></argsstring>
+        <name>errmax</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="185" column="13" bodyfile="src/hcubature.cpp" bodystart="185" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="1">
+        <label>region</label>
+        <link refid="structregion"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>h</edgelabel>
+        </childnode>
+        <childnode refid="3" relation="usage">
+          <edgelabel>ee</edgelabel>
+        </childnode>
+      </node>
+      <node id="3">
+        <label>esterr</label>
+        <link refid="structesterr"/>
+      </node>
+      <node id="2">
+        <label>hypercube</label>
+        <link refid="structhypercube"/>
+      </node>
+    </collaborationgraph>
+    <location file="src/hcubature.cpp" line="180" column="15" bodyfile="src/hcubature.cpp" bodystart="180" bodyend="186"/>
+    <listofallmembers>
+      <member refid="structregion_1a9f26e00f2193fe8f18687b37c78888e1" prot="public" virt="non-virtual"><scope>region</scope><name>ee</name></member>
+      <member refid="structregion_1a6b8017501de197f23ccb412c350b8894" prot="public" virt="non-virtual"><scope>region</scope><name>errmax</name></member>
+      <member refid="structregion_1a2fd989f56c0ce31c3a44f8c64c93ea5b" prot="public" virt="non-virtual"><scope>region</scope><name>fdim</name></member>
+      <member refid="structregion_1abfda19a8491b7417a31a9d6b30bdbe9a" prot="public" virt="non-virtual"><scope>region</scope><name>h</name></member>
+      <member refid="structregion_1a2d63d993b4832f859834b40e0c8f9a3d" prot="public" virt="non-virtual"><scope>region</scope><name>splitDim</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

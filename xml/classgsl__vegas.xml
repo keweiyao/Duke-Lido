@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="classgsl__vegas" kind="class" language="C++" prot="public">
+    <compoundname>gsl_vegas</compoundname>
+    <templateparamlist>
+      <param>
+        <type>typename F</type>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classgsl__vegas_1a1536fc27ed488bee48d31eca9c517d25" prot="private" static="no" mutable="no">
+        <type>F</type>
+        <definition>F gsl_vegas&lt; F &gt;::f</definition>
+        <argsstring></argsstring>
+        <name>f</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/integrator.h" line="90" column="5" bodyfile="src/integrator.h" bodystart="90" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgsl__vegas_1a4381f4e856a7f3cc00d23d5d6ebdf9c9" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gsl_vegas&lt; F &gt;::limit</definition>
+        <argsstring></argsstring>
+        <name>limit</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/integrator.h" line="91" column="7" bodyfile="src/integrator.h" bodystart="91" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-static-func">
+      <memberdef kind="function" id="classgsl__vegas_1a7ca18e08d0a6fcf18179885f123ccf37" prot="private" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>static double gsl_vegas&lt; F &gt;::gsl_wrapper</definition>
+        <argsstring>(double *x, size_t n_dim, void *p)</argsstring>
+        <name>gsl_wrapper</name>
+        <param>
+          <type>double *</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>n_dim</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>p</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/integrator.h" line="92" column="17" bodyfile="src/integrator.h" bodystart="92" bodyend="96"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classgsl__vegas_1a1fd06a26a07216a0606f5ee2900491ee" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>gsl_vegas&lt; F &gt;::gsl_vegas</definition>
+        <argsstring>(F f, int limit)</argsstring>
+        <name>gsl_vegas</name>
+        <param>
+          <type>F</type>
+          <declname>f</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>limit</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/integrator.h" line="99" column="3" bodyfile="src/integrator.h" bodystart="99" bodyend="101"/>
+      </memberdef>
+      <memberdef kind="function" id="classgsl__vegas_1a5eeffd354a96bf92ac572fc68102d74f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double gsl_vegas&lt; F &gt;::integrate</definition>
+        <argsstring>(int dim, double *xmin, double *xmax, double &amp;error)</argsstring>
+        <name>integrate</name>
+        <param>
+          <type>int</type>
+          <declname>dim</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>xmin</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>xmax</declname>
+        </param>
+        <param>
+          <type>double &amp;</type>
+          <declname>error</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/integrator.h" line="103" column="10" bodyfile="src/integrator.h" bodystart="103" bodyend="120"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/integrator.h" line="89" column="16" bodyfile="src/integrator.h" bodystart="89" bodyend="121"/>
+    <listofallmembers>
+      <member refid="classgsl__vegas_1a1536fc27ed488bee48d31eca9c517d25" prot="private" virt="non-virtual"><scope>gsl_vegas</scope><name>f</name></member>
+      <member refid="classgsl__vegas_1a1fd06a26a07216a0606f5ee2900491ee" prot="public" virt="non-virtual"><scope>gsl_vegas</scope><name>gsl_vegas</name></member>
+      <member refid="classgsl__vegas_1a7ca18e08d0a6fcf18179885f123ccf37" prot="private" virt="non-virtual"><scope>gsl_vegas</scope><name>gsl_wrapper</name></member>
+      <member refid="classgsl__vegas_1a5eeffd354a96bf92ac572fc68102d74f" prot="public" virt="non-virtual"><scope>gsl_vegas</scope><name>integrate</name></member>
+      <member refid="classgsl__vegas_1a4381f4e856a7f3cc00d23d5d6ebdf9c9" prot="private" virt="non-virtual"><scope>gsl_vegas</scope><name>limit</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

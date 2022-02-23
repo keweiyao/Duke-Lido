@@ -1,0 +1,52 @@
+\hypertarget{lorentz_8h}{}\doxysection{src/lorentz.h File Reference}
+\label{lorentz_8h}\index{src/lorentz.h@{src/lorentz.h}}
+{\ttfamily \#include $<$cmath$>$}\newline
+{\ttfamily \#include $<$cstdlib$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structcoordinate}{coordinate}}
+\item 
+struct \mbox{\hyperlink{structscalar}{scalar}}
+\item 
+struct \mbox{\hyperlink{structfourvec}{fourvec}}
+\item 
+struct \mbox{\hyperlink{structtensor}{tensor}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structfourvec}{fourvec}} \mbox{\hyperlink{lorentz_8h_adba324410ab4c4d0bdf54b90fc7ae141}{measure\+\_\+perp}} (\mbox{\hyperlink{structfourvec}{fourvec}} p, \mbox{\hyperlink{structfourvec}{fourvec}} k)
+\item 
+double \mbox{\hyperlink{lorentz_8h_a06238a0e25b4c8f7f572d79e3e1bd6b1}{dot}} (const \mbox{\hyperlink{structfourvec}{fourvec}} \&A, const \mbox{\hyperlink{structfourvec}{fourvec}} \&B)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const double \mbox{\hyperlink{lorentz_8h_ac06597536cc12c0332b1bf39aa895c84}{tiny\+\_\+v2}} = 1e-\/15
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{lorentz_8h_a06238a0e25b4c8f7f572d79e3e1bd6b1}\label{lorentz_8h_a06238a0e25b4c8f7f572d79e3e1bd6b1}} 
+\index{lorentz.h@{lorentz.h}!dot@{dot}}
+\index{dot@{dot}!lorentz.h@{lorentz.h}}
+\doxysubsubsection{\texorpdfstring{dot()}{dot()}}
+{\footnotesize\ttfamily double dot (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structfourvec}{fourvec}} \&}]{A,  }\item[{const \mbox{\hyperlink{structfourvec}{fourvec}} \&}]{B }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{lorentz_8h_adba324410ab4c4d0bdf54b90fc7ae141}\label{lorentz_8h_adba324410ab4c4d0bdf54b90fc7ae141}} 
+\index{lorentz.h@{lorentz.h}!measure\_perp@{measure\_perp}}
+\index{measure\_perp@{measure\_perp}!lorentz.h@{lorentz.h}}
+\doxysubsubsection{\texorpdfstring{measure\_perp()}{measure\_perp()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structfourvec}{fourvec}} measure\+\_\+perp (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structfourvec}{fourvec}}}]{p,  }\item[{\mbox{\hyperlink{structfourvec}{fourvec}}}]{k }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{lorentz_8h_ac06597536cc12c0332b1bf39aa895c84}\label{lorentz_8h_ac06597536cc12c0332b1bf39aa895c84}} 
+\index{lorentz.h@{lorentz.h}!tiny\_v2@{tiny\_v2}}
+\index{tiny\_v2@{tiny\_v2}!lorentz.h@{lorentz.h}}
+\doxysubsubsection{\texorpdfstring{tiny\_v2}{tiny\_v2}}
+{\footnotesize\ttfamily const double tiny\+\_\+v2 = 1e-\/15}
+

@@ -1,0 +1,858 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="matrix__elements_8h" kind="file" language="C++">
+    <compoundname>matrix_elements.h</compoundname>
+    <includes local="no">cstdlib</includes>
+    <includes local="no">vector</includes>
+    <includes refid="lorentz_8h" local="yes">lorentz.h</includes>
+    <includedby refid="collision__manager_8cpp" local="yes">src/collision_manager.cpp</includedby>
+    <includedby refid="matrix__elements__1-2_8cpp" local="yes">src/matrix_elements_1-2.cpp</includedby>
+    <includedby refid="matrix__elements__2-2_8cpp" local="yes">src/matrix_elements_2-2.cpp</includedby>
+    <includedby refid="matrix__elements__2-3_8cpp" local="yes">src/matrix_elements_2-3.cpp</includedby>
+    <includedby refid="Rate_8cpp" local="yes">src/Rate.cpp</includedby>
+    <includedby refid="Xsection_8cpp" local="yes">src/Xsection.cpp</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>src/matrix_elements.h</label>
+        <link refid="matrix__elements_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>cmath</label>
+      </node>
+      <node id="4">
+        <label>lorentz.h</label>
+        <link refid="lorentz_8h_source"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>vector</label>
+      </node>
+      <node id="2">
+        <label>cstdlib</label>
+      </node>
+      <node id="6">
+        <label>iostream</label>
+      </node>
+    </incdepgraph>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="matrix__elements_8h_1ab88d96ceb707698a7c5d0b6033fcdfa1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double LGV_q2qg</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>LGV_q2qg</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="9" column="8" bodyfile="src/matrix_elements_1-2.cpp" bodystart="11" bodyend="31" declfile="src/matrix_elements.h" declline="9" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a7ff97bb5967ad6f24d0c527a17cb856c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double LGV_qg2q</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>LGV_qg2q</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="10" column="8" declfile="src/matrix_elements.h" declline="10" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1accde828f0bbfb568372cbce1a7ef7c30" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double LGV_g2gg</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>LGV_g2gg</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="12" column="8" bodyfile="src/matrix_elements_1-2.cpp" bodystart="34" bodyend="56" declfile="src/matrix_elements.h" declline="12" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a0bb66821b079e20fb3793caacf95507f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double LGV_gg2g</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>LGV_gg2g</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="13" column="8" declfile="src/matrix_elements.h" declline="13" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a830258948b4c917908d5a537a8921d99" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double LGV_g2qqbar</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>LGV_g2qqbar</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="14" column="8" bodyfile="src/matrix_elements_1-2.cpp" bodystart="59" bodyend="80" declfile="src/matrix_elements.h" declline="14" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1af50b3c54205048ad1b85f0c0499ef9de" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_gq2gq</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>M2_gq2gq</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+<para>g(h)1 + q(s)2 <ndash/>only 1/t^2 term--&gt; g3 + q4 </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="17" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="35" bodyend="45" declfile="src/matrix_elements.h" declline="17" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1acbb004ea33ca2446ece85f067c78099a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_gq2gq</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>dX_gq2gq</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="18" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="46" bodyend="50" declfile="src/matrix_elements.h" declline="18" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1ae578e5bbddc616e8709d8edd0c5a418f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_gg2gg</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>M2_gg2gg</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="20" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="13" bodyend="26" declfile="src/matrix_elements.h" declline="20" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1ab7e8f70e0c6868230cdae3904a0e8795" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_gg2gg</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>dX_gg2gg</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="21" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="28" bodyend="32" declfile="src/matrix_elements.h" declline="21" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1ac850461460de603a595c6fc876116850" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_qq2qq</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>M2_qq2qq</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+<para>q(h)1 + q(s)2 <ndash/>only-t--&gt; q3 + q4, m1=m3, m2=m4=0 </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="23" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="54" bodyend="64" declfile="src/matrix_elements.h" declline="23" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a293dc69c87d63f97023c66aba1222a02" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_qq2qq</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>dX_qq2qq</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="24" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="65" bodyend="69" declfile="src/matrix_elements.h" declline="24" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a70b50dca794b6f96ad1712cec87200f9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_qg2qg</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>M2_qg2qg</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+<para>q(h)1 + g(s)2 <ndash/>only-t--&gt; q3 + g4, m1=m3, m2=m4=0 </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="26" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="73" bodyend="84" declfile="src/matrix_elements.h" declline="26" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a038ddf0c61062165873595c7c69c064e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_qg2qg</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>dX_qg2qg</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="27" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="85" bodyend="89" declfile="src/matrix_elements.h" declline="27" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a476018048b4b8ba00bd3ef9f76840bba" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_qg2qg_stu</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>M2_qg2qg_stu</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+<para>q(h)1 + g(s)2 <ndash/>s+u+t--&gt; q3 + g4, m1=m3, m2=m4=0 </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="29" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="92" bodyend="112" declfile="src/matrix_elements.h" declline="29" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a74c890669694c68c838920364324fb4a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_qg2qg_stu</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>dX_qg2qg_stu</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="30" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="113" bodyend="117" declfile="src/matrix_elements.h" declline="30" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a6ba2dfc280d2ee7f0fa94148e353269f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_gg2qqbar</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>M2_gg2qqbar</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="32" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="120" bodyend="141" declfile="src/matrix_elements.h" declline="32" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1af443f4e799dad51e603de1aa659afa86" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_gg2qqbar</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>dX_gg2qqbar</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="33" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="142" bodyend="146" declfile="src/matrix_elements.h" declline="33" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a61d87bfedc169aa09c8173879a209237" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_qqbar2qqbar_diff</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>M2_qqbar2qqbar_diff</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="35" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="150" bodyend="163" declfile="src/matrix_elements.h" declline="35" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1ae1beaada3687755a26958573432deaca" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_qqbar2qqbar_diff</definition>
+        <argsstring>(const double t, void *params)</argsstring>
+        <name>dX_qqbar2qqbar_diff</name>
+        <param>
+          <type>const double</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="36" column="8" bodyfile="src/matrix_elements_2-2.cpp" bodystart="165" bodyend="169" declfile="src/matrix_elements.h" declline="36" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1acb7c5341561b79ca938fa317f22139e3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_qq2qqg</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>M2_qq2qqg</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="39" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="153" bodyend="195" declfile="src/matrix_elements.h" declline="39" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a442fe910071f56abbc79d44ebfebf862" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_qq2qqg</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>dX_qq2qqg</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="40" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="196" bodyend="202" declfile="src/matrix_elements.h" declline="40" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a17a14a4b743a7ae1f48a9f09083aba5f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_qg2qgg</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>M2_qg2qgg</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="42" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="206" bodyend="275" declfile="src/matrix_elements.h" declline="42" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a8d7285d176f8b7d83fe1bdca6df47f4b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_qg2qgg</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>dX_qg2qgg</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="43" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="276" bodyend="282" declfile="src/matrix_elements.h" declline="43" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a4991c97a5c6a687bdcdcc3559ec79301" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_gq2gqg</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>M2_gq2gqg</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="45" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="347" bodyend="415" declfile="src/matrix_elements.h" declline="45" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a275d00154608cf7af3def9f1c8a25ba8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_gq2gqg</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>dX_gq2gqg</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="46" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="416" bodyend="422" declfile="src/matrix_elements.h" declline="46" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a76aa70a7b177044acc04f1af95a05082" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_gg2ggg</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>M2_gg2ggg</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="48" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="427" bodyend="471" declfile="src/matrix_elements.h" declline="48" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1ae8e8275665c3512960289ec4db99b0ce" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_gg2ggg</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>dX_gg2ggg</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="49" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="472" bodyend="478" declfile="src/matrix_elements.h" declline="49" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1aad36bb70e027ae75ac77a43abfb611d0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_qg2qqqbar</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>M2_qg2qqqbar</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="51" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="285" bodyend="336" declfile="src/matrix_elements.h" declline="51" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a1e148fab4b78370afc7901eb545e8512" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_qg2qqqbar</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>dX_qg2qqqbar</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="52" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="337" bodyend="343" declfile="src/matrix_elements.h" declline="52" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1af36700ebc0b195c509851caa0f1d7f7a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_gq2qqqbar</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>M2_gq2qqqbar</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="55" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="481" bodyend="528" declfile="src/matrix_elements.h" declline="55" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1addbbadc99db5959be1e17e5f0843c077" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_gq2qqqbar</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>dX_gq2qqqbar</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="56" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="529" bodyend="535" declfile="src/matrix_elements.h" declline="56" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a8799feb91e354f4ac437eb7adffd5a16" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_gg2qgqbar</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>M2_gg2qgqbar</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="58" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="538" bodyend="584" declfile="src/matrix_elements.h" declline="58" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1a607a86fa9df0feace9ed85c50f6b0fbd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_gg2qgqbar</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>dX_gg2qgqbar</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="59" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="585" bodyend="591" declfile="src/matrix_elements.h" declline="59" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1af376aa505ae2e1bfa6c99f13c3dae561" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double M2_gg2gqqbar</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>M2_gg2gqqbar</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="61" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="595" bodyend="641" declfile="src/matrix_elements.h" declline="61" declcolumn="8"/>
+      </memberdef>
+      <memberdef kind="function" id="matrix__elements_8h_1ada89d9a730f84117a85d28828e47778e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double dX_gg2gqqbar</definition>
+        <argsstring>(const double *x_, void *params_)</argsstring>
+        <name>dX_gg2gqqbar</name>
+        <param>
+          <type>const double *</type>
+          <declname>x_</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>params_</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/matrix_elements.h" line="62" column="8" bodyfile="src/matrix_elements_2-3.cpp" bodystart="642" bodyend="648" declfile="src/matrix_elements.h" declline="62" declcolumn="8"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>MATRIX_ELEMENTS_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>MATRIX_ELEMENTS_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstdlib&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;vector&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;lorentz.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="comment">//<sp/>diffusion<sp/>induced<sp/>process</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>LGV_q2qg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*params_);<sp/></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>LGV_qg2q(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*params_);<sp/></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>LGV_g2gg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*params_);<sp/></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>LGV_gg2g(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*params_);<sp/><sp/></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>LGV_g2qqbar(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*params_);<sp/></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_gq2gq(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_gq2gq(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_gg2gg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_gg2gg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_qq2qq(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_qq2qq(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_qg2qg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_qg2qg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_qg2qg_stu(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_qg2qg_stu(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_gg2qqbar(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_gg2qqbar(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_qqbar2qqbar_diff(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_qqbar2qqbar_diff(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>t,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params);</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_qq2qqg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_qq2qqg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_qg2qgg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_qg2qgg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_gq2gqg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_gq2gqg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_gg2ggg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_gg2ggg(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"></highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_qg2qqqbar(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_qg2qqqbar(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_gq2qqqbar(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_gq2qqqbar(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_gg2qgqbar(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_gg2qgqbar(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>M2_gg2gqqbar(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>dX_gg2gqqbar(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*<sp/>x_,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*<sp/>params_);</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"></highlight></codeline>
+<codeline lineno="64"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="src/matrix_elements.h"/>
+  </compounddef>
+</doxygen>

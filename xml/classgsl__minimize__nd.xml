@@ -1,0 +1,182 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="classgsl__minimize__nd" kind="class" language="C++" prot="public">
+    <compoundname>gsl_minimize_nd</compoundname>
+    <templateparamlist>
+      <param>
+        <type>typename F</type>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classgsl__minimize__nd_1aa7dadccd8bdfd725d1556557bf8cc376" prot="private" static="no" mutable="no">
+        <type>F</type>
+        <definition>F gsl_minimize_nd&lt; F &gt;::f</definition>
+        <argsstring></argsstring>
+        <name>f</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/minimizer.h" line="45" column="5" bodyfile="src/minimizer.h" bodystart="45" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgsl__minimize__nd_1a787133965350824362a6befb8b978ab2" prot="private" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>size_t gsl_minimize_nd&lt; F &gt;::dim</definition>
+        <argsstring></argsstring>
+        <name>dim</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/minimizer.h" line="46" column="10" bodyfile="src/minimizer.h" bodystart="46" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgsl__minimize__nd_1a2a8a8829092624183f9eae77c24f381a" prot="private" static="no" mutable="no">
+        <type>gsl_vector *</type>
+        <definition>gsl_vector* gsl_minimize_nd&lt; F &gt;::ss</definition>
+        <argsstring></argsstring>
+        <name>ss</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/minimizer.h" line="47" column="14" bodyfile="src/minimizer.h" bodystart="47" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgsl__minimize__nd_1a357737307e3d7171cda5c589cb4f58ba" prot="private" static="no" mutable="no">
+        <type>gsl_vector *</type>
+        <definition>gsl_vector* gsl_minimize_nd&lt; F &gt;::x</definition>
+        <argsstring></argsstring>
+        <name>x</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/minimizer.h" line="48" column="14" bodyfile="src/minimizer.h" bodystart="48" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classgsl__minimize__nd_1a8ae0e93f136a56c03c1ae747859c97d1" prot="private" static="no" mutable="no">
+        <type>std::unique_ptr&lt; gsl_multimin_fminimizer, std::function&lt; void(gsl_multimin_fminimizer *)&gt; &gt;</type>
+        <definition>std::unique_ptr&lt;gsl_multimin_fminimizer, std::function&lt;void(gsl_multimin_fminimizer*)&gt; &gt; gsl_minimize_nd&lt; F &gt;::workspace</definition>
+        <argsstring></argsstring>
+        <name>workspace</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/minimizer.h" line="51" column="2" bodyfile="src/minimizer.h" bodystart="51" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-static-func">
+      <memberdef kind="function" id="classgsl__minimize__nd_1a667a90dcf7cbf92208d25e6b54c61517" prot="private" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>static double gsl_minimize_nd&lt; F &gt;::f_wrapper</definition>
+        <argsstring>(const gsl_vector *v, void *p)</argsstring>
+        <name>f_wrapper</name>
+        <param>
+          <type>const gsl_vector *</type>
+          <declname>v</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>p</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/minimizer.h" line="55" column="17" bodyfile="src/minimizer.h" bodystart="55" bodyend="64"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classgsl__minimize__nd_1a43527f7867fc4fad15159b1314b9b8a5" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>gsl_minimize_nd&lt; F &gt;::gsl_minimize_nd</definition>
+        <argsstring>(F f, const size_t dim)</argsstring>
+        <name>gsl_minimize_nd</name>
+        <param>
+          <type>F</type>
+          <declname>f</declname>
+        </param>
+        <param>
+          <type>const size_t</type>
+          <declname>dim</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/minimizer.h" line="67" column="3" bodyfile="src/minimizer.h" bodystart="67" bodyend="74"/>
+      </memberdef>
+      <memberdef kind="function" id="classgsl__minimize__nd_1ab1940e964667fed142cee1e2796353bd" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>gsl_minimize_nd&lt; F &gt;::~gsl_minimize_nd</definition>
+        <argsstring>()</argsstring>
+        <name>~gsl_minimize_nd</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/minimizer.h" line="75" column="3" bodyfile="src/minimizer.h" bodystart="75" bodyend="78"/>
+      </memberdef>
+      <memberdef kind="function" id="classgsl__minimize__nd_1ae2eb6b2f619e136216f1f179a25150ba" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double gsl_minimize_nd&lt; F &gt;::minimize</definition>
+        <argsstring>(std::vector&lt; double &gt; start, std::vector&lt; double &gt; step, int max_iter, double eps)</argsstring>
+        <name>minimize</name>
+        <param>
+          <type>std::vector&lt; double &gt;</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; double &gt;</type>
+          <declname>step</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>max_iter</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>eps</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/minimizer.h" line="80" column="10" bodyfile="src/minimizer.h" bodystart="80" bodyend="103"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/minimizer.h" line="44" column="22" bodyfile="src/minimizer.h" bodystart="44" bodyend="104"/>
+    <listofallmembers>
+      <member refid="classgsl__minimize__nd_1a787133965350824362a6befb8b978ab2" prot="private" virt="non-virtual"><scope>gsl_minimize_nd</scope><name>dim</name></member>
+      <member refid="classgsl__minimize__nd_1aa7dadccd8bdfd725d1556557bf8cc376" prot="private" virt="non-virtual"><scope>gsl_minimize_nd</scope><name>f</name></member>
+      <member refid="classgsl__minimize__nd_1a667a90dcf7cbf92208d25e6b54c61517" prot="private" virt="non-virtual"><scope>gsl_minimize_nd</scope><name>f_wrapper</name></member>
+      <member refid="classgsl__minimize__nd_1a43527f7867fc4fad15159b1314b9b8a5" prot="public" virt="non-virtual"><scope>gsl_minimize_nd</scope><name>gsl_minimize_nd</name></member>
+      <member refid="classgsl__minimize__nd_1ae2eb6b2f619e136216f1f179a25150ba" prot="public" virt="non-virtual"><scope>gsl_minimize_nd</scope><name>minimize</name></member>
+      <member refid="classgsl__minimize__nd_1a2a8a8829092624183f9eae77c24f381a" prot="private" virt="non-virtual"><scope>gsl_minimize_nd</scope><name>ss</name></member>
+      <member refid="classgsl__minimize__nd_1a8ae0e93f136a56c03c1ae747859c97d1" prot="private" virt="non-virtual"><scope>gsl_minimize_nd</scope><name>workspace</name></member>
+      <member refid="classgsl__minimize__nd_1a357737307e3d7171cda5c589cb4f58ba" prot="private" virt="non-virtual"><scope>gsl_minimize_nd</scope><name>x</name></member>
+      <member refid="classgsl__minimize__nd_1ab1940e964667fed142cee1e2796353bd" prot="public" virt="non-virtual"><scope>gsl_minimize_nd</scope><name>~gsl_minimize_nd</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

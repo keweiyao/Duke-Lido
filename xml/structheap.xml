@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="structheap" kind="struct" language="C++" prot="public">
+    <compoundname>heap</compoundname>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structheap_1a389e0ffbf2c22aa4f134df911757d250" prot="public" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>size_t heap::n</definition>
+        <argsstring></argsstring>
+        <name>n</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="776" column="13" bodyfile="src/hcubature.cpp" bodystart="776" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structheap_1a211aa03db5145479baea2b1cf177d8d7" prot="public" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>size_t heap::nalloc</definition>
+        <argsstring></argsstring>
+        <name>nalloc</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="776" column="15" bodyfile="src/hcubature.cpp" bodystart="776" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structheap_1a4f01a4bc5d5a09fc17f440753edd3e49" prot="public" static="no" mutable="no">
+        <type><ref refid="structregion" kindref="compound">heap_item</ref> *</type>
+        <definition>heap_item* heap::items</definition>
+        <argsstring></argsstring>
+        <name>items</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="777" column="16" bodyfile="src/hcubature.cpp" bodystart="777" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structheap_1a3f5fa485acf45832b40095960b6c9d95" prot="public" static="no" mutable="no">
+        <type>unsigned</type>
+        <definition>unsigned heap::fdim</definition>
+        <argsstring></argsstring>
+        <name>fdim</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="778" column="15" bodyfile="src/hcubature.cpp" bodystart="778" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structheap_1a4246a4017fc3d2f77ffe2688d543e0a3" prot="public" static="no" mutable="no">
+        <type><ref refid="structesterr" kindref="compound">esterr</ref> *</type>
+        <definition>esterr* heap::ee</definition>
+        <argsstring></argsstring>
+        <name>ee</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/hcubature.cpp" line="779" column="13" bodyfile="src/hcubature.cpp" bodystart="779" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="2">
+        <label>region</label>
+        <link refid="structregion"/>
+        <childnode refid="3" relation="usage">
+          <edgelabel>h</edgelabel>
+        </childnode>
+        <childnode refid="4" relation="usage">
+          <edgelabel>ee</edgelabel>
+        </childnode>
+      </node>
+      <node id="4">
+        <label>esterr</label>
+        <link refid="structesterr"/>
+      </node>
+      <node id="3">
+        <label>hypercube</label>
+        <link refid="structhypercube"/>
+      </node>
+      <node id="1">
+        <label>heap</label>
+        <link refid="structheap"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>items</edgelabel>
+        </childnode>
+        <childnode refid="4" relation="usage">
+          <edgelabel>ee</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="src/hcubature.cpp" line="775" column="15" bodyfile="src/hcubature.cpp" bodystart="775" bodyend="780"/>
+    <listofallmembers>
+      <member refid="structheap_1a4246a4017fc3d2f77ffe2688d543e0a3" prot="public" virt="non-virtual"><scope>heap</scope><name>ee</name></member>
+      <member refid="structheap_1a3f5fa485acf45832b40095960b6c9d95" prot="public" virt="non-virtual"><scope>heap</scope><name>fdim</name></member>
+      <member refid="structheap_1a4f01a4bc5d5a09fc17f440753edd3e49" prot="public" virt="non-virtual"><scope>heap</scope><name>items</name></member>
+      <member refid="structheap_1a389e0ffbf2c22aa4f134df911757d250" prot="public" virt="non-virtual"><scope>heap</scope><name>n</name></member>
+      <member refid="structheap_1a211aa03db5145479baea2b1cf177d8d7" prot="public" virt="non-virtual"><scope>heap</scope><name>nalloc</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>
