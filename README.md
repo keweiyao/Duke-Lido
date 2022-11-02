@@ -18,7 +18,7 @@ Otherwise please download [pythia8235](http://home.thep.lu.se/~torbjorn/pythiaau
 #2 Compile LIDO
 -------------------
 
-Requirements: c++11, libraries: gsl, hdf5, and boost and make sure Pythia8 is in your system path
+Requirements: ``c++11, gsl, hdf5, boost`` and make sure ``Pythia8`` is in your system path
 Run cmake with the ``pythia8`` option turned on and then compile and install. Within the LIDO folder run the following:
 
 ```bash
