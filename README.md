@@ -42,7 +42,7 @@ The LIDO transport model couples the jet partons to a hydrodynamic background. W
 #4 Generate Tables
 --------------------
 
-LIDO will tabulate all those 2->2 and 2->3 and 1->2 cross-sections and rates. This can take sometime. But for every sets of coupling/cut parameters, this only need to be performed ones. You can find the lido_settings.xml in the main folder with contains the table information for all different scattering channles. To make table (assume you have install all LIDO excutables and add them to the system path)
+LIDO will tabulate all those 2->2 and 2->3 and 1->2 cross-sections and rates. This can take sometime. But for every set of coupling/screening parameters, this only needs to be performed once. You can find the ``lido_settings.xml`` in the main folder which contains table information for all different scattering channles. To make table (assume you have install all LIDO excutables and add them to the system path)
 
 ```bash
     Lido-TabGen -s <path/to/lido_setting.xml> -t ./table.h5 --muT=1.5
