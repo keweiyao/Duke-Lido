@@ -207,17 +207,12 @@ foreach(App "Lido-TabGen" "Lido-X-tests" "Lido-R-tests" "Lido-Incoherent-tests")
 endforeach()
 
 if(pythia8)
-	foreach(App "PGunTest" "Lido2DHydro" "Lido_pp" "Dijet")
+	foreach(App "Lido2DHydro" "Lido_pp")
 	add_executable(${App} ./JetMains/${App}.cpp)
 	target_link_libraries(${App} ${LIBRARY_NAME} ${LIBRARY_JETFIND} ${PYTHIA8_LIBRARIES} ${FASTJET_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
 	install(TARGETS ${App} DESTINATION bin)
 endforeach()
 
-foreach(App "HQ-2Dhydro-couple" "pythia_HQ_baseline" "decay")
-	add_executable(${App} ./HeavyQuarkMains/${App}.cpp)
-	target_link_libraries(${App} ${LIBRARY_NAME} ${PYTHIA8_LIBRARIES} ${GSL_LIBRARIES} ${GSLCALAS_LIBRARIES} ${HDF5_LIBRARIES} ${Boost_LIBRARIES} -pthread -lpthread -ldl)
-	install(TARGETS ${App} DESTINATION bin)
-endforeach()
 endif(pythia8)
 
 #install(FILES ./settings/lido_settings.xml DESTINATION share)

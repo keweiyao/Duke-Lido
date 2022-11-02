@@ -6,6 +6,15 @@
 #include <random>
 using namespace Pythia8;
 
+class HFdecayer{
+public: 
+    HFdecayer();
+    int Decay(Pythia8::Particle pIn, std::vector<Pythia8::Particle> & pOut);
+private:
+    Pythia pythia;
+};
+
+
 class JetDenseMediumHadronize{
 public:
    JetDenseMediumHadronize();
@@ -15,15 +24,9 @@ public:
                  double Q0, double Tf, int level);
 private:
    Pythia pythia;
+   HFdecayer Decay;
 };
 
-class HFHadronize{
-public:
-   HFHadronize();
-   int hadronize(particle pIn, std::vector<particle> & pOut, double Q0, double Tf);
-private:
-   Pythia pythia;
-};
 
 
 #endif

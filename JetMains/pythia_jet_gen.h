@@ -149,15 +149,19 @@ bool PythiaGen::Generate(std::vector<particle> & plist){
     */
     double sg = pythia.info.sigmaGen();
     // convert sigma_hard into hadronic level cross-section
-    sigma0 = sg;
-    /*if(sigma0 >1e-4){
-        double db = 0.005;
+    // sg = mb = 0.1 fm^2
+    if(10.0*sg/4/0.45/.45>.01){
+        double db = 0.0025;
         sigma0 = 0.;
-        for (int m=0; m<1000; m++){
+        for (int m=0; m<4000; m++){
             double b = db*m;
-            sigma0 += (1.-std::exp(-sg*Tpp(b)))*2.*M_PI*b*db;
+            sigma0 += (1.-std::exp(-10*sg*Tpp(b)))*2.*M_PI*b*db/10.;
         }
-    }*/
+    }else {
+        sigma0 = sg; 
+    }
+    
+    sigma0 = sg*pythia.info.weight() ;
     auto & event = pythia.event;
     color_count = event.lastColTag()+1;
     for (size_t i = 0; i < event.size(); ++i) {

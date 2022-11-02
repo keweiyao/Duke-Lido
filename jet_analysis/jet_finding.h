@@ -99,6 +99,7 @@ private:
     double sigma, vradial, Tfreeze;
     std::vector<particle> plist;
     std::vector<current> clist;
+    std::vector<double> Rs;
     MediumResponse MR;
     std::vector<std::vector<fourvec> > Pmu;
     Pythia8::Pythia HF2mu;

@@ -7,6 +7,10 @@
 // It illustrates how to feed in a single particle (including a resonance)
 // or a toy parton-level configurations.
 
+
+
+
+
 #include "Pythia8/Pythia.h"
 #include "Hadronize.h"
 #include "lorentz.h"
@@ -17,9 +21,14 @@
 using namespace Pythia8;
 
 
+
+
+
 JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("Tune:pp=19");
     pythia.readString("PDF:pSet = 8");
+    pythia.readString("PDF:pSet = LHAPDF6:CT14nlo/0");
+    //pythia.readString("PDF:pSet = LHAPDF6:nNNPDF30_nlo_as_0118_p/0");
     pythia.readString("ProcessLevel:all = off");
     pythia.readString("Print:quiet = on");
     pythia.readString("SoftQCD:all = off");
@@ -36,10 +45,16 @@ JetDenseMediumHadronize::JetDenseMediumHadronize(){
     pythia.readString("HadronLevel:Decay = on");
     pythia.readString("411:mayDecay = off");
     pythia.readString("421:mayDecay = off");
+    pythia.readString("413:mayDecay = off");
+    pythia.readString("423:mayDecay = off");
     pythia.readString("431:mayDecay = off");
+    pythia.readString("433:mayDecay = off");
     pythia.readString("511:mayDecay = off");
     pythia.readString("521:mayDecay = off");
+    pythia.readString("513:mayDecay = off");
+    pythia.readString("523:mayDecay = off");
     pythia.readString("531:mayDecay = off");
+    pythia.readString("533:mayDecay = off");
     pythia.init();
 }
 
@@ -188,6 +203,7 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> pIn_list,
     }     
     pythia.forceTimeShower(1,count-1, maxQ0);
     pythia.next();
+    // All final-state particle
     for (int i = 0; i < pythia.event.size(); ++i) {
         auto ip = pythia.event[i];
         bool good = false;
@@ -196,138 +212,46 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> pIn_list,
         if (level==0) good = (ip.isParton() 
                       && pythia.event[ip.daughter1()].isHadron())
                       || (ip.isFinal() && ip.isParton());
+                   
         if (good) {
-            particle h;
-            h.pid = ip.id();
-            h.p.a[1] = ip.px();
-            h.p.a[2] = ip.py();
-            h.p.a[3] = ip.pz();
-            h.mass = ip.m();
-            h.p.a[0] = std::sqrt(h.mass*h.mass + h.p.pabs2());
-            h.weight = 1;
-	    h.T0 = 0;
-            h.charged = ip.isCharged();
-	    if (std::abs(h.pid)==13) {
-                auto & pQ = pythia.event[ip.mother1()];
-		if (pQ.idAbs()==411 || pQ.idAbs()==421 || pQ.idAbs()==511 || pQ.idAbs()==521){
-                    h.radlist.clear();
-		     particle h2;
-            h2.pid = pQ.id();
-            h2.p.a[1] = pQ.px();
-            h2.p.a[2] = pQ.py();
-            h2.p.a[3] = pQ.pz();
-            h2.mass = pQ.m();
-            h2.p.a[0] = std::sqrt(pQ.m()*pQ.m() + h2.p.pabs2());
-            h2.weight = 1;
-            h2.charged = pQ.isCharged();
-
-		    h.radlist.push_back({h2});
+                std::vector<Pythia8::Particle> pOut;
+                Decay.Decay(ip, pOut);
+                for (auto & H : pOut) {
+                    particle h;
+                    h.pid = H.id();
+                    h.p.a[1] = H.px();
+                    h.p.a[2] = H.py();
+                    h.p.a[3] = H.pz();
+                    h.mass = H.m();
+                    h.p.a[0] = std::sqrt(h.mass*h.mass + h.p.pabs2());
+                    h.weight = 1;
+	            h.T0 = 0;
+                    h.charged = H.isCharged();
+                    hadrons.push_back(h);
                 }
-            }
-            hadrons.push_back(h);
         }
     }
     return hadrons.size();
 }
 
-HFHadronize::HFHadronize(){
-    pythia.readString("Tune:pp=19");
+HFdecayer::HFdecayer(){
+    pythia.readString("Random:setSeed = on");
+    pythia.readString("Random:seed = 0");
     pythia.readString("ProcessLevel:all = off");
-    pythia.readString("Print:quiet = on");
-    pythia.readString("SoftQCD:all = off");
-    pythia.readString("PromptPhoton:all=off");
-    pythia.readString("WeakSingleBoson:all=off");
-    pythia.readString("WeakDoubleBoson:all=off");
-    pythia.readString("SpaceShower:QEDshowerByQ=off");
-    pythia.readString("TimeShower:QEDshowerByQ = off");
-    pythia.readString("Next:numberShowInfo = 0");
-    pythia.readString("Next:numberShowProcess = 0");
-    pythia.readString("Next:numberShowEvent = 0");
-    pythia.readString("1:m0 = 0");
-    pythia.readString("2:m0 = 0");
-    pythia.readString("3:m0 = 0");
-    pythia.readString("4:m0 = 1.3");
-    pythia.readString("5:m0 = 4.2");
-    pythia.readString("PartonLevel:Remnants = on");
     pythia.readString("HadronLevel:all = on");
-    pythia.readString("HadronLevel:Decay = on");
-    pythia.readString("StringZ:usePetersonC=on");
-    pythia.readString("StringZ:usePetersonB=on");
-    pythia.readString("411:mayDecay = off");
-    pythia.readString("421:mayDecay = off");
-    pythia.readString("413:mayDecay = off");
-    pythia.readString("423:mayDecay = off");
-    pythia.readString("511:mayDecay = off");
-    pythia.readString("521:mayDecay = off");
-    pythia.readString("513:mayDecay = off");
-    pythia.readString("523:mayDecay = off");
-pythia.readString("411:oneChannel = 1 1 22 -13 14 311");
-pythia.readString("421:oneChannel = 1 1 22 -13 14 321");
-pythia.readString("511:oneChannel = 1 1 22 14 -13 -411");
-pythia.readString("521:oneChannel = 1 1 22 14 -13 -421");
+    pythia.readString("HadronLevel:decay = on");
     pythia.init();
 }
-
-int HFHadronize::hadronize(particle pIn, std::vector<particle> & pOut,
-                           double Q0, double Tf){
-    double maxQ0 = Q0;
+int HFdecayer::Decay(Pythia8::Particle pIn, std::vector<Pythia8::Particle> & pOut){
     pOut.clear();
     pythia.event.reset();
-    double vzgrid = std::tanh(pIn.x.x3());
-    auto pmu = pIn.p.boost_back(0,0,vzgrid);
-    pythia.event.append(std::abs(pIn.pid), 23, 101, 0,
-                        pmu.x(), pmu.y(), pmu.z(), pmu.t(), pIn.mass);
-
-    fourvec p2;
-    double kperp = 0.;
-    do{
-        p2 = Srandom::generate_thermal_parton_with_boost(
-                           Q0, 0, 0, vzgrid);
-	kperp = measure_perp(pmu, p2).pabs();
-    }while(kperp<Q0);
-
-    pythia.event.append(-std::abs(Srandom::sample_flavor(3)), 23, 0, 101,
-                        p2.x(), p2.y(), p2.z(), pmu.t(), 0.);
-    pythia.event[1].scale(Q0);
-    pythia.event[2].scale(3*Tf);
-    pythia.forceTimeShower(1,2,Q0);
+    pythia.event.append(pIn.id(), 85, 0, 0, pIn.px(), pIn.py(), pIn.pz(), pIn.e(), pIn.m());
     pythia.next();
-
-
-    double tau = pIn.x.x0();
-    double etas = pIn.x.x3();
-    coordinate x{tau*std::cosh(etas), pIn.x.x1(), pIn.x.x2(),
-                 tau*std::sinh(etas)};
-    double vzcell = std::tanh(etas);
-    double gamma = 1./std::sqrt(1.-vzcell*vzcell);
-            pIn.vcell[0] = pIn.vcell[0]/gamma/(1+vzcell*pIn.vcell[2]);
-            pIn.vcell[1] = pIn.vcell[1]/gamma/(1+vzcell*pIn.vcell[2]);
-            pIn.vcell[2] = (vzcell+pIn.vcell[2])/(1+vzcell*pIn.vcell[2]);
-
-
-    for (int i = 0; i < pythia.event.size(); ++i) {
-        auto ip = pythia.event[i];
-        int absid = std::abs(ip.id());
-        if ( ((ip.isParton()
-          && pythia.event[ip.daughter1()].isHadron())
-            || (ip.isFinal() && ip.isParton()))
-		       	&& absid==std::abs(pIn.pid)
-	    ){
-            particle p;
-	    
-	    p.p = fourvec{ip.e(), ip.px(), ip.py(), ip.pz()};
-	    p.mass = pIn.mass;
-	    p.vcell.resize(3);
-	    p.vcell[0] = pIn.vcell[0];
-	    p.vcell[1] = pIn.vcell[1];
-            p.vcell[2] = pIn.vcell[2];
-	    p.p0 = p.p;
-	    p.weight = pIn.weight;
-	    p.Tf = pIn.Tf;
-	    p.x = x;
-	    p.pid = pIn.pid;
-            pOut.push_back(p);
-        }
+    for (int i = 0; i < pythia.event.size(); ++i){
+        auto p = pythia.event[i];
+        if (p.isFinal()) pOut.push_back(p);
     }
     return 0;
 }
+
+
