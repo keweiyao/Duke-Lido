@@ -2,8 +2,8 @@ The Duke Linearized-Boltzmann-and-Diffusion Partonic Transport Model
 ====================================================================
 
 
-1. Install Pythia8
---------------------
+#1 Install Pythia8
+------------------
 
 The collider mode study requires Pythia8. If you already have Pythia8 installed and have environment variables set in ``$HOME/.bashrc``, e.g,
 
@@ -15,7 +15,7 @@ The collider mode study requires Pythia8. If you already have Pythia8 installed 
 Otherwise please download [pythia8235](http://home.thep.lu.se/~torbjorn/pythiaaux/present.html) and install accordingly.
 
 
-2. Compile LIDO
+#2 Compile LIDO
 -------------------
 
 Requirements: c++11, libraries: gsl, hdf5, and boost and make sure Pythia8 is in your system path
@@ -30,7 +30,16 @@ Run cmake with the ``pythia8`` option turned on and then compile and install. Wi
 
 This will install the package to the default localtion ``$HOME/.local/``. Or you can specifiy the install path by running ``cmake -DCMAKE_INSTALL_PREFIX:PATH=<your/install/path>`` instead.
 
-3. Generate Tables:
+#3 Download test hydro profiles.
+----------------------------------
+
+The LIDO transport model couples the jet partons to a hydrodynamic background. We have a few pregenerated hydrofiles for AuAu at 200 GeV. Download them by 
+
+```bash
+   ./get_test_hydro_profiles.sh
+```
+
+#4 Generate Tables
 --------------------
 
 LIDO will tabulate all those 2->2 and 2->3 and 1->2 cross-sections and rates. This can take sometime. But for every sets of coupling/cut parameters, this only need to be performed ones. You can find the lido_settings.xml in the main folder with contains the table information for all different scattering channles. To make table (assume you have install all LIDO excutables and add them to the system path)
@@ -41,11 +50,4 @@ LIDO will tabulate all those 2->2 and 2->3 and 1->2 cross-sections and rates. Th
 
 will compute the tables with coupling scale parameters ``mu = 1.5*pi*T`` and output to the file ``table.h5``
 
-4. Download test hydro profiles.
-----------------------------------
 
-The LIDO transport model couples the jet partons to a hydrodynamic background. We have a few pregenerated hydrofiles for AuAu at 200 GeV. Download them by 
-
-```bash
-   ./get_test_hydro_profiles.sh
-```
