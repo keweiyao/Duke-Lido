@@ -25,10 +25,8 @@ using namespace Pythia8;
 
 
 JetDenseMediumHadronize::JetDenseMediumHadronize(){
-    pythia.readString("Tune:pp=19");
-    pythia.readString("PDF:pSet = 8");
-    pythia.readString("PDF:pSet = LHAPDF6:CT14nlo/0");
-    //pythia.readString("PDF:pSet = LHAPDF6:nNNPDF30_nlo_as_0118_p/0");
+    pythia.readString("Tune:pp=21");
+    //pythia.readString("PDF:pSet = 8");
     pythia.readString("ProcessLevel:all = off");
     pythia.readString("Print:quiet = on");
     pythia.readString("SoftQCD:all = off");
@@ -214,21 +212,36 @@ int JetDenseMediumHadronize::hadronize(std::vector<particle> pIn_list,
                       || (ip.isFinal() && ip.isParton());
                    
         if (good) {
-                std::vector<Pythia8::Particle> pOut;
-                Decay.Decay(ip, pOut);
-                for (auto & H : pOut) {
+                //std::vector<Pythia8::Particle> pOut;
+		// Keep D0, other particles decay
+		/*double pT = ip.pT();
+                double yabs = std::abs(ip.y());
+
+                double lowpT_y_cut = std::abs(-0.2/15*pT*pT+1.9/15*pT+0.5);
+
+		bool isD = (absid==421) && (3.0<pT) && (pT<36.0);
+		if (pT>5) isD = isD && (yabs<0.8);
+		else isD = isD && (yabs<lowpT_y_cut);
+		
+		if (isD) pOut.push_back(ip);*/
+
+		   
+		//Decay.Decay(ip, pOut);
+                 
+		
+		//for (auto & H : pOut) {
                     particle h;
-                    h.pid = H.id();
-                    h.p.a[1] = H.px();
-                    h.p.a[2] = H.py();
-                    h.p.a[3] = H.pz();
-                    h.mass = H.m();
+                    h.pid = ip.id();
+                    h.p.a[1] = ip.px();
+                    h.p.a[2] = ip.py();
+                    h.p.a[3] = ip.pz();
+                    h.mass = ip.m();
                     h.p.a[0] = std::sqrt(h.mass*h.mass + h.p.pabs2());
                     h.weight = 1;
 	            h.T0 = 0;
-                    h.charged = H.isCharged();
+                    h.charged = ip.isCharged();
                     hadrons.push_back(h);
-                }
+                //}
         }
     }
     return hadrons.size();

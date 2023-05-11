@@ -191,14 +191,17 @@ void JetFinder::MakeETower(double _vradial,
     }
     // put hard particles into the towers
     for (auto & p : plist){
+	// Skip the copy of HF hadrons:
+	auto absid = std::abs(p.pid);
+        //if (absid==22 && p.p.xT()>50 && p.T0<-10) continue;	
+
         double eta = p.p.pseudorap();
         double phi = p.p.phi();
         int ieta = corp_index(eta, etamin, etamax, deta, Neta);
         if (ieta<0) continue;
         int iphi = corp_index(phi, phimin, phimax, dphi, Nphi);
 	if (charged_jet){
-	    auto absid = std::abs(p.pid);
-	    if (p.charged || (p.pid==421) ) {
+	    if (p.charged) {
                 Pmu[ieta][iphi] = Pmu[ieta][iphi] + p.p;
 	        if (p.p.xT()>pTmin) PT[ieta][iphi] += p.p.xT();
 	    }
@@ -348,35 +351,19 @@ void JetFinder::FindJets(std::vector<double> Rs_,
             J.phi = newP.phi();
             J.eta = newP.pseudorap();
             J.M2 = newP.m2();
-	    if (!chg_trigger){
-		// Further trigger on gamma-away side:
-		//if (std::cos(J.phi-phigamma)<0.)
-        	Jets.push_back(J);
-	    }
-	    else{
-	        // trigger on high-pT constituents
-	        /*bool trigger = false;
-	        for (auto & p: plist) {
-                    double absdphi = std::abs(Jphi - p.p.phi());
-                    if (absdphi>M_PI) absdphi = 2.*M_PI-absdphi;
-                    double deta = Jeta-p.p.pseudorap();
-                    double dR = std::sqrt(absdphi*absdphi + deta*deta);
-                    if ( (dR<J.R) && p.charged && p.p.xT()>5.) trigger = true;
-	        }*/
-	        //if (trigger) 
-		Jets.push_back(J);   
-	    }
+	    // Further trigger on gamma-away side: pi/2
+	    // if (std::cos(J.phi-phigamma)<std::cos(M_PI/2.)) 
+            Jets.push_back(J);
         }
     }
 }
 
 
 void JetFinder::FindHF(std::vector<particle> plist) {
-    // find heavy meson, decay it until it produce a muon (weighted by branching ratio)
-    // the candidate contains the HF meson and its decay product
     for (auto & pIn : plist){
 	int absid = std::abs(pIn.pid);
-        bool isHF = (pIn.pid==421);
+	bool isHF = (absid==411) || (absid==421) || (absid==413) || (absid==423) || (absid==431) || (absid==433) 
+		  || (absid==511) || (absid==521) || (absid==513) || (absid==523) || (absid==531) || (absid==533);
         if (isHF) HFs.push_back(pIn);
     }
 }
@@ -413,6 +400,47 @@ void JetFinder::CalcJetshape(std::vector<double> rbins){
     }
 }
 
+
+void JetFinder::JT(std::vector<double> jTbins){
+    for (int i=0; i<Jets.size(); i++){
+        auto & J = Jets[i];
+        double Jphi = J.phi;
+        double Jeta = J.eta;
+        J.jT.resize(jTbins.size()-1);
+        for (auto & it : J.jT) it = 0.;
+
+        for (auto & p : plist) {
+            // Skip the copy of HF hadrons:
+            auto absid = std::abs(p.pid);           
+            bool isD = (absid==411) || (absid==421) || (absid==413) || (absid==423) || (absid==433) || (absid==431);
+            if (isD) continue; // because we include them as the decay hadrons already.
+
+
+            double absdphi = std::abs(Jphi - p.p.phi());
+            if (absdphi>M_PI) absdphi = 2.*M_PI-absdphi;
+            double deta = Jeta-p.p.pseudorap();
+            double dR = std::sqrt(absdphi*absdphi + deta*deta);
+            // D(z)
+            if (dR<J.R && p.charged) {
+		double pTcrossjet2 = std::pow(p.p.y()*J.pmu.z()-p.p.z()*J.pmu.y(),2)
+			           + std::pow(p.p.x()*J.pmu.z()-p.p.z()*J.pmu.x(),2)
+				   + std::pow(p.p.x()*J.pmu.y()-p.p.y()*J.pmu.x(),2);
+                double jT = std::sqrt(pTcrossjet2)/J.pT;
+                int index = -1;
+                for (int i=0; i<J.jT.size(); i++){
+                    if (jT>jTbins[i] && jT<=jTbins[i+1]) {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index >= 0) J.jT[index] += 1.;
+            }
+        }
+	for (int i=0; i<J.jT.size(); i++)
+            J.jT[i] /= (jTbins[i+1]-jTbins[i]);
+    }
+}
+
 void JetFinder::Frag(std::vector<double> zbins, std::vector<double> zpTbins){
     for (int i=0; i<Jets.size(); i++){
 	auto & J = Jets[i];
@@ -424,13 +452,18 @@ void JetFinder::Frag(std::vector<double> zbins, std::vector<double> zpTbins){
         for (auto & it : J.dNdpT) it = 0.;
 
 	for (auto & p : plist) {
+
+        // Skip the copy of HF hadrons:
+        //auto absid = std::abs(p.pid);
+        //if (absid==421) continue;
+
 	    double absdphi = std::abs(Jphi - p.p.phi());
             if (absdphi>M_PI) absdphi = 2.*M_PI-absdphi;
             double deta = Jeta-p.p.pseudorap();
             double dR = std::sqrt(absdphi*absdphi + deta*deta); 
 	    // D(z)
             if (dR<J.R && p.charged) {
-                double z = std::min(p.p.xT()*std::cos(dR)/J.pT,.999);
+                double z = p.p.xT()*std::cos(dR)/J.pT;
                 int index = -1;
                 for (int i=0; i<J.dNdz.size(); i++){
                     if (z>zbins[i] && z<=zbins[i+1]) {
@@ -526,14 +559,12 @@ void JetFinder::Frag(std::vector<double> zbins, std::vector<double> zpTbins){
                 double dR_hf_J = std::sqrt(absdphi*absdphi + deta*deta);
 
                 int absid = std::abs(hf.pid);
-                bool isD = (absid/100)%100 == 4;
-                bool isB = (absid/100)%100 == 5;
-                if ((dR_hf_J < thisR) && isD && J.flavor==4) {
-                   
-                
+                bool isD = (absid==411) || (absid==421) || (absid==413) || (absid==423) || (absid==433) || (absid==431);
+                bool isB = (absid==511) || (absid==521) || (absid==513) || (absid==523) || (absid==533) || (absid==531);
+                double z = (hf.p.x()*J.pmu.x()+hf.p.y()*J.pmu.y()+hf.p.z()*J.pmu.z())/(J.pmu.x()*J.pmu.x()+J.pmu.y()*J.pmu.y()+J.pmu.z()*J.pmu.z());
+		//double z = hf.p.xT()*std::cos(dR_hf_J)/J.pT;
+		if ((dR_hf_J < thisR) && isD && J.flavor==4) {
         	    hf.is_virtual = true;
-                    //double z = (hf.p.x()*J.pmu.x()+hf.p.y()*J.pmu.y()+hf.p.z()*J.pmu.z())/(J.pmu.x()*J.pmu.x()+J.pmu.y()*J.pmu.y()+J.pmu.z()*J.pmu.z());
-                    double z = hf.p.xT()*std::cos(dR_hf_J)/J.pT;
 		    int index = -1;
                     for (int i=0; i<J.dDdz.size(); i++){
                         if (z>zbins[i] && z<=zbins[i+1]) {
@@ -542,18 +573,10 @@ void JetFinder::Frag(std::vector<double> zbins, std::vector<double> zpTbins){
                         }
                     }
                     
-                    // some exp cuts of ALICE:
-                    bool cuts = (5<J.pT && J.pT<7 && 2<hf.p.xT() && hf.p.xT() < 7) ||
-                                (7<J.pT && J.pT<10 && 3<hf.p.xT() && hf.p.xT() < 10) || 
-                                (10<J.pT && J.pT<15 && 5<hf.p.xT() && hf.p.xT() < 15) || 
-                                (15<J.pT && J.pT<50 && 5<hf.p.xT() && hf.p.xT() < 36) ;
-                    
-                    
-                    if (index >= 0 && cuts) J.dDdz[index] += 1.;
+                    if (index >= 0) J.dDdz[index] += 1.;
                 }
                 if ((dR_hf_J < thisR) && isB && J.flavor==5) {
 	            hf.is_virtual = true;
-                    double z = hf.p.xT()*std::cos(dR_hf_J)/J.pT;
                     int index = -1;
                     for (int i=0; i<J.dBdz.size(); i++){ 
                         if (z>zbins[i] && z<=zbins[i+1]) {
@@ -571,6 +594,7 @@ void JetFinder::Frag(std::vector<double> zbins, std::vector<double> zpTbins){
                 J.dBdz[i] /= (zbins[i+1]-zbins[i]);
         }
     }
+
 }
 
 
@@ -588,32 +612,37 @@ void JetFinder::LabelFlavor(){
         double Jeta = J.eta;
         bool isD = false;
         bool isB = false;
+
+	double dR_hf_J, jT_hf_J;
         for (auto & hf : HFs){
             double absdphi = std::abs(Jphi - hf.p.phi());
             if (absdphi>M_PI) absdphi = 2.*M_PI-absdphi;
             double deta = Jeta-hf.p.pseudorap();
-            double dR_hf_J = std::sqrt(absdphi*absdphi + deta*deta); 
+            dR_hf_J = std::sqrt(absdphi*absdphi + deta*deta); 
+
+	    double pTcrossjet2 = std::pow(hf.p.y()*J.pmu.z()-hf.p.z()*J.pmu.y(),2)
+                                   + std::pow(hf.p.x()*J.pmu.z()-hf.p.z()*J.pmu.x(),2)
+                                   + std::pow(hf.p.x()*J.pmu.y()-hf.p.y()*J.pmu.x(),2);
+            jT_hf_J = std::sqrt(pTcrossjet2)/J.pT;
+
 
             if (dR_hf_J<thisR && (!hf.is_virtual) ) {
                 int absid = std::abs(hf.pid);
-                isD = isD || ( hf.pid==421 && 3.<hf.p.xT() && hf.p.xT()<36. ); 
-                //isB = isB || (absid==511 || absid==521 || absid==513 || absid==523 || absid==533 || absid==531); 
-		// if this HF already belongs to a higher-pT jet
-		// do not make it visuable to lower-pT jet
-		hf.is_virtual = true;
+                isD = isD || (absid==421 || absid==411 || absid==413 || absid==423 || absid==433 || absid==431);
+                isB = isB || (absid==511 || absid==521 || absid==513 || absid==523 || absid==533 || absid==531); 
+		hf.is_virtual = true; // label this HF as used to avoid double counting
 		break;
             }
         }
-        //if (isB) J.flavor = 5;
-        //else if 
-        if (isD) J.flavor = 4;
+        if (isB) { J.flavor = 5; J.HF_r = dR_hf_J; J.HF_jT = jT_hf_J; }
+        else if (isD) { J.flavor = 4; J.HF_r = dR_hf_J; J.HF_jT = jT_hf_J; }
         else J.flavor = -1;
     }
   }
 }
 
 LeadingParton::LeadingParton():
-pTbins({1,2,3,4,5,6,8,10,12,16,20,24,30,40,50,60,80,100,120,150,200,300,500}){
+pTbins({2,3,4,5,6,8,10,12,14,16,18,20,24,28,32,36,40,45,50,60,80,100}){
     NpT = pTbins.size()-1;
     nchg.resize(NpT); for (auto & it:nchg) it=0.;
     npi.resize(NpT); for (auto & it:npi) it=0.;
@@ -691,7 +720,7 @@ void LeadingParton::add_event(std::vector<particle> plist,
 	    bool isstrange = (pid == 321) && (std::abs(p.p.pseudorap()) < 1.) ;
             bool ischg = (pid==211 || pid==321 || pid==2212) && (std::abs(p.p.pseudorap()) < 1.) ;
             bool isD = (pid==411 || pid == 421 || pid == 413 || pid == 423) && (std::abs(p.p.rap()) < 1.) ;
-            bool isB = (pid==511 || pid == 521 || pid == 513  || pid == 523) && (std::abs(p.p.rap()) < 2.4) ;
+            bool isB = (pid==511 || pid == 521 || pid == 513  || pid == 523) && (std::abs(p.p.rap()) < 1.) ;
             int ii=0;
             for (int i=0; i<NpT; i++){
                 if ( (pTbins[i]<pT) && (pT<pTbins[i+1]) ) {
@@ -785,19 +814,17 @@ JetStatistics::JetStatistics(
      std::vector<double> _Rs, 
      std::vector<double> _shape_rbins,
      std::vector<double> _Frag_zbins,
-     std::vector<double> _Frag_zpTbins):
+     std::vector<double> _Frag_zpTbins,
+     std::vector<double> _jTbins):
 Rs(_Rs),
-//pTbins({5,7,9,11,13,15,18,21,24,27,30,35,40,45,50}),
-pTbins({4,6,8,10,12,16,20,25,30,35,40,50,60,80,100,120,140,160,180,200,220}),
-xJ_pTbins({100,112,126,141,
-	   158,178,200,224,
-	   251,282,316,398,562}),
-shape_pTbins({10,20,30,40,60,80,100,120,2500}),
-//Frag_pTbins({10,20,30,40,60,70,100,126,158,200,251,316,398,600,800}),
-Frag_pTbins({5,7,10,15,50}),
+pTbins({3,4,6,8,10,12,14,16,18,20,24,28,32,36,40,50,60,80,100}),
+xJ_pTbins({8,10,12,16,20,25,30,40,60,80,100}),
+shape_pTbins({6,8,10,12,16,20,25,30,40,60}),
+Frag_pTbins({6,8,10,12,16,20,25,30,40,60}),
 shape_rbins(_shape_rbins),
 Frag_zbins(_Frag_zbins),
 Frag_zpTbins(_Frag_zpTbins),
+jTbins(_jTbins),
 xJbins({0, .05,  .1, .15,  .2,
          .25,  .3, .35,  .4, .45,
           .5, .55,  .6, .65,  .7,
@@ -828,9 +855,27 @@ xJbins({0, .05,  .1, .15,  .2,
     Frags_B.resize(Frag_pTbins.size()-1);
     Frags_B_pT.resize(Frag_pTbins.size()-1);
     Frags_B_W.resize(Frag_pTbins.size()-1);
+    jTs.resize(Frag_pTbins.size()-1);
+    jTs_W.resize(Frag_pTbins.size()-1);
+    jTDs.resize(Frag_pTbins.size()-1);
+    jTDs_W.resize(Frag_pTbins.size()-1);
+    jTBs.resize(Frag_pTbins.size()-1);
+    jTBs_W.resize(Frag_pTbins.size()-1);
 
     D_in_jet_W.resize(Rs.size());
     for (auto & it: D_in_jet_W) {
+        it.resize(Frag_pTbins.size()-1);
+        for (auto & iit : it) iit = 0.;
+    }
+
+    D_in_jet_R_W.resize(Rs.size());
+    for (auto & it: D_in_jet_R_W) {
+        it.resize(Frag_pTbins.size()-1);
+        for (auto & iit : it) iit = 0.;
+    }
+
+    D_in_jet_jT_W.resize(Rs.size());
+    for (auto & it: D_in_jet_jT_W) {
         it.resize(Frag_pTbins.size()-1);
         for (auto & iit : it) iit = 0.;
     }
@@ -850,6 +895,26 @@ xJbins({0, .05,  .1, .15,  .2,
 	}
     }
 
+    D_in_jet_R.resize(Rs.size());
+    for (auto & it: D_in_jet_R){
+        it.resize(Frag_pTbins.size()-1);
+        for (auto & iit : it) {
+            iit.resize(shape_rbins.size()-1);
+            for (auto & iiit : iit) iiit=0.;
+        }
+    }
+
+    D_in_jet_jT.resize(Rs.size());
+    for (auto & it: D_in_jet_jT){
+        it.resize(Frag_pTbins.size()-1);
+        for (auto & iit : it) {
+            iit.resize(jTbins.size()-1);
+            for (auto & iiit : iit) iiit=0.;
+        }
+    }
+
+
+
     B_in_jet.resize(Rs.size());
     for (auto & it: B_in_jet){
         it.resize(Frag_pTbins.size()-1);
@@ -859,6 +924,22 @@ xJbins({0, .05,  .1, .15,  .2,
         }
     }
 
+
+    for (auto & it: jTs_W) it=0.;
+    for (auto & it: jTs) {
+        it.resize(jTbins.size()-1);
+	for (auto & iit : it) iit=0.;
+    }
+    for (auto & it: jTDs_W) it=0.;
+    for (auto & it: jTDs) {
+        it.resize(jTbins.size()-1);
+        for (auto & iit : it) iit=0.;
+    }
+    for (auto & it: jTBs_W) it=0.;
+    for (auto & it: jTBs) {
+        it.resize(jTbins.size()-1);
+        for (auto & iit : it) iit=0.;
+    }
 
 
     for (auto & it : Frags_W) it=0.;
@@ -1003,10 +1084,12 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
 		}
             }
         }
-    }
+    }*/
+
+    double R0 = 0.4;
     // shape
     for (auto & J:jets){
-        if ((J.R<0.41) && (J.R>0.39) && (std::abs(J.eta) < 2.0) ) {
+        if ((J.R<R0+.01) && (J.R>R0-.01)) {
             int ii=-1;
             for (int i=0; i<shape_NpT; i++){
                 if ((shape_pTbins[i]<J.pT) && (J.pT<shape_pTbins[i+1])) {
@@ -1025,14 +1108,35 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
             }
         }
     }
+    // jT
+    for (auto & J:jets){
+        if ((J.R<R0+.01) && (J.R>R0-.01)) {
+            int ii=-1;
+            for (int i=0; i<Frag_pTbins.size()-1; i++){
+                if ((Frag_pTbins[i]<J.pT) && (J.pT<Frag_pTbins[i+1])) {
+                    ii = i;
+                    break;
+                }
+            }
+            if (ii<0) continue;
+            if (J.flavor==4) jTDs_W[ii] += sigma_gen;
+            if (J.flavor==5) jTBs_W[ii] += sigma_gen;
+            jTs_W[ii] += sigma_gen;
+            for (int i=0; i<jTs[ii].size(); i++){
+                jTs[ii][i] += sigma_gen*J.jT[i];
+                if (J.flavor==4) jTDs[ii][i] += sigma_gen*J.jT[i];
+                if (J.flavor==5) jTBs[ii][i] += sigma_gen*J.jT[i];
+            }
+        }
+    }
+
 
     // Frag
     for (int i=0; i<jets.size(); i++){
 	auto & J = jets[i];
-	
-        if ((J.R<0.41) && (J.R>0.39) && (std::abs(J.eta) < 2.1) ) {
-            bool triggered = true;
-            for (int j=0; j<jets.size(); j++){
+        if ((J.R<R0+.01) && (J.R>R0-.01) ) {
+            /* bool triggered = true;
+	    for (int j=0; j<jets.size(); j++){
                 if (i==j) continue;
 	        if (jets[j].R<0.39||jets[j].R>0.41) continue;
                 auto & J2 = jets[j];
@@ -1042,7 +1146,7 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
                 double dR = std::sqrt(absdphi*absdphi + deta*deta);
                 if ((dR<1.0) && (J2.pT>J.pT)) triggered = false;
             }
-            if (!triggered) continue;	
+            if (!triggered) continue;	*/
             int ii=-1;
             for (int i=0; i<Frag_pTbins.size()-1; i++){
                 if ((Frag_pTbins[i]<J.pT) && (J.pT<Frag_pTbins[i+1])) {
@@ -1066,9 +1170,9 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
 	    }
         }
     }
-*/
 
-    // Flavor in jet
+
+    // Flavor in jet: z
     for (int iR=0; iR<Rs.size(); iR++){
 	double R = Rs[iR]; 
         for (auto & J : jets){
@@ -1092,6 +1196,40 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
     }
 
 
+    // Flavor in jet: r jT
+    for (int iR=0; iR<Rs.size(); iR++){
+        double R = Rs[iR];
+        for (auto & J : jets){
+            bool interested = (J.R<R+.01) && (J.R>R-.01) && (J.flavor==4);
+            if ( !interested ) continue;
+            int ii=-1;
+            for (int i=0; i<Frag_pTbins.size()-1; i++){
+                if ((Frag_pTbins[i]<J.pT) && (J.pT<Frag_pTbins[i+1])) {
+                    ii = i;
+                    break;
+                }
+            }
+            if (ii<0) continue;
+            D_in_jet_R_W[iR][ii] += J.sigma;
+          
+	    for (int j=0; j<D_in_jet_R[iR][ii].size(); j++){
+	        if (shape_rbins[j]<J.HF_r && J.HF_r<shape_rbins[j+1]) {
+                    D_in_jet_R[iR][ii][j] += J.sigma/(shape_rbins[j+1]-shape_rbins[j]);
+		}
+            }
+
+	    D_in_jet_jT_W[iR][ii] += J.sigma;
+            for (int j=0; j<D_in_jet_jT[iR][ii].size(); j++){
+                if (jTbins[j]<J.HF_jT && J.HF_jT<jTbins[j+1]) {
+                    D_in_jet_jT[iR][ii][j] += J.sigma/(jTbins[j+1]-jTbins[j]);
+                }
+            }
+
+
+        }
+    }
+
+
     // Yield and Vn
     for (auto & J : jets){
         // check jet R
@@ -1105,7 +1243,7 @@ void JetStatistics::add_event(std::vector<Fjet> jets, double sigma_gen, fourvec 
             }
         }
         if (iR==Rs.size()) continue;
-        if (std::abs(J.eta) < 0.9-J.R){
+        if (std::abs(J.eta) < 1.0){
             // check jet pT cut
             int ii=-1;
             for (int i=0; i<NpT; i++){
@@ -1132,8 +1270,7 @@ void JetStatistics::write(std::string fheader){
     for (int iR=0; iR<Rs.size(); iR++){
         std::stringstream filename;
         
-        filename << fheader << "-spectra.dat";
-        std::cout << filename.str() <<"!!!!!!!!!!!!"<<std::endl;
+        filename << fheader << "-iR-"<<iR << "-spectra.dat";
         std::ofstream f(filename.str());
         for (int i=0; i<NpT; i++) {
             f    << (pTbins[i]+pTbins[i+1])/2. << " "
@@ -1162,7 +1299,7 @@ void JetStatistics::write(std::string fheader){
 
     }
 
-    /*std::stringstream filename1;
+    std::stringstream filename1;
     filename1 << fheader << "-jet-dNdz.dat";
     std::ofstream f1(filename1.str());
     f1 << "#";
@@ -1214,6 +1351,7 @@ void JetStatistics::write(std::string fheader){
     }
     f11.close();
 
+
     std::stringstream filename111;
     filename111 << fheader << "-D-jet-dNdpT.dat";
     std::ofstream f111(filename111.str());
@@ -1231,7 +1369,7 @@ void JetStatistics::write(std::string fheader){
     }
     f111.close();
 
-    std::stringstream filename12;
+    /*std::stringstream filename12;
     filename12 << fheader << "-B-jet-dNdz.dat";
     std::ofstream f12(filename12.str());
     f12 << "#";
@@ -1263,7 +1401,7 @@ void JetStatistics::write(std::string fheader){
         }
         f121 << std::endl;
     }
-    f121.close();
+    f121.close();*/
 
 
     std::stringstream filename2;
@@ -1300,7 +1438,7 @@ void JetStatistics::write(std::string fheader){
     }
     f3.close();
 
-    std::stringstream filename4;
+    /*std::stringstream filename4;
     filename4 << fheader << "-B-jetshape.dat";
     std::ofstream f4(filename4.str());
     f4 << "#";
@@ -1315,9 +1453,62 @@ void JetStatistics::write(std::string fheader){
         }
         f4 << std::endl;
     }
-    f4.close();
+    f4.close();*/
 
+    // jT distribution
     std::stringstream filename5;
+    filename5 << fheader << "-jet-jT.dat";
+    std::ofstream f5(filename5.str());
+    f5 << "#";
+    for (auto it : jTbins) f5 << it << " ";
+    f5 << std::endl;
+    for (int i=0; i<jTs.size(); i++) {
+        f5   << (Frag_pTbins[i]+Frag_pTbins[i+1])/2. << " "
+             << Frag_pTbins[i] << " "
+             << Frag_pTbins[i+1] << " " << jTs_W[i] << " ";
+        for (int j=0; j<jTs[i].size(); j++){
+            f5 << jTs[i][j] << " ";
+        }
+        f5 << std::endl;
+    }
+    f5.close();
+
+    std::stringstream filename6;
+    filename6 << fheader << "-D-jet-jT.dat";
+    std::ofstream f6(filename6.str());
+    f6 << "#";
+    for (auto it : jTbins) f6 << it << " ";
+    f6 << std::endl;
+    for (int i=0; i<jTDs.size(); i++) {
+        f6   << (Frag_pTbins[i]+Frag_pTbins[i+1])/2. << " "
+             << Frag_pTbins[i] << " "
+             << Frag_pTbins[i+1] << " " << jTDs_W[i] << " ";
+        for (int j=0; j<jTDs[i].size(); j++){
+            f6 << jTDs[i][j] << " ";
+        }
+        f6 << std::endl;
+    }
+    f6.close();
+
+    /*std::stringstream filename7;
+    filename7 << fheader << "-B-jet-jT.dat";
+    std::ofstream f7(filename7.str());
+    f7 << "#";
+    for (auto it : jTbins) f7 << it << " ";
+    f7 << std::endl;
+    for (int i=0; i<jTBs.size(); i++) {
+        f7   << (Frag_pTbins[i]+Frag_pTbins[i+1])/2. << " "
+             << Frag_pTbins[i] << " "
+             << Frag_pTbins[i+1] << " " << jTBs_W[i] << " ";
+        for (int j=0; j<jTBs[i].size(); j++){
+            f7 << jTBs[i][j] << " ";
+        }
+        f7 << std::endl;
+    }
+    f7.close();*/
+
+
+    /*std::stringstream filename5;
     filename5 << fheader << "-xJ.dat";
     std::ofstream f5(filename5.str());
     for (int i=0; i<xJ.size(); i++){
@@ -1341,29 +1532,13 @@ void JetStatistics::write(std::string fheader){
                  << leading_yield[i]/binwidth[i] << " "
                  << subleading_yield[i]/binwidth[i] << std::endl;
     }
-    f55.close();
-   
-*/
+    f55.close();*/
+    
+
     for (int iR=0; iR<Rs.size(); iR++){
-    /*std::stringstream filename100;
-    filename100 << fheader << "-D-in-jet-iR-"<<iR<<".dat";
-    std::ofstream f100(filename100.str());
-    f100 << "#";
-    for (auto it : Frag_zbins) f100 << it << " ";
-    f100 << std::endl;
-    for (int i=0; i<D_in_jet[iR].size(); i++) {
-        f100   << (Frag_pTbins[i]+Frag_pTbins[i+1])/2. << " "
-             << Frag_pTbins[i] << " "
-             << Frag_pTbins[i+1] << " " << D_in_jet_W[iR][i] << " ";
-        for (int j=0; j<D_in_jet[iR][i].size(); j++){
-            f100 << D_in_jet[iR][i][j] << " " ;
-        }
-        f100 << std::endl;
-    }
-    f100.close(); */
 
     std::stringstream filename200;
-    filename200 << fheader  << "-HFFF.dat";
+    filename200 << fheader <<"-iR-"<<iR  << "-HFFF.dat";
     std::ofstream f200(filename200.str());
     f200 << "#";
     for (auto it : Frag_zbins) f200 << it << " ";
@@ -1378,114 +1553,44 @@ void JetStatistics::write(std::string fheader){
         f200 << std::endl;
     }
     f200.close();
+
+    std::stringstream filename300;
+    filename300 << fheader <<"-iR-"<<iR  << "-HF_r.dat";
+    std::ofstream f300(filename300.str());
+    f300 << "#";
+    for (auto it : shape_rbins) f300 << it << " ";
+    f300 << std::endl;
+    for (int i=0; i<D_in_jet_R[iR].size(); i++) {
+        f300   << (Frag_pTbins[i]+Frag_pTbins[i+1])/2. << " "
+             << Frag_pTbins[i] << " "
+             << Frag_pTbins[i+1] << " " << D_in_jet_R_W[iR][i] << " ";
+        for (int j=0; j<D_in_jet_R[iR][i].size(); j++){
+            f300 << D_in_jet_R[iR][i][j] << " " ;
+        }
+        f300 << std::endl;
+    }
+    f300.close();
+
+
+    std::stringstream filename400;
+    filename400 << fheader <<"-iR-"<<iR  << "-HF_jT.dat";
+    std::ofstream f400(filename400.str());
+    f400 << "#";
+    for (auto it : jTbins) f400 << it << " ";
+    f400 << std::endl;
+    for (int i=0; i<D_in_jet_jT[iR].size(); i++) {
+        f400   << (Frag_pTbins[i]+Frag_pTbins[i+1])/2. << " "
+             << Frag_pTbins[i] << " "
+             << Frag_pTbins[i+1] << " " << D_in_jet_jT_W[iR][i] << " ";
+        for (int j=0; j<D_in_jet_jT[iR][i].size(); j++){
+            f400 << D_in_jet_jT[iR][i][j] << " " ;
+        }
+        f400 << std::endl;
+    }
+    f400.close();
    }
-}
 
-JetHFCorr::JetHFCorr(std::vector<double> _rbins):
-pTHFbins({4,20,2000}), 
-rbins(_rbins){
-    dDdr_W.resize(pTHFbins.size());
-    for (auto & it: dDdr_W) it=0.;
-    dBdr_W.resize(pTHFbins.size());
-    for (auto & it: dBdr_W) it=0.;
 
-    dDdr.clear();
-    dDdr.resize(pTHFbins.size());
-    for (auto & it: dDdr){
-        it.resize(rbins.size());
-        for (auto & iit: it) iit = 0.;
-    }
-    dBdr.clear();
-    dBdr.resize(pTHFbins.size());
-    for (auto & it: dBdr){
-        it.resize(rbins.size());
-        for (auto & iit: it) iit = 0.;
-    }
-}
-
-void JetHFCorr::add_event(std::vector<Fjet> jets, 
-                  std::vector<particle> HFs, 
-                  double sigma_gen){
-    for (auto & J : jets){
-        if (std::abs(J.eta)<1.6 && std::abs(J.pT)>60. 
-	    && J.R<0.31 && J.R>0.29){
-            for (auto & p : HFs) {
-                if (std::abs(p.p.rap())<2.){
-                    double absdphi = std::abs(J.phi - p.p.phi());
-                    if (absdphi>M_PI) absdphi = 2.*M_PI-absdphi;
-                    double deta = J.eta-p.p.pseudorap();
-                    double dR = std::sqrt(absdphi*absdphi + deta*deta);
-                    // find r index
-                    int rindex = -1;
-                    for (int i=0; i<rbins.size()-1; i++){
-                        if (rbins[i]<dR && dR<rbins[i+1]){
-                            rindex = i;
-                            break;
-                        }
-                    }
-                    if (rindex==-1) continue;
-                    // find pT index
-                    int pTindex = -1;
-                    for (int i=0; i<pTHFbins.size()-1; i++){
-                        if (pTHFbins[i]<p.p.xT() && p.p.xT()<pTHFbins[i+1]){
-                            pTindex = i;
-                            break;
-                        }
-                    }
-                    if (pTindex==-1) continue;      
-                    int absid = std::abs(p.pid);
-                    if (absid == 4 || 
-                        absid == 411 || absid == 421 ||
-                        absid == 413 || absid == 423) {
-                        dDdr[pTindex][rindex] += sigma_gen;
-                        dDdr_W[pTindex] += sigma_gen;
-                    }    
-                    if (absid == 5 ||
-                        absid == 511 || absid == 521 ||
-                        absid == 513 || absid == 523) {
-                        dBdr[pTindex][rindex] += sigma_gen;
-                        dBdr_W[pTindex] += sigma_gen;
-                    }          
-                }
-            }
-        }
-    }
-}
-
-void JetHFCorr::write(std::string fheader){
-    std::stringstream filename1;
-    filename1 << fheader << "-dDdr.dat";
-    std::ofstream f1(filename1.str());
-    f1 << "#";
-    for (auto it : rbins) f1 << it << " ";
-    f1 << std::endl;
-    for (int i=0; i<pTHFbins.size()-1; i++) {
-        f1   << (pTHFbins[i]+pTHFbins[i+1])/2. << " "
-             << pTHFbins[i] << " "
-             << pTHFbins[i+1] << " " << dDdr_W[i] << " ";
-        for (int j=0; j<rbins.size()-1; j++){
-            f1 << dDdr[i][j] << " "; 
-        }
-        f1 << std::endl;
-    }
-    f1.close();
-
-    std::stringstream filename2;
-    filename2 << fheader << "-dBdr.dat";
-    std::ofstream f2(filename2.str());
-    f2 << "#";
-    for (auto it : rbins) f2 << it << " ";
-    f2 << std::endl;
-    for (int i=0; i<pTHFbins.size()-1; i++) {
-        f2   << (pTHFbins[i]+pTHFbins[i+1])/2. << " "
-             << pTHFbins[i] << " "
-             << pTHFbins[i+1] << " " << dBdr_W[i] << " ";
-        for (int j=0; j<rbins.size()-1; j++){
-            f2 << dBdr[i][j] << " "; 
-        }
-        f2 << std::endl;
-    }
-    f2.close();
 }
 
 void TestSource(

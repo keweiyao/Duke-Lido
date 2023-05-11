@@ -102,8 +102,9 @@ int main(int argc, char* argv[]){
 
         std::vector<double> TriggerBin;
 	if (args["jet"].as<bool>()){
-		std::vector<double> a({6,8,10,12,14,16,18,20,25,30,35,40,50});
+		//std::vector<double> a({3,5,7,9,11,13,15,18,22,26,30,35,40,50,60,80,100});
 		//std::vector<double> a({4,6,8,10,12,14,16,18,20,22,24,27,30,35,40,50,60,80,100,120,140,160,200,250,300,400});
+		std::vector<double> a({30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,110,120,130,140,160,180,200,220,250,280,350,500});
 		TriggerBin = a;
 	} else{
            std::vector<double> a({
@@ -192,7 +193,7 @@ int main(int argc, char* argv[]){
                 jetfinder.MakeETower(
                      0.6, 0.165, args["pTtrack"].as<double>(),
                      ie.hlist, ie.clist, 10, false);
-                jetfinder.FindJets(Rs, 6.0, -1., 1., false);
+                jetfinder.FindJets(Rs, 30.0, -2.8, 2.8, false);
                 jetfinder.FindHF(ie.hlist);
                 jetfinder.LabelFlavor();
 		jetfinder.JT(jTbins);

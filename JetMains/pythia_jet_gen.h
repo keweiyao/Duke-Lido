@@ -10,11 +10,6 @@
 
 using namespace Pythia8;
 
-double Tpp(double b){
-    double w = 0.45;
-    return 1/(4*M_PI*w*w) * std::exp(-b*b/(4*w*w));
-}
-
 
 class PythiaGen{
 public: 
@@ -112,7 +107,8 @@ TRENToSampler(f_trento, iev)
     pythia.readString(s4.str());
     // Init
     pythia.init();
-    for (int i=0; i<100; i++) pythia.next();
+    for (int i=0; i<1000; i++) pythia.next();
+    sigma0 = pythia.info.sigmaGen();
 }
 
 bool PythiaGen::Generate(std::vector<particle> & plist){
@@ -122,11 +118,14 @@ bool PythiaGen::Generate(std::vector<particle> & plist){
    
     pythia.next(); 
     
+    bool triggered = true;
     /*bool triggered = false;
     // Trigger on isolated photon!
     for (int j=0; j<pythia.event.size(); j++){
         auto & p = pythia.event[j];
-        if (p.isFinal() && p.id()==22 && p.pT()>50 && std::abs(p.eta())<2.37) {
+        if (p.isFinal() && p.id()==22 && p.pT()>50 
+			&& std::abs(p.eta())<2.37 
+			) {
             std::cout  << "Here is a photon" << std::endl;
             double EThadron = 0.;
             for (int ih=0; ih<pythia.event.size(); ih++){
@@ -145,23 +144,11 @@ bool PythiaGen::Generate(std::vector<particle> & plist){
 	    }
         }
     }
-    if(!triggered) return false;
-    */
-    double sg = pythia.info.sigmaGen();
+    if(!triggered) return false; */
+
     // convert sigma_hard into hadronic level cross-section
-    // sg = mb = 0.1 fm^2
-    if(10.0*sg/4/0.45/.45>.01){
-        double db = 0.0025;
-        sigma0 = 0.;
-        for (int m=0; m<4000; m++){
-            double b = db*m;
-            sigma0 += (1.-std::exp(-10*sg*Tpp(b)))*2.*M_PI*b*db/10.;
-        }
-    }else {
-        sigma0 = sg; 
-    }
+    sigma0 = pythia.info.sigmaGen();
     
-    sigma0 = sg*pythia.info.weight() ;
     auto & event = pythia.event;
     color_count = event.lastColTag()+1;
     for (size_t i = 0; i < event.size(); ++i) {
@@ -214,8 +201,10 @@ bool PythiaGen::Generate(std::vector<particle> & plist){
             // clear its radiation list
             _p.radlist.clear();
             // ready to go
-            if (p.status()==666) std::cout << "a good photon" << std::endl;
-	    _p.T0 = -100;
+            if (p.status()==666) {
+		    std::cout << "a good photon" << std::endl;
+	             _p.T0 = -100;
+            }else _p.T0=-5;
             plist.push_back(_p);
         }
     }

@@ -51,9 +51,9 @@ class MyInfo: public fastjet::PseudoJet::UserInfoBase {
 struct Fjet{
     fourvec pmu;
     double R, pT, M2, phi, eta;
-    std::vector<double> shape, dNdz, dDdz, dBdz, dNdpT;
+    std::vector<double> shape, dNdz, dDdz, dBdz, dNdpT, jT;
     int flavor;
-    double sigma;
+    double sigma, HF_r, HF_jT;
 };
 void TestSource(
              MediumResponse MR,
@@ -82,6 +82,7 @@ public:
 		  bool charged_trigger);
     void FindHF(std::vector<particle> plist);
     void CalcJetshape(std::vector<double> rbins);
+    void JT(std::vector<double> jTbins);
     void Frag(std::vector<double> zbins, std::vector<double>  zpTbins);
     void LabelFlavor();
     std::vector<Fjet> Jets;
@@ -123,7 +124,8 @@ class JetStatistics{
    JetStatistics(std::vector<double> Rs, 
       std::vector<double> shaperbins, 
       std::vector<double> Fragszbins, 
-      std::vector<double> FragszpTbins);
+      std::vector<double> FragszpTbins,
+      std::vector<double> _jTbins);
    void add_event(std::vector<Fjet> jets, double sigma_gen, fourvec x0);
    void write(std::string fheader);
    private:
@@ -133,28 +135,22 @@ class JetStatistics{
 	   Frag_pTbins, Frag_zbins, Frag_zpTbins, 
            Frags_W, Frags_D_W, Frags_B_W,
            Shape_W, Shape_D_W, Shape_B_W,
+	   jTs_W, jTDs_W, jTBs_W, jTbins,
            leading_yield, subleading_yield;
-   std::vector<std::vector<std::vector<double> > > JQ2, JQ3, JQ4,  D_in_jet, B_in_jet;
+   std::vector<std::vector<std::vector<double> > > JQ2, JQ3, JQ4,  
+	                                           D_in_jet, B_in_jet, D_in_jet_R, B_in_jet_R, D_in_jet_jT, B_in_jet_jT;
+   //Fragmentation of D and B in jet
    std::vector<double> Rs;
-   std::vector<std::vector<double> > shapes, xJ, 
-	   Dshapes, Bshapes, 
-	   dsigmadpT, dBdpT, dDdpT,
-	   Frags, Frags_pT, 
-           Frags_D, Frags_D_pT,
-           Frags_B, Frags_B_pT,
-           DijetInfo,  D_in_jet_W, B_in_jet_W;
+   std::vector<std::vector<double> > 
+	   xJ, DijetInfo, // dijet pair xJ and location array
+	   shapes, Dshapes, Bshapes, // jetshape: inclusive, D, and B 
+	   dsigmadpT, dBdpT, dDdpT, // jet spectra: inclusive, D, and B
+	   Frags, Frags_pT, // inclusve D(z), D(pT)
+           Frags_D, Frags_D_pT, // D-jet D(z), D(pT)
+           Frags_B, Frags_B_pT, // B-jet (Dz), D(pT)
+           jTs, jTDs, jTBs, // jT distribution of charged particles in jets
+           D_in_jet_W, B_in_jet_W, D_in_jet_R_W, B_in_jet_R_W, D_in_jet_jT_W, B_in_jet_jT_W; // normalization of D in jet, B in jet
    int NpT, shape_NpT, shape_Nr;
-};
-
-class JetHFCorr{
-   public:
-   JetHFCorr(std::vector<double> rbins);
-   void add_event(std::vector<Fjet> jets, std::vector<particle> HFs, 
-                  double sigma_gen);
-   void write(std::string fheader);
-   private:
-   std::vector<double> pTHFbins, rbins, dDdr_W, dBdr_W;
-   std::vector<std::vector<double> > dDdr, dBdr;
 };
 
 #endif
